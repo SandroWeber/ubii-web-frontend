@@ -1,11 +1,11 @@
 <template>
   <div>
     <div class="grid">
-      <router-link to="/interfaces/topic-inspector" class="interface-link">
+      <router-link to="/tools/topic-inspector" class="interface-link">
         <font-awesome-icon icon="eye" class="interface-icon" />
         <p>Topic Inspector</p>
       </router-link>
-      <router-link to="/interfaces/demo-mouse-pointer" class="interface-link">
+      <router-link to="/tools/demo-mouse-pointer" class="interface-link">
         <font-awesome-icon icon="mouse-pointer" class="interface-icon" />
         <p>Mouse Demo</p>
       </router-link>
@@ -14,9 +14,9 @@
 </template>
 
 <script>
+  /* fontawesome */
   import { library } from '@fortawesome/fontawesome-svg-core'
   import { faEye, faMousePointer } from '@fortawesome/free-solid-svg-icons'
-
   library.add(faEye);
   library.add(faMousePointer);
 
@@ -30,7 +30,7 @@
   .grid {
     display: grid;
     grid-gap: 15px;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     margin: 25px;
   }
 
@@ -43,7 +43,7 @@
   }
 
   .interface-icon {
-    width: 100px;
-    height: 100px;
+    width: 50px;
+    height: 50px;
   }
 </style>

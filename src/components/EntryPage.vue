@@ -1,20 +1,20 @@
 <template>
   <div id="page-grid">
-    <router-link to="/configuration">
+    <router-link to="/admin">
       <font-awesome-icon icon="cogs" class="page-icon" />
     </router-link>
     <router-link to="/interfaces">
-      <font-awesome-icon icon="gamepad" class="page-icon" />
+      <font-awesome-icon icon="toolbox" class="page-icon" />
     </router-link>
   </div>
 </template>
 
 <script>
   import { library } from '@fortawesome/fontawesome-svg-core'
-  import { faCogs, faGamepad } from '@fortawesome/free-solid-svg-icons'
+  import { faCogs, faToolbox } from '@fortawesome/free-solid-svg-icons'
 
   library.add(faCogs);
-  library.add(faGamepad);
+  library.add(faToolbox);
 
   export default {
     name: 'EntryPage',
@@ -34,8 +34,8 @@
   }
 
   .page-icon {
-    width: 100px;
-    height: 100px;
+    width: 50px;
+    height: 50px;
     color: cyan;
     background: black;
     padding: 10px;

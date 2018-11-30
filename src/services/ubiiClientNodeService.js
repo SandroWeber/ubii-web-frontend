@@ -1,4 +1,4 @@
-class UbiiClientNode {
+class UbiiClientNodeService {
   constructor() {
     this.serverIP = '127.0.0.1';
     this.serverPort = '8080';
@@ -11,4 +11,4 @@ class UbiiClientNode {
   }
 }
 
-export default new UbiiClientNode();
+export default new UbiiClientNodeService();

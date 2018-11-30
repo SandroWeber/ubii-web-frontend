@@ -11,23 +11,23 @@ export default new Router({
       component: () => import('./components/EntryPage.vue')
     },
     {
-      path: '/configuration',
-      name: 'Server Configuration',
-      component: () => import('./components/ServerConfiguration.vue')
+      path: '/admin',
+      name: 'Administration',
+      component: () => import('./components/Administration.vue')
     },
     /* web interfaces */
     {
-      path: '/interfaces',
-      name: 'Interfaces',
-      component: () => import('./components/Interfaces.vue')
+      path: '/tools',
+      name: 'Tools',
+      component: () => import('./components/Tools.vue')
     },
     {
-      path: '/interfaces/topic-inspector',
+      path: '/tools/topic-inspector',
       name: 'Topic Inspector',
       component: () => import('./components/TopicInspector.vue')
     },
     {
-      path: '/interfaces/demo-mouse-pointer',
+      path: '/tools/demo-mouse-pointer',
       name: 'Demo: Mouse Pointer',
       component: () => import('./components/DemoMousePointer.vue')
     }

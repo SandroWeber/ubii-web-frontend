@@ -7,20 +7,29 @@
     <button v-on:click="clientNode.connect()">
       <font-awesome-icon icon="exchange-alt" v-bind:class="{ transparent: !clientNode.connected }" />
     </button>
+
+    <br/>
+
+    <cause-effect-editor />
   </div>
 </template>
 
 <script>
-  import ClientNode from '../services/ubiiClientNode';
+  import ClientNode from '../services/ubiiClientNodeService.js';
 
+  import CauseEffectEditor from './CauseEffectEditor.vue'
+
+  /* fontawesome */
   import { library } from '@fortawesome/fontawesome-svg-core'
   import { faExchangeAlt } from '@fortawesome/free-solid-svg-icons'
-
   library.add(faExchangeAlt);
 
   export default {
     name: 'ServerConfiguration',
     props: {},
+    components: {
+      CauseEffectEditor
+    },
     data: () => { return {
       clientNode: ClientNode
     }}
