@@ -35,5 +35,6 @@
 <style scoped>
   .codemirror-wrapper {
     text-align: left;
+    margin: 10px;
   }
 </style>

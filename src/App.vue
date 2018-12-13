@@ -1,22 +1,24 @@
 <template>
   <div id="app">
-    <h2 class="server-stats">
-      Ubi-Interact Backend = {{ clientNode.connected ? clientNode.serverIP + ':' + clientNode.serverPort : 'not connected' }}
-    </h2>
+    <server-status />
     <nav class="navigation-bar">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/admin">Administration</router-link> |
-      <router-link to="/tools">Tools</router-link>
+      <router-link to="/" class="navigation-item">Home</router-link> |
+      <router-link to="/admin" class="navigation-item">Administration</router-link> |
+      <router-link to="/tools" class="navigation-item">Tools</router-link>
     </nav>
-    <router-view/>
+    <router-view class="router-view"/>
   </div>
 </template>
 
 <script>
   import ClientNode from './services/ubiiClientNodeService';
+  import ServerStatus from './components/ServerStatus.vue'
 
   export default {
     name: 'app',
+    components: {
+      ServerStatus
+    },
     data: () => {
       return {
         clientNode: ClientNode
@@ -40,9 +42,18 @@
   .navigation-bar {
     padding: 10px;
     text-align: center;
+    background: dimgrey;
+  }
+
+  .navigation-item {
+    color: cyan;
+    padding: 0px 20px 0px 20px;
   }
 
   .server-stats {
     text-align: center;
+  }
+
+  .router-view {
   }
 </style>

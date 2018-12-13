@@ -1,48 +1,62 @@
 <template>
-  <div class="backend-info">
-    <label for="server-ip">Server IP</label>
-    <input id="server-ip" type="text" v-model="clientNode.serverIP"/>
-    <label for="server-port">Server Port</label>
-    <input id="server-port" type="text" v-model="clientNode.serverPort"/>
-    <button v-on:click="clientNode.connect()">
-      <font-awesome-icon icon="exchange-alt" v-bind:class="{ transparent: !clientNode.connected }" />
-    </button>
-
-    <br/>
-
-    <cause-effect-editor />
+  <div>
+    <treeselect v-model="treeSelect.model" :multiple="false" :options="treeSelect.options" class="tree-select" />
+    <interaction-editor />
   </div>
 </template>
 
 <script>
-  import ClientNode from '../services/ubiiClientNodeService.js';
+  // Treeselect
+  import Treeselect from '@riophae/vue-treeselect'
+  import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 
-  import CauseEffectEditor from './CauseEffectEditor.vue'
-
-  /* fontawesome */
-  import { library } from '@fortawesome/fontawesome-svg-core'
-  import { faExchangeAlt } from '@fortawesome/free-solid-svg-icons'
-  library.add(faExchangeAlt);
+  import InteractionEditor from './InteractionEditor.vue'
 
   export default {
-    name: 'ServerConfiguration',
+    name: 'Administration',
     props: {},
     components: {
-      CauseEffectEditor
+      InteractionEditor,
+      Treeselect
     },
-    data: () => { return {
-      clientNode: ClientNode
-    }}
+    data: () => {
+      return {
+        treeSelect: {
+          model: [],
+          options: [{
+            id: 'sessions-parent',
+            label: 'Sessions',
+            children: [{
+              id: 'session-1',
+              label: 'Session 1',
+              children: [{
+                id: 'interaction-1',
+                label: 'Interaction 1',
+              }, {
+                id: 'interaction-2',
+                label: 'Interaction 2',
+              }]
+            }],
+          }, {
+            id: 'devices-parent',
+            label: 'Devices',
+            children: [{
+              id: 'device-a',
+              label: 'Device A',
+            }, {
+              id: 'device-b',
+              label: 'Device B',
+            }],
+          }]
+        }
+      };
+    }
   }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-  .backend-info {
-    text-align: center;
-  }
-
-  .transparent {
-    opacity: 0.2;
+  .tree-select {
+    margin: 10px;
   }
 </style>
