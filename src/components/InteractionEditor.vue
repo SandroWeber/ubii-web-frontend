@@ -4,8 +4,9 @@
       <div class="interaction-header">
         <h2>{{interaction.name}}  (ID {{interaction.id}})</h2>
       </div>
+
       <div class="inout-wrapper">
-        <div v-for="input in interaction.inputMappings" class="inout-mapping">
+        <div v-for="input in interaction.inputMappings" :key="input.name" class="inout-mapping">
           <span>{{input.topic}}</span>
           <br />
           <font-awesome-icon icon="arrow-down" />
@@ -13,11 +14,13 @@
           <span>{{input.name}}</span>
         </div>
       </div>
+
       <div class="code-wrapper">
         <codemirror v-model="interaction.code" :options="codemirror.options"></codemirror>
       </div>
+
       <div class="inout-wrapper">
-        <div v-for="output in interaction.outputMappings" class="inout-mapping">
+        <div v-for="output in interaction.outputMappings" :key="output.name" class="inout-mapping">
           <span>{{output.name}}</span>
           <br />
           <font-awesome-icon icon="arrow-down" />
