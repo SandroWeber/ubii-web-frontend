@@ -4,7 +4,8 @@
     <nav class="navigation-bar">
       <router-link to="/" class="navigation-item">Home</router-link> |
       <router-link to="/admin" class="navigation-item">Administration</router-link> |
-      <router-link to="/tools" class="navigation-item">Tools</router-link>
+      <router-link to="/tools" class="navigation-item">Tools</router-link> |
+      <router-link to="/nodeEditor" class="navigation-item">Node Editor</router-link>
     </nav>
     <router-view class="router-view"/>
   </div>
@@ -28,8 +29,10 @@
 </script>
 
 <style>
-  body {
-    margin: 0px;
+  html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
   }
 
   #app {
@@ -37,6 +40,8 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background: white;
+    width: 100%;
+    height: 100%;
   }
 
   .navigation-bar {
