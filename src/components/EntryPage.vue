@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="canvas layer-two background horizontal-shadow">
     <div class="grid">
       <router-link to="/admin" class="interface-link">
         <font-awesome-icon icon="cogs" class="interface-icon" />
@@ -27,12 +27,16 @@
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style scoped lang="stylus">
+  .canvas
+    height: 100%
+    padding: 25px;
+
   .grid {
     display: grid;
     grid-gap: 15px;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    margin: 25px;
+    
   }
 
   .interface-link {
