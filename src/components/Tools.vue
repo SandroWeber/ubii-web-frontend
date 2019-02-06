@@ -1,11 +1,11 @@
 <template>
   <div>
     <div class="grid">
-      <router-link to="/tools/topic-inspector" class="interface-link">
+      <router-link to="/tools/topic-inspector" class="interface-link layer-three background round shadow link-area orange-accent">
         <font-awesome-icon icon="eye" class="interface-icon" />
         <p>Topic Inspector</p>
       </router-link>
-      <router-link to="/tools/demo-mouse-pointer" class="interface-link">
+      <router-link to="/tools/demo-mouse-pointer" class="interface-link layer-three background round shadow link-area orange-accent">
         <font-awesome-icon icon="mouse-pointer" class="interface-icon" />
         <p>Mouse Demo</p>
       </router-link>
@@ -36,9 +36,6 @@
 
   .interface-link {
     padding: 10px;
-    border: 3px solid darkcyan;
-    background: black;
-    color: cyan;
     text-align: center;
   }
 
