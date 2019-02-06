@@ -1,15 +1,93 @@
-// Colors
-primaryColor = #990044
-primaryColorDark = #990044
+@import "./color"
 
-layerOneSecondaryColor = #990044
-layerTwoSecondaryColor = #990044
-layerThreeSecondaryColor = #990044
-layerFourSecondaryColor = #990044
+// Layer Styles:
+.layer-one
+    &.background
+        background-color: layerOneSecondaryColor 
+    &.border
+        border: 1px solid layerOneBorderColor
+        &.round
+            border-radius: 5px
 
-redAccentColor = #990044
-greenAccentColor = #990044
-yellowAccentColor = #990044
-orangeAccentColor = #990044
-purpleAccentColor = #990044
-blueAccentColor = #990044
+.layer-two
+    &.background
+        background-color: layerTwoSecondaryColor 
+    &.border
+        border: 1px solid layerTwoBorderColor
+        &.round
+            border-radius: 5px
+
+.layer-three
+    &.background
+        background-color: layerThreeSecondaryColor 
+    &.border
+        border: 1px solid layerThreeBorderColor
+        &.round
+            border-radius: 5px
+
+.layer-four
+    &.background
+        background-color: layerFourSecondaryColor 
+    &.border
+        border: 1px solid layerFourBorderColor
+        &.round
+            border-radius: 5px
+
+// Shadows
+shadowColor = #101010
+.shadow
+    box-shadow: 1px 1px 5px 2px shadowColor;
+
+.vertical-shadow
+    box-shadow: 1px 0px 5px 2px shadowColor;
+
+.horizontal-shadow
+    box-shadow: 0px 1px 5px 2px shadowColor;
+
+// Contrast Styles:
+.low-contrast
+    color: lowContrastColor
+
+.medium-contrast
+    color: mediumContrastColor
+
+.high-contrast
+    color: highContrastColor
+
+.max-contrast
+    color: maxContrastColor
+
+// Accent Styles:
+.red-accent
+    color: redAccentColor
+
+.green-accent
+    color: greenAccentColor
+
+.yellow-accent
+    color: yellowAccentColor
+
+.orange-accent
+    color: orangeAccentColor
+
+.purple-accent
+    color: purpleAccentColor
+
+.blue-accent
+    color: blueAccentColor
+
+// Button Styles
+.button
+    border: 1px solid mediumContrastColor
+    border-radius: 3px
+    color: mediumContrastColor
+    background-color: layerOneSecondaryColor
+    &:hover
+        border-color: highContrastColor 
+        color: highContrastColor
+
+// Navigation Styles
+.navigation-item
+    color: yellowAccentColor 
+    &:hover
+        color:maxContrastColor
