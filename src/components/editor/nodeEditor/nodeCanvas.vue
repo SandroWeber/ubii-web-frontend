@@ -22,15 +22,15 @@
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style scoped lang="stylus">
   .node-canvas {
     width: 100%;
-    height: 100%;
+    height: 100%; 
   }
   .blueprint-grid {
     width: 100%;
     height: 100%;
-    background-color: #eeeeee;
+    background-color: primaryColor;
   }
   .blueprint-dot {
     fill: #cccccc
