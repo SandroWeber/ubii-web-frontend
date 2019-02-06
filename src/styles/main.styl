@@ -1,48 +1,96 @@
 @import "./color"
 
 // Layer Styles:
+layerBorderWidth = 1px
+layerBorderRadius = 5px
+
 .layer-one
     &.background
-        background-color: layerOneSecondaryColor 
+        background-color: layerOneSecondaryColor
     &.border
-        border: 1px solid layerOneBorderColor
+        border-width: layerBorderWidth
+        border-style: solid
+        border-color: layerOneBorderColor
         &.round
-            border-radius: 5px
+            border-radius: layerBorderRadius
+    &.link-area
+        border-color: layerOneBorderColor
+        
 
 .layer-two
     &.background
-        background-color: layerTwoSecondaryColor 
+        background-color: layerTwoSecondaryColor
     &.border
-        border: 1px solid layerTwoBorderColor
+        border-width: layerBorderWidth
+        border-style: solid
+        border-color: layerTwoBorderColor
         &.round
-            border-radius: 5px
+            border-radius: layerBorderRadius
+    &.link-area
+        border-color: layerTwoBorderColor
 
 .layer-three
     &.background
-        background-color: layerThreeSecondaryColor 
+        background-color: layerThreeSecondaryColor
     &.border
-        border: 1px solid layerThreeBorderColor
+        border-width: layerBorderWidth
+        border-style: solid
+        border-color: layerThreeBorderColor
         &.round
-            border-radius: 5px
+            border-radius: layerBorderRadius
+    &.link-area
+        border-color: layerThreeBorderColor
 
 .layer-four
     &.background
-        background-color: layerFourSecondaryColor 
+        background-color: layerFourSecondaryColor
     &.border
-        border: 1px solid layerFourBorderColor
+        border-width: layerBorderWidth
+        border-style: solid
+        border-color: layerFourBorderColor
         &.round
-            border-radius: 5px
+            border-radius: layerBorderRadius
+    &.link-area
+        border-color: layerFourBorderColor
 
 // Shadows
 shadowColor = #101010
 .shadow
-    box-shadow: 1px 1px 5px 2px shadowColor;
+    box-shadow: -1px 1px 2px 0px shadowColor;
 
 .vertical-shadow
     box-shadow: 1px 0px 5px 2px shadowColor;
 
 .horizontal-shadow
     box-shadow: 0px 1px 5px 2px shadowColor;
+
+// Button Styles
+.button
+    border: 1px solid mediumContrastColor
+    border-radius: 3px
+    color: mediumContrastColor
+    background-color: layerOneSecondaryColor
+    &:hover
+        border-color: highContrastColor 
+        color: highContrastColor
+
+.link-area
+    border-width: 2px
+    border-style: solid
+    text-decoration: none
+    color: mediumContrastColor
+    &:hover
+      color: maxContrastColor
+
+.clickable
+    &:hover
+        color: maxContrastColor
+
+// Navigation Styles
+.navigation-item
+    color: yellowAccentColor 
+    &:hover
+        color:maxContrastColor
 
 // Contrast Styles:
 .low-contrast
@@ -75,19 +123,3 @@ shadowColor = #101010
 
 .blue-accent
     color: blueAccentColor
-
-// Button Styles
-.button
-    border: 1px solid mediumContrastColor
-    border-radius: 3px
-    color: mediumContrastColor
-    background-color: layerOneSecondaryColor
-    &:hover
-        border-color: highContrastColor 
-        color: highContrastColor
-
-// Navigation Styles
-.navigation-item
-    color: yellowAccentColor 
-    &:hover
-        color:maxContrastColor
