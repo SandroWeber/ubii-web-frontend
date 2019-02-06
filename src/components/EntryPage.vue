@@ -1,16 +1,16 @@
 <template>
   <div class="canvas layer-two background horizontal-shadow">
     <div class="grid">
-      <router-link to="/admin" class="interface-link">
+      <router-link to="/admin" class="interface-link layer-three background round shadow link-area green-accent">
         <font-awesome-icon icon="cogs" class="interface-icon" />
         <p>Administration</p>
       </router-link>
-      <router-link to="/tools" class="interface-link">
-        <font-awesome-icon icon="toolbox" class="interface-icon" />
+      <router-link to="/tools" class="interface-link layer-three background round shadow link-area blue-accent">
+        <font-awesome-icon icon="toolbox" class="interface-icon " />
         <p>Tools</p>
       </router-link>
     </div>
-  </div>
+  </div> 
 </template>
 
 <script>
@@ -22,16 +22,16 @@
 
   export default {
     name: 'EntryPage',
-    components: {}
+    components: {} 
   }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="stylus">
   .canvas
-    height: 100%
+    height: 100% 
     padding: 25px;
-
+  
   .grid {
     display: grid;
     grid-gap: 15px;
@@ -39,13 +39,10 @@
     
   }
 
-  .interface-link {
+  .interface-link
     padding: 10px;
-    border: 3px solid darkcyan;
-    background: black;
-    color: cyan;
     text-align: center;
-  }
+
 
   .interface-icon {
     width: 50px;
