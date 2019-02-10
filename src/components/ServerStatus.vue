@@ -5,13 +5,13 @@
     <label for="server-port">Server Port</label>
     <input id="server-port" type="text" v-model="clientNode.serverPort"/>
     <button class="button-connect" v-on:click="clientNode.connect()">
-      <font-awesome-icon icon="exchange-alt" v-bind:class="{ transparent: !clientNode.connected }" />
+      <font-awesome-icon icon="exchange-alt" v-bind:class="{ transparent: !clientNode.isConnected() }" />
     </button>
   </div>
 </template>
 
 <script>
-  import ClientNode from '../services/ubiiClientNodeService.js';
+  import ClientNode from '../services/ubiiClient/ubiiClientNodeService.js';
 
   /* fontawesome */
   import { library } from '@fortawesome/fontawesome-svg-core'

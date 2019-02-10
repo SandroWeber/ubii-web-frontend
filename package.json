@@ -12,12 +12,14 @@
     "@fortawesome/free-solid-svg-icons": "^5.5.0",
     "@fortawesome/vue-fontawesome": "^0.1.2",
     "@riophae/vue-treeselect": "0.0.37",
+    "@tum-far/ubii-msg-formats": "0.5.2",
     "i": "^0.3.6",
     "npm": "^6.4.1",
     "prettier": "^1.15.2",
     "vue": "^2.5.17",
     "vue-codemirror": "^4.0.6",
-    "vue-router": "^3.0.1"
+    "vue-router": "^3.0.1",
+    "axios": "0.18.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.2.0",
