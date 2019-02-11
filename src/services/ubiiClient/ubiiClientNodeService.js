@@ -24,6 +24,7 @@ class UbiiClientNodeService {
   }
 
   isConnected() {
+    console.info(this.client);
     return this.client && this.client.isInitialized();
   }
 }

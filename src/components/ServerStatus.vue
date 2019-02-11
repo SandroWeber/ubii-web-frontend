@@ -5,7 +5,7 @@
     <label for="server-port">Server Port</label>
     <input id="server-port" type="text" v-model="clientNode.serverPort"/>
     <button class="button-connect" v-on:click="clientNode.connect()"
-            v-bind:class="{ connected: clientNode.isConnected(), disconnected: !clientNode.isConnected() }">
+            v-bind:class="{'highlight-green': clientNode.isConnected()}">
       <font-awesome-icon icon="exchange-alt" />
     </button>
   </div>
@@ -40,11 +40,11 @@
     margin: 0px 5px 0px 10px;
   }
 
-  .connected {
+  .highlight-green {
     background-color: green;
   }
 
-  .disconnected {
+  .highlight-red {
     background-color: red;
   }
 
