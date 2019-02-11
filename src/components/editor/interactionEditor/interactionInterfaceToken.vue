@@ -1,12 +1,16 @@
 <template>
-  <div class="">
+  <div class="interaction-interface-token">
+        <span>{{name}}</span>
   </div>
 </template>
 
 <script>
   export default { 
     name: 'interactionInterfaceToken',
-    components: {} 
+    components: {},
+    props: {
+      name: String,
+    }
   } 
 </script> 
 
