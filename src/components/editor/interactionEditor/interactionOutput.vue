@@ -1,12 +1,20 @@
 <template>
-  <div class="">
+  <div class="interaction-output">
+      <interaction-interface-token v-for="output in output" :key="output.name" :name="output.name"/>
   </div>
 </template>
 
 <script>
+  import interactionInterfaceToken from "./interactionInterfaceToken.vue";
+
   export default { 
     name: 'interactionOutput',
-    components: {} 
+    components: {
+      interactionInterfaceToken: interactionInterfaceToken
+    },
+    props: {
+      output: Array
+    }
   } 
 </script> 
 
