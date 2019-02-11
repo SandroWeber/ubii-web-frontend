@@ -49,8 +49,7 @@ class WebsocketClient {
     };
 
     this.websocket.onerror = (error) => {
-      console.info('[' + new Date() + '] WebsocketClient ' + error.toString());
-      console.error(error);
+      console.error('[' + new Date() + '] WebsocketClient ' + error.toString());
     };
   }
 
@@ -75,5 +74,4 @@ class WebsocketClient {
   }
 }
 
-//module.exports = WebsocketClient;
 export default WebsocketClient;

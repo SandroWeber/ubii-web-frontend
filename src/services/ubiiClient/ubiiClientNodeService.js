@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 
-// ClientNodeWeb = require('./clientNodeWeb');
 import ClientNodeWeb from './clientNodeWeb';
+
 
 class UbiiClientNodeService {
   constructor() {
@@ -15,7 +15,8 @@ class UbiiClientNodeService {
     this.client = new ClientNodeWeb('web frontend', this.serverIP, this.serverPort);
     this.client.initialize().then(
       () => {
-        console.info(this.client.clientSpecification);
+        console.info('UbiiClientNodeService - client connected:\n' +
+          this.client.clientSpecification.identifier);
       },
       (error) => {
         console.info('UbiiClientNodeService.client.initialize() failed:\n' + error);

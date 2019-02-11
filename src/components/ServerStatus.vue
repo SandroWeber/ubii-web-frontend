@@ -4,8 +4,9 @@
     <input id="server-ip" type="text" v-model="clientNode.serverIP"/>
     <label for="server-port">Server Port</label>
     <input id="server-port" type="text" v-model="clientNode.serverPort"/>
-    <button class="button-connect" v-on:click="clientNode.connect()">
-      <font-awesome-icon icon="exchange-alt" v-bind:class="{ transparent: !clientNode.isConnected() }" />
+    <button class="button-connect" v-on:click="clientNode.connect()"
+            v-bind:class="{ connected: clientNode.isConnected(), disconnected: !clientNode.isConnected() }">
+      <font-awesome-icon icon="exchange-alt" />
     </button>
   </div>
 </template>
@@ -39,8 +40,12 @@
     margin: 0px 5px 0px 10px;
   }
 
-  .transparent {
-    opacity: 0.2;
+  .connected {
+    background-color: green;
+  }
+
+  .disconnected {
+    background-color: red;
   }
 
   .button-connect {

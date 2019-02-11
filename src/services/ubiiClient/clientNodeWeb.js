@@ -1,14 +1,9 @@
 /* eslint-disable no-console */
 
-/*const {RESTClient} = require('./restClient');
-const {WebsocketClient} = require('./websocketClient');
-
-const { ProtobufTranslator } = require('@tum-far/ubii-msg-formats');*/
-
 import RESTClient from './restClient';
 import WebsocketClient from './websocketClient';
-
 import {ProtobufTranslator} from '@tum-far/ubii-msg-formats';
+
 
 class ClientNodeWeb {
   constructor(name,
@@ -44,7 +39,6 @@ class ClientNodeWeb {
         .then(
           () => {
             this.initializeTopicDataClient(this.clientSpecification);
-            console.info(this.topicDataClient);
             return resolve();
           },
           (error) => {
@@ -58,13 +52,11 @@ class ClientNodeWeb {
   }
 
   initializeTopicDataClient(clientSpecification) {
-    console.info('ClientNodeWeb.initializeTopicDataClient()');
     this.topicDataClient = new WebsocketClient(
       clientSpecification.identifier,
       clientSpecification.topicDataHost,
       parseInt(clientSpecification.topicDataPortWs)
     );
-    console.info(this.topicDataClient);
     this.topicDataClient.onMessageReceived((messageBuffer) => {
       try {
         // Decode the buffer.
@@ -125,13 +117,12 @@ class ClientNodeWeb {
 
             // Cache the client specification.
             this.clientSpecification = message.clientSpecification;
-            console.info(this.clientSpecification);
 
             return resolve();
           }
         },
         (error) => {
-          console.info(error);
+          console.error(error);
           return reject();
         });
     });
@@ -227,7 +218,4 @@ class ClientNodeWeb {
   }
 }
 
-/*module.exports = {
-  ClientNodeWeb: ClientNodeWeb,
-};*/
 export default ClientNodeWeb;

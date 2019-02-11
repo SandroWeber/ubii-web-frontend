@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 
-//const axios = require('axios');
 import axios from 'axios';
 
 
@@ -32,5 +31,4 @@ class RESTClient {
   }
 }
 
-//module.exports = RESTClient;
 export default RESTClient;
