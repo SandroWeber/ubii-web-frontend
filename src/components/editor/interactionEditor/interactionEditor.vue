@@ -1,38 +1,23 @@
 <template>
     <div>
         <div class="interaction-editor-wrapper">
-        
             <interaction-header :name="interaction.name" :id="interaction.id"/>
 
-            <div class="inout-wrapper">
-                <div v-for="input in interaction.inputMappings" :key="input.name" class="inout-mapping">
-                <span>{{input.topic}}</span>
-                <br />
-                <font-awesome-icon icon="arrow-down" />
-                <br />
-                <span>{{input.name}}</span>
-                </div>
-            </div>
+            <interaction-input :input="interaction.inputMappings"/>
 
             <div class="code-wrapper">
                 <codemirror v-model="interaction.code" :options="codemirror.options"></codemirror>
             </div>
 
-            <div class="inout-wrapper">
-                <div v-for="output in interaction.outputMappings" :key="output.name" class="inout-mapping">
-                <span>{{output.name}}</span>
-                <br />
-                <font-awesome-icon icon="arrow-down" />
-                <br />
-                <span>{{output.topic}}</span>
-                </div>
-            </div>
+            <interaction-output :output="interaction.outputMappings"/>
         </div>
     </div>
 </template>
 
 <script>
     import interactionHeader from './interactionHeader.vue';
+    import interactionInput from './interactionInput.vue';
+    import interactionOutput from './interactionOutput.vue';
 
     // Codemirror.
     import { codemirror } from 'vue-codemirror';
@@ -76,8 +61,10 @@
         name: 'interactionEditor',
         props: {},
         components: {
-        codemirror,
-        interactionHeader
+            codemirror: codemirror,
+            interactionHeader: interactionHeader,
+            interactionInput: interactionInput,
+            interactionOutput: interactionOutput
         },
         data: () => {
         return {
