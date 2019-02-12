@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="layer-one background">
     <server-status id="server-status"/>
-    <nav class="navigation-bar layer-one background border">
+    <nav class="navigation-bar layer-one background border shadow">
       <router-link to="/" class="navigation-item ">Home</router-link> |
       <router-link to="/admin" class="navigation-item">Administration</router-link> |
       <router-link to="/tools" class="navigation-item">Tools</router-link> |
@@ -47,12 +47,13 @@
     -moz-osx-font-smoothing: grayscale;
     width: 100%;
     height: 100%;
+    display flex
+    flex-direction column
   }
 
   .navigation-bar {
     padding: 15px;
     text-align: center;
-    z-index: 900
   }
 
   .navigation-item {
@@ -62,10 +63,13 @@
 
   #server-status
     position: relative
-    z-index: 1000
 
   .server-stats {
     text-align: center;
   }
+
+  .router-view
+
+    flex-grow: 1
 
 </style>
