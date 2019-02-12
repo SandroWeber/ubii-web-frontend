@@ -12,7 +12,7 @@
 </template>
 
 <script>
-  import ClientService from '../services/ubiiClient/ubiiClientNodeService.js';
+  import ClientService from '../services/ubiiClient/ubiiClientService.js';
 
   /* fontawesome */
   import { library } from '@fortawesome/fontawesome-svg-core'

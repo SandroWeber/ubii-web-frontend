@@ -11,7 +11,7 @@
 </template>
 
 <script>
-  import ClientNode from './services/ubiiClient/ubiiClientNodeService';
+  import ClientNode from './services/ubiiClient/ubiiClientService';
   import ServerStatus from './components/ServerStatus.vue'
 
   export default {

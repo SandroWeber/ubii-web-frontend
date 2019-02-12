@@ -90,42 +90,20 @@ class ClientNodeWeb {
    * Register this client at the masterNode.
    */
   async registerClient() {
-    return new Promise((resolve, reject) => {
-      let message = {
-        clientRegistration: {
-          name: this.name,
-          namespace: ''
+    let message = {
+      clientRegistration: {
+        name: this.name,
+        namespace: ''
+      }
+    };
+
+    return this.callService('/services', message).then(
+      (reply) => {
+        if (reply.clientSpecification !== undefined && reply.clientSpecification !== null) {
+          this.clientSpecification = reply.clientSpecification;
         }
-      };
-
-      //TODO: just send JSON?
-      // VARIANT A: PROTOBUF
-      //let buffer = this.translatorServiceRequest.createBufferFromPayload(message);
-      //console.info(buffer);
-      //this.serviceClient.send('/services', {buffer: JSON.stringify(buffer)})
-      // VARIANT B: JSON
-      this.serviceClient.send('/services', {message: JSON.stringify(message)}).then(
-        (reply) => {
-          // VARIANT A: PROTOBUF
-          //let message = this.translatorServiceReply.createMessageFromBuffer(reply.buffer.data);
-          // VARIANT B: JSON
-          let json = JSON.parse(reply.message);
-          let message = this.translatorServiceReply.createMessageFromPayload(json);
-
-          if (message.clientSpecification !== undefined && message.clientSpecification !== null) {
-            // Process the reply client specification.
-
-            // Cache the client specification.
-            this.clientSpecification = message.clientSpecification;
-
-            return resolve();
-          }
-        },
-        (error) => {
-          console.error(error);
-          return reject();
-        });
-    });
+      }
+    );
   }
 
   /**
@@ -186,6 +164,37 @@ class ClientNodeWeb {
             // TODO: log error
             reject();
           }
+        });
+    });
+  }
+
+  /**
+   * Call a service specified by the topic with a message and callback.
+   * @param {String} topic The topic relating to the service to be called
+   * @param {Object} message An object representing the protobuf message to be sent
+   * @param {Function} callback The function to be called with the reply
+   */
+  callService(topic, message) {
+    return new Promise((resolve, reject) => {
+      //TODO: just send JSON?
+      // VARIANT A: PROTOBUF
+      //let buffer = this.translatorServiceRequest.createBufferFromPayload(message);
+      //console.info(buffer);
+      //this.serviceClient.send('/services', {buffer: JSON.stringify(buffer)})
+      // VARIANT B: JSON
+      this.serviceClient.send(topic, {message: JSON.stringify(message)}).then(
+        (reply) => {
+          // VARIANT A: PROTOBUF
+          //let message = this.translatorServiceReply.createMessageFromBuffer(reply.buffer.data);
+          // VARIANT B: JSON
+          let json = JSON.parse(reply.message);
+          let message = this.translatorServiceReply.createMessageFromPayload(json);
+
+          return resolve(message);
+        },
+        (error) => {
+          console.error(error);
+          return reject();
         });
     });
   }
