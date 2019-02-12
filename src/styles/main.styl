@@ -5,6 +5,9 @@ layerBorderWidth = 1px
 layerBorderRadius = 5px
 
 .layer-one
+    z-index: 1000
+    &.token
+        color: layerOneSecondaryColor
     &.background
         background-color: layerOneSecondaryColor
     &.border
@@ -18,6 +21,9 @@ layerBorderRadius = 5px
         
 
 .layer-two
+    z-index: 2000
+    &.token
+        color: layerTwoSecondaryColor
     &.background
         background-color: layerTwoSecondaryColor
     &.border
@@ -30,6 +36,9 @@ layerBorderRadius = 5px
         border-color: layerTwoBorderColor
 
 .layer-three
+    z-index: 3000
+    &.token
+        color: layerThreeSecondaryColor
     &.background
         background-color: layerThreeSecondaryColor
     &.border
@@ -42,6 +51,9 @@ layerBorderRadius = 5px
         border-color: layerThreeBorderColor
 
 .layer-four
+    z-index: 4000
+    &.token
+        color: layerFourSecondaryColor
     &.background
         background-color: layerFourSecondaryColor
     &.border
@@ -85,6 +97,25 @@ shadowColor = #101010
 .clickable
     &:hover
         color: maxContrastColor
+
+// Token Styles
+
+.token
+    background-color: mediumContrastColor
+    border-radius: 999px
+    &.red-accent
+        background-color: redAccentColor
+    &.green-accent
+        background-color: greenAccentColor
+    &.yellow-accent
+        background-color: yellowAccentColor
+    &.orange-accent
+        background-color: orangeAccentColor
+    &.purple-accent
+        background-color: purpleAccentColor
+    &.blue-accent
+        background-color: blueAccentColor
+
 
 // Navigation Styles
 .navigation-item

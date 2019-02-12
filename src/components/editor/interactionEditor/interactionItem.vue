@@ -1,5 +1,5 @@
 <template>
-  <div class="interaction-interface-token token">
+  <div class="interaction-item low-contrast" @click="selectItem(id)">
         <span>{{name}}</span>
   </div>
 </template>
@@ -9,13 +9,19 @@
     name: 'interactionInterfaceToken',
     components: {},
     props: {
-      name: String,
+        id: String,
+        name: String,
+    },
+    methods: {
+        selectItem: function(id) {
+            this.$emit('select', id);
+        }
     }
   } 
 </script> 
 
 <style scoped lang="stylus"> 
-  .interaction-interface-token
+  .interaction-item
     order 1
     margin 5px
     padding 5px 10px 5px 10px
