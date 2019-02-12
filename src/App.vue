@@ -21,7 +21,7 @@
     },
     data: () => {
       return {
-        clientNode: ClientNode
+        clientService: ClientNode
       }
     }
   }
