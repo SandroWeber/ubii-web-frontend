@@ -2,7 +2,7 @@
 
 import RESTClient from './restClient';
 import WebsocketClient from './websocketClient';
-import {ProtobufTranslator} from '@tum-far/ubii-msg-formats';
+import {ProtobufTranslator, MSG_TYPES, DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
 
 
 class ClientNodeWeb {
@@ -16,12 +16,12 @@ class ClientNodeWeb {
 
     // Translators:
     //TODO: define message format constants in ubii-msg-formats
-    this.msgTypeServiceReply = 'ubii.service.ServiceReply';
+    /*this.msgTypeServiceReply = 'ubii.service.ServiceReply';
     this.msgTypeServiceRequest = 'ubii.service.ServiceRequest';
-    this.msgTypeTopicData = 'ubii.topicData.TopicData';
-    this.translatorServiceReply = new ProtobufTranslator(this.msgTypeServiceReply);
-    this.translatorServiceRequest = new ProtobufTranslator(this.msgTypeServiceRequest);
-    this.translatorTopicData = new ProtobufTranslator(this.msgTypeTopicData);
+    this.msgTypeTopicData = 'ubii.topicData.TopicData';*/
+    this.translatorServiceReply = new ProtobufTranslator(MSG_TYPES.SERVICE_REPLY);
+    this.translatorServiceRequest = new ProtobufTranslator(MSG_TYPES.SERVICE_REQUEST);
+    this.translatorTopicData = new ProtobufTranslator(MSG_TYPES.TOPIC_DATA);
 
     // Cache for specifications:
     this.clientSpecification = {};
@@ -91,7 +91,7 @@ class ClientNodeWeb {
    */
   async registerClient() {
     let message = {
-      topic: '/services/client_registration',
+      topic: DEFAULT_TOPICS.SERVICES.CLIENT_REGISTRATION, //'/services/client_registration',
       clientRegistration: {
         name: this.name,
         namespace: ''
@@ -114,7 +114,7 @@ class ClientNodeWeb {
    */
   async registerDevice(deviceName, deviceType) {
     let message = {
-      topic: '/services/device_registration',
+      topic: DEFAULT_TOPICS.SERVICES.DEVICE_REGISTRATION, //'/services/device_registration',
       deviceRegistration: {
         name: deviceName,
         deviceType: deviceType,
