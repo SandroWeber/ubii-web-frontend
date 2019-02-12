@@ -1,27 +1,51 @@
 <template>
-    <div class="grid">
-        <div class="options">
-            <input id="checkboxClientPointer" type="checkbox" v-model="showClientPointer"/>
-            <label for="checkboxClientPointer">Show Client Pointer</label>
-            <br/>
-            <input id="checkboxServerPointer" type="checkbox" v-model="showServerPointer"/>
-            <label for="checkboxServerPointer">Show Server Pointer</label>
+    <div>
+        <div v-show="!ubiiClientService.isConnected">
+            <span class="notification">Please connect to backend before starting the application.</span>
         </div>
-        <div class="mouse-pointer-area" v-bind:class="{ hideCursor: !showClientPointer }">
+
+        <div v-show="ubiiClientService.isConnected && !demoStarted">
+            <button v-on:click="startDemo()">
+                <font-awesome-icon icon="play" />
+            </button>
+        </div>
+        <div v-show="ubiiClientService.isConnected && demoStarted" class="grid">
+            <div class="options">
+                <input id="checkboxClientPointer" type="checkbox" v-model="showClientPointer"/>
+                <label for="checkboxClientPointer">Show Client Pointer</label>
+                <br/>
+                <input id="checkboxServerPointer" type="checkbox" v-model="showServerPointer"/>
+                <label for="checkboxServerPointer">Show Server Pointer</label>
+            </div>
+            <div class="mouse-pointer-area" v-bind:class="{ hideCursor: !showClientPointer }">
+            </div>
         </div>
     </div>
+
 </template>
 
 <script>
-  import ClientService from '../services/ubiiClient/ubiiClientService.js';
+  import UbiiClientService from '../services/ubiiClient/ubiiClientService.js';
+
+  /* fontawesome */
+  import { library } from '@fortawesome/fontawesome-svg-core'
+  import { faPlay } from '@fortawesome/free-solid-svg-icons'
+  library.add(faPlay);
 
   export default {
     name: 'DemoMousePointer',
-    data() {
+    data: () => {
       return {
         showClientPointer: true,
         showServerPointer: true,
-        clientService: ClientService
+        ubiiClientService: UbiiClientService,
+        demoStarted: false
+      }
+    },
+    methods: {
+      startDemo: function() {
+        UbiiClientService.registerDevice('web-demo-mouse-pointer', 0);
+        this.$data.demoStarted = true;
       }
     }
   }
@@ -44,5 +68,9 @@
 
     .hideCursor {
         cursor: none;
+    }
+
+    .notification {
+        color: red;
     }
 </style>

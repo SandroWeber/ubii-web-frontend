@@ -91,6 +91,7 @@ class ClientNodeWeb {
    */
   async registerClient() {
     let message = {
+      topic: '/services/client_registration',
       clientRegistration: {
         name: this.name,
         namespace: ''
@@ -112,29 +113,27 @@ class ClientNodeWeb {
    * @param {*} deviceType
    */
   async registerDevice(deviceName, deviceType) {
-    return new Promise((resolve, reject) => {
-      let message = {
-        deviceRegistration: {
-          name: deviceName,
-          deviceType: deviceType,
-          correspondingClientIdentifier: this.clientSpecification.identifier,
-        }
-      };
+    let message = {
+      topic: '/services/device_registration',
+      deviceRegistration: {
+        name: deviceName,
+        deviceType: deviceType,
+        correspondingClientIdentifier: this.clientSpecification.identifier,
+      }
+    };
 
-      this.serviceClient.send('/services', {buffer: this.translatorServiceRequest.createBufferFromPayload(message)})
-        .then((reply) => {
-          let message = this.translatorServiceReply.createMessageFromBuffer(reply.buffer.data);
-          // The reply should be a device specification.
-          if (message.deviceSpecification !== undefined && message.deviceSpecification !== null) {
-            // Process the reply client specification.
-            this.deviceSpecifications.set(message.deviceSpecification.name, message.deviceSpecification);
-            resolve();
-          } else {
-            // TODO: log error
-            reject();
-          }
-        });
-    });
+    return this.callService('/services', message).then(
+      (reply) => {
+        if (reply.deviceSpecification !== undefined && reply.deviceSpecification !== null) {
+          // Process the reply client specification.
+          this.deviceSpecifications.set(reply.deviceSpecification.name, reply.deviceSpecification);
+          console.info(this.deviceSpecifications);
+        }
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
   }
 
   /**

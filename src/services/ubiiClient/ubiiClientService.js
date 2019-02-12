@@ -12,6 +12,10 @@ class UbiiClientService {
   }
 
   connect() {
+    if (this.isConnected) {
+      return;
+    }
+
     console.info('connecting to backend ' + this.serverIP + ':' + this.serverPort);
 
     this.client = new ClientNodeWeb('web frontend', this.serverIP, this.serverPort);
@@ -24,6 +28,14 @@ class UbiiClientService {
       (error) => {
         console.info('UbiiClientService.client.initialize() failed:\n' + error);
       });
+  }
+
+  async registerDevice(deviceName, deviceType) {
+    if (this.client && this.client.isInitialized()) {
+      return this.client.registerDevice(deviceName, deviceType);
+    } else {
+      return;
+    }
   }
 }
 
