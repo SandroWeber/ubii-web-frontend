@@ -30,8 +30,8 @@
   .interaction-item
     height 20px
     order 1
-    margin 5px
-    padding 0px 10px 0px 10px
+    margin 0px
+    padding 5px 10px 5px 10px
     display flex
     flex-direction row
     cursor pointer
