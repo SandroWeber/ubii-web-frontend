@@ -54,7 +54,10 @@
   }
 
   .button-connect {
+    height: 1.8em
+    width 1.8em
     margin: 2px 10px 2px 10px;
-    padding: 0px 3px 0px 3px
+    padding: 0.1em
+    border-radius 999px
   }
 </style>
