@@ -14,7 +14,7 @@
       class="layer-four background border round high-contrast"/>
     <button class="button-connect button"
       v-on:click="clientNode.connect()">
-      <font-awesome-icon icon="exchange-alt" v-bind:class="{ transparent: !clientNode.connected }" />
+      <font-awesome-icon icon="sync-alt" v-bind:class="{ transparent: !clientNode.connected }" />
     </button>
   </div>
 </template>
@@ -24,8 +24,8 @@
 
   /* fontawesome */
   import { library } from '@fortawesome/fontawesome-svg-core'
-  import { faExchangeAlt } from '@fortawesome/free-solid-svg-icons'
-  library.add(faExchangeAlt);
+  import { faSyncAlt } from '@fortawesome/free-solid-svg-icons'
+  library.add(faSyncAlt);
 
   export default {
     name: 'ServerStatus',
