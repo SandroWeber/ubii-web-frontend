@@ -1,6 +1,6 @@
 <template>
     <div class="interaction-explorer layer-two background shadow">
-        <interaction-item v-for="element in interactions" :key="element.name" :name="element.name" :id="element.id" @select="onSelectItem"/>
+        <interaction-item v-for="element in interactions" :key="element.name" :name="element.name" :id="element.id" :selected="element.id === selectedInteractionId" @select="onSelectItem"/>
     </div>
 </template>
 
@@ -10,7 +10,8 @@
     export default {
         name: 'interactionExplorer',
         props: {
-            interactions: Array
+            interactions: Array,
+            selectedInteractionId: String
         },
         components: {
             interactionItem: interactionItem
