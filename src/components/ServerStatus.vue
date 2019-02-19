@@ -1,17 +1,18 @@
 <template>
   <div class="backend-info">
     <label for="server-ip">Server IP</label>
-    <input id="server-ip" type="text" v-model="clientNode.serverIP"/>
+    <input id="server-ip" type="text" v-model="clientService.serverIP"/>
     <label for="server-port">Server Port</label>
-    <input id="server-port" type="text" v-model="clientNode.serverPort"/>
-    <button class="button-connect" v-on:click="clientNode.connect()">
-      <font-awesome-icon icon="exchange-alt" v-bind:class="{ transparent: !clientNode.connected }" />
+    <input id="server-port" type="text" v-model="clientService.serverPort"/>
+    <button class="button-connect" v-on:click="clientService.connect()"
+            v-bind:class="clientService.isConnected ? 'green' : 'red'">
+      <font-awesome-icon icon="exchange-alt" />
     </button>
   </div>
 </template>
 
 <script>
-  import ClientNode from '../services/ubiiClientNodeService.js';
+  import ClientService from '../services/ubiiClient/ubiiClientService.js';
 
   /* fontawesome */
   import { library } from '@fortawesome/fontawesome-svg-core'
@@ -22,7 +23,7 @@
     name: 'ServerStatus',
     props: {},
     data: () => { return {
-      clientNode: ClientNode
+      clientService: ClientService
     }}
   }
 </script>
@@ -39,8 +40,12 @@
     margin: 0px 5px 0px 10px;
   }
 
-  .transparent {
-    opacity: 0.2;
+  .green {
+    background-color: green;
+  }
+
+  .red {
+    background-color: red;
   }
 
   .button-connect {
