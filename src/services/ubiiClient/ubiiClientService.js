@@ -32,11 +32,23 @@ class UbiiClientService {
       });
   }
 
-  async registerDevice(deviceName, deviceType) {
+  getClientID() {
     if (this.client && this.client.isInitialized()) {
-      return this.client.registerDevice(deviceName, deviceType);
+      return this.client.clientSpecification.id;
     } else {
-      return;
+      return undefined;
+    }
+  }
+
+
+  /**
+   * Register the specified device at the UBII server.
+   * @param {object} device Object specifying device according to protobuf format ubii.devices.Device
+   */
+  async registerDevice(device) {
+    if (this.client && this.client.isInitialized()) {
+      device.clientId = this.client.clientSpecification.id;
+      return this.client.registerDevice(device);
     }
   }
 }

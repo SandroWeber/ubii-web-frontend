@@ -60,7 +60,8 @@ class ClientNodeWeb {
     this.topicDataClient.onMessageReceived((messageBuffer) => {
       try {
         // Decode the buffer.
-        let message = this.translatorTopicData.createMessageFromBuffer(messageBuffer);
+        let arrayBuffer = messageBuffer.data;
+        let message = this.translatorTopicData.createMessageFromBuffer(new Uint8Array(arrayBuffer));
         this._onTopicDataMessageReceived(message);
       } catch (e) {
         (console.error || console.log).call(console, "Ubii Message Translator createMessageFromBuffer failed with an error: " + (e.stack || e));
@@ -98,7 +99,7 @@ class ClientNodeWeb {
    */
   async registerClient() {
     let message = {
-      topic: DEFAULT_TOPICS.SERVICES.CLIENT_REGISTRATION, //'/services/client_registration',
+      topic: DEFAULT_TOPICS.SERVICES.CLIENT_REGISTRATION,
       clientRegistration: {
         name: this.name,
         namespace: ''
@@ -116,20 +117,15 @@ class ClientNodeWeb {
 
   /**
    * Register the specified device at the masterNode.
-   * @param {String} deviceName
-   * @param {*} deviceType
+   * @param {object} device Object specifying device according to protobuf format ubii.devices.Device
    */
-  async registerDevice(deviceName, deviceType) {
+  async registerDevice(device) {
     let message = {
-      topic: DEFAULT_TOPICS.SERVICES.DEVICE_REGISTRATION, //'/services/device_registration',
-      deviceRegistration: {
-        name: deviceName,
-        deviceType: deviceType,
-        correspondingClientIdentifier: this.clientSpecification.identifier
-      }
+      topic: DEFAULT_TOPICS.SERVICES.DEVICE_REGISTRATION,
+      deviceRegistration: device
     };
 
-    return this.callService("/services", message).then(
+    return this.callService('/services', message).then(
       (reply) => {
         if (reply.deviceSpecification !== undefined && reply.deviceSpecification !== null) {
           // Process the reply client specification.
@@ -158,7 +154,7 @@ class ClientNodeWeb {
       }
     };
 
-    return this.callService("/services", message).then(
+    return this.callService('/services', message).then(
       (reply) => {
         if (reply.success !== undefined && reply.success !== null) {
           let callbacks = this.topicDataCallbacks.get(topic);
