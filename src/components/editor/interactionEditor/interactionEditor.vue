@@ -16,7 +16,9 @@
         {
             id: '1234',
             name: 'Dummy Interaction One',
-            code: '(input, output, state) => { return true; }',
+            code: `(input, output, state) => {
+    return true;
+}`,
             input: [
                 {
                     name: 'input-A',
@@ -41,7 +43,9 @@
         {
             id: '5678',
             name: 'Dummy Interaction Two',
-            code: '(input, output, state) => { return true; }',
+            code: `(input, output, state) => {
+    return true;
+}`,
             input: [
                 {
                     name: 'Position A',
@@ -70,7 +74,9 @@
         {
             id: '9123',
             name: 'Dummy Interaction Three',
-            code: '(input, output, state) => { return true; }',
+            code: `(input, output, state) => {
+    return true;
+}`,
             input: [
                 {
                     name: 'Position',
