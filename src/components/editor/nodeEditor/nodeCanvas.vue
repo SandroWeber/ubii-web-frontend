@@ -1,5 +1,8 @@
 <template>
   <div class="node-canvas layer-three background shadow">
+      
+
+    <div id="viewer" ref="viewer" >
       <div class="blueprint-grid">
         <svg width="100%" height="100%">
             <defs>
@@ -11,18 +14,16 @@
             <rect x="0" y="0" width="100%" height="100%" fill="url(#dots)" />
         </svg>
     </div>
-
-    <div id="viewer" ref="viewer" >
     </div>
   </div>
 </template>
 
-<script>
+<script>  
   import initViewer from './viewer';
   
 
-  export default { 
-    name: 'nodeCanvas',
+  export default {  
+    name: 'nodeCanvas',  
     data: () => {
         return {
         };
@@ -31,7 +32,7 @@
     async mounted(){
       await initViewer(this.$refs.viewer);
     }
-  } 
+  }
 </script> 
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
