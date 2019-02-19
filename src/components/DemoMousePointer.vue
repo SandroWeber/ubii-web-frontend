@@ -18,10 +18,13 @@
                 <label for="checkboxServerPointer">Show Server Pointer</label>
             </div>
             <div class="mouse-pointer-area" v-bind:class="{ hideCursor: !showClientPointer }"
-                 v-on:mousemove="onMouseMove($event)">
+                 v-on:mousemove="onMouseMove($event)"
+                 v-on:mouseenter="clientPointerInside = true;" v-on:mouseleave="clientPointerInside = false;"
+                 v-on:touchstart="onTouchStart($event)" v-on:touchend="clientPointerInside = false;"
+                 v-on:touchmove="onTouchMove($event)">
                 <div class="server-mouse-position-indicator"
                      :style="{top: serverMousePosition.y + 'px', left: serverMousePosition.x + 'px' }"
-                     v-show="showServerPointer">
+                     v-show="showServerPointer && clientPointerInside">
                 </div>
             </div>
         </div>
@@ -46,7 +49,8 @@
         showServerPointer: true,
         ubiiClientService: UbiiClientService,
         demoStarted: false,
-        serverMousePosition: {x: 0, y: 0}
+        serverMousePosition: {x: 0, y: 0},
+        clientPointerInside: false
       }
     },
     methods: {
@@ -80,11 +84,6 @@
         this.$data.demoStarted = true;
       },
       onMouseMove: function(event) {
-        /*let boundingRect = event.target.getBoundingClientRect();
-        let relativeMousePosition = {
-          x: Math.floor(event.clientX - boundingRect.left),
-          y: Math.floor(event.clientY - boundingRect.top)
-        };*/
         let relativeMousePosition = {
           x: event.offsetX,
           y: event.offsetY
@@ -98,6 +97,35 @@
           type,
           this.$data.clientMousePosition
         );
+      },
+      onTouchStart: function(event) {
+        this.$data.clientPointerInside = true;
+        this.onTouchMove(event);
+      },
+      onTouchMove: function(event) {
+        console.info(event.touches[0]);
+        let relativeMousePosition = {
+          x: event.touches[0].clientX - event.target.offsetLeft,
+          y: event.touches[0].clientY - event.target.offsetTop
+        };
+
+        if (relativeMousePosition.x < 0 || relativeMousePosition.x > event.target.offsetWidth ||
+          relativeMousePosition.y < 0 || relativeMousePosition.y > event.target.offsetHeight) {
+          this.$data.clientPointerInside = false;
+          return;
+        }
+
+        let type = ProtobufLibrary.ubii.dataStructure.Vector2.prototype.constructor.name.toLowerCase();
+        this.$data.clientMousePosition = relativeMousePosition;
+        UbiiClientService.client.publish(
+          this.$data.device.name,
+          this.$data.device.components[1].topic,
+          type,
+          this.$data.clientMousePosition
+        );
+      },
+      log: function(object) {
+        console.info(object);
       }
     }
   }
@@ -109,13 +137,17 @@
         display: grid;
         grid-gap: 15px;
         grid-template-columns: 1fr 5fr;
+        height: 100%;
+    }
+
+    .options {
         margin: 25px;
     }
 
     .mouse-pointer-area {
         margin: 25px;
         border: 3px solid black;
-        height: 500px;
+        height: 300px;
     }
 
     .hideCursor {
