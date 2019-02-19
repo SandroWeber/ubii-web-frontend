@@ -21,9 +21,11 @@ class UbiiClientService {
     this.client = new ClientNodeWeb('web frontend', this.serverIP, this.serverPort);
     return this.client.initialize().then(
       () => {
-        console.info('UbiiClientService - client connected with ID:\n' +
-          this.client.clientSpecification.identifier);
-        this.isConnected = true;
+        if (this.client.isInitialized()) {
+          console.info('UbiiClientService - client connected with ID:\n' +
+            this.client.clientSpecification.id);
+          this.isConnected = true;
+        }
       },
       (error) => {
         console.info('UbiiClientService.client.initialize() failed:\n' + error);

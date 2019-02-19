@@ -37,7 +37,7 @@ class ClientNodeWeb {
         this.registerClient()
           .then(
             () => {
-              this.initializeTopicDataClient(this.clientSpecification);
+              this.initializeTopicDataClient(this.serverSpecification);
               return resolve();
             },
             (error) => {
@@ -80,7 +80,7 @@ class ClientNodeWeb {
       topic: DEFAULT_TOPICS.SERVICES.SERVER_CONFIG
     };
 
-    return this.callService("/services", message).then(
+    return this.callService('/services', message).then(
       (reply) => {
         if (reply.serverSpecification !== undefined && reply.serverSpecification !== null) {
           // Process the reply client specification.
@@ -101,11 +101,11 @@ class ClientNodeWeb {
       topic: DEFAULT_TOPICS.SERVICES.CLIENT_REGISTRATION, //'/services/client_registration',
       clientRegistration: {
         name: this.name,
-        namespace: ""
+        namespace: ''
       }
     };
 
-    return this.callService("/services", message).then(
+    return this.callService('/services', message).then(
       (reply) => {
         if (reply.clientSpecification !== undefined && reply.clientSpecification !== null) {
           this.clientSpecification = reply.clientSpecification;
