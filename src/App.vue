@@ -28,8 +28,13 @@
 </script>
 
 <style>
+  html {
+    height: 100%;
+  }
+
   body {
     margin: 0px;
+    height: 100%;
   }
 
   #app {
@@ -37,6 +42,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background: white;
+    height: 100%;
   }
 
   .navigation-bar {
