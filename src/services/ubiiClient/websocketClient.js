@@ -31,6 +31,7 @@ class WebsocketClient {
   start() {
     // init
     this.websocket = new WebSocket(`ws://${this.host}:${this.port}?clientID=${this.identity}`);
+    this.websocket.binaryType = 'arraybuffer';
 
     // add callbacks
     this.websocket.onmessage = (message) => {
