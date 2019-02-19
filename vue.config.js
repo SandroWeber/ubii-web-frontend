@@ -13,6 +13,7 @@ function addStyleResource (rule) {
     .options({
       patterns: [
         path.resolve(__dirname, './src/styles/main.styl'),
+        path.resolve(__dirname, './src/styles/rete.styl'),
       ],
     })
 }
