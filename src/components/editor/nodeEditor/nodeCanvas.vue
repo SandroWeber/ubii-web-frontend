@@ -1,9 +1,6 @@
 <template>
   <div class="node-canvas layer-three background shadow">
-      
-
-    <div id="viewer" ref="viewer" >
-      <div class="blueprint-grid">
+    <div class="blueprint-grid">
         <svg width="100%" height="100%">
             <defs>
                 <pattern id="dots" x="0" y="0" width="25" height="25" patternUnits="userSpaceOnUse">
@@ -14,6 +11,9 @@
             <rect x="0" y="0" width="100%" height="100%" fill="url(#dots)" />
         </svg>
     </div>
+
+    <div id="viewer" ref="viewer" >
+      
     </div>
   </div>
 </template>
