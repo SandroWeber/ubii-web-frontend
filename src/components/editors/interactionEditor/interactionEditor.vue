@@ -2,7 +2,7 @@
     <div>
         <div class="interaction-editor layer-one background">
             <interaction-explorer :interactions="interactions" :selectedInteractionId="selectedInteraction.id" @selectInteraction="onSelectInteraction"/>
-            <interaction-mirror :interaction="selectedInteraction" v-model="onSelectedInteractionChange"/>
+            <interaction-mirror :interaction="selectedInteraction" @changes="onSelectedInteractionChange"/>
         </div>
     </div>
 </template>
