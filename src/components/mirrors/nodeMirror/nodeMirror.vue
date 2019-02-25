@@ -1,5 +1,5 @@
 <template>
-  <div class="node-canvas layer-three background shadow">
+  <div class="node-mirror layer-three background shadow">
     <div class="blueprint-grid">
         <svg width="100%" height="100%">
             <defs>
@@ -23,7 +23,7 @@
   
 
   export default {  
-    name: 'nodeCanvas',  
+    name: 'nodeMirror',  
     data: () => {
         return {
         };
@@ -37,7 +37,7 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="stylus"> 
-  .node-canvas { 
+  .node-mirror { 
     position relative
     width: 100%; 
     height: 100%;  

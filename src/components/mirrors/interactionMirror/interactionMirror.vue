@@ -19,7 +19,7 @@
     import interactionInterfaceList from './interactionInterfaceList.vue';
 
     // Codemirror.
-    import codeMirror from './../codeEditor/codeMirror.vue';
+    import codeMirror from './../codeMirror/codeMirror.vue';
  
     // Fontawesome.
     import { library } from '@fortawesome/fontawesome-svg-core';

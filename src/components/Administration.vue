@@ -10,8 +10,6 @@
   import Treeselect from '@riophae/vue-treeselect'
   import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 
-  import InteractionEditor from './InteractionEditor.vue'
-
   let dummyTreeselectOptions = [{
     id: 'sessions-parent',
     label: 'Sessions',
@@ -42,7 +40,6 @@
     name: 'Administration',
     props: {},
     components: {
-      InteractionEditor,
       Treeselect
     },
     data: () => {

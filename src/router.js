@@ -34,7 +34,7 @@ export default new Router({
     {
       path: '/nodeEditor',
       name: 'Node Editor',
-      component: () => import('./components/editor/nodeEditor/nodeCanvas.vue')
+      component: () => import('./components/editors/nodeEditor/nodeEditor.vue')
     },
     {
       path: '/interactionEditor',
