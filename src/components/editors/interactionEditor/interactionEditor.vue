@@ -1,8 +1,12 @@
 <template>
     <div>
         <div class="interaction-editor layer-one background">
-            <interaction-explorer :interactions="interactions" :selectedInteractionId="selectedInteraction.id" @selectInteraction="onSelectInteraction"/>
-            <interaction-mirror :interaction="selectedInteraction" @changes="onSelectedInteractionChange"/>
+            <interaction-explorer   :interactions="interactions"
+                                    :selectedInteractionId="selectedInteraction.id"
+                                    @selectInteraction="onSelectInteraction"/>
+
+            <interaction-mirror     :interaction="selectedInteraction"
+                                    @changes="onSelectedInteractionChange"/>
         </div>
     </div>
 </template>
@@ -123,15 +127,6 @@
             return {
                 selectedInteractionId: 0,
                 interactions: dummyInteractions,
-                codemirror: {
-                    options: {
-                        tabSize: 4,
-                        mode: 'text/javascript',
-                        theme: 'base16-dark',
-                        lineNumbers: true,
-                        line: true
-                    }
-                }
             };
         },
         computed: {
@@ -167,23 +162,5 @@
         flex-wrap: nowrap
         justify-content: flex-start
         align-items flex-start
-        align-content flex-start
-
-    .code-wrapper {
-        text-align: left;
-        margin: 10px;
-    }
-
-    .inout-wrapper {
-        display: flex;
-        flex-direction: row;
-    }
-
-    .inout-mapping {
-        margin: 5px;
-        padding: 5px;
-        color: cyan;
-        background: black;
-        text-align: center;
-    }
+        align-content flex-starts
 </style>
