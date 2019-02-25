@@ -12,8 +12,8 @@
 </template>
 
 <script>
-    import interactionExplorer from './interactionExplorer.vue';
-    import interactionMirror from './interactionMirror.vue';
+    import interactionExplorer from './../../explorers/interactionExplorer/interactionExplorer.vue';
+    import interactionMirror from './../../mirrors/interactionMirror/interactionMirror.vue';
 
     // Dummy interaction.
     let dummyInteractions = [
