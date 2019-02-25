@@ -5,7 +5,7 @@
         <interaction-interface-list :interface-list="interaction.input"/>
 
         <div class="code-wrapper layer-three border round">
-            <codemirror v-model="interaction.code" @input="onCodeChange" :options="codemirror.options"></codemirror>
+            <codeMirror v-model="interaction.code" @input="onCodeChange"></codeMirror>
         </div>
 
         <interaction-interface-list :interfaceList="interaction.output"/>
@@ -17,10 +17,8 @@
     import interactionInterfaceList from './interactionInterfaceList.vue';
 
     // Codemirror.
-    import { codemirror } from 'vue-codemirror';
-    import 'codemirror/lib/codemirror.css';
-    import 'codemirror/mode/javascript/javascript.js';
-    import 'codemirror/theme/base16-dark.css';
+    import codeMirror from './../codeEditor/codeMirror.vue';
+ 
 
     // Fontawesome.
     import { library } from '@fortawesome/fontawesome-svg-core';
@@ -33,27 +31,17 @@
             interaction: Object
         },
         components: {
-            codemirror: codemirror,
+            codeMirror: codeMirror,
             interactionHeader: interactionHeader,
             interactionInterfaceList: interactionInterfaceList,
         },
         data: () => {
-        return {
-            codemirror: {
-                options: {
-                    tabSize: 4,
-                    mode: 'text/javascript',
-                    theme: 'base16-dark',
-                    lineNumbers: true,
-                    line: true
-                }
-            }
-        };
+            return {
+            };
         },
         methods: {
             onCodeChange: function(value) {
-                this.interaction.code = value
-                this.$emit('input', this.interaction);
+                this.$emit('changes', this.interaction);
             }
         }
     }
