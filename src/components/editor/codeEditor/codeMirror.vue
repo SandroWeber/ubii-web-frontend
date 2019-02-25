@@ -1,11 +1,12 @@
 <template>
     <div class="code-mirror">
-        <codemirror v-model="code" @input="onCodeChange" :options="codemirror.options"></codemirror>
+        <codemirror :value="value"
+                    @input="onCodeChange"
+                    :options="codemirror.options"></codemirror>
     </div>
 </template>
 
 <script>
-    // Codemirror.
     import { codemirror } from 'vue-codemirror';
     import 'codemirror/lib/codemirror.css';
     import 'codemirror/mode/javascript/javascript.js';
@@ -13,9 +14,7 @@
 
     export default {
         name: 'codeMirror',
-        props: {
-            code: Object
-        },
+        props: ['value'],
         components: {
             codemirror: codemirror,
         },
@@ -24,7 +23,7 @@
                 codemirror: {
                     options: {
                         tabSize: 4,
-                        mode: 'text/javascript',
+                        mode: 'text/javascript', 
                         theme: 'base16-dark',
                         lineNumbers: true,
                         line: true
@@ -34,8 +33,7 @@
         },
         methods: {
             onCodeChange: function(value) {
-                this.code = value
-                this.$emit('onCodeChange', this.code);
+                this.$emit('input', value);
             }
         }
     }
