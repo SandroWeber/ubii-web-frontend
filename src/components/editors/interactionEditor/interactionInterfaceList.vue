@@ -1,6 +1,8 @@
 <template>
   <div class="interaction-interface-list">
-      <interaction-interface-token v-for="element in interfaceList" :key="element.name" :name="element.name"/>
+      <interaction-interface-token  v-for="element in interfaceList"
+                                    :key="element.name"
+                                    :name="element.name"/>
   </div>
 </template>
 
@@ -24,7 +26,7 @@
     flex-direction: row
     flex-wrap: nowrap
     justify-content: flex-start
-    align-items flex-start
-    align-content flex-start
-    padding 10px
+    align-items: flex-start
+    align-content: flex-start
+    padding: 10px
 </style>
