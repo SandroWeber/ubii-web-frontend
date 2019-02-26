@@ -13,33 +13,29 @@
 </template>
 
 <script>
-export default {
-  name: 'DemoMousePointer',
-  data() {
-    return {
-      showClientPointer: true,
-      showServerPointer: true
+  export default {
+    name: 'DemoMousePointer',
+    data: () => {
+      return {
+        showClientPointer: true,
+        showServerPointer: true
+      }
     }
   }
-}
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-  .grid {
-    display: grid;
-    grid-gap: 15px;
-    grid-template-columns: 1fr 5fr;
-    margin: 25px;
-  }
+<style scoped lang="stylus">
+  .grid
+    display: grid
+    grid-gap: 15px
+    grid-template-columns: 1fr 5fr
+    margin: 25px
 
-  .mouse-pointer-area {
-    margin: 25px;
-    border: 3px solid black;
-    height: 500px;
-  }
+  .mouse-pointer-area
+    margin: 25px
+    border: 3px solid black
+    height: 500px
 
-  .hideCursor {
-    cursor: none;
-  }
+  .hideCursor
+    cursor: none
 </style>
