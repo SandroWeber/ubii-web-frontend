@@ -41,6 +41,8 @@
   import { faPlay } from '@fortawesome/free-solid-svg-icons'
   library.add(faPlay);
 
+  /* eslint-disable no-console */
+
   export default {
     name: 'DemoMousePointer',
     data: () => {
