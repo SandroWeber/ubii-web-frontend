@@ -1,13 +1,26 @@
 <template>
   <div class="grid">
     <div class="options">
-      <input id="checkboxClientPointer" type="checkbox" v-model="showClientPointer" />
-      <label for="checkboxClientPointer">Show Client Pointer</label>
+
+      <input  id="checkboxClientPointer"
+              type="checkbox"
+              v-model="showClientPointer" />
+      <label for="checkboxClientPointer">
+        Show Client Pointer
+      </label>
+
       <br/>
-      <input id="checkboxServerPointer" type="checkbox" v-model="showServerPointer" />
-      <label for="checkboxServerPointer">Show Server Pointer</label>
+
+      <input  id="checkboxServerPointer"
+              type="checkbox"
+              v-model="showServerPointer" />
+      <label for="checkboxServerPointer">
+        Show Server Pointer
+      </label>
+      
     </div>
-    <div class="mouse-pointer-area" v-bind:class="{ hideCursor: !showClientPointer }">
+    <div  class="mouse-pointer-area"
+          v-bind:class="{ hideCursor: !showClientPointer }">
     </div>
   </div>
 </template>
