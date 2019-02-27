@@ -41,6 +41,7 @@
   /* fontawesome */
   import {library} from '@fortawesome/fontawesome-svg-core'
   import {faPlay} from '@fortawesome/free-solid-svg-icons'
+
   library.add(faPlay);
 
   /* eslint-disable no-console */
@@ -48,126 +49,19 @@
   export default {
     name: 'DemoMousePointer',
     data: () => {
-      let deviceName = 'web-demo-mouse-pointer';
-
-      let inputClientPointer = {
-        internalName: 'clientPointer',
-        messageFormat: 'ubii.dataStructure.Vector2',
-        topic: UbiiClientService.getClientID() + '/' + deviceName + '/' + 'mouse_client_position'
-      };
-      let inputMirror = {
-        internalName: 'mirrorPointer',
-        messageFormat: 'bool',
-        topic: UbiiClientService.getClientID() + '/' + deviceName + '/' + 'mirror_mouse'
-      };
-      let outputServerPointer = {
-        internalName: 'serverPointer',
-        messageFormat: 'ubii.dataStructure.Vector2',
-        topic: UbiiClientService.getClientID() + '/' + deviceName + '/' + 'mouse_server_position'
-      };
-
-      let ubiiDevice = {
-        name: deviceName,
-        deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
-        components: [
-          {
-            topic: inputClientPointer.topic,
-            messageFormat: inputClientPointer.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
-          },
-          {
-            topic: inputMirror.topic,
-            messageFormat: inputMirror.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
-          },
-          {
-            topic: outputServerPointer.topic,
-            messageFormat: outputServerPointer.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
-          }
-        ]
-      };
-
-      let ubiiInteraction = {
-        id: uuidv4(),
-        name: 'mirror-mouse-pointer',
-        processingCallback: '(input, output, state) => {' +
-        'if (input.mirrorPointer === true) {' +
-        'output.serverPointer = {x: 1-input.clientPointer.x, y: 1-input.clientPointer.y};' +
-        '} else {' +
-        'output.serverPointer = {x: input.clientPointer.x, y: input.clientPointer.y};' +
-        '}' +
-        '};',
-        inputFormats: [
-          {
-            internalName: inputClientPointer.internalName,
-            messageFormat: inputClientPointer.messageFormat
-          },
-          {
-            internalName: inputMirror.internalName,
-            messageFormat: inputMirror.messageFormat
-          }
-        ],
-        outputFormats: [
-          {
-            internalName: outputServerPointer.internalName,
-            messageFormat: outputServerPointer.messageFormat
-          }
-        ]
-      };
-
-      let ubiiSession = {
-        id: uuidv4(),
-        name: 'web-mouse-demo-session',
-        interactions: [
-          ubiiInteraction
-        ],
-        ioMappings: [
-          {
-            interactionId: ubiiInteraction.id,
-            interactionInput: {
-              internalName: inputClientPointer.internalName,
-              messageFormat: inputClientPointer.messageFormat
-            },
-            topic: inputClientPointer.topic
-          },
-          {
-            interactionId: ubiiInteraction.id,
-            interactionInput: {
-              internalName: inputMirror.internalName,
-              messageFormat: inputMirror.messageFormat
-            },
-            topic: inputMirror.topic
-          },
-          {
-            interactionId: ubiiInteraction.id,
-            interactionOutput: {
-              internalName: outputServerPointer.internalName,
-              messageFormat: outputServerPointer.messageFormat
-            },
-            topic: outputServerPointer.topic
-          }
-        ]
-      };
-
       return {
         showClientPointer: true,
         showServerPointer: true,
         ubiiClientService: UbiiClientService,
         demoStarted: false,
         serverMousePosition: {x: 0, y: 0},
-        clientPointerInside: false,
-        deviceName: deviceName,
-        inputClientPointer: inputClientPointer,
-        inputMirror: inputMirror,
-        outputServerPointer: outputServerPointer,
-        ubiiDevice: ubiiDevice,
-        ubiiInteraction: ubiiInteraction,
-        ubiiSession: ubiiSession
+        clientPointerInside: false
       }
     },
     methods: {
       startDemo: function () {
+        this.createUbiiSpecs();
+
         // register the mouse pointer device
         UbiiClientService.registerDevice(this.$data.ubiiDevice)
           .then((device) => {
@@ -185,12 +79,10 @@
               };
             });
             UbiiClientService.client.subscribe(this.$data.outputServerPointer.topic, (mousePosition) => {
-                /*let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
-                 this.$data.serverMousePosition = {
-                 x: mousePosition.x * boundingRect.width,
-                 y: mousePosition.y * boundingRect.height
-                 };*/
-              console.info(mousePosition);
+              //console.info(mousePosition);
+            });
+            UbiiClientService.client.subscribe(this.$data.inputMirror.topic, (mirror) => {
+              console.info(mirror);
             });
 
             UbiiClientService.registerSession(this.$data.ubiiSession)
@@ -233,7 +125,6 @@
         this.onTouchMove(event);
       },
       onTouchMove: function (event) {
-        console.info(event.touches[0]);
         let relativeMousePosition = {
           x: event.touches[0].clientX - event.target.offsetLeft,
           y: event.touches[0].clientY - event.target.offsetTop
@@ -254,8 +145,123 @@
           this.$data.clientMousePosition
         );
       },
-      log: function (object) {
-        console.info(object);
+      createUbiiSpecs: function () {
+        let deviceName = 'web-demo-mouse-pointer';
+
+        let topicPrefix = UbiiClientService.getClientID() + '/' + deviceName;
+        let inputClientPointer = {
+          internalName: 'clientPointer',
+          messageFormat: 'ubii.dataStructure.Vector2',
+          topic: topicPrefix + '/' + 'mouse_client_position'
+        };
+        let inputMirror = {
+          internalName: 'mirrorPointer',
+          messageFormat: 'bool',
+          topic: topicPrefix + '/' + 'mirror_mouse'
+        };
+        let outputServerPointer = {
+          internalName: 'serverPointer',
+          messageFormat: 'ubii.dataStructure.Vector2',
+          topic: topicPrefix + '/' + 'mouse_server_position'
+        };
+
+        let ubiiDevice = {
+          name: deviceName,
+          deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
+          components: [
+            {
+              topic: inputClientPointer.topic,
+              messageFormat: inputClientPointer.messageFormat,
+              ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            },
+            {
+              topic: inputMirror.topic,
+              messageFormat: inputMirror.messageFormat,
+              ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            },
+            {
+              topic: outputServerPointer.topic,
+              messageFormat: outputServerPointer.messageFormat,
+              ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            }
+          ]
+        };
+
+        let processingCallback = (input, output, state) => {
+          if (!input.clientPointer) {
+            return;
+          }
+
+          if (input.mirrorPointer === true) {
+            output.serverPointer = {x: 1-input.clientPointer.x, y: 1-input.clientPointer.y};
+          } else {
+            output.serverPointer = {x: input.clientPointer.x, y: input.clientPointer.y};
+          }
+        };
+
+        let ubiiInteraction = {
+          id: uuidv4(),
+          name: 'mirror-mouse-pointer',
+          processingCallback: processingCallback.toString(),
+          inputFormats: [
+            {
+              internalName: inputClientPointer.internalName,
+              messageFormat: inputClientPointer.messageFormat
+            },
+            {
+              internalName: inputMirror.internalName,
+              messageFormat: inputMirror.messageFormat
+            }
+          ],
+          outputFormats: [
+            {
+              internalName: outputServerPointer.internalName,
+              messageFormat: outputServerPointer.messageFormat
+            }
+          ]
+        };
+
+        let ubiiSession = {
+          id: uuidv4(),
+          name: 'web-mouse-demo-session',
+          interactions: [
+            ubiiInteraction
+          ],
+          ioMappings: [
+            {
+              interactionId: ubiiInteraction.id,
+              interactionInput: {
+                internalName: inputClientPointer.internalName,
+                messageFormat: inputClientPointer.messageFormat
+              },
+              topic: inputClientPointer.topic
+            },
+            {
+              interactionId: ubiiInteraction.id,
+              interactionInput: {
+                internalName: inputMirror.internalName,
+                messageFormat: inputMirror.messageFormat
+              },
+              topic: inputMirror.topic
+            },
+            {
+              interactionId: ubiiInteraction.id,
+              interactionOutput: {
+                internalName: outputServerPointer.internalName,
+                messageFormat: outputServerPointer.messageFormat
+              },
+              topic: outputServerPointer.topic
+            }
+          ]
+        };
+
+        this.$data.deviceName = deviceName;
+        this.$data.inputClientPointer = inputClientPointer;
+        this.$data.inputMirror = inputMirror;
+        this.$data.outputServerPointer = outputServerPointer;
+        this.$data.ubiiDevice = ubiiDevice;
+        this.$data.ubiiInteraction = ubiiInteraction;
+        this.$data.ubiiSession = ubiiSession;
       }
     }
   }
