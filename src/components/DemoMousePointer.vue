@@ -116,6 +116,7 @@
       };
 
       let ubiiSession = {
+        id: uuidv4(),
         name: 'web-mouse-demo-session',
         interactions: [
           ubiiInteraction
