@@ -1,11 +1,15 @@
 <template>
-  <div class="codemirror-wrapper">
-    <codemirror v-model="code" :options="cmOptions"></codemirror>
+  <div 
+    class="codemirror-wrapper">
+    <codemirror
+      v-model="code" 
+      :options="cmOptions">
+    </codemirror>
   </div>
 </template>
 
 <script>
-  // codemirror
+  // Codemirror.
   import { codemirror } from 'vue-codemirror'
   import 'codemirror/lib/codemirror.css'
   import 'codemirror/mode/javascript/javascript.js'
@@ -31,10 +35,8 @@
   }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-  .codemirror-wrapper {
-    text-align: left;
-    margin: 10px;
-  }
+<style scoped lang="stylus">
+  .codemirror-wrapper
+    text-align: left
+    margin: 10px
 </style>
