@@ -16,6 +16,9 @@
                 <br/>
                 <input id="checkboxServerPointer" type="checkbox" v-model="showServerPointer"/>
                 <label for="checkboxServerPointer">Show Server Pointer</label>
+                <br/>
+                <input id="checkboxMirrorPointer" type="checkbox" v-model="mirrorPointer"/>
+                <label for="checkboxMirrorPointer">Mirror Pointer</label>
             </div>
             <div id="mouse-pointer-area" class="mouse-pointer-area" v-bind:class="{ hideCursor: !showClientPointer }"
                  v-on:mousemove="onMouseMove($event)"
@@ -52,6 +55,7 @@
       return {
         showClientPointer: true,
         showServerPointer: true,
+        mirrorPointer: false,
         ubiiClientService: UbiiClientService,
         demoStarted: false,
         serverMousePosition: {x: 0, y: 0},
@@ -71,15 +75,13 @@
           })
           .then(() => {
             // subscribe to the device topics
-            UbiiClientService.client.subscribe(this.$data.inputClientPointer.topic, (mousePosition) => {
+            UbiiClientService.client.subscribe(this.$data.inputClientPointer.topic, (mousePosition) => {});
+            UbiiClientService.client.subscribe(this.$data.outputServerPointer.topic, (mousePosition) => {
               let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
               this.$data.serverMousePosition = {
                 x: mousePosition.x * boundingRect.width,
                 y: mousePosition.y * boundingRect.height
               };
-            });
-            UbiiClientService.client.subscribe(this.$data.outputServerPointer.topic, (mousePosition) => {
-              //console.info(mousePosition);
             });
             UbiiClientService.client.subscribe(this.$data.inputMirror.topic, (mirror) => {
               console.info(mirror);
@@ -111,12 +113,11 @@
           y: event.offsetY / boundingRect.height
         };
 
-        let type = ProtobufLibrary.ubii.dataStructure.Vector2.prototype.constructor.name.toLowerCase();
         this.$data.clientMousePosition = relativeMousePosition;
         UbiiClientService.client.publish(
           this.$data.ubiiDevice.name,
           this.$data.inputClientPointer.topic,
-          type,
+          'vector2',
           this.$data.clientMousePosition
         );
       },
@@ -136,12 +137,11 @@
           return;
         }
 
-        let type = ProtobufLibrary.ubii.dataStructure.Vector2.prototype.constructor.name.toLowerCase();
         this.$data.clientMousePosition = relativeMousePosition;
         UbiiClientService.client.publish(
           this.$data.ubiiDevice.name,
           this.$data.inputClientPointer.topic,
-          type,
+          'vector2',
           this.$data.clientMousePosition
         );
       },

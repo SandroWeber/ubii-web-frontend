@@ -255,9 +255,10 @@ class ClientNodeWeb {
   }
 
   _onTopicDataMessageReceived(message) {
-    if (message.topicDataRecord && message.topicDataRecord.topic) {
-      let callbacks = this.topicDataCallbacks.get(message.topicDataRecord.topic);
-      callbacks.forEach((cb) => {cb(message.topicDataRecord[message.topicDataRecord.type])})
+    let record = message.topicDataRecord;
+    if (record && record.topic) {
+      let callbacks = this.topicDataCallbacks.get(record.topic);
+      callbacks.forEach((cb) => {cb(record[record.type])})
     }
   }
 }
