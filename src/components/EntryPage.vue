@@ -1,18 +1,27 @@
 <template>
-  <div class="canvas layer-two background horizontal-shadow">
-    <div class="grid">
-      <router-link  to="/admin"
-                    class="interface-link layer-three background round shadow link-area green-accent">
-        <font-awesome-icon  icon="cogs"
-                            class="interface-icon" />
-        <p>Administration</p>
+  <div
+    class="canvas layer-two background horizontal-shadow">
+    <div
+      class="grid">
+      <router-link
+        to="/admin"
+        class="interface-link layer-three background round shadow link-area green-accent">
+        <font-awesome-icon
+          icon="cogs"
+          class="interface-icon" />
+        <p>
+          Administration
+        </p>
       </router-link>
-
-      <router-link  to="/tools"
-                    class="interface-link layer-three background round shadow link-area blue-accent">
-        <font-awesome-icon  icon="toolbox"
-                            class="interface-icon " />
-        <p>Tools</p>
+      <router-link
+        to="/tools"
+        class="interface-link layer-three background round shadow link-area blue-accent">
+        <font-awesome-icon
+          icon="toolbox"
+          class="interface-icon " />
+        <p>
+          Tools
+        </p>
       </router-link>
     </div>
   </div> 
@@ -44,7 +53,6 @@
   .interface-link
     padding: 10px
     text-align: center
-
 
   .interface-icon
     width: 50px
