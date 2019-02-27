@@ -1,6 +1,6 @@
 <template>
-    <div class="node-editor layer-one background">
-
+    <div
+        class="node-editor layer-one background">
         <node-mirror/>
     </div>
 </template>
