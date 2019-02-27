@@ -201,7 +201,7 @@
               })
               .then((session) => {
                 UbiiClientService.client
-                  .callService('/services', {
+                  .callService({
                     topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
                     session: this.$data.ubiiSession
                   })

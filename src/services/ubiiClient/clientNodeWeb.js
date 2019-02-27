@@ -81,7 +81,7 @@ class ClientNodeWeb {
       topic: DEFAULT_TOPICS.SERVICES.SERVER_CONFIG
     };
 
-    return this.callService('/services', message).then(
+    return this.callService(message).then(
       (reply) => {
         if (reply.server !== undefined && reply.server !== null) {
           // Process the reply client specification.
@@ -107,7 +107,7 @@ class ClientNodeWeb {
       }
     };
 
-    return this.callService('/services', message).then(
+    return this.callService(message).then(
       (reply) => {
         if (reply.client !== undefined && reply.client !== null) {
           this.clientSpecification = reply.client;
@@ -129,7 +129,7 @@ class ClientNodeWeb {
       device: device
     };
 
-    return this.callService('/services', message).then(
+    return this.callService(message).then(
       (reply) => {
         if (reply.device !== undefined && reply.device !== null) {
           // Process the reply client specification.
@@ -151,7 +151,7 @@ class ClientNodeWeb {
       session: session
     };
 
-    return this.callService('/services', message).then(
+    return this.callService(message).then(
       (reply) => {
         if (reply.session !== undefined && reply.session !== null) {
           console.info(reply.session);
@@ -180,7 +180,7 @@ class ClientNodeWeb {
       }
     };
 
-    return this.callService('/services', message).then(
+    return this.callService(message).then(
       (reply) => {
         if (reply.success !== undefined && reply.success !== null) {
           let callbacks = this.topicDataCallbacks.get(topic);
@@ -206,7 +206,7 @@ class ClientNodeWeb {
    * @param {Object} message An object representing the protobuf message to be sent
    * @param {Function} callback The function to be called with the reply
    */
-  callService(topic, message) {
+  callService(message) {
     return new Promise((resolve, reject) => {
       //TODO: just send JSON?
       // VARIANT A: PROTOBUF
@@ -214,7 +214,7 @@ class ClientNodeWeb {
       //console.info(buffer);
       //this.serviceClient.send('/services', {buffer: JSON.stringify(buffer)})
       // VARIANT B: JSON
-      this.serviceClient.send(topic, { message: JSON.stringify(message) }).then(
+      this.serviceClient.send('/services', { message: JSON.stringify(message) }).then(
         (reply) => {
           // VARIANT A: PROTOBUF
           //let message = this.translatorServiceReply.createMessageFromBuffer(reply.buffer.data);
