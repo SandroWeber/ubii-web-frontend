@@ -36,6 +36,7 @@
   import uuidv4 from 'uuid/v4';
   import UbiiClientService from '../services/ubiiClient/ubiiClientService.js';
   import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
+  import {DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
 
   /* fontawesome */
   import {library} from '@fortawesome/fontawesome-svg-core'
@@ -168,24 +169,48 @@
     methods: {
       startDemo: function () {
         // register the mouse pointer device
-        UbiiClientService.registerDevice(this.$data.ubiiDevice).then((device) => {
-          console.info(device);
-        });
-        // subscribe to the device topics
-        UbiiClientService.client.subscribe(this.$data.inputClientPointer.topic, (mousePosition) => {
-          let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
-          this.$data.serverMousePosition = {
-            x: mousePosition.x * boundingRect.width,
-            y: mousePosition.y * boundingRect.height
-          };
-        });
+        UbiiClientService.registerDevice(this.$data.ubiiDevice)
+          .then((device) => {
+            this.$data.ubiiDevice = device;
+            console.info(device);
+            return device;
+          })
+          .then(() => {
+            // subscribe to the device topics
+            UbiiClientService.client.subscribe(this.$data.inputClientPointer.topic, (mousePosition) => {
+              let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
+              this.$data.serverMousePosition = {
+                x: mousePosition.x * boundingRect.width,
+                y: mousePosition.y * boundingRect.height
+              };
+            });
+            UbiiClientService.client.subscribe(this.$data.outputServerPointer.topic, (mousePosition) => {
+                /*let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
+                 this.$data.serverMousePosition = {
+                 x: mousePosition.x * boundingRect.width,
+                 y: mousePosition.y * boundingRect.height
+                 };*/
+              console.info(mousePosition);
+            });
 
-        UbiiClientService.registerSession(this.$data.ubiiSession).then((session) => {
-          console.info(session);
-          this.$data.ubiiSession = session;
-        });
-
-        this.$data.demoStarted = true;
+            UbiiClientService.registerSession(this.$data.ubiiSession)
+              .then((session) => {
+                console.info(session);
+                this.$data.ubiiSession = session;
+                return session;
+              })
+              .then((session) => {
+                UbiiClientService.client
+                  .callService('/services', {
+                    topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+                    session: this.$data.ubiiSession
+                  })
+                  .then((result) => {
+                    console.info(result);
+                  });
+                this.$data.demoStarted = true;
+              });
+          });
       },
       onMouseMove: function (event) {
         let boundingRect = event.currentTarget.getBoundingClientRect();
