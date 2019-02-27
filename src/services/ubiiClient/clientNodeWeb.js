@@ -145,6 +145,26 @@ class ClientNodeWeb {
     );
   }
 
+  async registerSession(session) {
+    let message = {
+      topic: DEFAULT_TOPICS.SERVICES.SESSION_REGISTRATION,
+      session: session
+    };
+
+    return this.callService('/services', message).then(
+      (reply) => {
+        if (reply.session !== undefined && reply.session !== null) {
+          console.info(reply.session);
+
+          return reply.session;
+        }
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
+  }
+
   /**
    * Subscribe and unsubscribe to the specified topics.
    * @param {*} deviceName

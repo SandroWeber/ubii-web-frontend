@@ -51,6 +51,12 @@ class UbiiClientService {
       return this.client.registerDevice(device);
     }
   }
+
+  async registerSession(session) {
+    if (this.client && this.client.isInitialized()) {
+      return this.client.registerSession(session);
+    }
+  }
 }
 
 export default new UbiiClientService();
