@@ -112,6 +112,8 @@ class ClientNodeWeb {
         if (reply.client !== undefined && reply.client !== null) {
           this.clientSpecification = reply.client;
           console.info(this.clientSpecification);
+
+          return reply.client;
         }
       }
     );
@@ -132,7 +134,9 @@ class ClientNodeWeb {
         if (reply.device !== undefined && reply.device !== null) {
           // Process the reply client specification.
           this.deviceSpecifications.set(reply.device.name, reply.device);
-          console.info(this.deviceSpecifications);
+          //console.info(this.deviceSpecifications);
+
+          return reply.device;
         }
       },
       (error) => {

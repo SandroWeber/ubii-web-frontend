@@ -6,7 +6,7 @@
 
         <div v-show="ubiiClientService.isConnected && !demoStarted">
             <button v-on:click="startDemo()">
-                <font-awesome-icon icon="play" />
+                <font-awesome-icon icon="play"/>
             </button>
         </div>
         <div v-show="ubiiClientService.isConnected && demoStarted" class="grid">
@@ -17,7 +17,7 @@
                 <input id="checkboxServerPointer" type="checkbox" v-model="showServerPointer"/>
                 <label for="checkboxServerPointer">Show Server Pointer</label>
             </div>
-            <div class="mouse-pointer-area" v-bind:class="{ hideCursor: !showClientPointer }"
+            <div id="mouse-pointer-area" class="mouse-pointer-area" v-bind:class="{ hideCursor: !showClientPointer }"
                  v-on:mousemove="onMouseMove($event)"
                  v-on:mouseenter="clientPointerInside = true;" v-on:mouseleave="clientPointerInside = false;"
                  v-on:touchstart="onTouchStart($event)" v-on:touchend="clientPointerInside = false;"
@@ -37,8 +37,8 @@
   import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 
   /* fontawesome */
-  import { library } from '@fortawesome/fontawesome-svg-core'
-  import { faPlay } from '@fortawesome/free-solid-svg-icons'
+  import {library} from '@fortawesome/fontawesome-svg-core'
+  import {faPlay} from '@fortawesome/free-solid-svg-icons'
   library.add(faPlay);
 
   /* eslint-disable no-console */
@@ -56,11 +56,11 @@
       }
     },
     methods: {
-      startDemo: function() {
+      startDemo: function () {
         // register the mouse pointer device
         let deviceName = 'web-demo-mouse-pointer';
         let topicName = UbiiClientService.getClientID() + '/' + deviceName + '/' + 'mouse_position';
-        this.$data.device = {
+        this.$data.ubiiDevice = {
           name: deviceName,
           deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
           components: [
@@ -76,35 +76,60 @@
             }
           ]
         };
-        UbiiClientService.registerDevice(this.$data.device);
+        UbiiClientService.registerDevice(this.$data.ubiiDevice).then((device) => {
+          console.info(device);
+        });
 
         // subscribe to the device topics
         UbiiClientService.client.subscribe(topicName, (mousePosition) => {
-          this.$data.serverMousePosition = mousePosition;
+          let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
+          this.$data.serverMousePosition = {
+            x: mousePosition.x * boundingRect.width,
+            y: mousePosition.y * boundingRect.height
+          };
         });
+
+        let ubiiInteraction = {
+          name: 'mirror-mouse-pointer',
+          processingCallback: '(input, output, state) => {' +
+          'if (input.mirrorPointer === true) {' +
+          'output.pointer = {x: 1-input.pointer.x, y: 1-input.pointer.y};' +
+          '} else {' +
+          'output.pointer = {x: input.pointer.x, y: input.pointer.y};' +
+          '};'
+        };
+
+        let ubiiSession = {
+          name: 'web-mouse-demo-session',
+          interactions: [
+            ubiiInteraction
+          ],
+          ioMappings: []
+        };
 
         this.$data.demoStarted = true;
       },
-      onMouseMove: function(event) {
+      onMouseMove: function (event) {
+        let boundingRect = event.currentTarget.getBoundingClientRect();
         let relativeMousePosition = {
-          x: event.offsetX,
-          y: event.offsetY
+          x: event.offsetX / boundingRect.width,
+          y: event.offsetY / boundingRect.height
         };
 
         let type = ProtobufLibrary.ubii.dataStructure.Vector2.prototype.constructor.name.toLowerCase();
         this.$data.clientMousePosition = relativeMousePosition;
         UbiiClientService.client.publish(
-          this.$data.device.name,
-          this.$data.device.components[1].topic,
+          this.$data.ubiiDevice.name,
+          this.$data.ubiiDevice.components[1].topic,
           type,
           this.$data.clientMousePosition
         );
       },
-      onTouchStart: function(event) {
+      onTouchStart: function (event) {
         this.$data.clientPointerInside = true;
         this.onTouchMove(event);
       },
-      onTouchMove: function(event) {
+      onTouchMove: function (event) {
         console.info(event.touches[0]);
         let relativeMousePosition = {
           x: event.touches[0].clientX - event.target.offsetLeft,
@@ -120,13 +145,13 @@
         let type = ProtobufLibrary.ubii.dataStructure.Vector2.prototype.constructor.name.toLowerCase();
         this.$data.clientMousePosition = relativeMousePosition;
         UbiiClientService.client.publish(
-          this.$data.device.name,
-          this.$data.device.components[1].topic,
+          this.$data.ubiiDevice.name,
+          this.$data.ubiiDevice.components[1].topic,
           type,
           this.$data.clientMousePosition
         );
       },
-      log: function(object) {
+      log: function (object) {
         console.info(object);
       }
     }
