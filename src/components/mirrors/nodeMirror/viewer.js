@@ -7,7 +7,12 @@ import NumComponent from "./nodeComponents/numComponent.js";
 import AddComponent from "./nodeComponents/addComponent.js";
 
 export default async function(container) {
-    const { editor, engine, resize, process } = await init(container);
+    const {
+        editor,
+        engine,
+        resize,
+        process
+    } = await init(container);
     
     editor.use(ContextMenuPlugin);
     
@@ -21,7 +26,6 @@ export default async function(container) {
     // Laod from JSON
     //await editor.fromJSON(data);
 
-
     var n1 = await components[0].createNode({num: 2});
     var n2 = await components[0].createNode({num: 0});
     var add = await components[1].createNode();
@@ -29,7 +33,6 @@ export default async function(container) {
     n1.position = [80, 200];
     n2.position = [80, 400];
     add.position = [500, 240];
-
 
     editor.addNode(n1);
     editor.addNode(n2);
@@ -43,44 +46,3 @@ export default async function(container) {
     resize();
     process();
 }
-
-
-/*
-
-,
-    mounted() {
-            //(async () => {
-
-    var container = document.querySelector('#rete');
-    var components = [new NumComponent(), new AddComponent()];
-
-    var editor = new Rete.NodeEditor('demo@0.1.0', container);
-    editor.use(this.ConnectionPlugin.default);
-    //editor.use(this.VueRenderPlugin.default);
-    
-        
-    //let readyMenu = [10, 12, 14];
-    //let dontHide = ['click'];
-    //editor.use(ContextMenuPlugin.default);
-    //editor.use(AreaPlugin);
-    //editor.use(CommentPlugin);
-    //editor.use(HistoryPlugin);
-
-    var engine = new Rete.Engine('demo@0.1.0');
-    
-    components.map(c => {
-        editor.register(c);
-        engine.register(c);
-    });
-
-
-    editor.on('process nodecreated noderemoved connectioncreated connectionremoved', async () => {
-      //console.log('process');
-        await engine.abort();
-        await engine.process(editor.toJSON());
-    });
-
-    editor.view.resize();
-    //AreaPlugin.zoomAt(editor);
-    editor.trigger('process');
-  //})();*/
