@@ -4,7 +4,7 @@
       class="grid">
       <router-link
         to="/tools/topic-inspector"
-        class="interface-link layer-three background round shadow link-area orange-accent">
+        class="interface-link layer-three background round shadow button-area orange-accent">
         <font-awesome-icon
           icon="eye"
           class="interface-icon" />
@@ -14,7 +14,7 @@
       </router-link>
       <router-link
         to="/tools/demo-mouse-pointer"
-        class="interface-link layer-three background round shadow link-area orange-accent">
+        class="interface-link layer-three background round shadow button-area orange-accent">
         <font-awesome-icon
           icon="mouse-pointer"
           class="interface-icon" />

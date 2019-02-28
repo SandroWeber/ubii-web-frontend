@@ -5,7 +5,7 @@
       class="grid">
       <router-link
         to="/admin"
-        class="interface-link layer-three background round shadow link-area green-accent">
+        class="interface-link layer-three background round shadow button-area green-accent">
         <font-awesome-icon
           icon="cogs"
           class="interface-icon" />
@@ -15,7 +15,7 @@
       </router-link>
       <router-link
         to="/tools"
-        class="interface-link layer-three background round shadow link-area blue-accent">
+        class="interface-link layer-three background round shadow button-area blue-accent">
         <font-awesome-icon
           icon="toolbox"
           class="interface-icon " />
