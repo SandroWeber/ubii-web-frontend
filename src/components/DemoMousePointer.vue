@@ -137,12 +137,12 @@
       },
       onTouchMove: function (event) {
         let relativeMousePosition = {
-          x: event.touches[0].clientX - event.target.offsetLeft,
-          y: event.touches[0].clientY - event.target.offsetTop
+          x: (event.touches[0].clientX - event.target.offsetLeft) / event.target.offsetWidth,
+          y: (event.touches[0].clientY - event.target.offsetTop) / event.target.offsetHeight
         };
 
-        if (relativeMousePosition.x < 0 || relativeMousePosition.x > event.target.offsetWidth ||
-          relativeMousePosition.y < 0 || relativeMousePosition.y > event.target.offsetHeight) {
+        if (relativeMousePosition.x < 0 || relativeMousePosition.x > 1 ||
+          relativeMousePosition.y < 0 || relativeMousePosition.y > 1) {
           this.$data.clientPointerInside = false;
           return;
         }
