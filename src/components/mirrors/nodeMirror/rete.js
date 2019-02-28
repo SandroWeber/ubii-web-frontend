@@ -18,8 +18,6 @@ export async function initialize(container, connOptions = {}, renderOptions = {}
         await engine.process(editor.toJSON());
     });
 
-    
-
     return {
         editor,
         engine,
