@@ -1,5 +1,11 @@
 <template>
-  <input type="number" :readonly="readonly" :value="value" @input="change($event)" @dblclick.stop="" @pointermove.stop=""/>
+  <input
+    type="number"
+    :readonly="readonly"
+    :value="value"
+    @input="change($event)"
+    @dblclick.stop="" 
+    @pointermove.stop=""/>
 </template>
 
 <script>
@@ -13,13 +19,14 @@
         },
         methods: {
             change(e){
-            this.value = +e.target.value;
-            this.update();
+                this.value = +e.target.value;
+                this.update();
             },
             update() {
-            if (this.ikey)
-                this.putData(this.ikey, this.value)
-            this.emitter.trigger('process');
+                if (this.ikey){
+                    this.putData(this.ikey, this.value);
+                }
+                this.emitter.trigger('process');
             }
         },
         mounted() {
@@ -29,5 +36,4 @@
 </script> 
 
 <style scoped lang="stylus"> 
-
 </style>
