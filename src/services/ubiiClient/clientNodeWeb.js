@@ -81,11 +81,12 @@ class ClientNodeWeb {
       topic: DEFAULT_TOPICS.SERVICES.SERVER_CONFIG
     };
 
-    return this.callService('/services', message).then(
+    return this.callService(message).then(
       (reply) => {
-        if (reply.serverSpecification !== undefined && reply.serverSpecification !== null) {
+        if (reply.server !== undefined && reply.server !== null) {
           // Process the reply client specification.
-          this.serverSpecification = reply.serverSpecification;
+          this.serverSpecification = reply.server;
+          console.info(this.serverSpecification);
         }
       },
       (error) => {
@@ -100,16 +101,19 @@ class ClientNodeWeb {
   async registerClient() {
     let message = {
       topic: DEFAULT_TOPICS.SERVICES.CLIENT_REGISTRATION,
-      clientRegistration: {
+      client: {
         name: this.name,
         namespace: ''
       }
     };
 
-    return this.callService('/services', message).then(
+    return this.callService(message).then(
       (reply) => {
-        if (reply.clientSpecification !== undefined && reply.clientSpecification !== null) {
-          this.clientSpecification = reply.clientSpecification;
+        if (reply.client !== undefined && reply.client !== null) {
+          this.clientSpecification = reply.client;
+          console.info(this.clientSpecification);
+
+          return reply.client;
         }
       }
     );
@@ -122,15 +126,37 @@ class ClientNodeWeb {
   async registerDevice(device) {
     let message = {
       topic: DEFAULT_TOPICS.SERVICES.DEVICE_REGISTRATION,
-      deviceRegistration: device
+      device: device
     };
 
-    return this.callService('/services', message).then(
+    return this.callService(message).then(
       (reply) => {
-        if (reply.deviceSpecification !== undefined && reply.deviceSpecification !== null) {
+        if (reply.device !== undefined && reply.device !== null) {
           // Process the reply client specification.
-          this.deviceSpecifications.set(reply.deviceSpecification.name, reply.deviceSpecification);
-          console.info(this.deviceSpecifications);
+          this.deviceSpecifications.set(reply.device.name, reply.device);
+          //console.info(this.deviceSpecifications);
+
+          return reply.device;
+        }
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
+  }
+
+  async registerSession(session) {
+    let message = {
+      topic: DEFAULT_TOPICS.SERVICES.SESSION_REGISTRATION,
+      session: session
+    };
+
+    return this.callService(message).then(
+      (reply) => {
+        if (reply.session !== undefined && reply.session !== null) {
+          console.info(reply.session);
+
+          return reply.session;
         }
       },
       (error) => {
@@ -149,12 +175,12 @@ class ClientNodeWeb {
     let message = {
       topic: DEFAULT_TOPICS.SERVICES.TOPIC_SUBSCRIPTION,
       topicSubscription: {
-        clientID: this.clientSpecification.id,
+        clientId: this.clientSpecification.id,
         subscribeTopics: [topic]
       }
     };
 
-    return this.callService('/services', message).then(
+    return this.callService(message).then(
       (reply) => {
         if (reply.success !== undefined && reply.success !== null) {
           let callbacks = this.topicDataCallbacks.get(topic);
@@ -180,7 +206,7 @@ class ClientNodeWeb {
    * @param {Object} message An object representing the protobuf message to be sent
    * @param {Function} callback The function to be called with the reply
    */
-  callService(topic, message) {
+  callService(message) {
     return new Promise((resolve, reject) => {
       //TODO: just send JSON?
       // VARIANT A: PROTOBUF
@@ -188,7 +214,7 @@ class ClientNodeWeb {
       //console.info(buffer);
       //this.serviceClient.send('/services', {buffer: JSON.stringify(buffer)})
       // VARIANT B: JSON
-      this.serviceClient.send(topic, { message: JSON.stringify(message) }).then(
+      this.serviceClient.send('/services', { message: JSON.stringify(message) }).then(
         (reply) => {
           // VARIANT A: PROTOBUF
           //let message = this.translatorServiceReply.createMessageFromBuffer(reply.buffer.data);
@@ -229,9 +255,10 @@ class ClientNodeWeb {
   }
 
   _onTopicDataMessageReceived(message) {
-    if (message.topicDataRecord && message.topicDataRecord.topic) {
-      let callbacks = this.topicDataCallbacks.get(message.topicDataRecord.topic);
-      callbacks.forEach((cb) => {cb(message.topicDataRecord[message.topicDataRecord.type])})
+    let record = message.topicDataRecord;
+    if (record && record.topic) {
+      let callbacks = this.topicDataCallbacks.get(record.topic);
+      callbacks.forEach((cb) => {cb(record[record.type])})
     }
   }
 }
