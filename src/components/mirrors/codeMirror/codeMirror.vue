@@ -1,8 +1,10 @@
 <template>
     <div class="code-mirror">
-        <codemirror :value="value"
-                    @input="onCodeChange"
-                    :options="codemirror.options"></codemirror>
+        <codemirror
+            :value="value"
+            @input="onCodeChange"
+            :options="codemirror.options">
+        </codemirror>
     </div>
 </template>
 
