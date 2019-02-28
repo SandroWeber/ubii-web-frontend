@@ -62,6 +62,20 @@
         clientPointerInside: false
       }
     },
+    watch: {
+      mirrorPointer: function (value) {
+        if (!UbiiClientService.isConnected || !this.$data.ubiiDevice.name || !this.$data.inputMirror.topic) {
+          return;
+        }
+        
+        UbiiClientService.client.publish(
+          this.$data.ubiiDevice.name,
+          this.$data.inputMirror.topic,
+          'boolean',
+          value
+        );
+      }
+    },
     methods: {
       startDemo: function () {
         this.createUbiiSpecs();
@@ -75,7 +89,6 @@
           })
           .then(() => {
             // subscribe to the device topics
-            UbiiClientService.client.subscribe(this.$data.inputClientPointer.topic, (mousePosition) => {});
             UbiiClientService.client.subscribe(this.$data.outputServerPointer.topic, (mousePosition) => {
               let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
               this.$data.serverMousePosition = {
@@ -156,7 +169,7 @@
         };
         let inputMirror = {
           internalName: 'mirrorPointer',
-          messageFormat: 'bool',
+          messageFormat: 'boolean',
           topic: topicPrefix + '/' + 'mirror_mouse'
         };
         let outputServerPointer = {
@@ -193,7 +206,7 @@
           }
 
           if (input.mirrorPointer === true) {
-            output.serverPointer = {x: 1-input.clientPointer.x, y: 1-input.clientPointer.y};
+            output.serverPointer = {x: 1 - input.clientPointer.x, y: 1 - input.clientPointer.y};
           } else {
             output.serverPointer = {x: input.clientPointer.x, y: input.clientPointer.y};
           }
