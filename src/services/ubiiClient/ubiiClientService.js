@@ -5,8 +5,8 @@ import ClientNodeWeb from './clientNodeWeb';
 
 class UbiiClientService {
   constructor() {
-    this.serverIP = '127.0.0.1';
-    this.serverPort = '8003';
+    this.serverIP = window.location.hostname;
+    this.serverPort = '8102';
     this.client = undefined;
     this.isConnected = false;
   }
