@@ -1,0 +1,32 @@
+@import "./color"
+
+.button
+    border: 1px solid mediumContrastColor
+    border-radius: 3px
+    color: mediumContrastColor
+    background-color: layerOneSecondaryColor
+    &:hover
+        border-color: highContrastColor 
+        color: highContrastColor
+
+.button-area
+    border-width: 2px
+    border-style: solid
+    text-decoration: none
+    color: mediumContrastColor
+    &:hover
+      color: maxContrastColor
+    
+    // Priamry
+    &.layer-one
+        border-color: layerOneBorderColor
+    &.layer-two
+        border-color: layerTwoBorderColor
+    &.layer-three
+        border-color: layerThreeBorderColor
+    &.layer-four
+        border-color: layerFourBorderColor
+
+.clickable
+    &:hover
+        color: maxContrastColor
