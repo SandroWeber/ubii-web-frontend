@@ -1,16 +1,20 @@
 <template>
-    <div class="interaction-mirror layer-three background shadow">
-        <interaction-header :name="interaction.name"
-                            :id="interaction.id"/>
-
-        <interaction-interface-list :interface-list="interaction.input"/>
-
-        <div class="code-wrapper layer-three border round">
-            <codeMirror v-model="interaction.code"
-                        @input="onCodeChange"></codeMirror>
+    <div
+        class="interaction-mirror layer-three background shadow">
+        <interaction-header
+            :name="interaction.name"
+            :id="interaction.id"/>
+        <interaction-interface-list
+            :interface-list="interaction.input"/>
+        <div
+            class="code-wrapper layer-three border round">
+            <codeMirror
+                v-model="interaction.code"
+                @input="onCodeChange">
+            </codeMirror>
         </div>
-
-        <interaction-interface-list :interfaceList="interaction.output"/>
+        <interaction-interface-list 
+            :interfaceList="interaction.output"/>
     </div>
 </template>
 

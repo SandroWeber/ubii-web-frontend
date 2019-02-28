@@ -1,6 +1,10 @@
 <template>
-  <div class="interaction-output">
-      <interaction-interface-token v-for="output in output" :key="output.name" :name="output.name"/>
+  <div
+    class="interaction-output">
+      <interaction-interface-token
+        v-for="output in output"
+        :key="output.name"
+        :name="output.name"/>
   </div>
 </template>
 
@@ -19,5 +23,4 @@
 </script> 
 
 <style scoped lang="stylus"> 
-
 </style>

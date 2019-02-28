@@ -1,6 +1,9 @@
 <template>
-  <div class="interaction-header medium-contrast">
-        <h3>{{name}}  (ID {{id}})</h3>
+  <div
+    class="interaction-header medium-contrast">
+        <h3>
+          {{name}}  (ID {{id}})
+        </h3>
   </div>
 </template>
 
@@ -17,5 +20,5 @@
 
 <style scoped lang="stylus"> 
   .interaction-header
-    text-align: center;
+    text-align: center
 </style>
