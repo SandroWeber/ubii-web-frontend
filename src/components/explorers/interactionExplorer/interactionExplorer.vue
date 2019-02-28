@@ -1,6 +1,13 @@
 <template>
-    <div class="interaction-explorer layer-two background shadow">
-        <interaction-item v-for="element in interactions" :key="element.name" :name="element.name" :id="element.id" :selected="element.id === selectedInteractionId" @select="onSelectItem"/>
+    <div
+        class="interaction-explorer layer-two background shadow">
+        <interaction-item
+            v-for="element in interactions"
+            :key="element.name"
+            :name="element.name"
+            :id="element.id"
+            :selected="element.id === selectedInteractionId"
+            @select="onSelectItem"/>
     </div>
 </template>
 
@@ -33,5 +40,4 @@
         height: 100%
         min-width 200px
         flex-grow: 0
-   
 </style>
