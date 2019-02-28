@@ -96,9 +96,6 @@
                 y: mousePosition.y * boundingRect.height
               };
             });
-            UbiiClientService.client.subscribe(this.$data.inputMirror.topic, (mirror) => {
-              console.info(mirror);
-            });
 
             UbiiClientService.registerSession(this.$data.ubiiSession)
               .then((session) => {
@@ -106,7 +103,7 @@
                 this.$data.ubiiSession = session;
                 return session;
               })
-              .then((session) => {
+              .then(() => {
                 UbiiClientService.client
                   .callService({
                     topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
@@ -200,7 +197,7 @@
           ]
         };
 
-        let processingCallback = (input, output, state) => {
+        let processingCallback = (input, output) => {
           if (!input.clientPointer) {
             return;
           }
