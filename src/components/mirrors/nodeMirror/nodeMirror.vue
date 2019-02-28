@@ -1,26 +1,43 @@
 <template>
-  <div class="node-mirror layer-three background shadow">
-    <div class="blueprint-grid">
-        <svg width="100%" height="100%">
+  <div
+    class="node-mirror layer-three background shadow">
+    <div
+      class="blueprint-grid">
+        <svg
+          width="100%"
+          height="100%">
             <defs>
-                <pattern id="dots" x="0" y="0" width="25" height="25" patternUnits="userSpaceOnUse">
-                    <circle class="blueprint-dot" cx="10.5" cy="10.5" r="1.5" />
+                <pattern
+                  id="dots"
+                  x="0"
+                  y="0"
+                  width="25"
+                  height="25"
+                  patternUnits="userSpaceOnUse">
+                    <circle
+                      class="blueprint-dot"
+                      cx="10.5"
+                      cy="10.5"
+                      r="1.5"/>
                 </pattern>
             </defs>
-
-            <rect x="0" y="0" width="100%" height="100%" fill="url(#dots)" />
+            <rect 
+              x="0"
+              y="0"
+              width="100%"
+              height="100%"
+              fill="url(#dots)"/>
         </svg>
     </div>
-
-    <div id="viewer" ref="viewer" >
-      
+    <div
+      id="viewer"
+      ref="viewer" >
     </div>
   </div>
 </template>
 
 <script>  
   import initViewer from './viewer';
-  
 
   export default {  
     name: 'nodeMirror',  
@@ -35,25 +52,23 @@
   }
 </script> 
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="stylus"> 
-  .node-mirror { 
+  .node-mirror
     position relative
-    width: 100%; 
-    height: 100%;  
-  } 
-  .blueprint-grid {
+    width: 100%
+    height: 100%
+
+  .blueprint-grid
     position absolute
     top 0
-    width: 100%;
-    height: 100%;
-  }
-  .blueprint-dot {
+    width: 100%
+    height: 100%
+
+  .blueprint-dot
     fill: lowContrastColor
-  }
-  #viewer{
+
+  #viewer
     position relative
     width 100%
     height 1000px
-  }
 </style>
