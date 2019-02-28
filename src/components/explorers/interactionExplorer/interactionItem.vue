@@ -1,7 +1,15 @@
 <template>
-  <div class="interaction-item low-contrast" @click="selectItem(id)" v-bind:class="{ selected: selected }">
-    <font-awesome-icon icon="code" class="icon"/>
-    <span class="label">{{name}}</span>
+  <div
+    class="interaction-item low-contrast"
+    @click="selectItem(id)"
+    v-bind:class="{ selected: selected }">
+    <font-awesome-icon 
+      icon="code"
+      class="icon"/>
+    <span 
+      class="label">
+      {{name}}
+      </span>
   </div>
 </template>
 
@@ -42,9 +50,9 @@
       color yellowAccentColor
 
   .icon
-    height 16px
-    width 16px
-    margin-top: 1px
+    height 13px
+    width 13px
+    margin-top: 0px
     
   .label
     margin-left 5px
