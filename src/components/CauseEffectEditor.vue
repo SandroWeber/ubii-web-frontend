@@ -1,9 +1,9 @@
 <template>
-  <div 
-    class="codemirror-wrapper">
+  <div class="codemirror-wrapper">
     <codemirror
       v-model="code" 
-      :options="cmOptions">
+      :options="cmOptions"
+    >
     </codemirror>
   </div>
 </template>

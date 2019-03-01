@@ -1,38 +1,74 @@
 <template>
-    <div>
-        <div v-show="!ubiiClientService.isConnected">
-            <span class="notification">Please connect to backend before starting the application.</span>
-        </div>
-
-        <div v-show="ubiiClientService.isConnected && !demoStarted">
-            <button v-on:click="startDemo()">
-                <font-awesome-icon icon="play"/>
-            </button>
-        </div>
-        <div v-show="ubiiClientService.isConnected && demoStarted" class="grid">
-            <div class="options">
-                <input id="checkboxClientPointer" type="checkbox" v-model="showClientPointer"/>
-                <label for="checkboxClientPointer">Show Client Pointer</label>
-                <br/>
-                <input id="checkboxServerPointer" type="checkbox" v-model="showServerPointer"/>
-                <label for="checkboxServerPointer">Show Server Pointer</label>
-                <br/>
-                <input id="checkboxMirrorPointer" type="checkbox" v-model="mirrorPointer"/>
-                <label for="checkboxMirrorPointer">Mirror Pointer</label>
-            </div>
-            <div id="mouse-pointer-area" class="mouse-pointer-area" v-bind:class="{ hideCursor: !showClientPointer }"
-                 v-on:mousemove="onMouseMove($event)"
-                 v-on:mouseenter="clientPointerInside = true;" v-on:mouseleave="clientPointerInside = false;"
-                 v-on:touchstart="onTouchStart($event)" v-on:touchend="clientPointerInside = false;"
-                 v-on:touchmove="onTouchMove($event)">
-                <div class="server-mouse-position-indicator"
-                     :style="{top: serverMousePosition.y + 'px', left: serverMousePosition.x + 'px' }"
-                     v-show="showServerPointer && clientPointerInside">
-                </div>
-            </div>
-        </div>
+  <div>
+    <div v-show="!ubiiClientService.isConnected">
+      <span class="notification">
+        Please connect to backend before starting the application.
+      </span>
     </div>
 
+    <div v-show="ubiiClientService.isConnected && !demoStarted">
+      <button v-on:click="startDemo()">
+        <font-awesome-icon icon="play"/>
+      </button>
+    </div>
+
+    <div
+      v-show="ubiiClientService.isConnected && demoStarted"
+      class="grid"
+    >
+      <div class="options">
+        <input
+          id="checkboxClientPointer"
+          type="checkbox"
+          v-model="showClientPointer"
+        />
+        <label for="checkboxClientPointer">
+          Show Client Pointer
+        </label>
+
+        <br/>
+
+        <input 
+          id="checkboxServerPointer"
+          type="checkbox"
+          v-model="showServerPointer"
+        />
+        <label for="checkboxServerPointer">
+          Show Server Pointer
+        </label>
+
+        <br/>
+
+        <input
+          id="checkboxMirrorPointer"
+          type="checkbox"
+          v-model="mirrorPointer"
+        />
+        <label for="checkboxMirrorPointer">
+          Mirror Pointer
+        </label>
+      </div>
+
+      <div
+        id="mouse-pointer-area"
+        class="mouse-pointer-area"
+        v-bind:class="{ hideCursor: !showClientPointer }"
+        v-on:mousemove="onMouseMove($event)"
+        v-on:mouseenter="clientPointerInside = true;"
+        v-on:mouseleave="clientPointerInside = false;"
+        v-on:touchstart="onTouchStart($event)"
+        v-on:touchend="clientPointerInside = false;"
+        v-on:touchmove="onTouchMove($event)"
+      >
+        <div
+          class="server-mouse-position-indicator"
+          :style="{top: serverMousePosition.y + 'px', left: serverMousePosition.x + 'px' }"
+          v-show="showServerPointer && clientPointerInside"
+        >
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>

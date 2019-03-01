@@ -4,7 +4,8 @@
       v-model="treeSelect.value"
       :multiple="false"
       :options="treeSelect.options"
-      class="tree-select"/>
+      class="tree-select"
+    />
     <interaction-editor/>
   </div>
 </template>

@@ -3,7 +3,8 @@
         <codemirror
             :value="value"
             @input="onCodeChange"
-            :options="codemirror.options">
+            :options="codemirror.options"
+        >
         </codemirror>
     </div>
 </template>

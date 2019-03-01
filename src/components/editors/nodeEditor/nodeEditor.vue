@@ -1,18 +1,17 @@
 <template>
-    <div
-        class="node-editor layer-one background">
+    <div class="node-editor layer-one background">
         <node-mirror/>
     </div>
 </template>
 
 <script>
-    import nodeMirror from './../../mirrors/nodeMirror/nodeMirror.vue';
+    import NodeMirror from './../../mirrors/nodeMirror/nodeMirror.vue';
 
     export default {
         name: 'nodeEditor',
         props: {},
         components: {
-            nodeMirror: nodeMirror
+            NodeMirror: NodeMirror
         },
         data: () => {
             return {

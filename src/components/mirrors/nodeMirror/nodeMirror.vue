@@ -1,11 +1,10 @@
 <template>
-  <div
-    class="node-mirror layer-three background shadow">
-    <div
-      class="blueprint-grid">
+  <div class="node-mirror layer-three background shadow">
+    <div class="blueprint-grid">
         <svg
           width="100%"
-          height="100%">
+          height="100%"
+        >
             <defs>
                 <pattern
                   id="dots"
@@ -13,12 +12,14 @@
                   y="0"
                   width="25"
                   height="25"
-                  patternUnits="userSpaceOnUse">
-                    <circle
-                      class="blueprint-dot"
-                      cx="10.5"
-                      cy="10.5"
-                      r="1.5"/>
+                  patternUnits="userSpaceOnUse"
+                >
+                  <circle
+                    class="blueprint-dot"
+                    cx="10.5"
+                    cy="10.5"
+                    r="1.5"
+                  />
                 </pattern>
             </defs>
             <rect 
@@ -26,12 +27,14 @@
               y="0"
               width="100%"
               height="100%"
-              fill="url(#dots)"/>
+              fill="url(#dots)"
+            />
         </svg>
     </div>
     <div
       id="viewer"
-      ref="viewer" >
+      ref="viewer"
+    >
     </div>
   </div>
 </template>

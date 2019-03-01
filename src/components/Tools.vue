@@ -1,23 +1,26 @@
 <template>
   <div>
-    <div
-      class="grid">
+    <div class="grid">
       <router-link
         to="/tools/topic-inspector"
-        class="interface-link layer-three background round shadow button-area orange-accent">
+        class="interface-link layer-three background round shadow button-area orange-accent"
+      >
         <font-awesome-icon
           icon="eye"
-          class="interface-icon" />
+          class="interface-icon"
+        />
         <p>
           Topic Inspector
         </p>
       </router-link>
       <router-link
         to="/tools/demo-mouse-pointer"
-        class="interface-link layer-three background round shadow button-area orange-accent">
+        class="interface-link layer-three background round shadow button-area orange-accent"
+      >
         <font-awesome-icon
           icon="mouse-pointer"
-          class="interface-icon" />
+          class="interface-icon"
+        />
         <p>
           Mouse Demo
         </p>

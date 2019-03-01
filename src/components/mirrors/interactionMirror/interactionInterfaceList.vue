@@ -1,10 +1,10 @@
 <template>
-  <div
-    class="interaction-interface-list">
+  <div class="interaction-interface-list">
       <interaction-interface-token 
         v-for="element in interfaceList"
         :key="element.name"
-        :name="element.name"/>
+        :name="element.name"
+      />
   </div>
 </template>
 

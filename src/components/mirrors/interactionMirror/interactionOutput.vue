@@ -1,10 +1,10 @@
 <template>
-  <div
-    class="interaction-output">
+  <div class="interaction-output">
       <interaction-interface-token
         v-for="output in output"
         :key="output.name"
-        :name="output.name"/>
+        :name="output.name"
+      />
   </div>
 </template>
 

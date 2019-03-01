@@ -1,11 +1,12 @@
 <template>
-  <input
-    type="number"
-    :readonly="readonly"
-    :value="value"
-    @input="change($event)"
-    @dblclick.stop="" 
-    @pointermove.stop=""/>
+    <input
+        type="number"
+        :readonly="readonly"
+        :value="value"
+        @input="change($event)"
+        @dblclick.stop="" 
+        @pointermove.stop=""
+    />
 </template>
 
 <script>

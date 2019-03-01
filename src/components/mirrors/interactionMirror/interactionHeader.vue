@@ -1,6 +1,5 @@
 <template>
-  <div
-    class="interaction-header medium-contrast">
+  <div class="interaction-header medium-contrast">
         <h3>
           {{name}}  (ID {{id}})
         </h3>

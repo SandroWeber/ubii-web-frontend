@@ -1,6 +1,5 @@
 <template>
-  <div
-    class="interaction-interface-token token">
+  <div class="interaction-interface-token token">
     <span>
       {{name}}
     </span>

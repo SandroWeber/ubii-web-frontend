@@ -2,14 +2,16 @@
   <div
     class="interaction-item low-contrast"
     @click="selectItem(id)"
-    v-bind:class="{ selected: selected }">
+    v-bind:class="{ selected: selected }"
+  >
     <font-awesome-icon 
       icon="code"
-      class="icon"/>
+      class="icon"
+    />
     <span 
       class="label">
       {{name}}
-      </span>
+    </span>
   </div>
 </template>
 

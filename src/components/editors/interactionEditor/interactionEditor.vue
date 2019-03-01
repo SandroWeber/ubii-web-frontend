@@ -1,14 +1,15 @@
 <template>
     <div>
-        <div
-            class="interaction-editor layer-one background">
+        <div class="interaction-editor layer-one background">
             <interaction-explorer   
                 :interactions="interactions"
                 :selectedInteractionId="selectedInteraction.id"
-                @selectInteraction="onSelectInteraction"/>
+                @selectInteraction="onSelectInteraction"
+            />
             <interaction-mirror    
                 :interaction="selectedInteraction"
-                @changes="onSelectedInteractionChange"/>
+                @changes="onSelectedInteractionChange"
+            />
         </div>
     </div>
 </template>
