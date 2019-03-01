@@ -14,8 +14,6 @@
     border-style: solid
     text-decoration: none
     color: mediumContrastColor
-    &:hover
-      color: maxContrastColor
     
     // Priamry
     &.layer-one
@@ -26,6 +24,34 @@
         border-color: layerThreeBorderColor
     &.layer-four
         border-color: layerFourBorderColor
+
+    // Contrast
+    &.low-contrast
+        color: lowContrastColor
+    &.medium-contrast
+        color: mediumContrastColor
+    &.high-contrast
+        color: highContrastColor
+    &.max-contrast
+        color: maxContrastColor
+
+    // Accents:
+    &.red-accent
+        color: redAccentColor
+    &.green-accent
+        color: greenAccentColor
+    &.yellow-accent
+        color: yellowAccentColor
+    &.orange-accent
+        color: orangeAccentColor
+    &.purple-accent
+        color: purpleAccentColor
+    &.blue-accent
+        color: blueAccentColor
+    
+    &:hover
+      color: maxContrastColor
+
 
 .clickable
     &:hover

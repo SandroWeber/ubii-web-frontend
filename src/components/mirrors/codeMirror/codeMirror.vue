@@ -44,6 +44,6 @@
 <style scoped lang="stylus">
     .code-mirror
         height 100%
-        padding: 10px
+        padding: 0px
         flex-grow: 1
 </style>

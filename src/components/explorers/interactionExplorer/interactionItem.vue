@@ -52,7 +52,7 @@
   .icon
     height 13px
     width 13px
-    margin-top: 0px
+    margin-top: 2px
     
   .label
     margin-left 5px
