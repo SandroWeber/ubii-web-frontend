@@ -313,37 +313,30 @@
   }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-    .grid {
-        display: grid;
-        grid-gap: 15px;
-        grid-template-columns: 1fr 5fr;
-        height: 100%;
-    }
+<style scoped lang="stylus">
+    .grid
+        display: grid
+        grid-gap: 15px
+        grid-template-columns: 1fr 5fr
+        height: 100%
 
-    .options {
-        margin: 25px;
-    }
+    .options
+        margin: 25px
 
-    .mouse-pointer-area {
-        margin: 25px;
-        border: 3px solid black;
-        height: 300px;
-    }
+    .mouse-pointer-area
+        margin: 25px
+        border: 3px solid black
+        height: 300px
 
-    .hideCursor {
-        cursor: none;
-    }
+    .hideCursor
+        cursor: none
 
-    .notification {
-        color: red;
-    }
+    .notification
+        color: red
 
-    .server-mouse-position-indicator {
-        position: relative;
-        width: 10px;
-        height: 10px;
-        background-color: red;
-    }
+    .server-mouse-position-indicator
+        position: relative
+        width: 10px
+        height: 10px
+        background-color: red
 </style>
