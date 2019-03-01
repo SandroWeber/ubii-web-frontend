@@ -5,10 +5,10 @@
 </template>
 
 <script>
-    import NodeMirror from './../../mirrors/nodeMirror/nodeMirror.vue';
+    import NodeMirror from './../../mirrors/nodeMirror/NodeMirror.vue';
 
     export default {
-        name: 'nodeEditor',
+        name: 'NodeEditor',
         props: {},
         components: {
             NodeMirror: NodeMirror

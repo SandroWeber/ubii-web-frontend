@@ -1,5 +1,5 @@
 <template>
-  <div class="interaction-header medium-contrast">
+  <div class="interaction-mirror-header medium-contrast">
         <h3>
           {{name}}  (ID {{id}})
         </h3>
@@ -8,7 +8,7 @@
 
 <script>
   export default { 
-    name: 'interactionHeader',
+    name: 'InteractionMirrorHeader',
     components: {},
     props: {
       name: String,
@@ -18,6 +18,6 @@
 </script> 
 
 <style scoped lang="stylus"> 
-  .interaction-header
+  .interaction-mirror-header
     text-align: center
 </style>

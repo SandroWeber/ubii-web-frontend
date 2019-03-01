@@ -34,12 +34,12 @@ export default new Router({
     {
       path: '/nodeEditor',
       name: 'Node Editor',
-      component: () => import('./components/editors/nodeEditor/nodeEditor.vue')
+      component: () => import('./components/editors/nodeEditor/NodeEditor.vue')
     },
     {
       path: '/interactionEditor',
       name: 'Interaction Editor',
-      component: () => import('./components/editors/interactionEditor/interactionEditor.vue')
+      component: () => import('./components/editors/interactionEditor/InteractionEditor.vue')
     }
   ]
 })

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="interaction-item low-contrast"
+    class="interaction-explorer-item low-contrast"
     @click="selectItem(id)"
     v-bind:class="{ selected: selected }"
   >
@@ -21,7 +21,7 @@
   library.add(faCode);
 
   export default { 
-    name: 'interactionInterfaceToken',
+    name: 'InteractionExplorerItem',
     components: {},
     props: {
         id: String,
@@ -37,7 +37,7 @@
 </script> 
 
 <style scoped lang="stylus"> 
-  .interaction-item
+  .interaction-explorer-item
     height 20px
     order 1
     margin 0px

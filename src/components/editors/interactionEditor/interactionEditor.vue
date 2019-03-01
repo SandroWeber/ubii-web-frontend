@@ -15,8 +15,8 @@
 </template>
 
 <script>
-    import interactionExplorer from './../../explorers/interactionExplorer/interactionExplorer.vue';
-    import interactionMirror from './../../mirrors/interactionMirror/interactionMirror.vue';
+    import InteractionExplorer from './../../explorers/interactionExplorer/InteractionExplorer.vue';
+    import InteractionMirror from './../../mirrors/interactionMirror/InteractionMirror.vue';
 
     // Dummy interaction.
     let dummyInteractions = [
@@ -120,11 +120,11 @@
     ];
 
     export default {
-        name: 'interactionEditor',
+        name: 'InteractionEditor',
         props: {},
         components: {
-            interactionExplorer: interactionExplorer,
-            interactionMirror: interactionMirror
+            InteractionExplorer: InteractionExplorer,
+            InteractionMirror: InteractionMirror
         },
         data: () => {
             return {

@@ -1,12 +1,44 @@
 <template>
-  <div id="app" class="layer-one background">
+  <div 
+    id="app"
+    class="layer-one background"
+  >
     <server-status id="server-status"/>
     <nav class="navigation-bar layer-one background border shadow">
-      <router-link to="/" class="navigation-item ">Home</router-link> |
-      <router-link to="/admin" class="navigation-item">Administration</router-link> |
-      <router-link to="/tools" class="navigation-item">Tools</router-link> |
-      <router-link to="/nodeEditor" class="navigation-item">Node Editor</router-link> |
-      <router-link to="/interactionEditor" class="navigation-item">Interaction Editor</router-link>
+      <router-link
+        to="/"
+        class="navigation-item "
+      >
+        Home
+      </router-link>
+      |
+      <router-link
+        to="/admin"
+        class="navigation-item"
+      >
+        Administration
+      </router-link>
+      |
+      <router-link
+        to="/tools"
+        class="navigation-item"
+      >
+      Tools
+      </router-link>
+      |
+      <router-link
+        to="/nodeEditor"
+        class="navigation-item"
+      >
+      Node Editor
+      </router-link>
+      |
+      <router-link
+        to="/interactionEditor"
+        class="navigation-item"
+      >
+        Interaction Editor
+      </router-link>
     </nav>
     
     <router-view class="router-view"/>

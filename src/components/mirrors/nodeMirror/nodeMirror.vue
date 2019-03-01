@@ -43,7 +43,7 @@
   import initViewer from './viewer';
 
   export default {  
-    name: 'nodeMirror',  
+    name: 'NodeMirror',  
     data: () => {
         return {
         };

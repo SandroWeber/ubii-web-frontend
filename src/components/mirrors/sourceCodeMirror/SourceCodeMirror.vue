@@ -16,7 +16,7 @@
     import 'codemirror/theme/base16-dark.css';
 
     export default {
-        name: 'codeMirror',
+        name: 'SourceCodeMirror',
         props: ['value'],
         components: {
             codemirror: codemirror,

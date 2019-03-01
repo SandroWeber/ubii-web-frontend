@@ -1,6 +1,6 @@
 <template>
-  <div class="interaction-interface-list">
-      <interaction-interface-token 
+  <div class="interaction-mirror-interface-list">
+      <interaction-mirror-interface-list-token 
         v-for="element in interfaceList"
         :key="element.name"
         :name="element.name"
@@ -9,12 +9,12 @@
 </template>
 
 <script>
-  import interactionInterfaceToken from "./interactionInterfaceToken.vue";
+  import InteractionMirrorInterfaceListToken from "./InteractionMirrorInterfaceListToken.vue";
 
   export default { 
     name: 'interactionInterfaceList',
     components: {
-      interactionInterfaceToken: interactionInterfaceToken
+      InteractionMirrorInterfaceListToken: InteractionMirrorInterfaceListToken
     },
     props: {
       interfaceList: Array
@@ -23,7 +23,7 @@
 </script> 
 
 <style scoped lang="stylus"> 
-  .interaction-interface-list
+  .interaction-mirror-interface-list
     display: flex
     flex-direction: row
     flex-wrap: nowrap

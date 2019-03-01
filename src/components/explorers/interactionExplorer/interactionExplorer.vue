@@ -1,6 +1,6 @@
 <template>
     <div class="interaction-explorer layer-two background shadow">
-        <interaction-item
+        <interaction-explorer-item
             v-for="element in interactions"
             :key="element.name"
             :name="element.name"
@@ -12,16 +12,16 @@
 </template>
 
 <script>
-    import interactionItem from "./interactionItem.vue";
+    import InteractionExplorerItem from "./InteractionExplorerItem.vue";
 
     export default {
-        name: 'interactionExplorer',
+        name: 'InteractionExplorer',
         props: {
             interactions: Array,
             selectedInteractionId: String
         },
         components: {
-            interactionItem: interactionItem
+            InteractionExplorerItem: InteractionExplorerItem
         },
         data: () => {
             return {

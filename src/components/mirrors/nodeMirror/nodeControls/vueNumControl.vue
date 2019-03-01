@@ -11,7 +11,7 @@
 
 <script>
   export default {
-        name:"vueNumControl",
+        name:"VueNumControl",
         props: ['readonly', 'emitter', 'ikey', 'getData', 'putData'],
         data() {
             return {

@@ -1,5 +1,5 @@
 <template>
-  <div class="interaction-interface-token token">
+  <div class="interaction-mirror-interface-list-token token">
     <span>
       {{name}}
     </span>
@@ -8,7 +8,7 @@
 
 <script>
   export default { 
-    name: 'interactionInterfaceToken',
+    name: 'InteractionMirrorInterfaceListToken',
     components: {},
     props: {
       name: String,
@@ -17,7 +17,7 @@
 </script> 
 
 <style scoped lang="stylus"> 
-  .interaction-interface-token
+  .interaction-mirror-interface-list-token
     order 1
     margin 5px
     padding 5px 10px 5px 10px
