@@ -1,29 +1,37 @@
 <template>
   <div class="backend-info layer-two background low-contrast horizontal-shadow">
-    <label for="server-ip">Server IP</label>
+    <label for="server-ip">
+      Server IP
+    </label>
     <input 
       id="server-ip" 
       type="text" 
-      v-model="clientNode.serverIP" 
-      class="layer-four background border round high-contrast"/>
-    <label for="server-port">Server Port</label>
+      v-model="clientService.serverIP" 
+      class="layer-four background border round high-contrast"
+    />
+    <label for="server-port">
+      Server Port
+    </label>
     <input
       id="server-port"
       type="text"
-      v-model="clientNode.serverPort"
-      class="layer-four background border round high-contrast"/>
+      v-model="clientService.serverPort"
+      class="layer-four background border round high-contrast"
+    />
     <button 
-      class="button-connect button"
-      v-on:click="clientNode.connect()">
+      :class="buttonClassObject"
+      @click="clientService.connect()"
+    >
       <font-awesome-icon 
         icon="sync-alt"
-        v-bind:class="{ transparent: !clientNode.connected }" />
+        :class="{ transparent: !clientService.isConnected }"
+      />
     </button>
   </div>
 </template>
 
 <script>
-  import ClientNode from '../services/ubiiClientNodeService.js';
+  import ClientService from '../services/ubiiClient/ubiiClientService.js';
 
   /* fontawesome */
   import { library } from '@fortawesome/fontawesome-svg-core'
@@ -33,9 +41,21 @@
   export default {
     name: 'ServerStatus',
     props: {},
-    data: () => { return {
-      clientNode: ClientNode
-    }}
+    data: () => {
+      return {
+        clientService: ClientService
+      }
+    },
+    computed:{
+      buttonClassObject: function () {
+        return {
+          "button-connect": true,
+          "button": true,
+          "green-accent": this.clientService.isConnected,
+          "red-accent": !this.clientService.isConnected
+        }
+      }
+    }
   }
 </script>
 

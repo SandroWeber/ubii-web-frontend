@@ -14,7 +14,7 @@
 </template>
 
 <script>
-  import ClientNode from './services/ubiiClientNodeService';
+  import ClientNode from './services/ubiiClient/ubiiClientService';
   import ServerStatus from './components/ServerStatus.vue'
 
   export default {
@@ -24,7 +24,7 @@
     },
     data: () => {
       return {
-        clientNode: ClientNode
+        clientService: ClientNode
       }
     }
   }
