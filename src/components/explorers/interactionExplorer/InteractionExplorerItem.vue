@@ -9,7 +9,8 @@
       class="icon"
     />
     <span 
-      class="label">
+      class="label"
+    >
       {{name}}
     </span>
   </div>

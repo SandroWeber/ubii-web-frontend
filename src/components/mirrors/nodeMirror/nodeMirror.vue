@@ -5,30 +5,30 @@
           width="100%"
           height="100%"
         >
-            <defs>
-                <pattern
-                  id="dots"
-                  x="0"
-                  y="0"
-                  width="25"
-                  height="25"
-                  patternUnits="userSpaceOnUse"
-                >
-                  <circle
-                    class="blueprint-dot"
-                    cx="10.5"
-                    cy="10.5"
-                    r="1.5"
-                  />
-                </pattern>
-            </defs>
-            <rect 
+          <defs>
+            <pattern
+              id="dots"
               x="0"
               y="0"
-              width="100%"
-              height="100%"
-              fill="url(#dots)"
-            />
+              width="25"
+              height="25"
+              patternUnits="userSpaceOnUse"
+            >
+              <circle
+                class="blueprint-dot"
+                cx="10.5"
+                cy="10.5"
+                r="1.5"
+              />
+            </pattern>
+          </defs>
+          <rect 
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            fill="url(#dots)"
+          />
         </svg>
     </div>
     <div
