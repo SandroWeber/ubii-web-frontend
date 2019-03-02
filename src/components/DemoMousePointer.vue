@@ -51,6 +51,12 @@
 
   export default {
     name: 'DemoMousePointer',
+    created() {
+      window.addEventListener('beforeunload', () => {
+        console.info('beforeunload');
+        //TODO: unregister client
+      });
+    },
     data: () => {
       return {
         showClientPointer: true,
@@ -273,6 +279,9 @@
         this.$data.ubiiInteraction = ubiiInteraction;
         this.$data.ubiiSession = ubiiSession;
       }
+    },
+    beforeDestroy: function() {
+      console.info('beforeDestroy');
     }
   }
 </script>
