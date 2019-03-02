@@ -200,6 +200,33 @@ class ClientNodeWeb {
     );
   }
 
+  async unsubscribe(topic) {
+    this.topicDataCallbacks.delete(topic);
+
+    let message = {
+      topic: DEFAULT_TOPICS.SERVICES.TOPIC_SUBSCRIPTION,
+      topicSubscription: {
+        clientId: this.clientSpecification.id,
+        unsubscribeTopics: [topic]
+      }
+    };
+
+    return this.callService(message).then(
+      (reply) => {
+        console.info('unsubscribe reply');
+        console.info(reply);
+        if (reply.success !== undefined && reply.success !== null) {
+          console.info('unsubscribed from ' + topic);
+        } else {
+          console.info('unsubscribe FAILED from ' + topic);
+        }
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
+  }
+
   /**
    * Call a service specified by the topic with a message and callback.
    * @param {String} topic The topic relating to the service to be called

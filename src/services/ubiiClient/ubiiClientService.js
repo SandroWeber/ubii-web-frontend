@@ -9,12 +9,26 @@ class UbiiClientService {
     this.serverPort = '8102';
     this.client = undefined;
     this.isConnected = false;
+    this.connecting = false;
   }
 
   connect() {
-    if (this.isConnected) {
-      return;
+    if (this.isConnected || this.connecting) {
+      return new Promise((resolve, reject) => {
+        let checkConnection = () => {
+          if (this.isConnected) {
+            resolve();
+          } else {
+            setTimeout(() => {
+              checkConnection();
+            }, 100);
+          }
+        };
+
+        checkConnection();
+      });
     }
+    this.connecting = true;
 
     console.info('connecting to backend ' + this.serverIP + ':' + this.serverPort);
 
@@ -25,6 +39,7 @@ class UbiiClientService {
           console.info('UbiiClientService - client connected with ID:\n' +
             this.client.clientSpecification.id);
           this.isConnected = true;
+          this.connecting = false;
         }
       },
       (error) => {

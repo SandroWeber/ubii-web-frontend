@@ -51,12 +51,6 @@
 
   export default {
     name: 'DemoMousePointer',
-    created() {
-      window.addEventListener('beforeunload', () => {
-        console.info('beforeunload');
-        //TODO: unregister client
-      });
-    },
     data: () => {
       return {
         showClientPointer: true,
@@ -95,12 +89,18 @@
           })
           .then(() => {
             // subscribe to the device topics
+            let subscribeTopic = this.$data.outputServerPointer.topic;
             UbiiClientService.client.subscribe(this.$data.outputServerPointer.topic, (mousePosition) => {
               let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
               this.$data.serverMousePosition = {
                 x: mousePosition.x * boundingRect.width,
                 y: mousePosition.y * boundingRect.height
               };
+            });
+            // unsubscribe before page is unloaded
+            window.addEventListener('beforeunload', () => {
+              console.info('beforeunload');
+              UbiiClientService.client.unsubscribe(subscribeTopic);
             });
 
             UbiiClientService.registerSession(this.$data.ubiiSession)

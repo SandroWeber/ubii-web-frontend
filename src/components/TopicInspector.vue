@@ -3,6 +3,12 @@
         <div v-show="!ubiiClientService.isConnected">
             <span class="notification">Please connect to backend before starting the application.</span>
         </div>
+
+        <div v-show="topicList">
+            <div v-for="topic in topicList">
+                {{topic}}
+            </div>
+        </div>
     </div>
 </template>
 
@@ -12,26 +18,25 @@
 
   export default {
     name: 'TopicInspector',
-    beforeMount: function() {
-      if (UbiiClientService.isConnected) {
-        console.info('beforeMount - already connected');
-        this.subscribeToAllTopics();
-      } else {
-        console.info('beforeMount - not yet connected');
-      }
+    mounted: function() {
+      UbiiClientService.connect()
+        .then(() => {
+          this.getTopicList();
+        })
     },
     data: () => {
       return {
-        ubiiClientService: UbiiClientService
+        ubiiClientService: UbiiClientService,
+        topicList: undefined
       }
     },
     methods: {
-      subscribeToAllTopics: function() {
+      getTopicList: function() {
         UbiiClientService.client.callService({
           topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST
         })
           .then((reply) => {
-            console.info(reply);
+            this.$data.topicList = reply.stringList.list;
           })
       }
     }
