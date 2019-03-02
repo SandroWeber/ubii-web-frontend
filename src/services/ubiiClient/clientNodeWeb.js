@@ -64,7 +64,7 @@ class ClientNodeWeb {
         let message = this.translatorTopicData.createMessageFromBuffer(new Uint8Array(arrayBuffer));
         this._onTopicDataMessageReceived(message);
       } catch (e) {
-        (console.error || console.log).call(console, "Ubii Message Translator createMessageFromBuffer failed with an error: " + (e.stack || e));
+        console.info(e);
       }
     });
   }
@@ -86,7 +86,6 @@ class ClientNodeWeb {
         if (reply.server !== undefined && reply.server !== null) {
           // Process the reply client specification.
           this.serverSpecification = reply.server;
-          console.info(this.serverSpecification);
         }
       },
       (error) => {
@@ -111,7 +110,6 @@ class ClientNodeWeb {
       (reply) => {
         if (reply.client !== undefined && reply.client !== null) {
           this.clientSpecification = reply.client;
-          console.info(this.clientSpecification);
 
           return reply.client;
         }
@@ -134,7 +132,6 @@ class ClientNodeWeb {
         if (reply.device !== undefined && reply.device !== null) {
           // Process the reply client specification.
           this.deviceSpecifications.set(reply.device.name, reply.device);
-          //console.info(this.deviceSpecifications);
 
           return reply.device;
         }
@@ -154,8 +151,6 @@ class ClientNodeWeb {
     return this.callService(message).then(
       (reply) => {
         if (reply.session !== undefined && reply.session !== null) {
-          console.info(reply.session);
-
           return reply.session;
         }
       },
@@ -211,20 +206,7 @@ class ClientNodeWeb {
       }
     };
 
-    return this.callService(message).then(
-      (reply) => {
-        console.info('unsubscribe reply');
-        console.info(reply);
-        if (reply.success !== undefined && reply.success !== null) {
-          console.info('unsubscribed from ' + topic);
-        } else {
-          console.info('unsubscribe FAILED from ' + topic);
-        }
-      },
-      (error) => {
-        console.error(error);
-      }
-    );
+    return this.callService(message);
   }
 
   /**
@@ -285,7 +267,7 @@ class ClientNodeWeb {
     let record = message.topicDataRecord;
     if (record && record.topic) {
       let callbacks = this.topicDataCallbacks.get(record.topic);
-      callbacks.forEach((cb) => {cb(record[record.type])})
+      callbacks && callbacks.forEach((cb) => {cb(record[record.type])});
     }
   }
 }

@@ -5,7 +5,7 @@
         </div>
 
         <div v-show="topicList">
-            <div v-for="topic in topicList">
+            <div v-for="topic in topicList" :key="topic">
                 {{topic}}
             </div>
         </div>

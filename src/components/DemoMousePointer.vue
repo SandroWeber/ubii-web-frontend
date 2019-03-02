@@ -51,6 +51,15 @@
 
   export default {
     name: 'DemoMousePointer',
+    mounted: function() {
+      // unsubscribe before page is unloaded
+      window.addEventListener('beforeunload', () => {
+        this.stopDemo();
+      });
+    },
+    beforeDestroy: function() {
+      this.stopDemo();
+    },
     data: () => {
       return {
         showClientPointer: true,
@@ -84,12 +93,10 @@
         UbiiClientService.registerDevice(this.$data.ubiiDevice)
           .then((device) => {
             this.$data.ubiiDevice = device;
-            console.info(device);
             return device;
           })
           .then(() => {
             // subscribe to the device topics
-            let subscribeTopic = this.$data.outputServerPointer.topic;
             UbiiClientService.client.subscribe(this.$data.outputServerPointer.topic, (mousePosition) => {
               let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
               this.$data.serverMousePosition = {
@@ -97,15 +104,9 @@
                 y: mousePosition.y * boundingRect.height
               };
             });
-            // unsubscribe before page is unloaded
-            window.addEventListener('beforeunload', () => {
-              console.info('beforeunload');
-              UbiiClientService.client.unsubscribe(subscribeTopic);
-            });
 
             UbiiClientService.registerSession(this.$data.ubiiSession)
               .then((session) => {
-                console.info(session);
                 this.$data.ubiiSession = session;
                 return session;
               })
@@ -115,10 +116,9 @@
                     topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
                     session: this.$data.ubiiSession
                   })
-                  .then((result) => {
-                    console.info(result);
+                  .then(() => {
+                    this.$data.demoStarted = true;
                   });
-                this.$data.demoStarted = true;
               });
           });
       },
@@ -278,10 +278,15 @@
         this.$data.ubiiDevice = ubiiDevice;
         this.$data.ubiiInteraction = ubiiInteraction;
         this.$data.ubiiSession = ubiiSession;
+      },
+      stopDemo: function() {
+        UbiiClientService.client.unsubscribe(this.$data.outputServerPointer.topic);
+        UbiiClientService.client
+          .callService({
+            topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+            session: this.$data.ubiiSession
+          });
       }
-    },
-    beforeDestroy: function() {
-      console.info('beforeDestroy');
     }
   }
 </script>
