@@ -1,0 +1,93 @@
+@import "./../base/color"
+
+.button
+    border: 1px solid mediumContrastColor
+    border-radius: 3px
+    color: mediumContrastColor
+    background-color: layerOneSecondaryColor
+
+    // Contrast
+    &.low-contrast
+        color: lowContrastColor
+        border-color: lowContrastColor
+    &.medium-contrast
+        color: mediumContrastColor
+        border-color: mediumContrastColor
+    &.high-contrast
+        color: highContrastColor
+        border-color: highContrastColor
+    &.max-contrast
+        color: maxContrastColor
+        border-color: maxContrastColor
+
+    // Accents:
+    &.red-accent
+        color: redAccentColor
+        border-color: redAccentColor
+    &.green-accent
+        color: greenAccentColor
+        border-color: greenAccentColor
+    &.yellow-accent
+        color: yellowAccentColor
+        border-color: yellowAccentColor
+    &.orange-accent
+        color: orangeAccentColor
+        border-color: orangeAccentColor
+    &.purple-accent
+        color: purpleAccentColor
+        border-color: purpleAccentColor
+    &.blue-accent
+        color: blueAccentColor
+        border-color: blueAccentColor
+
+    &:hover
+        border-color: highContrastColor 
+        color: highContrastColor
+
+.button-area
+    border-width: 2px
+    border-style: solid
+    text-decoration: none
+    color: mediumContrastColor
+    
+    // Priamry
+    &.layer-one
+        border-color: layerOneBorderColor
+    &.layer-two
+        border-color: layerTwoBorderColor
+    &.layer-three
+        border-color: layerThreeBorderColor
+    &.layer-four
+        border-color: layerFourBorderColor
+
+    // Contrast
+    &.low-contrast
+        color: lowContrastColor
+    &.medium-contrast
+        color: mediumContrastColor
+    &.high-contrast
+        color: highContrastColor
+    &.max-contrast
+        color: maxContrastColor
+
+    // Accents:
+    &.red-accent
+        color: redAccentColor
+    &.green-accent
+        color: greenAccentColor
+    &.yellow-accent
+        color: yellowAccentColor
+    &.orange-accent
+        color: orangeAccentColor
+    &.purple-accent
+        color: purpleAccentColor
+    &.blue-accent
+        color: blueAccentColor
+    
+    &:hover
+      color: maxContrastColor
+
+
+.clickable
+    &:hover
+        color: maxContrastColor

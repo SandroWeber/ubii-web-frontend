@@ -1,24 +1,42 @@
 <template>
-    <div class="backend-info">
-        <label for="server-ip">Server IP</label>
-        <input id="server-ip" type="text" v-model="ubiiClientService.serverIP"/>
-        <label for="server-port">Server Port</label>
-        <input id="server-port" type="text" v-model="ubiiClientService.serverPort"/>
-        <button class="button-connect" v-on:click="ubiiClientService.connect()"
-                v-bind:class="ubiiClientService.isConnected ? 'green' : 'red'">
-            <font-awesome-icon icon="exchange-alt"/>
-        </button>
-    </div>
+  <div class="backend-info layer-two background low-contrast horizontal-shadow">
+    <label for="server-ip">
+      Server IP
+    </label>
+    <input 
+      id="server-ip" 
+      type="text" 
+      v-model="ubiiClientService.serverIP" 
+      class="layer-four background border round high-contrast"
+    />
+    <label for="server-port">
+      Server Port
+    </label>
+    <input
+      id="server-port"
+      type="text"
+      v-model="ubiiClientService.serverPort"
+      class="layer-four background border round high-contrast"
+    />
+    <button 
+      :class="buttonClassObject"
+      @click="ubiiClientService.connect()"
+    >
+      <font-awesome-icon 
+        icon="sync-alt"
+        :class="{ transparent: !ubiiClientService.isConnected }"
+      />
+    </button>
+  </div>
 </template>
 
 <script>
   import UbiiClientService from '../services/ubiiClient/ubiiClientService.js';
 
   /* fontawesome */
-  import {library} from '@fortawesome/fontawesome-svg-core'
-  import {faExchangeAlt} from '@fortawesome/free-solid-svg-icons'
-
-  library.add(faExchangeAlt);
+  import { library } from '@fortawesome/fontawesome-svg-core'
+  import { faSyncAlt } from '@fortawesome/free-solid-svg-icons'
+  library.add(faSyncAlt);
 
   export default {
     name: 'ServerStatus',
@@ -31,31 +49,34 @@
       return {
         ubiiClientService: UbiiClientService
       }
+    },
+    computed:{
+      buttonClassObject: function () {
+        return {
+          "button-connect": true,
+          "button": true,
+          "green-accent": this.clientService.isConnected,
+          "red-accent": !this.clientService.isConnected
+        }
+      }
     }
   }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-    .backend-info {
-        padding: 5px;
-        background: black;
-        color: cyan;
-    }
+<style scoped lang="stylus">
+  .backend-info
+    padding: 8px
 
-    label {
-        margin: 0px 5px 0px 10px;
-    }
+  label
+    margin: 0px 5px 0px 10px
 
-    .green {
-        background-color: green;
-    }
+  input
+    padding: 1px 5px 1px 5px
 
-    .red {
-        background-color: red;
-    }
-
-    .button-connect {
-        margin: 0px 10px 0px 10px;
-    }
+  .button-connect
+    height: 1.8em
+    width 1.8em
+    margin: 2px 10px 2px 10px
+    padding: 0.1em
+    border-radius 999px
 </style>

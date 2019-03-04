@@ -30,6 +30,16 @@ export default new Router({
       path: '/tools/demo-mouse-pointer',
       name: 'Demo: Mouse Pointer',
       component: () => import('./components/DemoMousePointer.vue')
+    },
+    {
+      path: '/nodeEditor',
+      name: 'Node Editor',
+      component: () => import('./components/editors/nodeEditor/NodeEditor.vue')
+    },
+    {
+      path: '/interactionEditor',
+      name: 'Interaction Editor',
+      component: () => import('./components/editors/interactionEditor/InteractionEditor.vue')
     }
   ]
 })

@@ -1,11 +1,46 @@
 <template>
-  <div id="app">
-    <server-status />
-    <nav class="navigation-bar">
-      <router-link to="/" class="navigation-item">Home</router-link> |
-      <router-link to="/admin" class="navigation-item">Administration</router-link> |
-      <router-link to="/tools" class="navigation-item">Tools</router-link>
+  <div 
+    id="app"
+    class="layer-one background"
+  >
+    <server-status id="server-status"/>
+    <nav class="navigation-bar layer-one background border shadow">
+      <router-link
+        to="/"
+        class="navigation-item "
+      >
+        Home
+      </router-link>
+      |
+      <router-link
+        to="/admin"
+        class="navigation-item"
+      >
+        Administration
+      </router-link>
+      |
+      <router-link
+        to="/tools"
+        class="navigation-item"
+      >
+      Tools
+      </router-link>
+      |
+      <router-link
+        to="/nodeEditor"
+        class="navigation-item"
+      >
+      Node Editor
+      </router-link>
+      |
+      <router-link
+        to="/interactionEditor"
+        class="navigation-item"
+      >
+        Interaction Editor
+      </router-link>
     </nav>
+    
     <router-view class="router-view"/>
   </div>
 </template>
@@ -27,39 +62,46 @@
   }
 </script>
 
-<style>
-  html {
-    height: 100%;
+<style lang="stylus"> 
+  * {
+      margin: 0;
+      padding: 0;
   }
 
-  body {
-    margin: 0px;
-    height: 100%;
-  }
-
+  html, body {
+    width: 100%;   
+    height: 100%; 
+  } 
+ 
   #app {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: white;
+    width: 100%;
     height: 100%;
+    display flex
+    flex-direction column
   }
 
   .navigation-bar {
-    padding: 10px;
+    padding: 15px;
     text-align: center;
-    background: dimgrey;
   }
 
   .navigation-item {
-    color: cyan;
     padding: 0px 20px 0px 20px;
+    text-decoration: none
   }
+
+  #server-status
+    position: relative
 
   .server-stats {
     text-align: center;
   }
 
-  .router-view {
-  }
+  .router-view
+
+    flex-grow: 1
+
 </style>

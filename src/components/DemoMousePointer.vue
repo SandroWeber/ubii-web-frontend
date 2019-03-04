@@ -1,38 +1,74 @@
 <template>
-    <div>
-        <div v-show="!ubiiClientService.isConnected">
-            <span class="notification">Please connect to backend before starting the application.</span>
-        </div>
-
-        <div v-show="ubiiClientService.isConnected && !demoStarted">
-            <button v-on:click="startDemo()">
-                <font-awesome-icon icon="play"/>
-            </button>
-        </div>
-        <div v-show="ubiiClientService.isConnected && demoStarted" class="grid">
-            <div class="options">
-                <input id="checkboxClientPointer" type="checkbox" v-model="showClientPointer"/>
-                <label for="checkboxClientPointer">Show Client Pointer</label>
-                <br/>
-                <input id="checkboxServerPointer" type="checkbox" v-model="showServerPointer"/>
-                <label for="checkboxServerPointer">Show Server Pointer</label>
-                <br/>
-                <input id="checkboxMirrorPointer" type="checkbox" v-model="mirrorPointer"/>
-                <label for="checkboxMirrorPointer">Mirror Pointer</label>
-            </div>
-            <div id="mouse-pointer-area" class="mouse-pointer-area" v-bind:class="{ hideCursor: !showClientPointer }"
-                 v-on:mousemove="onMouseMove($event)"
-                 v-on:mouseenter="clientPointerInside = true;" v-on:mouseleave="clientPointerInside = false;"
-                 v-on:touchstart="onTouchStart($event)" v-on:touchend="clientPointerInside = false;"
-                 v-on:touchmove="onTouchMove($event)">
-                <div class="server-mouse-position-indicator"
-                     :style="{top: serverMousePosition.y + 'px', left: serverMousePosition.x + 'px' }"
-                     v-show="showServerPointer && clientPointerInside">
-                </div>
-            </div>
-        </div>
+  <div>
+    <div v-show="!ubiiClientService.isConnected">
+      <span class="notification">
+        Please connect to backend before starting the application.
+      </span>
     </div>
 
+    <div v-show="ubiiClientService.isConnected && !demoStarted">
+      <button v-on:click="startDemo()">
+        <font-awesome-icon icon="play"/>
+      </button>
+    </div>
+
+    <div
+      v-show="ubiiClientService.isConnected && demoStarted"
+      class="grid"
+    >
+      <div class="options">
+        <input
+          id="checkboxClientPointer"
+          type="checkbox"
+          v-model="showClientPointer"
+        />
+        <label for="checkboxClientPointer">
+          Show Client Pointer
+        </label>
+
+        <br/>
+
+        <input 
+          id="checkboxServerPointer"
+          type="checkbox"
+          v-model="showServerPointer"
+        />
+        <label for="checkboxServerPointer">
+          Show Server Pointer
+        </label>
+
+        <br/>
+
+        <input
+          id="checkboxMirrorPointer"
+          type="checkbox"
+          v-model="mirrorPointer"
+        />
+        <label for="checkboxMirrorPointer">
+          Mirror Pointer
+        </label>
+      </div>
+
+      <div
+        id="mouse-pointer-area"
+        class="mouse-pointer-area"
+        v-bind:class="{ hideCursor: !showClientPointer }"
+        v-on:mousemove="onMouseMove($event)"
+        v-on:mouseenter="clientPointerInside = true;"
+        v-on:mouseleave="clientPointerInside = false;"
+        v-on:touchstart="onTouchStart($event)"
+        v-on:touchend="clientPointerInside = false;"
+        v-on:touchmove="onTouchMove($event)"
+      >
+        <div
+          class="server-mouse-position-indicator"
+          :style="{top: serverMousePosition.y + 'px', left: serverMousePosition.x + 'px' }"
+          v-show="showServerPointer && clientPointerInside"
+        >
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -291,37 +327,30 @@
   }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-    .grid {
-        display: grid;
-        grid-gap: 15px;
-        grid-template-columns: 1fr 5fr;
-        height: 100%;
-    }
+<style scoped lang="stylus">
+    .grid
+        display: grid
+        grid-gap: 15px
+        grid-template-columns: 1fr 5fr
+        height: 100%
 
-    .options {
-        margin: 25px;
-    }
+    .options
+        margin: 25px
 
-    .mouse-pointer-area {
-        margin: 25px;
-        border: 3px solid black;
-        height: 300px;
-    }
+    .mouse-pointer-area
+        margin: 25px
+        border: 3px solid black
+        height: 300px
 
-    .hideCursor {
-        cursor: none;
-    }
+    .hideCursor
+        cursor: none
 
-    .notification {
-        color: red;
-    }
+    .notification
+        color: red
 
-    .server-mouse-position-indicator {
-        position: relative;
-        width: 10px;
-        height: 10px;
-        background-color: red;
-    }
+    .server-mouse-position-indicator
+        position: relative
+        width: 10px
+        height: 10px
+        background-color: red
 </style>

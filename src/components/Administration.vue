@@ -1,16 +1,19 @@
 <template>
   <div>
-    <treeselect v-model="treeSelect.value" :multiple="false" :options="treeSelect.options" class="tree-select" />
-    <interaction-editor />
+    <treeselect 
+      v-model="treeSelect.value"
+      :multiple="false"
+      :options="treeSelect.options"
+      class="tree-select"
+    />
+    <interaction-editor/>
   </div>
 </template>
 
 <script>
-  // Treeselect
+  // Treeselect.
   import Treeselect from '@riophae/vue-treeselect'
   import '@riophae/vue-treeselect/dist/vue-treeselect.css'
-
-  import InteractionEditor from './InteractionEditor.vue'
 
   let dummyTreeselectOptions = [{
     id: 'sessions-parent',
@@ -42,7 +45,6 @@
     name: 'Administration',
     props: {},
     components: {
-      InteractionEditor,
       Treeselect
     },
     data: () => {
@@ -56,9 +58,7 @@
   }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-  .tree-select {
-    margin: 10px;
-  }
+<style scoped lang="stylus">
+  .tree-select
+    margin: 10px
 </style>
