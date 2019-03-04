@@ -56,7 +56,7 @@
     },
     data: () => {
       return {
-        clientService: ClientNode
+        ubiiClientService: ClientNode
       }
     }
   }

@@ -6,7 +6,7 @@
     <input 
       id="server-ip" 
       type="text" 
-      v-model="clientService.serverIP" 
+      v-model="ubiiClientService.serverIP" 
       class="layer-four background border round high-contrast"
     />
     <label for="server-port">
@@ -15,23 +15,23 @@
     <input
       id="server-port"
       type="text"
-      v-model="clientService.serverPort"
+      v-model="ubiiClientService.serverPort"
       class="layer-four background border round high-contrast"
     />
     <button 
       :class="buttonClassObject"
-      @click="clientService.connect()"
+      @click="ubiiClientService.connect()"
     >
       <font-awesome-icon 
         icon="sync-alt"
-        :class="{ transparent: !clientService.isConnected }"
+        :class="{ transparent: !ubiiClientService.isConnected }"
       />
     </button>
   </div>
 </template>
 
 <script>
-  import ClientService from '../services/ubiiClient/ubiiClientService.js';
+  import UbiiClientService from '../services/ubiiClient/ubiiClientService.js';
 
   /* fontawesome */
   import { library } from '@fortawesome/fontawesome-svg-core'
@@ -40,10 +40,14 @@
 
   export default {
     name: 'ServerStatus',
-    props: {},
+    beforeMount: function () {
+      if (!UbiiClientService.isConnected) {
+        UbiiClientService.connect();
+      }
+    },
     data: () => {
       return {
-        clientService: ClientService
+        ubiiClientService: UbiiClientService
       }
     },
     computed:{
