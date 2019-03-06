@@ -1,18 +1,13 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import interactions from './modules/interactions'
-import sessions from './modules/sessions'
-import createLogger from '../../../src/plugins/logger'
+//import sessions from './modules/sessions'
 
 Vue.use(Vuex)
-
-const debug = process.env.NODE_ENV !== 'production'
 
 export default new Vuex.Store({
   modules: {
     interactions,
-    sessions
+   // sessions
   },
-  strict: debug,
-  plugins: debug ? [createLogger()] : []
 })
