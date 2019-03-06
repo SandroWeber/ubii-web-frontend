@@ -55,8 +55,8 @@
         return {
           "button-connect": true,
           "button": true,
-          "green-accent": this.clientService.isConnected,
-          "red-accent": !this.clientService.isConnected
+          "green-accent": this.ubiiClientService.isConnected,
+          "red-accent": !this.ubiiClientService.isConnected
         }
       }
     }
