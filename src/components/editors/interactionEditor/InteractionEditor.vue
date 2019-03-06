@@ -17,107 +17,7 @@
 <script>
     import InteractionExplorer from './../../explorers/interactionExplorer/InteractionExplorer.vue';
     import InteractionMirror from './../../mirrors/interactionMirror/InteractionMirror.vue';
-
-    // Dummy interaction.
-    let dummyInteractions = [
-        {
-            id: '1234',
-            name: 'Dummy Interaction One',
-            code: `(input, output, state) => {
-    return true;
-}`,
-            input: [
-                {
-                    name: 'input-A',
-                    topic: 'topic-A'
-                },
-                {
-                    name: 'input-B',
-                    topic: 'topic-B'
-                }
-            ],
-            output: [
-                {
-                    name: 'output-X',
-                    topic: 'topic-X'
-                },
-                {
-                    name: 'output-Y',
-                    topic: 'topic-Y'
-                }
-            ]
-        },
-        {
-            id: '5678',
-            name: 'Dummy Interaction Two',
-            code: `(input, output, state) => {
-    return true;
-}`,
-            input: [
-                {
-                    name: 'Position A',
-                    topic: 'topic-A'
-                },
-                {
-                    name: 'Position B',
-                    topic: 'topic-B'
-                },
-                {
-                    name: 'Step',
-                    topic: 'topic-C'
-                }
-            ],
-            output: [
-                {
-                    name: 'Position',
-                    topic: 'topic-X'
-                },
-                {
-                    name: 'Progress',
-                    topic: 'topic-Y'
-                }
-            ]
-        },
-        {
-            id: '9123',
-            name: 'Dummy Interaction Three',
-            code: `(input, output, state) => {
-    return true;
-}`,
-            input: [
-                {
-                    name: 'Position',
-                    topic: 'topic-A'
-                },
-                {
-                    name: 'Rotation',
-                    topic: 'topic-B'
-                },
-                {
-                    name: 'Scale',
-                    topic: 'topic-C'
-                }
-            ],
-            output: [
-                {
-                    name: 'Vertex X',
-                    topic: 'topic-X'
-                },
-                {
-                    name: 'Vertex Y',
-                    topic: 'topic-Y'
-                },
-                {
-                    name: 'Vertex Z',
-                    topic: 'topic-Z'
-                },
-                {
-                    name: 'Vertex W',
-                    topic: 'topic-W'
-                }
-            ]
-        }
-    ];
+    import { mapState, mapActions } from 'vuex'
 
     export default {
         name: 'InteractionEditor',
@@ -129,10 +29,9 @@
         data: () => {
             return {
                 selectedInteractionId: 0,
-                interactions: dummyInteractions,
             };
         },
-        computed: {
+        computed: mapState({
             selectedInteraction: function (){
                 let id = this.selectedInteractionId;
                 let found = this.interactions.find(function(element) {
@@ -144,14 +43,19 @@
                 }else{
                     return this.interactions[0];
                 }
-            }
-        },
+            },
+            interactions: state => state.interactions.interactions
+        }),
         methods: {
             onSelectInteraction: function(id) {
                 this.selectedInteractionId = id;
             },
             onSelectedInteractionChange: function(input){
                 this.selectedInteraction = input;
+            },
+            addInteraction: function(){
+                this.$store.commit('increment');
+                console.log(this.$store.state.count)
             }
         }
     }
