@@ -31,7 +31,7 @@
                 selectedInteractionId: 0,
             };
         },
-        computed: mapState({
+        computed: {
             selectedInteraction: function (){
                 let id = this.selectedInteractionId;
                 let found = this.interactions.find(function(element) {
@@ -44,8 +44,10 @@
                     return this.interactions[0];
                 }
             },
-            interactions: state => state.interactions.all
-        }),
+            ...mapState({
+                interactions: state => state.interactions.all
+            })
+        },
         methods: {
             onSelectInteraction: function(id) {
                 this.selectedInteractionId = id;
@@ -53,11 +55,12 @@
             onSelectedInteractionChange: function(input){
                 this.selectedInteraction = input;
             },
-            addInteraction: function(){
-                this.$store.commit('increment');
-                console.log(this.$store.state.count)
-            }
-        }
+            ...mapActions({
+                addInteraction: function(){
+                    //this.$store.commit('increment');
+                }
+            }),
+        },
     }
 </script>
 
