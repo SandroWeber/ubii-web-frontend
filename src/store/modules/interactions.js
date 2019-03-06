@@ -54,7 +54,7 @@ let dummyInteractionTwo = {
 
 // initial state
 const state = {
-  interactions: [dummyInteractionOne, dummyInteractionTwo]
+  all: [dummyInteractionOne, dummyInteractionTwo]
 }
   
 // getters
@@ -65,7 +65,7 @@ const getters = {
 // actions
 const actions = {
   addInteraction (context, payload) {
-    context.commit('increment', {
+    context.commit('pushInteraction', {
       interaction: payload.interaction
     })
   }
@@ -74,7 +74,7 @@ const actions = {
 // mutations
 const mutations = {
   pushInteraction (state, payload){
-    state.interactions.push(payload.interaction);
+    state.all.push(payload.interaction);
   }
 }
 
