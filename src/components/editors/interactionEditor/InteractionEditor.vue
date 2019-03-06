@@ -44,7 +44,7 @@
                     return this.interactions[0];
                 }
             },
-            interactions: state => state.interactions.interactions
+            interactions: state => state.interactions.all
         }),
         methods: {
             onSelectInteraction: function(id) {
