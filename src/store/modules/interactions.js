@@ -64,7 +64,7 @@ const getters = {
 
 // actions
 const actions = {
-  addInteraction (context, payload) {
+  add (context, payload) {
     context.commit('pushInteraction', {
       interaction: payload.interaction
     })
