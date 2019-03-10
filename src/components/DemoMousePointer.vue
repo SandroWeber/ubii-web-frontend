@@ -313,6 +313,8 @@
         this.$data.outputServerPointer = outputServerPointer;
         this.$data.ubiiDevice = ubiiDevice;
         this.$data.ubiiInteraction = ubiiInteraction;
+        // New store way:
+        // this.$store.dispatch("interactions/add", {interaction: ubiiInteraction});
         this.$data.ubiiSession = ubiiSession;
       },
       stopDemo: function() {
