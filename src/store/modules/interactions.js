@@ -59,7 +59,7 @@ const state = {
   
 // getters
 const getters = {
-    flavor: state => state.flavor
+    all: state => state.all
 }
 
 // actions
