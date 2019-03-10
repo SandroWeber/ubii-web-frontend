@@ -19,6 +19,30 @@
     import InteractionMirror from './../../mirrors/interactionMirror/InteractionMirror.vue';
     import { mapState, mapActions } from 'vuex'
 
+    let dummyInteractionThree = {
+  id: 'three',
+  name: 'mirror-mouse-pointer',
+  processingCallback: `(input, output, state) => {
+  return true;
+}`,
+  inputFormats: [
+    {
+      internalName: 'inputClientPointer.internalName',
+      messageFormat: 'inputClientPointer.messageFormat'
+    },
+    {
+      internalName: 'inputMirror.internalName',
+      messageFormat: 'inputMirror.messageFormat'
+    }
+  ],
+  outputFormats: [
+    {
+      internalName: 'outputServerPointer.internalName',
+      messageFormat: 'outputServerPointer.messageFormat'
+    }
+  ]
+};
+
     export default {
         name: 'InteractionEditor',
         props: {},
@@ -61,6 +85,9 @@
                 }
             }),
         },
+        mounted(){
+            this.$store.dispatch("interactions/add", {interaction: dummyInteractionThree});
+        }
     }
 </script>
 
