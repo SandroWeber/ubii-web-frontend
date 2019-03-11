@@ -133,16 +133,14 @@
             onSelectedInteractionChange: function(input){
                 this.selectedInteraction = input;
             },
-            ...mapActions({
-                addInteraction: function(){
-                    //this.$store.commit('increment');
-                }
+            ...mapActions('interactions', {
+                addInteraction: 'add'
             }),
         },
         mounted(){
-            this.$store.dispatch("interactions/add", {interaction: dummyInteractionOne});
-            this.$store.dispatch("interactions/add", {interaction: dummyInteractionTwo});
-            this.$store.dispatch("interactions/add", {interaction: dummyInteractionThree});
+            this.addInteraction({interaction: dummyInteractionOne});
+            this.addInteraction({interaction: dummyInteractionTwo});
+            this.addInteraction({interaction: dummyInteractionThree});
         }
     }
 </script>
