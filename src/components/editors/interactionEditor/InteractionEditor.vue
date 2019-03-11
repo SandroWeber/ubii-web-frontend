@@ -32,16 +32,30 @@
             };
         },
         computed: {
-            selectedInteraction: function (){
-                let id = this.selectedInteractionId;
-                let found = this.interactions.find(function(element) {
-                    return element.id === id;
-                });
-                if(found)
-                {
-                    return found;
-                }else{
-                    return this.interactions[0];
+            selectedInteraction: {
+                get: function () {
+                    let id = this.selectedInteractionId;
+                    let found = this.interactions.find(function(element) {
+                        return element.id === id;
+                    });
+                    if(found)
+                    {
+                        return found;
+                    }else{
+                        return this.interactions[0];
+                    }
+                },
+                set: function (newValue) {
+                    let id = this.selectedInteractionId;
+                    let found = this.interactions.find(function(element) {
+                        return element.id === id;
+                    });
+                    if(found)
+                    {
+                        found = newValue;
+                    }else{
+                        this.interactions[0] = newValue;
+                    }
                 }
             },
             ...mapState({
