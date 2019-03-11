@@ -81,7 +81,7 @@
 
   let dummyInteractionTwo = {
   id: 'uuidv4()',
-  name: 'mirror-mouse-pointer',
+  name: 'Second Test',
   processingCallback: `(input, output, state) => {
   return true;
 }`,
@@ -105,7 +105,7 @@
 
   let dummyInteractionThree = {
 id: 'three',
-name: 'mirror-mouse-pointer',
+name: 'TestThree',
 processingCallback: `(input, output, state) => {
 return true;
 }`,
