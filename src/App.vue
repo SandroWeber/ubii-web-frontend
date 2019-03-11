@@ -49,6 +49,84 @@
   import ClientNode from './services/ubiiClient/ubiiClientService';
   import ServerStatus from './components/ServerStatus.vue'
 
+  // Dummy interaction.
+  let dummyInteractionOne =
+  {
+      id: '1234',
+      name: 'Dummy Interaction One',
+      processingCallback: `(input, output, state) => {
+  return true;
+}`,
+  inputFormats: [
+      {
+          internalName: 'input-A',
+          messageFormat: 'topic-A'
+      },
+      {
+          internalName: 'input-B',
+          messageFormat: 'topic-B'
+      }
+  ],
+  outputFormats: [
+      {
+          internalName: 'output-X',
+          messageFormat: 'topic-X'
+      },
+      {
+          internalName: 'output-Y',
+          messageFormat: 'topic-Y'
+      }
+  ]
+  };
+
+  let dummyInteractionTwo = {
+  id: 'uuidv4()',
+  name: 'mirror-mouse-pointer',
+  processingCallback: `(input, output, state) => {
+  return true;
+}`,
+  inputFormats: [
+      {
+          internalName: 'inputClientPointer.internalName',
+          messageFormat: 'inputClientPointer.messageFormat'
+      },
+      {
+          internalName: 'inputMirror.internalName',
+          messageFormat: 'inputMirror.messageFormat'
+      }
+  ],
+  outputFormats: [
+      {
+          internalName: 'outputServerPointer.internalName',
+          messageFormat: 'outputServerPointer.messageFormat'
+      }
+  ]
+  };
+
+  let dummyInteractionThree = {
+id: 'three',
+name: 'mirror-mouse-pointer',
+processingCallback: `(input, output, state) => {
+return true;
+}`,
+  inputFormats: [
+      {
+          internalName: 'inputClientPointer.internalName',
+          messageFormat: 'inputClientPointer.messageFormat'
+      },
+      {
+          internalName: 'inputMirror.internalName',
+          messageFormat: 'inputMirror.messageFormat'
+      }
+  ],
+  outputFormats: [
+      {
+          internalName: 'outputServerPointer.internalName',
+          messageFormat: 'outputServerPointer.messageFormat'
+      }
+  ]
+  };
+
   export default {
     name: 'app',
     components: {
@@ -58,6 +136,11 @@
       return {
         ubiiClientService: ClientNode
       }
+    },
+    mounted(){
+      this.$store.dispatch("interactions/add", {interaction: dummyInteractionOne});
+      this.$store.dispatch("interactions/add", {interaction: dummyInteractionTwo});
+      this.$store.dispatch("interactions/add", {interaction: dummyInteractionThree});
     }
   }
 </script>
