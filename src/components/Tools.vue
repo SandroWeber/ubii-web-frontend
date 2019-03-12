@@ -3,33 +3,39 @@
     <div class="grid">
       <router-link
         to="/tools/topic-inspector"
-        class="interface-link layer-three background round shadow button-area orange-accent"
+        class="interface-link"
       >
-        <font-awesome-icon
-          icon="eye"
-          class="interface-icon"
-        />
-        <p>
-          Topic Inspector
-        </p>
+        <app-tile class="layer-three background round shadow orange-accent"> 
+          <font-awesome-icon
+            icon="eye"
+            class="interface-icon"
+          />
+          <p>
+            Topic Inspector
+          </p>
+        </app-tile>
       </router-link>
       <router-link
         to="/tools/demo-mouse-pointer"
-        class="interface-link layer-three background round shadow button-area orange-accent"
+        class="interface-link"
       >
-        <font-awesome-icon
-          icon="mouse-pointer"
-          class="interface-icon"
-        />
-        <p>
-          Mouse Demo
-        </p>
+        <app-tile class="layer-three background round shadow orange-accent"> 
+          <font-awesome-icon
+            icon="mouse-pointer"
+            class="interface-icon"
+          />
+          <p>
+            Mouse Demo
+          </p>
+        </app-tile>
       </router-link>
     </div>
   </div>
 </template>
 
 <script>
+  import AppTile from './appComponents/AppTile.vue';
+
   // Fontawesome.
   import { library } from '@fortawesome/fontawesome-svg-core'
   import { faEye, faMousePointer } from '@fortawesome/free-solid-svg-icons'
@@ -37,7 +43,10 @@
   library.add(faMousePointer);
 
   export default {
-    name: 'Interfaces'
+    name: 'Interfaces',
+    components: {
+      AppTile: AppTile
+    }
   }
 </script>
 
@@ -49,7 +58,6 @@
     margin: 25px
 
   .interface-link
-    padding: 10px
     text-align: center
 
   .interface-icon
