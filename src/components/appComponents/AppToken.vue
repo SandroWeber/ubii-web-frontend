@@ -1,6 +1,8 @@
 <template>
   <div class="app-token">
-    <slot> </slot>
+    <span>
+      {{text}}
+    </span>
   </div>
 </template>
 
@@ -8,10 +10,55 @@
   export default { 
     name: 'AppToken',
     components: {},
-    props: {}
+    props: {
+        text: String,
+        editable: Boolean
+    }
   } 
 </script> 
 
-<style scoped lang="stylus"> 
+<style scoped lang="stylus">
+@import "./../../styles/main/base/color"
 
+.app-token
+    // Base:
+    background-color: mediumContrastColor
+    border-radius: 999px
+    color: layerOneSecondaryColor
+    padding 5px 10px 5px 10px
+
+    // Primary:
+    &.layer-one
+        color: layerOneSecondaryColor
+    &.layer-two
+        color: layerTwoSecondaryColor
+    &.layer-three
+        color: layerThreeSecondaryColor
+    &.layer-four
+        color: layerFourSecondaryColor
+
+    // Contrasts
+    &.low-contrast
+        background-color: lowContrastColor
+    &.medium-contrast
+        background-color: mediumContrastColor
+    &.high-contrast
+        background-color: highContrastColor
+    &.max-contrast
+        background-color: maxContrastColor
+
+
+    // Accents:
+    &.red-accent
+        background-color: redAccentColor
+    &.green-accent
+        background-color: greenAccentColor
+    &.yellow-accent
+        background-color: yellowAccentColor
+    &.orange-accent
+        background-color: orangeAccentColor
+    &.purple-accent
+        background-color: purpleAccentColor
+    &.blue-accent
+        background-color: blueAccentColor
 </style>
