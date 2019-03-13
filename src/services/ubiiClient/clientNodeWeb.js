@@ -16,7 +16,7 @@ class ClientNodeWeb {
 
     // Translators:
     this.translatorServiceReply = new ProtobufTranslator(MSG_TYPES.SERVICE_REPLY);
-    //this.translatorServiceRequest = new ProtobufTranslator(MSG_TYPES.SERVICE_REQUEST);
+    this.translatorServiceRequest = new ProtobufTranslator(MSG_TYPES.SERVICE_REQUEST);
     this.translatorTopicData = new ProtobufTranslator(MSG_TYPES.TOPIC_DATA);
 
     // Cache for specifications:
@@ -101,8 +101,7 @@ class ClientNodeWeb {
     let message = {
       topic: DEFAULT_TOPICS.SERVICES.CLIENT_REGISTRATION,
       client: {
-        name: this.name,
-        namespace: ''
+        name: this.name
       }
     };
 
@@ -217,16 +216,19 @@ class ClientNodeWeb {
    */
   callService(message) {
     return new Promise((resolve, reject) => {
-      //TODO: just send JSON?
       // VARIANT A: PROTOBUF
-      //let buffer = this.translatorServiceRequest.createBufferFromPayload(message);
-      //console.info(buffer);
-      this.serviceClient.send('/services', {message: JSON.stringify(message)}).then(
+      let buffer = this.translatorServiceRequest.createBufferFromPayload(message);
+      console.info('### callService - request ###');
+      console.info(message);
+      console.info(buffer);
+      this.serviceClient.send('/services', buffer).then(
         (reply) => {
           let buffer = new Buffer(reply);
-          console.info(buffer);
           let message = this.translatorServiceReply.createMessageFromBuffer(buffer);
+          console.info('### callService - reply ###');
           console.info(message);
+          console.info(buffer.length);
+          console.info(buffer);
 
           return resolve(message);
         },
