@@ -2,7 +2,7 @@
 
 import RESTClient from "./restClient";
 import WebsocketClient from "./websocketClient";
-import { ProtobufTranslator, MSG_TYPES, DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
+import {ProtobufTranslator, MSG_TYPES, DEFAULT_TOPICS} from "@tum-far/ubii-msg-formats";
 
 
 class ClientNodeWeb {
@@ -221,15 +221,12 @@ class ClientNodeWeb {
       // VARIANT A: PROTOBUF
       //let buffer = this.translatorServiceRequest.createBufferFromPayload(message);
       //console.info(buffer);
-      //this.serviceClient.send('/services', {buffer: JSON.stringify(buffer)})
-      // VARIANT B: JSON
-      this.serviceClient.send('/services', { message: JSON.stringify(message) }).then(
+      this.serviceClient.send('/services', {message: JSON.stringify(message)}).then(
         (reply) => {
-          // VARIANT A: PROTOBUF
-          //let message = this.translatorServiceReply.createMessageFromBuffer(reply.buffer.data);
-          // VARIANT B: JSON
-          let json = JSON.parse(reply.message);
-          let message = this.translatorServiceReply.createMessageFromPayload(json);
+          let buffer = new Buffer(reply);
+          console.info(buffer);
+          let message = this.translatorServiceReply.createMessageFromBuffer(buffer);
+          console.info(message);
 
           return resolve(message);
         },
@@ -237,6 +234,20 @@ class ClientNodeWeb {
           console.error(error);
           return reject();
         });
+
+      // VARIANT B: JSON
+      /*this.serviceClient.send('/services', { message: JSON.stringify(message) }).then(
+       (reply) => {
+         let json = JSON.parse(reply.message);
+         console.info(json);
+         let message = this.translatorServiceReply.createMessageFromPayload(json);
+
+         return resolve(message);
+       },
+       (error) => {
+         console.error(error);
+         return reject();
+       });*/
     });
   }
 
@@ -267,7 +278,9 @@ class ClientNodeWeb {
     let record = message.topicDataRecord;
     if (record && record.topic) {
       let callbacks = this.topicDataCallbacks.get(record.topic);
-      callbacks && callbacks.forEach((cb) => {cb(record[record.type])});
+      callbacks && callbacks.forEach((cb) => {
+        cb(record[record.type])
+      });
     }
   }
 }

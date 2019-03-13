@@ -126,6 +126,7 @@
         this.createUbiiSpecs();
 
         // register the mouse pointer device
+        console.info(this.$data.ubiiDevice);
         UbiiClientService.registerDevice(this.$data.ubiiDevice)
           .then((device) => {
             this.$data.ubiiDevice = device;
