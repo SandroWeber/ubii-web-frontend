@@ -14,20 +14,20 @@ class RESTClient {
     this.host = host;
     this.port = port;
 
-    axios.defaults.headers.post['Content-Type'] = 'application/octet-stream';
+    //axios.defaults.headers.post['Content-Type'] = 'application/octet-stream';
   }
 
   send(route, message) {
     let url = 'http://' + this.host + ':' + this.port + route;
 
     return new Promise((resolve, reject) => {
-      axios({
+      /*axios({
         url: url,
         method: 'post',
         data: message,
         //config: { headers: {'Content-Type': 'application/octet-stream' }}
-      })
-      //axios.post(url, message)
+      })*/
+      axios.post(url, message)
         .then((response) => {
           resolve(response.data);
         })

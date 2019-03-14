@@ -217,7 +217,7 @@ class ClientNodeWeb {
   callService(message) {
     return new Promise((resolve, reject) => {
       // VARIANT A: PROTOBUF
-      let buffer = this.translatorServiceRequest.createBufferFromPayload(message);
+      /*let buffer = this.translatorServiceRequest.createBufferFromPayload(message);
       console.info('### callService - request ###');
       console.info(message);
       console.info(buffer);
@@ -235,21 +235,19 @@ class ClientNodeWeb {
         (error) => {
           console.error(error);
           return reject();
-        });
+        });*/
 
       // VARIANT B: JSON
-      /*this.serviceClient.send('/services', { message: JSON.stringify(message) }).then(
+      this.serviceClient.send('/services', message).then(
        (reply) => {
-         let json = JSON.parse(reply.message);
-         console.info(json);
-         let message = this.translatorServiceReply.createMessageFromPayload(json);
+         let message = this.translatorServiceReply.createMessageFromPayload(reply);
 
          return resolve(message);
        },
        (error) => {
          console.error(error);
          return reject();
-       });*/
+       });
     });
   }
 
