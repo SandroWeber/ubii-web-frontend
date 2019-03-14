@@ -122,81 +122,6 @@
       }
     },
     methods: {
-      startDemo: function () {
-        this.createUbiiSpecs();
-
-        // register the mouse pointer device
-        UbiiClientService.registerDevice(this.$data.ubiiDevice)
-          .then((device) => {
-            this.$data.ubiiDevice = device;
-            return device;
-          })
-          .then(() => {
-            // subscribe to the device topics
-            UbiiClientService.client.subscribe(this.$data.outputServerPointer.topic, (mousePosition) => {
-              let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
-              this.$data.serverMousePosition = {
-                x: mousePosition.x * boundingRect.width,
-                y: mousePosition.y * boundingRect.height
-              };
-            });
-
-            UbiiClientService.registerSession(this.$data.ubiiSession)
-              .then((session) => {
-                this.$data.ubiiSession = session;
-                return session;
-              })
-              .then(() => {
-                UbiiClientService.client
-                  .callService({
-                    topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
-                    session: this.$data.ubiiSession
-                  })
-                  .then(() => {
-                    this.$data.demoStarted = true;
-                  });
-              });
-          });
-      },
-      onMouseMove: function (event) {
-        let boundingRect = event.currentTarget.getBoundingClientRect();
-        let relativeMousePosition = {
-          x: event.offsetX / boundingRect.width,
-          y: event.offsetY / boundingRect.height
-        };
-
-        this.$data.clientMousePosition = relativeMousePosition;
-        UbiiClientService.client.publish(
-          this.$data.ubiiDevice.name,
-          this.$data.inputClientPointer.topic,
-          'vector2',
-          this.$data.clientMousePosition
-        );
-      },
-      onTouchStart: function (event) {
-        this.$data.clientPointerInside = true;
-        this.onTouchMove(event);
-      },
-      onTouchMove: function (event) {
-        let relativeMousePosition = {
-          x: (event.touches[0].clientX - event.target.offsetLeft) / event.target.offsetWidth,
-          y: (event.touches[0].clientY - event.target.offsetTop) / event.target.offsetHeight
-        };
-
-        if (relativeMousePosition.x < 0 || relativeMousePosition.x > 1 ||
-          relativeMousePosition.y < 0 || relativeMousePosition.y > 1) {
-          this.$data.clientPointerInside = false;
-          return;
-        }
-
-        this.$data.clientMousePosition = relativeMousePosition;
-        UbiiClientService.client.publish(
-          this.$data.ubiiDevice.name,
-          this.$data.inputClientPointer.topic,
-          'vector2',
-          this.$data.clientMousePosition
-        );
-      },
       createUbiiSpecs: function () {
         let deviceName = 'web-demo-mouse-pointer';
 
@@ -315,6 +240,42 @@
         this.$data.ubiiInteraction = ubiiInteraction;
         this.$data.ubiiSession = ubiiSession;
       },
+      startDemo: function () {
+        this.createUbiiSpecs();
+
+        // register the mouse pointer device
+        UbiiClientService.registerDevice(this.$data.ubiiDevice)
+          .then((device) => {
+            this.$data.ubiiDevice = device;
+            return device;
+          })
+          .then(() => {
+            // subscribe to the device topics
+            UbiiClientService.client.subscribe(this.$data.outputServerPointer.topic, (mousePosition) => {
+              let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
+              this.$data.serverMousePosition = {
+                x: mousePosition.x * boundingRect.width,
+                y: mousePosition.y * boundingRect.height
+              };
+            });
+
+            UbiiClientService.registerSession(this.$data.ubiiSession)
+              .then((session) => {
+                this.$data.ubiiSession = session;
+                return session;
+              })
+              .then(() => {
+                UbiiClientService.client
+                  .callService({
+                    topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+                    session: this.$data.ubiiSession
+                  })
+                  .then(() => {
+                    this.$data.demoStarted = true;
+                  });
+              });
+          });
+      },
       stopDemo: function() {
         UbiiClientService.client.unsubscribe(this.$data.outputServerPointer.topic);
         UbiiClientService.client
@@ -322,6 +283,45 @@
             topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
             session: this.$data.ubiiSession
           });
+      },
+      onMouseMove: function (event) {
+        let boundingRect = event.currentTarget.getBoundingClientRect();
+        let relativeMousePosition = {
+          x: event.offsetX / boundingRect.width,
+          y: event.offsetY / boundingRect.height
+        };
+
+        this.$data.clientMousePosition = relativeMousePosition;
+        UbiiClientService.client.publish(
+          this.$data.ubiiDevice.name,
+          this.$data.inputClientPointer.topic,
+          'vector2',
+          this.$data.clientMousePosition
+        );
+      },
+      onTouchStart: function (event) {
+        this.$data.clientPointerInside = true;
+        this.onTouchMove(event);
+      },
+      onTouchMove: function (event) {
+        let relativeMousePosition = {
+          x: (event.touches[0].clientX - event.target.offsetLeft) / event.target.offsetWidth,
+          y: (event.touches[0].clientY - event.target.offsetTop) / event.target.offsetHeight
+        };
+
+        if (relativeMousePosition.x < 0 || relativeMousePosition.x > 1 ||
+          relativeMousePosition.y < 0 || relativeMousePosition.y > 1) {
+          this.$data.clientPointerInside = false;
+          return;
+        }
+
+        this.$data.clientMousePosition = relativeMousePosition;
+        UbiiClientService.client.publish(
+          this.$data.ubiiDevice.name,
+          this.$data.inputClientPointer.topic,
+          'vector2',
+          this.$data.clientMousePosition
+        );
       }
     }
   }
