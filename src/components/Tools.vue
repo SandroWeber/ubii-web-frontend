@@ -36,7 +36,7 @@
 </template>
 
 <script>
-  import AppTile from './appComponents/AppTile.vue';
+  import { AppTile } from './appComponents/appComponents.js';
 
   // Fontawesome.
   import { library } from '@fortawesome/fontawesome-svg-core'
@@ -47,7 +47,8 @@
   export default {
     name: 'Interfaces',
     components: {
-      AppTile: AppTile
+      AppTile: AppTile,
+      AppLayer: AppLayer
     }
   }
 </script>
