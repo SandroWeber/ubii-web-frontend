@@ -12,8 +12,10 @@
   } 
 </script> 
 
-<style scoped lang="stylus"> 
-  .app-tile
+<style scoped lang="stylus">
+@import "./../../styles/main/base/color"
+
+.app-tile
     border-width: 2px
     border-style: solid
     text-decoration: none
@@ -23,12 +25,16 @@
     // Priamry
     &.layer-one
         border-color: layerOneBorderColor
+        background-color: layerOneSecondaryColor
     &.layer-two
         border-color: layerTwoBorderColor
+        background-color: layerTwoSecondaryColor
     &.layer-three
         border-color: layerThreeBorderColor
+        background-color: layerThreeSecondaryColor
     &.layer-four
         border-color: layerFourBorderColor
+        background-color: layerFourSecondaryColor
 
     // Contrast
     &.low-contrast
@@ -56,4 +62,9 @@
     
     &:hover
       color: maxContrastColor
+
+    & p 
+        text-decoration-line: none !important
+a
+    text-decoration-line: none !important
 </style>
