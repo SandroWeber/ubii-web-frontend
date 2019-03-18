@@ -1,5 +1,5 @@
 <template>
-  <div 
+  <app-layer 
     id="app"
     class="layer-one background"
   >
@@ -42,17 +42,19 @@
     </nav>
     
     <router-view class="router-view"/>
-  </div>
+  </app-layer>
 </template>
 
 <script>
   import ClientNode from './services/ubiiClient/ubiiClientService';
   import ServerStatus from './components/ServerStatus.vue'
+  import { AppLayer } from './components/appComponents/appComponents.js';
 
   export default {
     name: 'app',
     components: {
-      ServerStatus
+      ServerStatus,
+      AppLayer
     },
     data: () => {
       return {
