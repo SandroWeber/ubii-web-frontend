@@ -18,20 +18,22 @@
       v-model="ubiiClientService.serverPort"
       class="layer-four background border round high-contrast"
     />
-    <button 
+    <AppButton 
       :class="buttonClassObject"
-      @click="ubiiClientService.connect()"
+      @click="connect"
     >
       <font-awesome-icon 
         icon="sync-alt"
         :class="{ transparent: !ubiiClientService.isConnected }"
       />
-    </button>
+    </AppButton>
   </div>
 </template>
 
 <script>
   import UbiiClientService from '../services/ubiiClient/ubiiClientService.js';
+  import AppButton from './appComponents/AppButton.vue';
+  import AppLayer from './appComponents/AppLayer.vue';
 
   /* fontawesome */
   import { library } from '@fortawesome/fontawesome-svg-core'
@@ -40,6 +42,9 @@
 
   export default {
     name: 'ServerStatus',
+    components:{
+      AppButton: AppButton
+    },
     beforeMount: function () {
       if (!UbiiClientService.isConnected) {
         UbiiClientService.connect();
@@ -54,10 +59,15 @@
       buttonClassObject: function () {
         return {
           "button-connect": true,
-          "button": true,
+          "round": true,
           "green-accent": this.ubiiClientService.isConnected,
           "red-accent": !this.ubiiClientService.isConnected
         }
+      }
+    },
+    methods:{
+      connect: function () {
+        ubiiClientService.connect();
       }
     }
   }
@@ -77,6 +87,5 @@
     height: 1.8em
     width 1.8em
     margin: 2px 10px 2px 10px
-    padding: 0.1em
-    border-radius 999px
+    
 </style>
