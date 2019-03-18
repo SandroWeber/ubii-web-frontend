@@ -71,7 +71,6 @@
     },
     methods:{
       connect: function () {
-        console.log("Conenct to "+ this.test)
         this.ubiiClientService.connect();
       }
     }

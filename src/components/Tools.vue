@@ -4,7 +4,7 @@
       <router-link
         to="/tools/topic-inspector"
         class="interface-link"
-        tag="li"
+        tag="div"
       >
         <app-tile class="layer-three background round shadow orange-accent"> 
           <font-awesome-icon
@@ -19,12 +19,12 @@
       <router-link
         to="/tools/demo-mouse-pointer"
         class="interface-link"
+        tag="div"
       >
         <app-tile class="layer-three background round shadow orange-accent"> 
           <font-awesome-icon
             icon="mouse-pointer"
             class="interface-icon"
-            tag="li"
           />
           <p>
             Mouse Demo
@@ -48,7 +48,6 @@
     name: 'Interfaces',
     components: {
       AppTile: AppTile,
-      AppLayer: AppLayer
     }
   }
 </script>
@@ -62,6 +61,7 @@
 
   .interface-link
     text-align: center
+    cursor:pointer
 
   .interface-icon
     width: 50px
