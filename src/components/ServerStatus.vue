@@ -35,10 +35,7 @@
 <script>
   import UbiiClientService from '../services/ubiiClient/ubiiClientService.js';
   import { AppButton, AppLayer, AppInput } from './appComponents/appComponents.js';
-  //import AppButton from './appComponents/AppButton.vue';
-  //  import AppLayer from './appComponents/AppLayer.vue';
-   //   import AppInput from './appComponents/AppInput.vue';
-
+  
   /* fontawesome */
   import { library } from '@fortawesome/fontawesome-svg-core'
   import { faSyncAlt } from '@fortawesome/free-solid-svg-icons'
