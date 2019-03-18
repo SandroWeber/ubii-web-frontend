@@ -2,7 +2,7 @@
 
 import RESTClient from "./restClient";
 import WebsocketClient from "./websocketClient";
-import { ProtobufTranslator, MSG_TYPES, DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
+import {ProtobufTranslator, MSG_TYPES, DEFAULT_TOPICS} from "@tum-far/ubii-msg-formats";
 
 
 class ClientNodeWeb {
@@ -16,7 +16,7 @@ class ClientNodeWeb {
 
     // Translators:
     this.translatorServiceReply = new ProtobufTranslator(MSG_TYPES.SERVICE_REPLY);
-    //this.translatorServiceRequest = new ProtobufTranslator(MSG_TYPES.SERVICE_REQUEST);
+    this.translatorServiceRequest = new ProtobufTranslator(MSG_TYPES.SERVICE_REQUEST);
     this.translatorTopicData = new ProtobufTranslator(MSG_TYPES.TOPIC_DATA);
 
     // Cache for specifications:
@@ -101,8 +101,7 @@ class ClientNodeWeb {
     let message = {
       topic: DEFAULT_TOPICS.SERVICES.CLIENT_REGISTRATION,
       client: {
-        name: this.name,
-        namespace: ''
+        name: this.name
       }
     };
 
@@ -217,26 +216,38 @@ class ClientNodeWeb {
    */
   callService(message) {
     return new Promise((resolve, reject) => {
-      //TODO: just send JSON?
       // VARIANT A: PROTOBUF
-      //let buffer = this.translatorServiceRequest.createBufferFromPayload(message);
-      //console.info(buffer);
-      //this.serviceClient.send('/services', {buffer: JSON.stringify(buffer)})
-      // VARIANT B: JSON
-      this.serviceClient.send('/services', { message: JSON.stringify(message) }).then(
+      /*let buffer = this.translatorServiceRequest.createBufferFromPayload(message);
+      console.info('### callService - request ###');
+      console.info(message);
+      console.info(buffer);
+      this.serviceClient.send('/services', buffer).then(
         (reply) => {
-          // VARIANT A: PROTOBUF
-          //let message = this.translatorServiceReply.createMessageFromBuffer(reply.buffer.data);
-          // VARIANT B: JSON
-          let json = JSON.parse(reply.message);
-          let message = this.translatorServiceReply.createMessageFromPayload(json);
+          let buffer = new Buffer(reply);
+          let message = this.translatorServiceReply.createMessageFromBuffer(buffer);
+          console.info('### callService - reply ###');
+          console.info(message);
+          console.info(buffer.length);
+          console.info(buffer);
 
           return resolve(message);
         },
         (error) => {
           console.error(error);
           return reject();
-        });
+        });*/
+
+      // VARIANT B: JSON
+      this.serviceClient.send('/services', message).then(
+       (reply) => {
+         let message = this.translatorServiceReply.createMessageFromPayload(reply);
+
+         return resolve(message);
+       },
+       (error) => {
+         console.error(error);
+         return reject();
+       });
     });
   }
 
@@ -267,7 +278,9 @@ class ClientNodeWeb {
     let record = message.topicDataRecord;
     if (record && record.topic) {
       let callbacks = this.topicDataCallbacks.get(record.topic);
-      callbacks && callbacks.forEach((cb) => {cb(record[record.type])});
+      callbacks && callbacks.forEach((cb) => {
+        cb(record[record.type])
+      });
     }
   }
 }
