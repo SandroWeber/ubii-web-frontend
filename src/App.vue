@@ -65,6 +65,8 @@
 </script>
 
 <style lang="stylus"> 
+@import "./styles/main/base/color"
+
   * {
       margin: 0;
       padding: 0;
@@ -83,6 +85,7 @@
     height: 100%;
     display flex
     flex-direction column
+    color: maxContrastColor
   }
 
   .navigation-bar {
