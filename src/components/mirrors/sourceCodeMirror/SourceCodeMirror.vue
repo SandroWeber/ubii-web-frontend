@@ -31,11 +31,11 @@
                         lineNumbers: true,
                         line: true
                     }
-                }
+                } 
             };
         },
         methods: {
-            onCodeChange: function(value) {
+            onCodeChange: function(value) { 
                 this.$emit('input', value);
             }
         }
