@@ -4,6 +4,7 @@
       <router-link
         to="/tools/topic-inspector"
         class="interface-link"
+        tag="li"
       >
         <app-tile class="layer-three background round shadow orange-accent"> 
           <font-awesome-icon
@@ -23,6 +24,7 @@
           <font-awesome-icon
             icon="mouse-pointer"
             class="interface-icon"
+            tag="li"
           />
           <p>
             Mouse Demo

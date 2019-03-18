@@ -4,6 +4,7 @@
       <router-link
         to="/admin"
         class="interface-link"
+        tag="li"
       >
         <app-tile class="layer-three background round shadow green-accent">
           <font-awesome-icon
@@ -19,6 +20,7 @@
       <router-link
         to="/tools"
         class="interface-link"
+        tag="li"
       >
         <app-tile class="layer-three background round shadow blue-accent">
           <font-awesome-icon
