@@ -7,7 +7,7 @@ import _AppToken from './AppToken.vue';
 
 export var AppLayer = _AppLayer;
 export var AppButton = _AppButton;
-export var fAppIcon = _AppIcon;
+export var AppIcon = _AppIcon;
 export var AppInput = _AppInput;
-export var fAppTile = _AppTile;
-export var fAppToken = _AppToken;
+export var AppTile = _AppTile;
+export var AppToken = _AppToken;
