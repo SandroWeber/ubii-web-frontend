@@ -17,7 +17,7 @@
     <app-input 
       id="server-port"
       type="text"
-      v-model="test"
+      v-model="ubiiClientService.serverPort"
       class="layer-four background border round high-contrast"
     />
     <app-button 
@@ -35,7 +35,7 @@
 <script>
   import UbiiClientService from '../services/ubiiClient/ubiiClientService.js';
   import { AppButton, AppLayer, AppInput } from './appComponents/appComponents.js';
-  
+
   /* fontawesome */
   import { library } from '@fortawesome/fontawesome-svg-core'
   import { faSyncAlt } from '@fortawesome/free-solid-svg-icons'
