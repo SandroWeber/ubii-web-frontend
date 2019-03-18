@@ -1,24 +1,26 @@
 <template>
-  <div class="backend-info layer-two background low-contrast horizontal-shadow">
+  <app-layer
+    class="backend-info layer-two background low-contrast horizontal-shadow"
+  >
     <label for="server-ip">
       Server IP
     </label>
-    <input 
-      id="server-ip" 
-      type="text" 
+    <app-input 
+      :id="server-ip" 
+      :type="text" 
       v-model="ubiiClientService.serverIP" 
       class="layer-four background border round high-contrast"
     />
     <label for="server-port">
       Server Port
     </label>
-    <input
+    <app-input 
       id="server-port"
       type="text"
-      v-model="ubiiClientService.serverPort"
+      v-model="test"
       class="layer-four background border round high-contrast"
     />
-    <AppButton 
+    <app-button 
       :class="buttonClassObject"
       @click="connect"
     >
@@ -26,14 +28,15 @@
         icon="sync-alt"
         :class="{ transparent: !ubiiClientService.isConnected }"
       />
-    </AppButton>
-  </div>
+    </app-button>
+  </app-layer>
 </template>
 
 <script>
   import UbiiClientService from '../services/ubiiClient/ubiiClientService.js';
   import AppButton from './appComponents/AppButton.vue';
   import AppLayer from './appComponents/AppLayer.vue';
+  import AppInput from './appComponents/AppInput.vue';
 
   /* fontawesome */
   import { library } from '@fortawesome/fontawesome-svg-core'
@@ -43,7 +46,9 @@
   export default {
     name: 'ServerStatus',
     components:{
-      AppButton: AppButton
+      AppButton: AppButton,
+      AppLayer: AppLayer,
+      AppInput: AppInput
     },
     beforeMount: function () {
       if (!UbiiClientService.isConnected) {
@@ -52,7 +57,8 @@
     },
     data: () => {
       return {
-        ubiiClientService: UbiiClientService
+        ubiiClientService: UbiiClientService,
+        test: "hallo"
       }
     },
     computed:{
@@ -67,7 +73,8 @@
     },
     methods:{
       connect: function () {
-        ubiiClientService.connect();
+        console.log("Conenct to "+ this.test)
+        this.ubiiClientService.connect();
       }
     }
   }
