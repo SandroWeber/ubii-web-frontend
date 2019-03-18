@@ -1,5 +1,5 @@
 <template>
-  <div class="canvas layer-two background horizontal-shadow">
+  <app-layer class="canvas layer-two background horizontal-shadow">
     <div class="grid">
       <router-link
         to="/admin"
@@ -34,7 +34,7 @@
       </router-link>
       
     </div>
-  </div> 
+  </app-layer> 
 </template>
 
 <script>
@@ -43,12 +43,13 @@
   library.add(faCogs);
   library.add(faToolbox);
 
-  import AppTile from './appComponents/AppTile.vue';
+  import { AppLayer, AppTile } from './appComponents/appComponents.js';
 
   export default {
     name: 'EntryPage',
     components: {
-      AppTile: AppTile
+      AppTile: AppTile,
+      AppLayer
     } 
   }
 </script>
