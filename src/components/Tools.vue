@@ -47,7 +47,7 @@
   export default {
     name: 'Interfaces',
     components: {
-      AppTile: AppTile,
+      AppTile,
     }
   }
 </script>
