@@ -77,6 +77,8 @@
   import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
   import {DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
 
+  import { mapState, mapActions } from 'vuex'
+
   /* fontawesome */
   import {library} from '@fortawesome/fontawesome-svg-core'
   import {faPlay} from '@fortawesome/free-solid-svg-icons'
@@ -238,6 +240,9 @@
         this.$data.outputServerPointer = outputServerPointer;
         this.$data.ubiiDevice = ubiiDevice;
         this.$data.ubiiInteraction = ubiiInteraction;
+
+        this.addInteraction({interaction: ubiiInteraction});
+
         this.$data.ubiiSession = ubiiSession;
       },
       startDemo: function () {
@@ -322,7 +327,10 @@
           'vector2',
           this.$data.clientMousePosition
         );
-      }
+      },
+      ...mapActions('interactions', {
+          addInteraction: 'add'
+      }),
     }
   }
 </script>
