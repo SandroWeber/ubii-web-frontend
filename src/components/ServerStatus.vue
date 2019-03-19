@@ -42,9 +42,9 @@
   export default {
     name: 'ServerStatus',
     components:{
-      AppButton: AppButton,
-      AppLayer: AppLayer,
-      AppInput: AppInput
+      AppButton,
+      AppLayer,
+      AppInput
     },
     beforeMount: function () {
       if (!UbiiClientService.isConnected) {
