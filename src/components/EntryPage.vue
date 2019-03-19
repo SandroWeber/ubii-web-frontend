@@ -48,7 +48,7 @@
   export default {
     name: 'EntryPage',
     components: {
-      AppTile: AppTile,
+      AppTile,
       AppLayer
     } 
   }
