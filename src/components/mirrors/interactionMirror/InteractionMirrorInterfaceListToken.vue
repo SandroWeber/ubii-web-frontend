@@ -21,7 +21,7 @@
       },
       computedClassList: function(){
         return {
-          "red-accent": this.isUnused
+          "orange-accent": this.isUnused
         }
       }
     }
