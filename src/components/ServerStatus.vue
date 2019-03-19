@@ -9,7 +9,6 @@
       :id="server-ip" 
       :type="text" 
       v-model="ubiiClientService.serverIP" 
-      class="layer-four background border round high-contrast"
     />
     <label for="server-port">
       Server Port
@@ -18,7 +17,6 @@
       id="server-port"
       type="text"
       v-model="ubiiClientService.serverPort"
-      class="layer-four background border round high-contrast"
     />
     <app-button 
       :class="buttonClassObject"
