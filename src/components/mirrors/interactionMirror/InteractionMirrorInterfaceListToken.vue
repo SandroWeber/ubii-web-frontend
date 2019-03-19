@@ -1,5 +1,5 @@
 <template>
-  <div class="interaction-mirror-interface-list-token token">
+  <div class="interaction-mirror-interface-list-token token" :class="computedClassList">
     <span>
       {{name}}
     </span>
@@ -12,6 +12,18 @@
     components: {},
     props: {
       name: String,
+      interfaceKey: String,
+      code: String
+    },
+    computed: {
+      isUnused: function(){
+        return (this.code.includes(this.interfaceKey+"."+this.name) !== true);
+      },
+      computedClassList: function(){
+        return {
+          "red-accent": this.isUnused
+        }
+      }
     }
   } 
 </script> 
