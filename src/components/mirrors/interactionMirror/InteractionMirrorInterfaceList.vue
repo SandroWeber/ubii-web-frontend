@@ -4,6 +4,8 @@
         v-for="element in interfaceList"
         :key="element.name"
         :name="element.name"
+        :interface-key="interfaceKey"
+        :code="code"
       />
   </div>
 </template>
@@ -17,8 +19,11 @@
       InteractionMirrorInterfaceListToken: InteractionMirrorInterfaceListToken
     },
     props: {
-      interfaceList: Array
-    }
+      interfaceList: Array,
+      interfaceKey: String,
+      code: String
+    },
+    
   } 
 </script> 
 
