@@ -8,16 +8,13 @@
 </template>
 
 <script>
-
     export default {
         name: 'AppInput',
-        props: ['value', 'id', 'type'],
-        components: {
-        },
-        data: () => {
-            return {
-            };
-        },
+        props: [
+            'value',
+            'id',
+            'type'
+        ],
         computed: {
             localValue: {
                 get() {
@@ -28,14 +25,19 @@
                 }
             }
         },
-        methods: {
-        }
     }
 </script>
 
 <style scoped lang="stylus">
-    .code-mirror
-        height 100%
-        padding: 0px
-        flex-grow: 1
+@import "./../../styles/main/base/color"
+
+.app-input
+    z-index: 4000
+    color: highContrastColor
+    background-color: layerFourSecondaryColor
+    border-width: layerBorderWidth
+    border-style: solid
+    border-color: layerFourBorderColor
+    &.round
+        border-radius: layerBorderRadius
 </style>
