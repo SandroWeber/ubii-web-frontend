@@ -62,9 +62,4 @@
     
     &:hover
       color: maxContrastColor
-
-    & p 
-        text-decoration-line: none !important
-a
-    text-decoration-line: none !important
 </style>
