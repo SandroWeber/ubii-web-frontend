@@ -4,7 +4,11 @@
             :name="interaction.name"
             :id="interaction.id"
         />
-        <interaction-mirror-interface-list :interface-list="interaction.input"/>
+        <interaction-mirror-interface-list
+            :interface-list="interaction.input"
+            :interface-key="'input'"
+            :code="interaction.code"
+        />
         <div class="code-wrapper layer-three border round">
             <source-code-mirror
                 v-model="interaction.code"
@@ -12,7 +16,11 @@
             >
             </source-code-mirror>
         </div>
-        <interaction-mirror-interface-list :interfaceList="interaction.output"/>
+        <interaction-mirror-interface-list
+            :interfaceList="interaction.output"
+            :interface-key="'output'"
+            :code="interaction.code"
+        v/>
     </div>
 </template>
 
