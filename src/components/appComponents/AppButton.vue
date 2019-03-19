@@ -3,8 +3,7 @@
     class="app-button"
     @click="onClick"
   >
-    <slot>
-    </slot>
+    <slot> </slot>
   </button>
 </template>
 
