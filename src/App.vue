@@ -87,17 +87,17 @@
 }`,
   inputFormats: [
       {
-          internalName: 'inputClientPointer.internalName',
+          internalName: 'inputClientPointer',
           messageFormat: 'inputClientPointer.messageFormat'
       },
       {
-          internalName: 'inputMirror.internalName',
+          internalName: 'inputMirror',
           messageFormat: 'inputMirror.messageFormat'
       }
   ],
   outputFormats: [
       {
-          internalName: 'outputServerPointer.internalName',
+          internalName: 'outputServerPointer',
           messageFormat: 'outputServerPointer.messageFormat'
       }
   ]
@@ -111,17 +111,17 @@ return true;
 }`,
   inputFormats: [
       {
-          internalName: 'inputClientPointer.internalName',
+          internalName: 'inputClientPointer',
           messageFormat: 'inputClientPointer.messageFormat'
       },
       {
-          internalName: 'inputMirror.internalName',
+          internalName: 'inputMirror',
           messageFormat: 'inputMirror.messageFormat'
       }
   ],
   outputFormats: [
       {
-          internalName: 'outputServerPointer.internalName',
+          internalName: 'outputServerPointer',
           messageFormat: 'outputServerPointer.messageFormat'
       }
   ]
