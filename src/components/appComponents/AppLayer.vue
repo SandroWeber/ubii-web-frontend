@@ -14,6 +14,7 @@
 
 <style scoped lang="stylus">
 @import "./../../styles/main/color"
+@import "./../../styles/main/shadow"
 
 layerBorderWidth = 1px
 layerBorderRadius = 5px
