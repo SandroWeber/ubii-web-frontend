@@ -4,16 +4,16 @@
             :name="interaction.name"
             :id="interaction.id"
         />
-        <interaction-mirror-interface-list :interface-list="interaction.input"/>
+        <interaction-mirror-interface-list :interface-list="interaction.inputFormats"/>
         <div class="code-wrapper layer-three border round">
             <source-code-mirror
-                v-model="interaction.code"
+                v-model="interaction.processingCallback"
                 @input="onCodeChange"
             >
             </source-code-mirror>
         </div>
-        <interaction-mirror-interface-list :interfaceList="interaction.output"/>
-    </app-layer>
+        <interaction-mirror-interface-list :interfaceList="interaction.outputFormats"/>
+    </div>
 </template>
 
 <script>

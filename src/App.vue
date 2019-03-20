@@ -52,6 +52,84 @@
   import ServerStatus from './components/ServerStatus.vue'
   import { AppLayer } from './components/appComponents/appComponents.js';
 
+  // Dummy interaction.
+  let dummyInteractionOne =
+  {
+      id: '1234',
+      name: 'Dummy Interaction One',
+      processingCallback: `(input, output, state) => {
+  return true;
+}`,
+  inputFormats: [
+      {
+          internalName: 'input-A',
+          messageFormat: 'topic-A'
+      },
+      {
+          internalName: 'input-B',
+          messageFormat: 'topic-B'
+      }
+  ],
+  outputFormats: [
+      {
+          internalName: 'output-X',
+          messageFormat: 'topic-X'
+      },
+      {
+          internalName: 'output-Y',
+          messageFormat: 'topic-Y'
+      }
+  ]
+  };
+
+  let dummyInteractionTwo = {
+  id: 'uuidv4()',
+  name: 'Second Test',
+  processingCallback: `(input, output, state) => {
+  return true;
+}`,
+  inputFormats: [
+      {
+          internalName: 'inputClientPointer',
+          messageFormat: 'inputClientPointer.messageFormat'
+      },
+      {
+          internalName: 'inputMirror',
+          messageFormat: 'inputMirror.messageFormat'
+      }
+  ],
+  outputFormats: [
+      {
+          internalName: 'outputServerPointer',
+          messageFormat: 'outputServerPointer.messageFormat'
+      }
+  ]
+  };
+
+  let dummyInteractionThree = {
+id: 'three',
+name: 'TestThree',
+processingCallback: `(input, output, state) => {
+return true;
+}`,
+  inputFormats: [
+      {
+          internalName: 'inputClientPointer',
+          messageFormat: 'inputClientPointer.messageFormat'
+      },
+      {
+          internalName: 'inputMirror',
+          messageFormat: 'inputMirror.messageFormat'
+      }
+  ],
+  outputFormats: [
+      {
+          internalName: 'outputServerPointer',
+          messageFormat: 'outputServerPointer.messageFormat'
+      }
+  ]
+  };
+
   export default {
     name: 'app',
     components: {
@@ -62,6 +140,11 @@
       return {
         ubiiClientService: ClientNode
       }
+    },
+    mounted(){
+      this.$store.dispatch("interactions/add", {interaction: dummyInteractionOne});
+      this.$store.dispatch("interactions/add", {interaction: dummyInteractionTwo});
+      this.$store.dispatch("interactions/add", {interaction: dummyInteractionThree});
     }
   }
 </script>
