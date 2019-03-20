@@ -67,7 +67,7 @@
 </script>
 
 <style lang="stylus"> 
-@import "./styles/main/base/color"
+@import "./styles/main/color"
 
   * {
       margin: 0;

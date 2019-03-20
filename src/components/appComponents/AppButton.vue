@@ -21,7 +21,7 @@
 </script> 
 
 <style scoped lang="stylus">
-@import "./../../styles/main/base/color"
+@import "./../../styles/main/color"
 
 .app-button
     border: 1px solid mediumContrastColor

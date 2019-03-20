@@ -18,7 +18,7 @@
 </script> 
 
 <style scoped lang="stylus">
-@import "./../../styles/main/base/color"
+@import "./../../styles/main/color"
 
 .app-token
     // Base:
