@@ -1,53 +1,56 @@
 <template>
-  <div 
+  <app-layer 
     id="app"
     class="layer-one background"
   >
     <server-status id="server-status"/>
-    <nav class="navigation-bar layer-one background border shadow">
-      <router-link
-        to="/"
-        class="navigation-item "
-      >
-        Home
-      </router-link>
-      |
-      <router-link
-        to="/admin"
-        class="navigation-item"
-      >
-        Administration
-      </router-link>
-      |
-      <router-link
-        to="/tools"
-        class="navigation-item"
-      >
-      Tools
-      </router-link>
-      |
-      <router-link
-        to="/nodeEditor"
-        class="navigation-item"
-      >
-      Node Editor
-      </router-link>
-      |
-      <router-link
-        to="/interactionEditor"
-        class="navigation-item"
-      >
-        Interaction Editor
-      </router-link>
-    </nav>
+    <app-layer class="layer-one layer-one background border shadow">
+      <nav class="navigation-bar">
+        <router-link
+          to="/"
+          class="navigation-item "
+        >
+          Home
+        </router-link>
+        |
+        <router-link
+          to="/admin"
+          class="navigation-item"
+        >
+          Administration
+        </router-link>
+        |
+        <router-link
+          to="/tools"
+          class="navigation-item"
+        >
+        Tools
+        </router-link>
+        |
+        <router-link
+          to="/nodeEditor"
+          class="navigation-item"
+        >
+        Node Editor
+        </router-link>
+        |
+        <router-link
+          to="/interactionEditor"
+          class="navigation-item"
+        >
+          Interaction Editor
+        </router-link>
+      </nav>
+    </app-layer>
     
     <router-view class="router-view"/>
-  </div>
+  </app-layer>
 </template>
 
 <script>
   import ClientNode from './services/ubiiClient/ubiiClientService';
   import ServerStatus from './components/ServerStatus.vue'
+  import { AppLayer } from './components/appComponents/appComponents.js';
 
   // Dummy interaction.
   let dummyInteractionOne =
@@ -130,7 +133,8 @@ return true;
   export default {
     name: 'app',
     components: {
-      ServerStatus
+      ServerStatus,
+      AppLayer
     },
     data: () => {
       return {
@@ -146,6 +150,8 @@ return true;
 </script>
 
 <style lang="stylus"> 
+@import "./styles/main/color"
+
   * {
       margin: 0;
       padding: 0;
@@ -164,6 +170,7 @@ return true;
     height: 100%;
     display flex
     flex-direction column
+    color: maxContrastColor
   }
 
   .navigation-bar {

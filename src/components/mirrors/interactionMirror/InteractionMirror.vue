@@ -1,5 +1,5 @@
 <template>
-    <div class="interaction-mirror layer-three background shadow">
+    <app-layer class="interaction-mirror layer-three background shadow">
         <interaction-mirror-header
             :name="interaction.name"
             :id="interaction.id"
@@ -13,13 +13,14 @@
             </source-code-mirror>
         </div>
         <interaction-mirror-interface-list :interfaceList="interaction.outputFormats"/>
-    </div>
+    </app-layer>
 </template>
 
 <script>
     import InteractionMirrorHeader from './InteractionMirrorHeader.vue';
     import InteractionMirrorInterfaceList from './InteractionMirrorInterfaceList.vue';
     import SourceCodeMirror from './../sourceCodeMirror/SourceCodeMirror.vue';
+    import { AppLayer } from './../../appComponents/appComponents.js';
  
     // Fontawesome.
     import { library } from '@fortawesome/fontawesome-svg-core';
@@ -35,6 +36,7 @@
             SourceCodeMirror: SourceCodeMirror,
             InteractionMirrorHeader: InteractionMirrorHeader,
             InteractionMirrorInterfaceList: InteractionMirrorInterfaceList,
+            AppLayer
         },
         data: () => {
             return {

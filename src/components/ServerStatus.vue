@@ -1,37 +1,38 @@
 <template>
-  <div class="backend-info layer-two background low-contrast horizontal-shadow">
+  <app-layer
+    class="backend-info layer-two background low-contrast horizontal-shadow"
+  >
     <label for="server-ip">
       Server IP
     </label>
-    <input 
-      id="server-ip" 
-      type="text" 
+    <app-input 
+      :id="'server-ip'" 
+      :type="'text'" 
       v-model="ubiiClientService.serverIP" 
-      class="layer-four background border round high-contrast"
     />
     <label for="server-port">
       Server Port
     </label>
-    <input
-      id="server-port"
-      type="text"
+    <app-input 
+      :id="'server-port'"
+      :type="'text'"
       v-model="ubiiClientService.serverPort"
-      class="layer-four background border round high-contrast"
     />
-    <button 
+    <app-button 
       :class="buttonClassObject"
-      @click="ubiiClientService.connect()"
+      @click="connect"
     >
       <font-awesome-icon 
         icon="sync-alt"
         :class="{ transparent: !ubiiClientService.isConnected }"
       />
-    </button>
-  </div>
+    </app-button>
+  </app-layer>
 </template>
 
 <script>
   import UbiiClientService from '../services/ubiiClient/ubiiClientService.js';
+  import { AppButton, AppLayer, AppInput } from './appComponents/appComponents.js';
 
   /* fontawesome */
   import { library } from '@fortawesome/fontawesome-svg-core'
@@ -40,6 +41,11 @@
 
   export default {
     name: 'ServerStatus',
+    components:{
+      AppButton,
+      AppLayer,
+      AppInput
+    },
     beforeMount: function () {
       if (!UbiiClientService.isConnected) {
         UbiiClientService.connect();
@@ -47,17 +53,23 @@
     },
     data: () => {
       return {
-        ubiiClientService: UbiiClientService
+        ubiiClientService: UbiiClientService,
+        test: "hallo"
       }
     },
     computed:{
       buttonClassObject: function () {
         return {
           "button-connect": true,
-          "button": true,
+          "round": true,
           "green-accent": this.ubiiClientService.isConnected,
           "red-accent": !this.ubiiClientService.isConnected
         }
+      }
+    },
+    methods:{
+      connect: function () {
+        this.ubiiClientService.connect();
       }
     }
   }
@@ -77,6 +89,5 @@
     height: 1.8em
     width 1.8em
     margin: 2px 10px 2px 10px
-    padding: 0.1em
-    border-radius 999px
+    
 </style>

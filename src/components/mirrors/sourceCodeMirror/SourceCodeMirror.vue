@@ -30,7 +30,7 @@
                         lineNumbers: true,
                         line: true
                     }
-                }
+                } 
             };
         },
         computed:{

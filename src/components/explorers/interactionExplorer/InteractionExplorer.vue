@@ -1,5 +1,5 @@
 <template>
-    <div class="interaction-explorer layer-two background shadow">
+    <app-layer class="interaction-explorer layer-two background shadow">
         <interaction-explorer-item
             v-for="element in interactions"
             :key="element.name"
@@ -8,11 +8,12 @@
             :selected="element.id === selectedInteractionId"
             @select="onSelectItem"
         />
-    </div>
+    </app-layer>
 </template>
 
 <script>
     import InteractionExplorerItem from "./InteractionExplorerItem.vue";
+    import { AppLayer } from './../../appComponents/appComponents.js';
 
     export default {
         name: 'InteractionExplorer',
@@ -21,7 +22,8 @@
             selectedInteractionId: String
         },
         components: {
-            InteractionExplorerItem: InteractionExplorerItem
+            InteractionExplorerItem: InteractionExplorerItem,
+            AppLayer
         },
         data: () => {
             return {

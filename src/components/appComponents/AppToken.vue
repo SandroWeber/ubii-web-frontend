@@ -1,10 +1,31 @@
-@import "./../base/color"
+<template>
+  <div class="app-token">
+    <span>
+      {{text}}
+    </span>
+  </div>
+</template>
 
-.token
+<script>
+  export default { 
+    name: 'AppToken',
+    components: {},
+    props: {
+        text: String,
+        editable: Boolean
+    }
+  } 
+</script> 
+
+<style scoped lang="stylus">
+@import "./../../styles/main/color"
+
+.app-token
     // Base:
     background-color: mediumContrastColor
     border-radius: 999px
     color: layerOneSecondaryColor
+    padding 5px 10px 5px 10px
 
     // Primary:
     &.layer-one
@@ -40,3 +61,4 @@
         background-color: purpleAccentColor
     &.blue-accent
         background-color: blueAccentColor
+</style>
