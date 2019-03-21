@@ -6,16 +6,16 @@
       Server IP
     </label>
     <app-input 
-      :id="server-ip" 
-      :type="text" 
+      :id="'server-ip'" 
+      :type="'text'" 
       v-model="ubiiClientService.serverIP" 
     />
     <label for="server-port">
       Server Port
     </label>
     <app-input 
-      id="server-port"
-      type="text"
+      :id="'server-port'"
+      :type="'text'"
       v-model="ubiiClientService.serverPort"
     />
     <app-button 
