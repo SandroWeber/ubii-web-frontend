@@ -1,74 +1,79 @@
 <template>
-  <div>
-    <div v-show="!ubiiClientService.isConnected">
+    <div>
+        <div v-show="!ubiiClientService.isConnected">
       <span class="notification">
         Please connect to backend before starting the application.
       </span>
-    </div>
-
-    <div v-show="ubiiClientService.isConnected && !demoStarted">
-      <button v-on:click="startDemo()">
-        <font-awesome-icon icon="play"/>
-      </button>
-    </div>
-
-    <div
-      v-show="ubiiClientService.isConnected && demoStarted"
-      class="grid"
-    >
-      <div class="options">
-        <input
-          id="checkboxClientPointer"
-          type="checkbox"
-          v-model="showClientPointer"
-        />
-        <label for="checkboxClientPointer">
-          Show Client Pointer
-        </label>
-
-        <br/>
-
-        <input 
-          id="checkboxServerPointer"
-          type="checkbox"
-          v-model="showServerPointer"
-        />
-        <label for="checkboxServerPointer">
-          Show Server Pointer
-        </label>
-
-        <br/>
-
-        <input
-          id="checkboxMirrorPointer"
-          type="checkbox"
-          v-model="mirrorPointer"
-        />
-        <label for="checkboxMirrorPointer">
-          Mirror Pointer
-        </label>
-      </div>
-
-      <div
-        id="mouse-pointer-area"
-        class="mouse-pointer-area"
-        v-bind:class="{ hideCursor: !showClientPointer }"
-        v-on:mousemove="onMouseMove($event)"
-        v-on:mouseenter="clientPointerInside = true;"
-        v-on:mouseleave="clientPointerInside = false;"
-        v-on:touchstart="onTouchStart($event)"
-        v-on:touchend="clientPointerInside = false;"
-        v-on:touchmove="onTouchMove($event)"
-      >
-        <div
-          class="server-mouse-position-indicator"
-          :style="{top: serverMousePosition.y + 'px', left: serverMousePosition.x + 'px' }"
-          v-show="showServerPointer && clientPointerInside"
-        >
         </div>
-      </div>
+
+        <div class="start-demo" v-show="ubiiClientService.isConnected && !demoStarted">
+            <button class="start-demo-button" v-on:click="startDemo()">
+                <font-awesome-icon icon="play"/>
+            </button>
+        </div>
+
+        <div
+                v-show="ubiiClientService.isConnected && demoStarted"
+                class="grid"
+        >
+            <div class="options">
+                <!-- a checkbox to toggle showing the client side pointer -->
+                <input
+                        id="checkboxClientPointer"
+                        type="checkbox"
+                        v-model="showClientPointer"
+                />
+                <label for="checkboxClientPointer">
+                    Show Client Pointer
+                  </label>
+
+                <br/>
+
+                <!-- a checkbox to toggle showing the server side pointer -->
+                <input
+                        id="checkboxServerPointer"
+                        type="checkbox"
+                        v-model="showServerPointer"
+                />
+                <label for="checkboxServerPointer">
+                    Show Server Pointer
+                  </label>
+
+                <br/>
+
+                <!-- a checkbox to toggle inverting the pointer position at the server before sending it back to client -->
+                <input
+                        id="checkboxMirrorPointer"
+                        type="checkbox"
+                        v-model="mirrorPointer"
+                />
+                <label for="checkboxMirrorPointer">
+                    Mirror Pointer
+                  </label>
+            </div>
+
+            <!-- the interaction area.
+            if our pointer is inside, its position is sent to the server and back to us, then displayed as a red square -->
+            <div
+                    id="mouse-pointer-area"
+                    class="mouse-pointer-area"
+                    v-bind:class="{ hideCursor: !showClientPointer }"
+                    v-on:mousemove="onMouseMove($event)"
+                    v-on:mouseenter="clientPointerInside = true;"
+                    v-on:mouseleave="clientPointerInside = false;"
+                    v-on:touchstart="onTouchStart($event)"
+                    v-on:touchend="clientPointerInside = false;"
+                    v-on:touchmove="onTouchMove($event)"
+            >
+                <div
+                        class="server-mouse-position-indicator"
+                        :style="{top: serverMousePosition.y + 'px', left: serverMousePosition.x + 'px' }"
+                        v-show="showServerPointer && clientPointerInside"
+                >
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </template>
 
 <script>
@@ -77,7 +82,7 @@
   import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
   import {DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
 
-  import { mapState, mapActions } from 'vuex'
+  import {mapState, mapActions} from 'vuex'
 
   /* fontawesome */
   import {library} from '@fortawesome/fontawesome-svg-core'
@@ -89,13 +94,13 @@
 
   export default {
     name: 'DemoMousePointer',
-    mounted: function() {
+    mounted: function () {
       // unsubscribe before page is unloaded
       window.addEventListener('beforeunload', () => {
         this.stopDemo();
       });
     },
-    beforeDestroy: function() {
+    beforeDestroy: function () {
       this.stopDemo();
     },
     data: () => {
@@ -114,19 +119,22 @@
         if (!UbiiClientService.isConnected || !this.$data.ubiiDevice.name || !this.$data.inputMirror.topic) {
           return;
         }
-        
+
+        // if the checkbox is changed, we publish this info on the related topic
         UbiiClientService.client.publish(
           this.$data.ubiiDevice.name,
           this.$data.inputMirror.topic,
-          'boolean',
+          this.$data.inputMirror.messageFormat,
           value
         );
       }
     },
     methods: {
       createUbiiSpecs: function () {
-        let deviceName = 'web-demo-mouse-pointer';
+        // create specifications for the protobuf messages
 
+        // helper definitions that we can reference later
+        let deviceName = 'web-demo-mouse-pointer';
         let topicPrefix = UbiiClientService.getClientID() + '/' + deviceName;
         let inputClientPointer = {
           internalName: 'clientPointer',
@@ -144,6 +152,8 @@
           topic: topicPrefix + '/' + 'mouse_server_position'
         };
 
+        // specification of a ubii.devices.Device
+        // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/devices/device.proto
         let ubiiDevice = {
           name: deviceName,
           deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
@@ -166,6 +176,8 @@
           ]
         };
 
+        // specification of a ubii.interactions.Interaction
+        // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/interactions/interaction.proto
         let processingCallback = (input, output) => {
           if (!input.clientPointer) {
             return;
@@ -200,6 +212,8 @@
           ]
         };
 
+        // specification of a ubii.sessions.Session
+        // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/sessions/session.proto
         let ubiiSession = {
           id: uuidv4(),
           name: 'web-mouse-demo-session',
@@ -234,6 +248,7 @@
           ]
         };
 
+        // assign to local state for future reference
         this.$data.deviceName = deviceName;
         this.$data.inputClientPointer = inputClientPointer;
         this.$data.inputMirror = inputMirror;
@@ -246,30 +261,43 @@
         this.$data.ubiiSession = ubiiSession;
       },
       startDemo: function () {
+        // create all the specifications we need to define our demo application
+        // these are protobuf messages to be sent to the server (saved in this.$data)
         this.createUbiiSpecs();
 
         // register the mouse pointer device
         UbiiClientService.registerDevice(this.$data.ubiiDevice)
           .then((device) => {
+            // on success, the response will be the (possibly extended) device specification we just sent
+            // we accept any additions the server might have made, like an ID that was left blank so the backend
+            // would automatically assign one, to our local state
             this.$data.ubiiDevice = device;
             return device;
           })
           .then(() => {
-            // subscribe to the device topics
-            UbiiClientService.client.subscribe(this.$data.outputServerPointer.topic, (mousePosition) => {
-              let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
-              this.$data.serverMousePosition = {
-                x: mousePosition.x * boundingRect.width,
-                y: mousePosition.y * boundingRect.height
-              };
-            });
+            // subscribe to the device topics so we are notified when new data arrives on the topic
+            UbiiClientService.client.subscribe(
+              this.$data.outputServerPointer.topic,
+              // a callback to be called when new data on this topic arrives
+              (mousePosition) => {
+                // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
+                // interaction area and set our red square indicator
+                let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
+                this.$data.serverMousePosition = {
+                  x: mousePosition.x * boundingRect.width,
+                  y: mousePosition.y * boundingRect.height
+                };
+              });
 
+            // register our session
             UbiiClientService.registerSession(this.$data.ubiiSession)
               .then((session) => {
+              // again, accept extended definition that is sent back by the server as confirmation
                 this.$data.ubiiSession = session;
                 return session;
               })
               .then(() => {
+                // start the session
                 UbiiClientService.client
                   .callService({
                     topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
@@ -281,7 +309,8 @@
               });
           });
       },
-      stopDemo: function() {
+      stopDemo: function () {
+        // unsubscribe and stop session
         UbiiClientService.client.unsubscribe(this.$data.outputServerPointer.topic);
         UbiiClientService.client
           .callService({
@@ -290,6 +319,7 @@
           });
       },
       onMouseMove: function (event) {
+        // calculate the current mouse position, normalized to the bounds of the interactive area ([0;1], [0;1])
         let boundingRect = event.currentTarget.getBoundingClientRect();
         let relativeMousePosition = {
           x: event.offsetX / boundingRect.width,
@@ -297,6 +327,7 @@
         };
 
         this.$data.clientMousePosition = relativeMousePosition;
+        // publish our normalized client mouse position
         UbiiClientService.client.publish(
           this.$data.ubiiDevice.name,
           this.$data.inputClientPointer.topic,
@@ -309,6 +340,7 @@
         this.onTouchMove(event);
       },
       onTouchMove: function (event) {
+        // calculate the current touch position, normalized to the bounds of the interactive area ([0;1], [0;1])
         let relativeMousePosition = {
           x: (event.touches[0].clientX - event.target.offsetLeft) / event.target.offsetWidth,
           y: (event.touches[0].clientY - event.target.offsetTop) / event.target.offsetHeight
@@ -321,6 +353,7 @@
         }
 
         this.$data.clientMousePosition = relativeMousePosition;
+        // publish our normalized client touch position
         UbiiClientService.client.publish(
           this.$data.ubiiDevice.name,
           this.$data.inputClientPointer.topic,
@@ -329,7 +362,7 @@
         );
       },
       ...mapActions('interactions', {
-          addInteraction: 'add'
+        addInteraction: 'add'
       }),
     }
   }
@@ -361,4 +394,13 @@
         width: 10px
         height: 10px
         background-color: red
+
+    .start-demo
+        text-align: center
+        margin-top: 25px;
+
+    .start-demo-button
+        width: 50px;
+        height: 50px;
+
 </style>
