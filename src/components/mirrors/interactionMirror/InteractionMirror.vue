@@ -13,7 +13,7 @@
             </source-code-mirror>
         </div>
         <interaction-mirror-interface-list :interfaceList="interaction.outputFormats"/>
-    </div>
+    </app-layer>
 </template>
 
 <script>
