@@ -51,7 +51,6 @@
 </template>
 
 <script>
-    import InteractionMirrorHeader from './InteractionMirrorHeader.vue';
     import InteractionMirrorInterfaceList from './InteractionMirrorInterfaceList.vue';
     import SourceCodeMirror from './../sourceCodeMirror/SourceCodeMirror.vue';
     import { AppLayer } from './../../appComponents/appComponents.js';
@@ -68,7 +67,6 @@
         },
         components: {
             SourceCodeMirror: SourceCodeMirror,
-            InteractionMirrorHeader: InteractionMirrorHeader,
             InteractionMirrorInterfaceList: InteractionMirrorInterfaceList,
             AppLayer
         },
