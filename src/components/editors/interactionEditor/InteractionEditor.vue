@@ -1,7 +1,8 @@
 <template>
     <div>
         <div class="interaction-editor layer-one background">
-            <interaction-explorer   
+            <interaction-explorer
+                class="interaction-explorer-instance"
                 :interactions="interactions"
                 :selectedInteractionId="selectedInteraction.id"
                 @selectInteraction="onSelectInteraction"
@@ -85,4 +86,7 @@
         justify-content: flex-start
         align-items flex-start
         align-content flex-starts
+
+    .interaction-explorer-instance
+        width 300px
 </style>
