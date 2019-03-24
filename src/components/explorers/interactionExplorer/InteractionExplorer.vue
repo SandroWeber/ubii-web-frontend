@@ -41,5 +41,7 @@
     .interaction-explorer
         height: 100%
         min-width 200px
+        width: 100%
+        overflow: hidden
         flex-grow: 0
 </style>
