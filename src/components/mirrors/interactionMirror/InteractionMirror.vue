@@ -1,18 +1,20 @@
 <template>
     <app-layer class="interaction-mirror layer-three background shadow">  
-        <div class="interaction-mirror-header medium-contrast">
-            <input
-                class=""
+        <div class="interaction-mirror-header high-contrast">
+            <h3 class="medium-contrast id-title">
+            id: {{interaction.id}}
+            </h3>
+            <app-input
+                class="layer-one round title-input"
                 :id="'interaction-name'" 
                 :type="'type'"
                 v-model="interaction.name"
+                :size="'huge'"
             />
-            <h3>
-             ( ID {{interaction.id}} )
-            </h3>
         </div>
+        
         <h4 class="medium-contrast">
-            Input Specification
+            inputFormats
         </h4>
         <div class="interface-code-wrapper layer-three border round">
             <source-code-mirror
@@ -24,7 +26,7 @@
         
         
         <h4 class="medium-contrast">
-            Code
+            processingCallback
         </h4>
         <interaction-mirror-interface-list :interface-list="interaction.inputFormats"/>
         <div class="code-wrapper layer-three border round">
@@ -37,7 +39,7 @@
         <interaction-mirror-interface-list :interfaceList="interaction.outputFormats"/>
         
         <h4 class="medium-contrast">
-            Output Specification
+            outputFormats
         </h4>
         <div class="interface-code-wrapper layer-three border round">
             <source-code-mirror
@@ -53,7 +55,7 @@
 <script>
     import InteractionMirrorInterfaceList from './InteractionMirrorInterfaceList.vue';
     import SourceCodeMirror from './../sourceCodeMirror/SourceCodeMirror.vue';
-    import { AppLayer } from './../../appComponents/appComponents.js';
+    import { AppLayer , AppInput} from './../../appComponents/appComponents.js';
  
     // Fontawesome.
     import { library } from '@fortawesome/fontawesome-svg-core';
@@ -68,7 +70,8 @@
         components: {
             SourceCodeMirror,
             InteractionMirrorInterfaceList,
-            AppLayer
+            AppLayer,
+            AppInput
         },
         data: () => {
             return {
@@ -126,13 +129,25 @@
     
     .interaction-mirror-header
         display flex
-        flex-direction row
+        flex-direction row-reverse
 
     .code-wrapper
         text-align: left
         flex-grow: 2
+        margin-top 10px
+        margin-bottom 10px
+    
+    .id-title
+        font-size 1.3em
+        font-weight 600
+        padding-top: 5px
+        margin-left: 25px
+
+    .title-input
+        flex-grow: 1
     
     h4
         margin-top:20px
         margin-bottom 10px
+    
 </style>
