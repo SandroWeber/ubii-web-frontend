@@ -39,13 +39,14 @@
 
 <style scoped lang="stylus"> 
   .interaction-explorer-item
-    height 20px
+    
     order 1
-    margin 0px
     padding 5px 10px 5px 10px
     display flex
     flex-direction row
     cursor pointer
+    overflow: hidden
+    white-space: nowrap;
     &:hover
       color #ffffff
     &.selected
@@ -55,8 +56,9 @@
   .icon
     height 13px
     width 13px
-    margin-top: 2px
+    margin-top: 0px
     
   .label
     margin-left 5px
+
 </style>
