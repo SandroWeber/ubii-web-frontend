@@ -155,7 +155,11 @@ return true;
   * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
   }
+
 
   html, body {
     width: 100%;   
