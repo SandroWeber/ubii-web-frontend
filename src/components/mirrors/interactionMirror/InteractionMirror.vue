@@ -66,8 +66,8 @@
             interaction: Object
         },
         components: {
-            SourceCodeMirror: SourceCodeMirror,
-            InteractionMirrorInterfaceList: InteractionMirrorInterfaceList,
+            SourceCodeMirror,
+            InteractionMirrorInterfaceList,
             AppLayer
         },
         data: () => {
