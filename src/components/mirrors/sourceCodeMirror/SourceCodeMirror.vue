@@ -44,6 +44,13 @@
             }
         },
         methods: {
+        },
+        mounted: function(){
+            var myElements = document.querySelectorAll(".CodeMirror");
+
+            for (var i = 0; i < myElements.length; i++) {
+                myElements[i].style.height = '100%';
+            }
         }
     }
 </script>
@@ -53,4 +60,8 @@
         height 100%
         padding: 0px
         flex-grow: 1
+    
+    .vue-codemirror
+        height 100%
+        background-color: cyan
 </style>
