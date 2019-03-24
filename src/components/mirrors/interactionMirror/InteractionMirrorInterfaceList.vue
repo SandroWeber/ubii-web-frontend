@@ -30,5 +30,4 @@
     justify-content: flex-start
     align-items: flex-start
     align-content: flex-start
-    padding: 10px
 </style>
