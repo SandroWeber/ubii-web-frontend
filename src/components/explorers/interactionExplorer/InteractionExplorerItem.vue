@@ -54,11 +54,13 @@
       color yellowAccentColor
 
   .icon
-    height 13px
-    width 13px
+    height 1em
+    width 1em
     margin-top: 0px
     
   .label
     margin-left 5px
+    font-size 1em
+    margin-top 0.05em
 
 </style>
