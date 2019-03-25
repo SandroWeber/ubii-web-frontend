@@ -1,9 +1,11 @@
 <template>
   <div
     class="interaction-mirror-interface-list-token"
-    :class="computedClassList"
   >
-    <app-token :text="name">
+    <app-token
+      :class="computedClassList"
+      :text="name"
+    >
     </app-token>
   </div>
 </template>
