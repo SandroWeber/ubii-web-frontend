@@ -149,5 +149,6 @@
     h4
         margin-top:20px
         margin-bottom 10px
+        font-weight 500
     
 </style>
