@@ -7,7 +7,7 @@
         <interaction-mirror-interface-list
             :interface-list="interaction.inputFormats"
             :interface-key="'input'"
-            :code="interaction.code"
+            :code="interaction.processingCallback"
         />
         <div class="code-wrapper layer-three border round">
             <source-code-mirror
@@ -19,7 +19,7 @@
         <interaction-mirror-interface-list
             :interfaceList="interaction.outputFormats"
             :interface-key="'output'"
-            :code="interaction.code"
+            :code="interaction.processingCallback"
         v/>
     </app-layer>
 </template>
