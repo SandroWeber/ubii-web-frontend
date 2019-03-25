@@ -1,5 +1,7 @@
 <template>
     <app-layer class="interaction-explorer layer-two background shadow">
+        <interaction-explorer-toolbar
+        />
         <interaction-explorer-item
             v-for="element in interactions"
             :key="element.name"
@@ -13,6 +15,7 @@
 
 <script>
     import InteractionExplorerItem from "./InteractionExplorerItem.vue";
+    import InteractionExplorerToolbar from "./InteractionExplorerToolbar.vue";
     import { AppLayer } from './../../appComponents/appComponents.js';
 
     export default {
@@ -22,7 +25,8 @@
             selectedInteractionId: String
         },
         components: {
-            InteractionExplorerItem: InteractionExplorerItem,
+            InteractionExplorerItem,
+            InteractionExplorerToolbar,
             AppLayer
         },
         data: () => {
@@ -44,4 +48,6 @@
         width: 100%
         overflow: hidden
         flex-grow: 0
+        display flex
+        flex-direction column
 </style>
