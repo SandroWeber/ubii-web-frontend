@@ -27,6 +27,7 @@
     border: 1px solid mediumContrastColor
     color: mediumContrastColor
     background-color: layerOneSecondaryColor
+    cursor pointer
 
     &.round
       border-radius: 999px
