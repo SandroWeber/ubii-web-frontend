@@ -1,8 +1,25 @@
-@import "./color"
+<template>
+  <div class="app-layer">
+    <slot> </slot>
+  </div>
+</template>
+
+<script>
+  export default { 
+    name: 'AppLayer',
+    components: {},
+    props: {}
+  } 
+</script> 
+
+<style scoped lang="stylus">
+@import "./../../styles/main/color"
+@import "./../../styles/main/shadow"
 
 layerBorderWidth = 1px
 layerBorderRadius = 5px
 
+.app-layer
 .layer-one
     z-index: 1000
     
@@ -50,4 +67,4 @@ layerBorderRadius = 5px
         border-color: layerFourBorderColor
         &.round
             border-radius: layerBorderRadius
-    
+</style>

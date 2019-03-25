@@ -1,15 +1,21 @@
 <template>
-  <div class="interaction-mirror-interface-list-token token" :class="computedClassList">
-    <span>
-      {{name}}
-    </span>
+  <div
+    class="interaction-mirror-interface-list-token"
+    :class="computedClassList"
+  >
+    <app-token :text="name">
+    </app-token>
   </div>
 </template>
 
 <script>
+import AppToken from './../../appComponents/AppToken.vue';
+
   export default { 
     name: 'InteractionMirrorInterfaceListToken',
-    components: {},
+    components: {
+      AppToken: AppToken
+    },
     props: {
       name: String,
       interfaceKey: String,
@@ -32,5 +38,4 @@
   .interaction-mirror-interface-list-token
     order 1
     margin 5px
-    padding 5px 10px 5px 10px
 </style>

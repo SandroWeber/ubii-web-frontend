@@ -1,33 +1,34 @@
 <template>
-    <div class="interaction-mirror layer-three background shadow">
+    <app-layer class="interaction-mirror layer-three background shadow">
         <interaction-mirror-header
             :name="interaction.name"
             :id="interaction.id"
         />
         <interaction-mirror-interface-list
-            :interface-list="interaction.input"
+            :interface-list="interaction.inputFormats"
             :interface-key="'input'"
             :code="interaction.code"
         />
         <div class="code-wrapper layer-three border round">
             <source-code-mirror
-                v-model="interaction.code"
+                v-model="interaction.processingCallback"
                 @input="onCodeChange"
             >
             </source-code-mirror>
         </div>
         <interaction-mirror-interface-list
-            :interfaceList="interaction.output"
+            :interfaceList="interaction.outputFormats"
             :interface-key="'output'"
             :code="interaction.code"
         v/>
-    </div>
+    </app-layer>
 </template>
 
 <script>
     import InteractionMirrorHeader from './InteractionMirrorHeader.vue';
     import InteractionMirrorInterfaceList from './InteractionMirrorInterfaceList.vue';
     import SourceCodeMirror from './../sourceCodeMirror/SourceCodeMirror.vue';
+    import { AppLayer } from './../../appComponents/appComponents.js';
  
     // Fontawesome.
     import { library } from '@fortawesome/fontawesome-svg-core';
@@ -43,6 +44,7 @@
             SourceCodeMirror: SourceCodeMirror,
             InteractionMirrorHeader: InteractionMirrorHeader,
             InteractionMirrorInterfaceList: InteractionMirrorInterfaceList,
+            AppLayer
         },
         data: () => {
             return {

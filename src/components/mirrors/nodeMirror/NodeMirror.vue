@@ -1,5 +1,5 @@
 <template>
-  <div class="node-mirror layer-three background shadow">
+  <app-layer class="node-mirror layer-three background shadow">
     <div class="blueprint-grid">
         <svg
           width="100%"
@@ -36,11 +36,12 @@
       ref="viewer"
     >
     </div>
-  </div>
+  </app-layer>
 </template>
 
 <script>  
   import initViewer from './viewer';
+  import { AppLayer } from './../../appComponents/appComponents.js';
 
   export default {  
     name: 'NodeMirror',  
@@ -48,7 +49,9 @@
         return {
         };
       },
-    components: {},
+    components: {
+      AppLayer
+    },
     async mounted(){
       await initViewer(this.$refs.viewer);
     }

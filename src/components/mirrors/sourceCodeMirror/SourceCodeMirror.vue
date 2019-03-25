@@ -1,8 +1,7 @@
 <template>
     <div class="code-mirror">
         <codemirror
-            :value="value"
-            @input="onCodeChange"
+            v-model="localValue"
             :options="codemirror.options"
         >
         </codemirror>
@@ -31,13 +30,20 @@
                         lineNumbers: true,
                         line: true
                     }
-                }
+                } 
             };
         },
-        methods: {
-            onCodeChange: function(value) {
-                this.$emit('input', value);
+        computed:{
+             localValue: {
+                get() {
+                    return this.value
+                },
+                set(localValue) {
+                    this.$emit('input', localValue)
+                }
             }
+        },
+        methods: {
         }
     }
 </script>

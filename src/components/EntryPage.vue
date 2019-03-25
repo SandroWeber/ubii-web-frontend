@@ -1,32 +1,40 @@
 <template>
-  <div class="canvas layer-two background horizontal-shadow">
+  <app-layer class="canvas layer-two background horizontal-shadow">
     <div class="grid">
       <router-link
         to="/admin"
-        class="interface-link layer-three background round shadow button-area green-accent"
+        class="interface-link"
+        tag="div"
       >
-        <font-awesome-icon
-          icon="cogs"
-          class="interface-icon"
-        />
-        <p>
-          Administration
-        </p>
+        <app-tile class="layer-three background round shadow green-accent">
+          <font-awesome-icon
+            icon="cogs"
+            class="interface-icon"
+          />
+          <p>
+            Administration
+          </p>
+        </app-tile>
       </router-link>
+      
       <router-link
         to="/tools"
-        class="interface-link layer-three background round shadow button-area blue-accent"
+        class="interface-link"
+        tag="div"
       >
-        <font-awesome-icon
-          icon="toolbox"
-          class="interface-icon"
-        />
-        <p>
-          Tools
-        </p>
+        <app-tile class="layer-three background round shadow blue-accent">
+          <font-awesome-icon
+            icon="toolbox"
+            class="interface-icon"
+          />
+          <p>
+            Tools
+          </p>
+          </app-tile>
       </router-link>
+      
     </div>
-  </div> 
+  </app-layer> 
 </template>
 
 <script>
@@ -35,9 +43,14 @@
   library.add(faCogs);
   library.add(faToolbox);
 
+  import { AppLayer, AppTile } from './appComponents/appComponents.js';
+
   export default {
     name: 'EntryPage',
-    components: {} 
+    components: {
+      AppTile,
+      AppLayer
+    } 
   }
 </script>
 
@@ -52,8 +65,8 @@
     grid-template-columns: 1fr 1fr 1fr 1fr
 
   .interface-link
-    padding: 10px
     text-align: center
+    cursor:pointer
 
   .interface-icon
     width: 50px

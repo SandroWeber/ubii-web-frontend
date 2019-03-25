@@ -2,8 +2,8 @@
   <div class="interaction-mirror-interface-list">
       <interaction-mirror-interface-list-token 
         v-for="element in interfaceList"
-        :key="element.name"
-        :name="element.name"
+        :key="element.internalName"
+        :name="element.internalName"
         :interface-key="interfaceKey"
         :code="code"
       />

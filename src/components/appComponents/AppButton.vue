@@ -1,10 +1,35 @@
-@import "./../base/color"
+<template>
+  <button 
+    class="app-button"
+    @click="onClick"
+  >
+    <slot> </slot>
+  </button>
+</template>
 
-.button
+<script>
+  export default { 
+    name: 'AppButton',
+    components: {},
+    props: {},
+    methods: {
+      onClick: function(value) {
+          this.$emit('click', value);
+      }
+    }
+  } 
+</script> 
+
+<style scoped lang="stylus">
+@import "./../../styles/main/color"
+
+.app-button
     border: 1px solid mediumContrastColor
-    border-radius: 3px
     color: mediumContrastColor
     background-color: layerOneSecondaryColor
+
+    &.round
+      border-radius: 999px
 
     // Contrast
     &.low-contrast
@@ -43,51 +68,4 @@
     &:hover
         border-color: highContrastColor 
         color: highContrastColor
-
-.button-area
-    border-width: 2px
-    border-style: solid
-    text-decoration: none
-    color: mediumContrastColor
-    
-    // Priamry
-    &.layer-one
-        border-color: layerOneBorderColor
-    &.layer-two
-        border-color: layerTwoBorderColor
-    &.layer-three
-        border-color: layerThreeBorderColor
-    &.layer-four
-        border-color: layerFourBorderColor
-
-    // Contrast
-    &.low-contrast
-        color: lowContrastColor
-    &.medium-contrast
-        color: mediumContrastColor
-    &.high-contrast
-        color: highContrastColor
-    &.max-contrast
-        color: maxContrastColor
-
-    // Accents:
-    &.red-accent
-        color: redAccentColor
-    &.green-accent
-        color: greenAccentColor
-    &.yellow-accent
-        color: yellowAccentColor
-    &.orange-accent
-        color: orangeAccentColor
-    &.purple-accent
-        color: purpleAccentColor
-    &.blue-accent
-        color: blueAccentColor
-    
-    &:hover
-      color: maxContrastColor
-
-
-.clickable
-    &:hover
-        color: maxContrastColor
+</style>
