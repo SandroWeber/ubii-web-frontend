@@ -4,7 +4,11 @@
             :name="interaction.name"
             :id="interaction.id"
         />
-        <interaction-mirror-interface-list :interface-list="interaction.inputFormats"/>
+        <interaction-mirror-interface-list
+            :interface-list="interaction.inputFormats"
+            :interface-key="'input'"
+            :code="interaction.processingCallback"
+        />
         <div class="code-wrapper layer-three border round">
             <source-code-mirror
                 v-model="interaction.processingCallback"
@@ -12,7 +16,11 @@
             >
             </source-code-mirror>
         </div>
-        <interaction-mirror-interface-list :interfaceList="interaction.outputFormats"/>
+        <interaction-mirror-interface-list
+            :interfaceList="interaction.outputFormats"
+            :interface-key="'output'"
+            :code="interaction.processingCallback"
+        v/>
     </app-layer>
 </template>
 

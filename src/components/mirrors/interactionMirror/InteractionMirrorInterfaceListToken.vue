@@ -1,6 +1,11 @@
 <template>
-  <div class="interaction-mirror-interface-list-token">
-    <app-token :text="name">
+  <div
+    class="interaction-mirror-interface-list-token"
+  >
+    <app-token
+      :class="computedClassList"
+      :text="name"
+    >
     </app-token>
   </div>
 </template>
@@ -15,6 +20,18 @@ import AppToken from './../../appComponents/AppToken.vue';
     },
     props: {
       name: String,
+      interfaceKey: String,
+      code: String
+    },
+    computed: {
+      isUnused: function(){
+        return (this.code.includes(this.interfaceKey+"."+this.name) !== true);
+      },
+      computedClassList: function(){
+        return {
+          "orange-accent": this.isUnused
+        }
+      }
     }
   } 
 </script> 
