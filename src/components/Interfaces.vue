@@ -1,33 +1,19 @@
 <template>
   <div>
+    <span>A list of generic device interfaces</span>
     <div class="grid">
       <router-link
-        to="/tools/topic-inspector"
+        to="/interfaces/smart-device"
         class="interface-link"
         tag="div"
       >
         <app-tile class="layer-three background round shadow orange-accent"> 
           <font-awesome-icon
-            icon="eye"
+            icon="mobile-alt"
             class="interface-icon"
           />
           <p>
-            Topic Inspector
-          </p>
-        </app-tile>
-      </router-link>
-      <router-link
-        to="/tools/demo-mouse-pointer"
-        class="interface-link"
-        tag="div"
-      >
-        <app-tile class="layer-three background round shadow orange-accent"> 
-          <font-awesome-icon
-            icon="mouse-pointer"
-            class="interface-icon"
-          />
-          <p>
-            Mouse Demo
+            Smart Device
           </p>
         </app-tile>
       </router-link>
@@ -40,12 +26,11 @@
 
   // Fontawesome.
   import { library } from '@fortawesome/fontawesome-svg-core'
-  import { faEye, faMousePointer } from '@fortawesome/free-solid-svg-icons'
-  library.add(faEye);
-  library.add(faMousePointer);
+  import { faMobileAlt } from '@fortawesome/free-solid-svg-icons'
+  library.add(faMobileAlt);
 
   export default {
-    name: 'Tools',
+    name: 'Interfaces',
     components: {
       AppTile,
     }

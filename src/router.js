@@ -15,7 +15,7 @@ export default new Router({
       name: 'Administration',
       component: () => import('./components/Administration.vue')
     },
-    /* web interfaces */
+    /* tools */
     {
       path: '/tools',
       name: 'Tools',
@@ -30,6 +30,17 @@ export default new Router({
       path: '/tools/demo-mouse-pointer',
       name: 'Demo: Mouse Pointer',
       component: () => import('./components/DemoMousePointer.vue')
+    },
+    /* interfaces */
+    {
+      path: '/interfaces',
+      name: 'Interfaces',
+      component: () => import('./components/Interfaces.vue')
+    },
+    {
+      path: '/interfaces/smart-device',
+      name: 'Interface - Smart Device',
+      component: () => import('./components/interfaces/SmartDevice.vue')
     },
     {
       path: '/nodeEditor',
