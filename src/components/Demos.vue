@@ -2,7 +2,7 @@
   <div>
     <div class="grid">
       <router-link
-        to="/demos/demo-mouse-pointer"
+        to="/demos/mouse-pointer"
         class="interface-link"
         tag="div"
       >
@@ -16,6 +16,22 @@
           </p>
         </app-tile>
       </router-link>
+
+      <router-link
+              to="/demos/threejs"
+              class="interface-link"
+              tag="div"
+      >
+        <app-tile class="layer-three background round shadow orange-accent">
+          <font-awesome-icon
+                  icon="cube"
+                  class="interface-icon"
+          />
+          <p>
+            three.js web rendering
+          </p>
+        </app-tile>
+      </router-link>
     </div>
   </div>
 </template>
@@ -25,8 +41,9 @@
 
   // Fontawesome.
   import { library } from '@fortawesome/fontawesome-svg-core'
-  import { faMousePointer } from '@fortawesome/free-solid-svg-icons'
+  import { faMousePointer, faCube } from '@fortawesome/free-solid-svg-icons'
   library.add(faMousePointer);
+  library.add(faCube);
 
   export default {
     name: 'Tools',
