@@ -73,11 +73,11 @@
 
 <script>
   import uuidv4 from 'uuid/v4';
-  import UbiiClientService from '../services/ubiiClient/ubiiClientService.js';
+  import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
   import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
   import {DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
 
-  import { mapState, mapActions } from 'vuex'
+  import { mapActions } from 'vuex'
 
   /* fontawesome */
   import {library} from '@fortawesome/fontawesome-svg-core'

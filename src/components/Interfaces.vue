@@ -1,6 +1,8 @@
 <template>
   <div>
-    <span>A list of generic device interfaces</span>
+    <div class="info">
+      <span>A list of web interfaces tailored to device types</span>
+    </div>
     <div class="grid">
       <router-link
         to="/interfaces/smart-device"
@@ -51,4 +53,8 @@
   .interface-icon
     width: 50px
     height: 50px
+
+  .info
+    text-align: center
+    width: 100%
 </style>

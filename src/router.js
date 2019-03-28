@@ -15,22 +15,6 @@ export default new Router({
       name: 'Administration',
       component: () => import('./components/Administration.vue')
     },
-    /* tools */
-    {
-      path: '/tools',
-      name: 'Tools',
-      component: () => import('./components/Tools.vue')
-    },
-    {
-      path: '/tools/topic-inspector',
-      name: 'Topic Inspector',
-      component: () => import('./components/TopicInspector.vue')
-    },
-    {
-      path: '/tools/demo-mouse-pointer',
-      name: 'Demo: Mouse Pointer',
-      component: () => import('./components/DemoMousePointer.vue')
-    },
     /* interfaces */
     {
       path: '/interfaces',
@@ -51,6 +35,28 @@ export default new Router({
       path: '/interactionEditor',
       name: 'Interaction Editor',
       component: () => import('./components/editors/interactionEditor/InteractionEditor.vue')
-    }
+    },
+    /* tools */
+    {
+      path: '/tools',
+      name: 'Tools',
+      component: () => import('./components/Tools.vue')
+    },
+    {
+      path: '/tools/topic-inspector',
+      name: 'Topic Inspector',
+      component: () => import('./components/TopicInspector.vue')
+    },
+    /* demos */
+    {
+      path: '/demos',
+      name: 'Demos',
+      component: () => import('./components/Demos.vue')
+    },
+    {
+      path: '/demos/demo-mouse-pointer',
+      name: 'Demo - Mouse Pointer',
+      component: () => import('./components/demos/DemoMousePointer.vue')
+    },
   ]
 })

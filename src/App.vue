@@ -21,6 +21,13 @@
         </router-link>
         |
         <router-link
+              to="/interfaces"
+              class="navigation-item"
+        >
+        Interfaces
+        </router-link>
+        |
+        <router-link
           to="/tools"
           class="navigation-item"
         >
@@ -28,10 +35,10 @@
         </router-link>
         |
         <router-link
-              to="/interfaces"
+              to="/demos"
               class="navigation-item"
         >
-        Interfaces
+        Demos
         </router-link>
         |
         <router-link
