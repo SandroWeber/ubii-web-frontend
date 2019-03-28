@@ -9,6 +9,9 @@
 
   import * as Three from 'three'
 
+  import WEBVR from './moduleThreejsWebVR'
+  console.info(WEBVR);
+
   export default {
     name: 'DemoThreejs',
     data() {

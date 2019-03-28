@@ -5,6 +5,11 @@
  * Based on @tojiro's vr-samples-utils.js
  */
 
+/**
+ * Content taken from node_modules/three/examples/js/vr/WebVR.js
+ * added export as module to be able to use import statement and make functions available in Vue component
+ */
+
 var WEBVR = {
 
 	createButton: function ( renderer, options ) {
@@ -236,3 +241,5 @@ var WEBVR = {
 	}
 
 };
+
+export default WEBVR;
