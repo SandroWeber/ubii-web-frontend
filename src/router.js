@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-Vue.use(Router)
+Vue.use(Router);
 
 export default new Router({
   routes: [
@@ -26,6 +26,7 @@ export default new Router({
       name: 'Interface - Smart Device',
       component: () => import('./components/interfaces/SmartDevice.vue')
     },
+    /* editors */
     {
       path: '/nodeEditor',
       name: 'Node Editor',
@@ -62,6 +63,11 @@ export default new Router({
       path: '/demos/threejs',
       name: 'Demo - THREEjs',
       component: () => import('./components/demos/DemoThreejs.vue')
+    },
+    {
+      path: '/demos/threejs-webvr',
+      name: 'Demo - THREEjs WebVR',
+      component: () => import('./components/demos/DemoThreejsWebVR.vue')
     },
   ]
 })
