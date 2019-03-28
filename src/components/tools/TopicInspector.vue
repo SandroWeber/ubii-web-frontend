@@ -13,7 +13,7 @@
 </template>
 
 <script>
-  import UbiiClientService from '../services/ubiiClient/ubiiClientService.js';
+  import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
   import {DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
 
   export default {

@@ -45,7 +45,7 @@ export default new Router({
     {
       path: '/tools/topic-inspector',
       name: 'Topic Inspector',
-      component: () => import('./components/TopicInspector.vue')
+      component: () => import('./components/tools/TopicInspector.vue')
     },
     /* demos */
     {
