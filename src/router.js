@@ -63,5 +63,10 @@ export default new Router({
       name: 'Demo - THREEjs',
       component: () => import('./components/demos/DemoThreejs.vue')
     },
+    {
+      path: '/demos/threejs-webvr',
+      name: 'Demo - THREEjs webVR',
+      component: () => import('./components/demos/DemoThreejsWebVR.vue')
+    },
   ]
 })
