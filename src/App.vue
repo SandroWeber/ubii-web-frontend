@@ -8,7 +8,7 @@
       <nav class="navigation-bar">
         <router-link
           to="/"
-          class="navigation-item "
+          class="navigation-item"
         >
           Home
         </router-link>
@@ -21,10 +21,24 @@
         </router-link>
         |
         <router-link
+              to="/interfaces"
+              class="navigation-item"
+        >
+        Interfaces
+        </router-link>
+        |
+        <router-link
           to="/tools"
           class="navigation-item"
         >
         Tools
+        </router-link>
+        |
+        <router-link
+              to="/demos"
+              class="navigation-item"
+        >
+        Demos
         </router-link>
         |
         <router-link

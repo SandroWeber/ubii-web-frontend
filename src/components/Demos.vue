@@ -2,17 +2,17 @@
   <div>
     <div class="grid">
       <router-link
-        to="/tools/topic-inspector"
+        to="/demos/demo-mouse-pointer"
         class="interface-link"
         tag="div"
       >
         <app-tile class="layer-three background round shadow orange-accent"> 
           <font-awesome-icon
-            icon="eye"
+            icon="mouse-pointer"
             class="interface-icon"
           />
           <p>
-            Topic Inspector
+            Mouse Demo
           </p>
         </app-tile>
       </router-link>
@@ -25,8 +25,8 @@
 
   // Fontawesome.
   import { library } from '@fortawesome/fontawesome-svg-core'
-  import { faEye } from '@fortawesome/free-solid-svg-icons'
-  library.add(faEye);
+  import { faMousePointer } from '@fortawesome/free-solid-svg-icons'
+  library.add(faMousePointer);
 
   export default {
     name: 'Tools',
