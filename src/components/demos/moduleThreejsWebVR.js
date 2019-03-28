@@ -10,6 +10,10 @@
  * added export as module to be able to use import statement and make functions available in Vue component
  */
 
+/* eslint-disable no-console */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-redeclare */
+
 var WEBVR = {
 
 	createButton: function ( renderer, options ) {

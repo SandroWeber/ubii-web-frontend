@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div id="threejs-container" class="render-container"></div>
+    <div id="demo-threejs-webvr-render-container" class="render-container"></div>
   </div>
 </template>
 
@@ -8,12 +8,10 @@
   /* eslint-disable no-console */
 
   import * as Three from 'three'
-
   import WEBVR from './moduleThreejsWebVR'
-  console.info(WEBVR);
 
   export default {
-    name: 'DemoThreejs',
+    name: 'DemoTHREEjsWebVR',
     data() {
       return {
         camera: null,
@@ -24,7 +22,7 @@
     },
     methods: {
       init: function() {
-        let container = document.getElementById('threejs-container');
+        let container = document.getElementById('demo-threejs-webvr-render-container');
 
         this.scene = new Three.Scene();
 

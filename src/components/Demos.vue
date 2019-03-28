@@ -1,51 +1,24 @@
 <template>
   <div>
     <div class="grid">
-      <router-link
-        to="/demos/mouse-pointer"
-        class="interface-link"
-        tag="div"
-      >
+      <router-link to="/demos/mouse-pointer" class="interface-link" tag="div">
         <app-tile class="layer-three background round shadow orange-accent"> 
-          <font-awesome-icon
-            icon="mouse-pointer"
-            class="interface-icon"
-          />
-          <p>
-            Mouse Demo
-          </p>
+          <font-awesome-icon icon="mouse-pointer" class="interface-icon"/>
+          <p>Mouse Demo</p>
         </app-tile>
       </router-link>
 
-      <router-link
-              to="/demos/threejs"
-              class="interface-link"
-              tag="div"
-      >
+      <router-link to="/demos/threejs" class="interface-link" tag="div">
         <app-tile class="layer-three background round shadow orange-accent">
-          <font-awesome-icon
-                  icon="cube"
-                  class="interface-icon"
-          />
-          <p>
-            three.js web rendering
-          </p>
+          <font-awesome-icon icon="cube" class="interface-icon"/>
+          <p>three.js web rendering</p>
         </app-tile>
       </router-link>
 
-      <router-link
-              to="/demos/threejs-webvr"
-              class="interface-link"
-              tag="div"
-      >
+      <router-link to="/demos/threejs-webvr" class="interface-link" tag="div">
         <app-tile class="layer-three background round shadow orange-accent">
-          <font-awesome-icon
-                  icon="vr-cardboard"
-                  class="interface-icon"
-          />
-          <p>
-            three.js webVR rendering
-          </p>
+          <font-awesome-icon icon="vr-cardboard" class="interface-icon"/>
+          <p>three.js webVR rendering</p>
         </app-tile>
       </router-link>
     </div>
@@ -63,7 +36,7 @@
   library.add(faVrCardboard);
 
   export default {
-    name: 'Tools',
+    name: 'Demos',
     components: {
       AppTile,
     }
