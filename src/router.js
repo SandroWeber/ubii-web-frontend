@@ -54,9 +54,14 @@ export default new Router({
       component: () => import('./components/Demos.vue')
     },
     {
-      path: '/demos/demo-mouse-pointer',
+      path: '/demos/mouse-pointer',
       name: 'Demo - Mouse Pointer',
       component: () => import('./components/demos/DemoMousePointer.vue')
+    },
+    {
+      path: '/demos/threejs',
+      name: 'Demo - THREEjs',
+      component: () => import('./components/demos/DemoThreejs.vue')
     },
   ]
 })
