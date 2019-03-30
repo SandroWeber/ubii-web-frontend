@@ -46,12 +46,24 @@
     
     output.defaultOut = input.defaultIn;
 }`,
+                inputFormatString: `[
+    {
+        "internalName": "newDefaultIn",
+        "messageFormat": "messageFormat"
+    }
+]`,
                 inputFormats: [
                     {
                         internalName: 'defaultIn',
                         messageFormat: 'messageFormat'
                     }
                 ],
+                outputFormatString: `[
+    {
+        "internalName": "newDefaultOut",
+        "messageFormat": "messageFormat"
+    }
+]`,
                 outputFormats: [
                     {
                         internalName: 'defaultOut',
