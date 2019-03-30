@@ -1,18 +1,21 @@
 <template>
   <div>
+    <div class="info">
+      <span>A list of web interfaces tailored to device types</span>
+    </div>
     <div class="grid">
       <router-link
-        to="/tools/topic-inspector"
+        to="/interfaces/smart-device"
         class="interface-link"
         tag="div"
       >
         <app-tile class="layer-three background round shadow orange-accent"> 
           <font-awesome-icon
-            icon="eye"
+            icon="mobile-alt"
             class="interface-icon"
           />
           <p>
-            Topic Inspector
+            Smart Device
           </p>
         </app-tile>
       </router-link>
@@ -25,11 +28,11 @@
 
   // Fontawesome.
   import { library } from '@fortawesome/fontawesome-svg-core'
-  import { faEye } from '@fortawesome/free-solid-svg-icons'
-  library.add(faEye);
+  import { faMobileAlt } from '@fortawesome/free-solid-svg-icons'
+  library.add(faMobileAlt);
 
   export default {
-    name: 'Tools',
+    name: 'Interfaces',
     components: {
       AppTile,
     }
@@ -50,4 +53,8 @@
   .interface-icon
     width: 50px
     height: 50px
+
+  .info
+    text-align: center
+    width: 100%
 </style>

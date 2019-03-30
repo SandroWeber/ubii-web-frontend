@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-Vue.use(Router)
+Vue.use(Router);
 
 export default new Router({
   routes: [
@@ -15,22 +15,18 @@ export default new Router({
       name: 'Administration',
       component: () => import('./components/Administration.vue')
     },
-    /* web interfaces */
+    /* interfaces */
     {
-      path: '/tools',
-      name: 'Tools',
-      component: () => import('./components/Tools.vue')
+      path: '/interfaces',
+      name: 'Interfaces',
+      component: () => import('./components/Interfaces.vue')
     },
     {
-      path: '/tools/topic-inspector',
-      name: 'Topic Inspector',
-      component: () => import('./components/TopicInspector.vue')
+      path: '/interfaces/smart-device',
+      name: 'Interface - Smart Device',
+      component: () => import('./components/interfaces/SmartDevice.vue')
     },
-    {
-      path: '/tools/demo-mouse-pointer',
-      name: 'Demo: Mouse Pointer',
-      component: () => import('./components/DemoMousePointer.vue')
-    },
+    /* editors */
     {
       path: '/nodeEditor',
       name: 'Node Editor',
@@ -40,6 +36,38 @@ export default new Router({
       path: '/interactionEditor',
       name: 'Interaction Editor',
       component: () => import('./components/editors/interactionEditor/InteractionEditor.vue')
-    }
+    },
+    /* tools */
+    {
+      path: '/tools',
+      name: 'Tools',
+      component: () => import('./components/Tools.vue')
+    },
+    {
+      path: '/tools/topic-inspector',
+      name: 'Topic Inspector',
+      component: () => import('./components/tools/TopicInspector.vue')
+    },
+    /* demos */
+    {
+      path: '/demos',
+      name: 'Demos',
+      component: () => import('./components/Demos.vue')
+    },
+    {
+      path: '/demos/mouse-pointer',
+      name: 'Demo - Mouse Pointer',
+      component: () => import('./components/demos/DemoMousePointer.vue')
+    },
+    {
+      path: '/demos/threejs',
+      name: 'Demo - THREEjs',
+      component: () => import('./components/demos/DemoThreejs.vue')
+    },
+    {
+      path: '/demos/threejs-webvr',
+      name: 'Demo - THREEjs WebVR',
+      component: () => import('./components/demos/DemoThreejsWebVR.vue')
+    },
   ]
 })

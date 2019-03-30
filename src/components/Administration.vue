@@ -6,7 +6,6 @@
       :options="treeSelect.options"
       class="tree-select"
     />
-    <interaction-editor/>
   </div>
 </template>
 
