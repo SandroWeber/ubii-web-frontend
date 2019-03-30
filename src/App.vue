@@ -63,29 +63,33 @@
   
   output.defaultOut = input.defaultIn;
 }`,
-    inputFormatString: `[
+  inputFormat: {
+    source:`[
   {
-      "internalName": "Alpha",
+      "internalName": "alpha",
       "messageFormat": "messageFormat"
   },
   {
-      "internalName": "Beta",
+      "internalName": "beta",
       "messageFormat": "messageFormat"
   }
 ]`,
-    inputFormats: [],
-    outputFormatString: `[
+    interpreted: []
+  },
+  outputFormat: {
+    source:`[
   {
-      "internalName": "First",
+      "internalName": "first",
       "messageFormat": "messageFormat"
   },
   {
-      "internalName": "Second",
+      "internalName": "second",
       "messageFormat": "messageFormat"
   }
 ]`,
-    outputFormats: []
-  };
+    interpreted: []
+  },
+};
   
   let dummyInteractionTwo = {
     id: uuidv4(),
@@ -96,7 +100,8 @@
   
   output.defaultOut = input.defaultIn;
 }`,
-    inputFormatString: `[
+  inputFormat: {
+    source:`[
   {
       "internalName": "inputClientPointer",
       "messageFormat": "messageFormat"
@@ -106,15 +111,18 @@
       "messageFormat": "messageFormat"
   }
 ]`,
-    inputFormats: [],
-    outputFormatString: `[
+    interpreted: []
+  },
+  outputFormat: {
+    source:`[
   {
       "internalName": "outputServerPointer",
       "messageFormat": "messageFormat"
   }
 ]`,
-    outputFormats: []
-  };
+    interpreted: []
+  },
+};
   
   let dummyInteractionThree = {
     id: uuidv4(),
@@ -125,21 +133,25 @@
   
   output.defaultOut = input.defaultIn;
 }`,
-    inputFormatString: `[
+  inputFormat: {
+    source:`[
   {
-      "internalName": "Anna",
+      "internalName": "alice",
       "messageFormat": "messageFormat"
   }
 ]`,
-    inputFormats: [],
-    outputFormatString: `[
+    interpreted: []
+  },
+  outputFormat: {
+    source:`[
   {
-      "internalName": "Bob",
+      "internalName": "bob",
       "messageFormat": "messageFormat"
   }
 ]`,
-    outputFormats: []
-  };
+    interpreted: []
+  },
+};
 
   export default {
     name: 'app',
