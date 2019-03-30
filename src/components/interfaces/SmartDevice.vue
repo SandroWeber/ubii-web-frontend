@@ -120,17 +120,17 @@
       onTouchStart: function (event) {
         this.$data.touches = event.touches;
 
-        this.publishTouch(0, event.touches[0].clientX, event.touches[0].clientY);
+        this.publishNormalizedTouch(event, 0);
       },
       onTouchMove: function (event) {
         this.$data.touches = event.touches;
 
-        this.publishTouch(0, event.touches[0].clientX, event.touches[0].clientY);
+        this.publishNormalizedTouch(event, 0);
       },
       onTouchEnd: function (event) {
         this.$data.touches = event.touches;
 
-        this.publishTouch(0, event.touches[0].clientX, event.touches[0].clientY);
+        this.publishNormalizedTouch(event, 0);
       },
       onDeviceOrientation: function(event) {
         // https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent
@@ -171,6 +171,16 @@
           this.$data.componentTouch.topic,
           'vector2',
           {x: x, y: y}
+        );
+      },
+      publishNormalizedTouch: function(event, touchIndex) {
+        let normalizedTouchX = (event.touches[touchIndex].clientX - event.target.offsetLeft) / event.target.offsetWidth;
+        let normalizedTouchY = (event.touches[touchIndex].clientY - event.target.offsetTop) / event.target.offsetHeight;
+        UbiiClientService.client.publish(
+          this.$data.ubiiDevice.name,
+          this.$data.componentTouch.topic,
+          'vector2',
+          {x: normalizedTouchX, y: normalizedTouchY}
         );
       }
     }
