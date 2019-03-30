@@ -31,12 +31,15 @@ class ClientNodeWeb {
    */
   async initialize() {
     return new Promise((resolve, reject) => {
+      // STEP 1: open a request/reply-style service connection to server
       this.serviceClient = new RESTClient(this.serverHost, this.servicePort);
 
+      // STEP 2: (service call) get the server configuration (ports, ....)
       this.getServerConfig().then(() => {
+        // STEP 3: (service call) register yourself as a client
         this.registerClient()
-          .then(
-            () => {
+          .then(() => {
+              // STEP 4: open the asynchronous connection for topic data communication
               this.initializeTopicDataClient(this.serverSpecification);
               return resolve();
             },
@@ -218,36 +221,36 @@ class ClientNodeWeb {
     return new Promise((resolve, reject) => {
       // VARIANT A: PROTOBUF
       /*let buffer = this.translatorServiceRequest.createBufferFromPayload(message);
-      console.info('### callService - request ###');
-      console.info(message);
-      console.info(buffer);
-      this.serviceClient.send('/services', buffer).then(
+       console.info('### callService - request ###');
+       console.info(message);
+       console.info(buffer);
+       this.serviceClient.send('/services', buffer).then(
+       (reply) => {
+       let buffer = new Buffer(reply);
+       let message = this.translatorServiceReply.createMessageFromBuffer(buffer);
+       console.info('### callService - reply ###');
+       console.info(message);
+       console.info(buffer.length);
+       console.info(buffer);
+
+       return resolve(message);
+       },
+       (error) => {
+       console.error(error);
+       return reject();
+       });*/
+
+      // VARIANT B: JSON
+      this.serviceClient.send('/services', message).then(
         (reply) => {
-          let buffer = new Buffer(reply);
-          let message = this.translatorServiceReply.createMessageFromBuffer(buffer);
-          console.info('### callService - reply ###');
-          console.info(message);
-          console.info(buffer.length);
-          console.info(buffer);
+          let message = this.translatorServiceReply.createMessageFromPayload(reply);
 
           return resolve(message);
         },
         (error) => {
           console.error(error);
           return reject();
-        });*/
-
-      // VARIANT B: JSON
-      this.serviceClient.send('/services', message).then(
-       (reply) => {
-         let message = this.translatorServiceReply.createMessageFromPayload(reply);
-
-         return resolve(message);
-       },
-       (error) => {
-         console.error(error);
-         return reject();
-       });
+        });
     });
   }
 
