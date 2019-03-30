@@ -51,83 +51,94 @@
   import ClientNode from './services/ubiiClient/ubiiClientService';
   import ServerStatus from './components/ServerStatus.vue'
   import { AppLayer } from './components/appComponents/appComponents.js';
+  import uuidv4 from 'uuid/v4';
 
   // Dummy interaction.
-  let dummyInteractionOne =
+  let dummyInteractionOne = {
+    id: uuidv4(),
+    name: 'Dummy Interaction One',
+    processingCallback: `(input, output, state) => {
+
+  // Your code here.
+  
+  output.defaultOut = input.defaultIn;
+}`,
+    inputFormatString: `[
   {
-      id: '1234',
-      name: 'Dummy Interaction One',
-      processingCallback: `(input, output, state) => {
-  return true;
-}`,
-  inputFormats: [
-      {
-          internalName: 'input-A',
-          messageFormat: 'topic-A'
-      },
-      {
-          internalName: 'input-B',
-          messageFormat: 'topic-B'
-      }
-  ],
-  outputFormats: [
-      {
-          internalName: 'output-X',
-          messageFormat: 'topic-X'
-      },
-      {
-          internalName: 'output-Y',
-          messageFormat: 'topic-Y'
-      }
-  ]
+      "internalName": "Alpha",
+      "messageFormat": "messageFormat"
+  },
+  {
+      "internalName": "Beta",
+      "messageFormat": "messageFormat"
+  }
+]`,
+    inputFormats: [],
+    outputFormatString: `[
+  {
+      "internalName": "First",
+      "messageFormat": "messageFormat"
+  },
+  {
+      "internalName": "Second",
+      "messageFormat": "messageFormat"
+  }
+]`,
+    outputFormats: []
   };
-
+  
   let dummyInteractionTwo = {
-  id: 'uuidv4()',
-  name: 'Second Test',
-  processingCallback: `(input, output, state) => {
-  return true;
-}`,
-  inputFormats: [
-      {
-          internalName: 'inputClientPointer',
-          messageFormat: 'inputClientPointer.messageFormat'
-      },
-      {
-          internalName: 'inputMirror',
-          messageFormat: 'inputMirror.messageFormat'
-      }
-  ],
-  outputFormats: [
-      {
-          internalName: 'outputServerPointer',
-          messageFormat: 'outputServerPointer.messageFormat'
-      }
-  ]
-  };
+    id: uuidv4(),
+    name: 'Pointer Test',
+    processingCallback: `(input, output, state) => {
 
-  let dummyInteractionThree = {
-id: 'three',
-name: 'TestThree',
-processingCallback: `(input, output, state) => {
-return true;
+  // Your code here.
+  
+  output.defaultOut = input.defaultIn;
 }`,
-  inputFormats: [
-      {
-          internalName: 'inputClientPointer',
-          messageFormat: 'inputClientPointer.messageFormat'
-      },
-      {
-          internalName: 'inputMirror',
-          messageFormat: 'inputMirror.messageFormat'
-      }
-  ],
-  outputFormats: [
-      {
-          internalName: 'outputServerPointer',
-          messageFormat: 'outputServerPointer.messageFormat'
-      }
-  ]
+    inputFormatString: `[
+  {
+      "internalName": "inputClientPointer",
+      "messageFormat": "messageFormat"
+  },
+  {
+      "internalName": "inputMirror",
+      "messageFormat": "messageFormat"
+  }
+]`,
+    inputFormats: [],
+    outputFormatString: `[
+  {
+      "internalName": "outputServerPointer",
+      "messageFormat": "messageFormat"
+  }
+]`,
+    outputFormats: []
+  };
+  
+  let dummyInteractionThree = {
+    id: uuidv4(),
+    name: 'Test Three',
+    processingCallback: `(input, output, state) => {
+
+  // Your code here.
+  
+  output.defaultOut = input.defaultIn;
+}`,
+    inputFormatString: `[
+  {
+      "internalName": "Anna",
+      "messageFormat": "messageFormat"
+  }
+]`,
+    inputFormats: [],
+    outputFormatString: `[
+  {
+      "internalName": "Bob",
+      "messageFormat": "messageFormat"
+  }
+]`,
+    outputFormats: []
   };
 
   export default {
