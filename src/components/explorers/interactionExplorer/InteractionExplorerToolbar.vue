@@ -46,30 +46,24 @@
     
     output.defaultOut = input.defaultIn;
 }`,
-                inputFormatString: `[
+                inputFormat: {
+                    source:`[
     {
         "internalName": "newDefaultIn",
         "messageFormat": "messageFormat"
     }
 ]`,
-                inputFormats: [
-                    {
-                        internalName: 'defaultIn',
-                        messageFormat: 'messageFormat'
-                    }
-                ],
-                outputFormatString: `[
+                    interpreted: []
+                    },
+                outputFormat: {
+                    source:`[
     {
         "internalName": "newDefaultOut",
         "messageFormat": "messageFormat"
     }
 ]`,
-                outputFormats: [
-                    {
-                        internalName: 'defaultOut',
-                        messageFormat: 'messageFormat'
-                    }
-                ]
+                    interpreted: []
+                    },
                 };
 
                 this.addInteraction({interaction: defaultInteraction})

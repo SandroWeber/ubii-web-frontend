@@ -28,7 +28,7 @@
         <h4 class="medium-contrast">
             processingCallback
         </h4>
-        <interaction-mirror-interface-list :interface-list="interaction.inputFormats"/>
+        <interaction-mirror-interface-list :interface-list="interaction.inputFormat.interpreted"/>
         <div class="code-wrapper layer-three border round">
             <source-code-mirror
                 v-model="interaction.processingCallback"
@@ -36,7 +36,7 @@
             >
             </source-code-mirror>
         </div>
-        <interaction-mirror-interface-list :interfaceList="interaction.outputFormats"/>
+        <interaction-mirror-interface-list :interfaceList="interaction.outputFormat.interpreted"/>
         
         <h4 class="medium-contrast">
             outputFormats
@@ -85,12 +85,12 @@
         computed: {
             inputFormats: {
                 get() {
-                    return this.interaction.inputFormatString;
+                    return this.interaction.inputFormat.source;
                 },
                 set(value) {
-                    this.interaction.inputFormatString = value;
+                    this.interaction.inputFormat.source = value;
                     try{
-                       this.interaction.inputFormats = JSON.parse(value);
+                       this.interaction.inputFormat.interpreted = JSON.parse(value);
                     } catch {
                         console.log("Invalid input format string.");
                     }
@@ -100,12 +100,12 @@
             },
             outputFormats: {
                 get() {
-                    return this.interaction.outputFormatString;
+                    return this.interaction.outputFormat.source;
                 },
                 set(value) {
-                    this.interaction.outputFormatString = value;
+                    this.interaction.outputFormat.source = value;
                     try{
-                       this.interaction.outputFormats = JSON.parse(value);
+                       this.interaction.outputFormat.interpreted = JSON.parse(value);
                     } catch {
                         console.log("Invalid output format string.");
                     }
