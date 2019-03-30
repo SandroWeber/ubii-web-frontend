@@ -69,5 +69,10 @@ export default new Router({
       name: 'Demo - THREEjs WebVR',
       component: () => import('./components/demos/DemoThreejsWebVR.vue')
     },
+    {
+      path: '/demos/gatherer-web-interface-smart-devices',
+      name: 'Demo - Gathering from Smart Devices connected via Web Interface',
+      component: () => import('./components/demos/DemoWebInterfaceSmartDevices.vue')
+    },
   ]
 })
