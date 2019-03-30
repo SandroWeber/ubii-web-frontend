@@ -85,33 +85,31 @@
         computed: {
             inputFormats: {
                 get() {
-                    var inputString = JSON.stringify(this.interaction.inputFormats);
-                    inputString = inputString.replace(/[,]/g, ",\n")
-                        //.replace(/[\[]/g, "[\n")
-                        //.replace(/[\]]/g, "\n]")
-                        .replace(/[{]/g, "{\n")
-                        .replace(/[}]/g, "\n}");
-                    return inputString;
+                    return this.interaction.inputFormatString;
                 },
-                set(inputFormatsString) {
-                    inputFormatsString = inputFormatsString.replace(/[\n]/g, "");
-                    this.interaction.inputFormats = JSON.parse(inputFormatsString);
+                set(value) {
+                    this.interaction.inputFormatString = value;
+                    try{
+                       this.interaction.inputFormats = JSON.parse(value);
+                    } catch {
+                        console.log("Invalid input format string.");
+                    }
+                    
                     this.$emit('changes', this.interaction);
                 }
             },
             outputFormats: {
                 get() {
-                    var outputString = JSON.stringify(this.interaction.outputFormats);
-                    outputString = outputString.replace(/[,]/g, ",\n")
-                        //.replace(/[\[]/g, "[\n")
-                        //.replace(/[\]]/g, "\n]")
-                        .replace(/[{]/g, "{\n")
-                        .replace(/[}]/g, "\n}");
-                    return outputString;
+                    return this.interaction.outputFormatString;
                 },
-                set(outputFormatsString) {
-                    outputFormatsString = outputFormatsString.replace(/[\n]/g, "");
-                    this.interaction.outputFormats = JSON.parse(outputFormatsString);
+                set(value) {
+                    this.interaction.outputFormatString = value;
+                    try{
+                       this.interaction.outputFormats = JSON.parse(value);
+                    } catch {
+                        console.log("Invalid output format string.");
+                    }
+                    
                     this.$emit('changes', this.interaction);
                 }
             }
