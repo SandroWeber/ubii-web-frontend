@@ -16,6 +16,22 @@
           </p>
         </app-tile>
       </router-link>
+
+      <router-link
+              to="/interfaces"
+              class="interface-link"
+              tag="div"
+      >
+        <app-tile class="layer-three background round shadow blue-accent">
+          <font-awesome-icon
+                  icon="link"
+                  class="interface-icon"
+          />
+          <p>
+            Interfaces
+          </p>
+        </app-tile>
+      </router-link>
       
       <router-link
         to="/tools"
@@ -32,6 +48,22 @@
           </p>
           </app-tile>
       </router-link>
+
+      <router-link
+              to="/demos"
+              class="interface-link"
+              tag="div"
+      >
+        <app-tile class="layer-three background round shadow blue-accent">
+          <font-awesome-icon
+                  icon="play-circle"
+                  class="interface-icon"
+          />
+          <p>
+            Demos
+          </p>
+        </app-tile>
+      </router-link>
       
     </div>
   </app-layer> 
@@ -39,9 +71,11 @@
 
 <script>
   import { library } from '@fortawesome/fontawesome-svg-core'
-  import { faCogs, faToolbox } from '@fortawesome/free-solid-svg-icons'
+  import { faCogs, faToolbox, faLink, faPlayCircle } from '@fortawesome/free-solid-svg-icons'
   library.add(faCogs);
   library.add(faToolbox);
+  library.add(faLink);
+  library.add(faPlayCircle);
 
   import { AppLayer, AppTile } from './appComponents/appComponents.js';
 

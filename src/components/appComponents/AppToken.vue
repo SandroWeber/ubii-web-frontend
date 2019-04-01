@@ -1,6 +1,6 @@
 <template>
   <div class="app-token">
-    <span>
+    <span class="token-text">
       {{text}}
     </span>
   </div>
@@ -61,4 +61,20 @@
         background-color: purpleAccentColor
     &.blue-accent
         background-color: blueAccentColor
+
+.token-text
+    color: maxContrastColor 
+
+.layer-one
+    & .token-text
+        color: layerOneSecondaryColor
+.layer-two
+    & .token-text  
+        color: layerTwoSecondaryColor
+.layer-three
+    & .token-text
+        color: layerThreeSecondaryColor
+.layer-four
+    & .token-text
+        color: layerFourSecondaryColor
 </style>

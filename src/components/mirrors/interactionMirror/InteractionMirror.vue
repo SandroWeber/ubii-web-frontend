@@ -28,7 +28,11 @@
         <h4 class="medium-contrast">
             processingCallback
         </h4>
-        <interaction-mirror-interface-list :interface-list="interaction.inputFormat.interpreted"/>
+        <interaction-mirror-interface-list
+            :interface-list="interaction.inputFormat.interpreted"
+            :interface-key="'input'"
+            :code="interaction.processingCallback"
+        />
         <div class="code-wrapper layer-three border round">
             <source-code-mirror
                 v-model="interaction.processingCallback"
@@ -36,7 +40,11 @@
             >
             </source-code-mirror>
         </div>
-        <interaction-mirror-interface-list :interfaceList="interaction.outputFormat.interpreted"/>
+         <interaction-mirror-interface-list
+            :interfaceList="interaction.outputFormat.interpreted"
+            :interface-key="'output'"
+            :code="interaction.processingCallback"
+        />
         
         <h4 class="medium-contrast">
             outputFormats
@@ -48,7 +56,6 @@
             >
             </source-code-mirror>
         </div>
-        
     </app-layer>
 </template>
 
