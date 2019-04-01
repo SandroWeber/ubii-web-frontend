@@ -18,8 +18,7 @@
         </h4>
         <div class="interface-code-wrapper layer-three border round">
             <source-code-mirror
-                v-model="inputFormats"
-                @input="onCodeChange"
+                v-model="inputFormatSource"
             >
             </source-code-mirror>
         </div>
@@ -31,19 +30,18 @@
         <interaction-mirror-interface-list
             :interface-list="interaction.inputFormat.interpreted"
             :interface-key="'input'"
-            :code="interaction.processingCallback"
+            :code="processingCallbackSource"
         />
         <div class="code-wrapper layer-three border round">
             <source-code-mirror
-                v-model="interaction.processingCallback"
-                @input="onCodeChange"
+                v-model="processingCallbackSource"
             >
             </source-code-mirror>
         </div>
          <interaction-mirror-interface-list
             :interfaceList="interaction.outputFormat.interpreted"
             :interface-key="'output'"
-            :code="interaction.processingCallback"
+            :code="processingCallbackSource"
         />
         
         <h4 class="medium-contrast">
@@ -51,8 +49,7 @@
         </h4>
         <div class="interface-code-wrapper layer-three border round">
             <source-code-mirror
-                v-model="outputFormats"
-                @input="onCodeChange"
+                v-model="outputFormatSource"
             >
             </source-code-mirror>
         </div>
@@ -72,7 +69,7 @@
     export default {
         name: 'InteractionMirror',
         props: {
-            interaction: Object
+            value: Object
         },
         components: {
             SourceCodeMirror,
@@ -86,15 +83,28 @@
         },
         methods: {
             onCodeChange: function() {
-                this.$emit('changes', this.interaction);
+                this.$emit('input', this.interaction);
             }
         },
         mounted: function () {
-            this.inputFormats = this.interaction.inputFormat.source;
-            this.outputFormats = this.interaction.outputFormat.source;
+            this.inputFormatSource = this.interaction.inputFormat.source;
+            this.outputFormatSource = this.interaction.outputFormat.source;
         },
         computed: {
-            inputFormats: {
+            interaction: function(){
+                return this.value;
+            },
+            processingCallbackSource: {
+                get() {
+                    return this.interaction.processingCallback;
+                },
+                set(value) {
+                    this.interaction.processingCallback = value;
+
+                    this.$emit('input', this.interaction);
+                }
+            },
+            inputFormatSource: {
                 get() {
                     return this.interaction.inputFormat.source;
                 },
@@ -107,10 +117,10 @@
                         console.log("Invalid input format string.");
                     }
                     
-                    this.$emit('changes', this.interaction);
+                    this.$emit('input', this.interaction);
                 }
             },
-            outputFormats: {
+            outputFormatSource: {
                 get() {
                     return this.interaction.outputFormat.source;
                 },
@@ -123,7 +133,7 @@
                         console.log("Invalid output format string.");
                     }
                     
-                    this.$emit('changes', this.interaction);
+                    this.$emit('input', this.interaction);
                 }
             }
         }

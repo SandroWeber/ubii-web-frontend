@@ -8,8 +8,7 @@
                 @selectInteraction="onSelectInteraction"
             />
             <interaction-mirror    
-                :interaction="selectedInteraction"
-                @changes="onSelectedInteractionChange"
+                v-model="selectedInteraction"
             />
         </div>
     </div>
@@ -66,9 +65,6 @@
         methods: {
             onSelectInteraction: function(id) {
                 this.selectedInteractionId = id;
-            },
-            onSelectedInteractionChange: function(input){
-                this.selectedInteraction = input;
             },
             ...mapActions('interactions', {
                 addInteraction: 'add'
