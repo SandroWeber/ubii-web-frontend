@@ -49,7 +49,7 @@
                 inputFormat: {
                     source:`[
     {
-        "internalName": "newDefaultIn",
+        "internalName": "defaultIn",
         "messageFormat": "messageFormat"
     }
 ]`,
@@ -58,7 +58,7 @@
                 outputFormat: {
                     source:`[
     {
-        "internalName": "newDefaultOut",
+        "internalName": "defaultOut",
         "messageFormat": "messageFormat"
     }
 ]`,
