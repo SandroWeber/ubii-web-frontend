@@ -82,6 +82,10 @@
                 this.$emit('changes', this.interaction);
             }
         },
+        mounted: function () {
+            this.inputFormats = this.interaction.inputFormat.source;
+            this.outputFormats = this.interaction.outputFormat.source;
+        },
         computed: {
             inputFormats: {
                 get() {
@@ -92,6 +96,7 @@
                     try{
                        this.interaction.inputFormat.interpreted = JSON.parse(value);
                     } catch {
+                        // eslint-disable-next-line
                         console.log("Invalid input format string.");
                     }
                     
@@ -107,6 +112,7 @@
                     try{
                        this.interaction.outputFormat.interpreted = JSON.parse(value);
                     } catch {
+                        // eslint-disable-next-line
                         console.log("Invalid output format string.");
                     }
                     
