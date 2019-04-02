@@ -8,7 +8,7 @@
                 class="layer-one round title-input"
                 :id="'interaction-name'" 
                 :type="'type'"
-                v-model="interaction.name"
+                v-model="nameSource"
                 :size="'huge'"
             />
         </div>
@@ -93,6 +93,16 @@
         computed: {
             interaction: function(){
                 return this.value;
+            },
+            nameSource: {
+                get() {
+                    return this.interaction.name;
+                },
+                set(value) {
+                    this.interaction.name = value;
+
+                    this.$emit('input', this.interaction);
+                }
             },
             processingCallbackSource: {
                 get() {
