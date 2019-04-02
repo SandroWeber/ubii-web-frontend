@@ -46,16 +46,10 @@
                     }
                 },
                 set: function (newValue) {
-                    let id = this.selectedInteractionId;
-                    let found = this.interactions.find(function(element) {
-                        return element.id === id;
+                    this.updateInteraction({
+                        currentInteractionId: this.selectedInteractionId,
+                        interaction: newValue
                     });
-                    if(found)
-                    {
-                        found = newValue;
-                    }else{
-                        this.interactions[0] = newValue;
-                    }
                 }
             },
             ...mapState({
@@ -67,7 +61,8 @@
                 this.selectedInteractionId = id;
             },
             ...mapActions('interactions', {
-                addInteraction: 'add'
+                addInteraction: 'add',
+                updateInteraction: 'update'
             }),
         }
     }
