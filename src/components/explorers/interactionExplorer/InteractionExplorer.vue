@@ -29,10 +29,6 @@
             InteractionExplorerToolbar,
             AppLayer
         },
-        data: () => {
-            return {
-            };
-        },
         methods: {
             onSelectItem: function(id){
                 this.$emit('selectInteraction', id)
