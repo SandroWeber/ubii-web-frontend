@@ -66,7 +66,7 @@
                     },
                 };
 
-                this.addInteraction({interaction: defaultInteraction})
+                this.addInteraction({interaction: defaultInteraction});
             }
         }
     } 
