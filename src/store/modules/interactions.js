@@ -50,14 +50,24 @@ const actions = {
   add (context, payload) {
     context.commit('pushInteraction', {
       interaction: payload.interaction
-    })
-  }
+    });
+  },
+  update (context, payload) {
+    context.commit('setInteraction', payload);
+  },
 }
 
 // mutations
 const mutations = {
   pushInteraction (state, payload){
     state.all.push(payload.interaction);
+  },
+  setInteraction (state, payload){
+    let id = payload.currentInteractionId;
+    let currentInteractionIndex = state.all.findIndex(function(element) {
+        return element.id === id;
+    });
+    state.all[currentInteractionIndex] = payload.interaction;
   }
 }
 
