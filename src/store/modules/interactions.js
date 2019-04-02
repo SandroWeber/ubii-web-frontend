@@ -1,7 +1,43 @@
+import uuidv4 from 'uuid/v4';
+
+// dummy interaction
+
+let dummyInteractionTwo = {
+  id: uuidv4(),
+  name: 'Pointer Test',
+  processingCallback: `(input, output, state) => {
+
+// Your code here.
+
+output.defaultOut = input.defaultIn;
+}`,
+inputFormat: {
+  source:`[
+{
+    "internalName": "inputClientPointer",
+    "messageFormat": "messageFormat"
+},
+{
+    "internalName": "inputMirror",
+    "messageFormat": "messageFormat"
+}
+]`,
+  interpreted: []
+},
+outputFormat: {
+  source:`[
+{
+    "internalName": "outputServerPointer",
+    "messageFormat": "messageFormat"
+}
+]`,
+  interpreted: []
+},
+};
 
 // initial state
 const state = {
-  all: []
+  all: [dummyInteractionTwo]
 }
   
 // getters
