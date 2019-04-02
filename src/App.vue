@@ -67,106 +67,6 @@
   import { AppLayer } from './components/appComponents/appComponents.js';
   import uuidv4 from 'uuid/v4';
 
-  // Dummy interaction.
-  let dummyInteractionOne = {
-    id: uuidv4(),
-    name: 'Dummy Interaction One',
-    processingCallback: `(input, output, state) => {
-
-  // Your code here.
-  
-  output.defaultOut = input.defaultIn;
-}`,
-  inputFormat: {
-    source:`[
-  {
-      "internalName": "alpha",
-      "messageFormat": "messageFormat"
-  },
-  {
-      "internalName": "beta",
-      "messageFormat": "messageFormat"
-  }
-]`,
-    interpreted: []
-  },
-  outputFormat: {
-    source:`[
-  {
-      "internalName": "first",
-      "messageFormat": "messageFormat"
-  },
-  {
-      "internalName": "second",
-      "messageFormat": "messageFormat"
-  }
-]`,
-    interpreted: []
-  },
-};
-  
-  let dummyInteractionTwo = {
-    id: uuidv4(),
-    name: 'Pointer Test',
-    processingCallback: `(input, output, state) => {
-
-  // Your code here.
-  
-  output.defaultOut = input.defaultIn;
-}`,
-  inputFormat: {
-    source:`[
-  {
-      "internalName": "inputClientPointer",
-      "messageFormat": "messageFormat"
-  },
-  {
-      "internalName": "inputMirror",
-      "messageFormat": "messageFormat"
-  }
-]`,
-    interpreted: []
-  },
-  outputFormat: {
-    source:`[
-  {
-      "internalName": "outputServerPointer",
-      "messageFormat": "messageFormat"
-  }
-]`,
-    interpreted: []
-  },
-};
-  
-  let dummyInteractionThree = {
-    id: uuidv4(),
-    name: 'Test Three',
-    processingCallback: `(input, output, state) => {
-
-  // Your code here.
-  
-  output.defaultOut = input.defaultIn;
-}`,
-  inputFormat: {
-    source:`[
-  {
-      "internalName": "alice",
-      "messageFormat": "messageFormat"
-  }
-]`,
-    interpreted: []
-  },
-  outputFormat: {
-    source:`[
-  {
-      "internalName": "bob",
-      "messageFormat": "messageFormat"
-  }
-]`,
-    interpreted: []
-  },
-};
-
   export default {
     name: 'app',
     components: {
@@ -178,11 +78,6 @@
         ubiiClientService: ClientNode
       }
     },
-    mounted(){
-      this.$store.dispatch("interactions/add", {interaction: dummyInteractionOne});
-      this.$store.dispatch("interactions/add", {interaction: dummyInteractionTwo});
-      this.$store.dispatch("interactions/add", {interaction: dummyInteractionThree});
-    }
   }
 </script>
 
