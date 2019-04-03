@@ -13,28 +13,22 @@ let dummyInteractionTwo = {
 
 output.defaultOut = input.defaultIn;
 }`,
-inputFormat: {
-  source:`[
-{
-    "internalName": "inputClientPointer",
-    "messageFormat": "messageFormat"
-},
-{
-    "internalName": "inputMirror",
-    "messageFormat": "messageFormat"
-}
-]`,
-  interpreted: []
-},
-outputFormat: {
-  source:`[
-{
-    "internalName": "outputServerPointer",
-    "messageFormat": "messageFormat"
-}
-]`,
-  interpreted: []
-},
+  inputFormats: [
+    {
+        "internalName": "inputClientPointer",
+        "messageFormat": "messageFormat"
+    },
+    {
+        "internalName": "inputMirror",
+        "messageFormat": "messageFormat"
+    }
+  ],
+  outputFormats: [
+    {
+        "internalName": "outputServerPointer",
+        "messageFormat": "messageFormat"
+    }
+  ]
 };
 
 // helpers
@@ -89,23 +83,39 @@ const helpers = {
         UbiiClientService.client
         .callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_REGISTRATION,
-          interaction: payload.interaction
+          interaction: {
+            id: "uuidv4()testid",
+            name: "New Interaction",
+            processingCallback: "(input, output, state) => {}",
+            inputFormats: [
+                    {
+                        "internalName": "defaultIn",
+                        "messageFormat": "messageFormat"
+                    }
+                ],
+            outputFormats: [
+                    {
+                        "internalName": "defaultOut",
+                        "messageFormat": "messageFormat"
+                    }
+                ],
+            }
         })
         .then((reply) => {
           console.log("Ive got something: "+reply);
           
           // resolve on success reject otherwise
           return resolve();
+        },()=>{
+          console.log("rejecteeed");
         });
         
       }catch{
         return reject();
       }
     });
-    
   }
 };
-
 
 
 // initial state
