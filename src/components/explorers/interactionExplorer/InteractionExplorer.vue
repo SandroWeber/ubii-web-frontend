@@ -4,7 +4,7 @@
         />
         <interaction-explorer-item
             v-for="element in interactions"
-            :key="element.name"
+            :key="element.id"
             :name="element.name"
             :id="element.id"
             :selected="element.id === selectedInteractionId"
