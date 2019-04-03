@@ -38,62 +38,70 @@ outputFormat: {
 };
 
 // helpers
+const helpers = {
+  fetch: function (context) {
+    return new Promise((resolve, reject) => {
+      try{
+        // fetch all interaction data from the backend
+        console.log("start fetching");
+        UbiiClientService.client
+        .callService({
+          topic: DEFAULT_TOPICS.SERVICES.INTERACTION_GET_LIST
+        })
+        .then((list) => {
+          console.log("Ive got something: "+list.data);
 
+          // clear fetched
+          context.commit('clearFetched');
+          
+          // analyse list and get all interactions and store them to fetched
+          // async with all resolved somehow. all have pushed to fetched when resolved
 
+          return resolve();
+        });
 
-let fetch = function () {
-  return new Promise((resolve, reject) => {
-    try{
-      // fetch all interaction data from the backend
-      console.log("start fetching");
-      UbiiClientService.client
-      .callService({
-        topic: DEFAULT_TOPICS.SERVICES.INTERACTION_GET_LIST
-      })
-      .then((list) => {
-        console.log("Ive got something: "+list.data);
+        
+      }catch{
+        return reject();
+      }
+    });
+    
+  },
+  pull: function (context) {
+    return new Promise((resolve, reject) => {
+      try{
+        // clear all
+        context.commit('clearAll');
+
+        // set all to fetched
 
         return resolve();
-      });
+      }catch{
+        return reject();
+      }
+    });
+  },
+  push: function (context, payload) {
+    return new Promise((resolve, reject) => {
+      try{
+        // push interaction to the backend
+        // resolve on success reject otherwise
 
-      
-    }catch{
-      return reject();
-    }
-  });
-  
-};
-
-let pull = function () {
-  return new Promise((resolve, reject) => {
-    try{
-      // overwrite all
-
-      return resolve();
-    }catch{
-      return reject();
-    }
-  });
-};
-
-let push = function (interaction) {
-  return new Promise((resolve, reject) => {
-    try{
-      // push interaction to the backend
-
-      return resolve();
-    }catch{
-      return reject();
-    }
-  });
-  
+        return resolve();
+      }catch{
+        return reject();
+      }
+    });
+    
+  }
 };
 
 
 
 // initial state
 const state = {
-  all: [dummyInteractionTwo]
+  all: [dummyInteractionTwo],
+  fetched: [],
 }
   
 // getters
@@ -122,7 +130,8 @@ const actions = {
     // then pull
   },
   pullAll (context, payload) {
-    fetch().then(() => {
+    helpers.fetch()
+    .then(() => {
       console.log("boing");
     })
 
@@ -134,6 +143,15 @@ const actions = {
 const mutations = {
   pushInteraction (state, payload){
     state.all.push(payload.interaction);
+  },
+  clearAll (state){
+    state.all = [];
+  },
+  pushFetchedInteraction (state, payload){
+    state.fetched.push(payload.interaction);
+  },
+  clearFetched (state){
+    state.fetched = [];
   },
   setInteraction (state, payload){
     let id = payload.currentInteractionId;
