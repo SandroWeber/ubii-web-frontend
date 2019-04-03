@@ -62,8 +62,12 @@
             },
             ...mapActions('interactions', {
                 addInteraction: 'add',
-                updateInteraction: 'update'
+                updateInteraction: 'update',
+                fetchInteractionList: 'fetchInteractionList'
             }),
+        },
+        mounted: function(){
+            this.fetchInteractionList();
         }
     }
 </script>
