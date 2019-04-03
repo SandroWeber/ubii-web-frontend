@@ -48,8 +48,8 @@ const helpers = {
         .callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_GET_LIST
         })
-        .then((list) => {
-          console.log("Ive got something: "+list.data);
+        .then((reply) => {
+          console.log("Ive got something: "+reply.interactionList.length);
 
           // clear fetched
           context.commit('clearFetched');
@@ -81,13 +81,23 @@ const helpers = {
       }
     });
   },
-  push: function (context, payload) {
+  register: function (context, payload) {
     return new Promise((resolve, reject) => {
       try{
-        // push interaction to the backend
-        // resolve on success reject otherwise
-
-        return resolve();
+        // register new interaction at the backend
+        console.log("start registering");
+        UbiiClientService.client
+        .callService({
+          topic: DEFAULT_TOPICS.SERVICES.INTERACTION_REGISTRATION,
+          interaction: payload.interaction
+        })
+        .then((reply) => {
+          console.log("Ive got something: "+reply);
+          
+          // resolve on success reject otherwise
+          return resolve();
+        });
+        
       }catch{
         return reject();
       }
@@ -117,6 +127,13 @@ const actions = {
     });
 
     // register interaction
+    helpers.register(context,payload)
+    .then(() => {
+      helpers.fetch(context)
+      .then(() => {
+        console.log("boing");
+      })
+    })
 
     // then fetch
     // then pull
@@ -130,7 +147,7 @@ const actions = {
     // then pull
   },
   pullAll (context, payload) {
-    helpers.fetch()
+    helpers.fetch(context)
     .then(() => {
       console.log("boing");
     })
