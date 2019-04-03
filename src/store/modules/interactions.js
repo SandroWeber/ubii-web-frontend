@@ -1,4 +1,6 @@
 import uuidv4 from 'uuid/v4';
+import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import {DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
 
 // dummy interaction
 
@@ -35,6 +37,24 @@ outputFormat: {
 },
 };
 
+// helpers
+
+
+
+let fetchinteractionList = function () {
+  console.log("start6 fetching");
+  UbiiClientService.client
+  .callService({
+    topic: DEFAULT_TOPICS.SERVICES.INTERACTION_GET_LIST
+  })
+  .then((list) => {
+    console.log("Ive got something: "+list.data);
+  });
+};
+
+
+
+
 // initial state
 const state = {
   all: [dummyInteractionTwo]
@@ -54,6 +74,9 @@ const actions = {
   },
   update (context, payload) {
     context.commit('setInteraction', payload);
+  },
+  fetchInteractionList (context, payload) {
+    fetchinteractionList();
   },
 }
 
