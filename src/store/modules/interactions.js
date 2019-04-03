@@ -41,17 +41,53 @@ outputFormat: {
 
 
 
-let fetchinteractionList = function () {
-  console.log("start6 fetching");
-  UbiiClientService.client
-  .callService({
-    topic: DEFAULT_TOPICS.SERVICES.INTERACTION_GET_LIST
-  })
-  .then((list) => {
-    console.log("Ive got something: "+list.data);
+let fetch = function () {
+  return new Promise((resolve, reject) => {
+    try{
+      // fetch all interaction data from the backend
+      console.log("start fetching");
+      UbiiClientService.client
+      .callService({
+        topic: DEFAULT_TOPICS.SERVICES.INTERACTION_GET_LIST
+      })
+      .then((list) => {
+        console.log("Ive got something: "+list.data);
+
+        return resolve();
+      });
+
+      
+    }catch{
+      return reject();
+    }
+  });
+  
+};
+
+let pull = function () {
+  return new Promise((resolve, reject) => {
+    try{
+      // overwrite all
+
+      return resolve();
+    }catch{
+      return reject();
+    }
   });
 };
 
+let push = function (interaction) {
+  return new Promise((resolve, reject) => {
+    try{
+      // push interaction to the backend
+
+      return resolve();
+    }catch{
+      return reject();
+    }
+  });
+  
+};
 
 
 
@@ -71,12 +107,26 @@ const actions = {
     context.commit('pushInteraction', {
       interaction: payload.interaction
     });
+
+    // register interaction
+
+    // then fetch
+    // then pull
   },
   update (context, payload) {
     context.commit('setInteraction', payload);
+
+    // replace interaction
+
+    // then fetch
+    // then pull
   },
-  fetchInteractionList (context, payload) {
-    fetchinteractionList();
+  pullAll (context, payload) {
+    fetch().then(() => {
+      console.log("boing");
+    })
+
+    // then pull
   },
 }
 
