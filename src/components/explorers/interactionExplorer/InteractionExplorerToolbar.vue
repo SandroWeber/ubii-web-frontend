@@ -38,7 +38,7 @@
             }),
             addDefaultInteraction: function(){
                 let defaultInteraction = {
-                id: uuidv4(),
+                id: uuidv4().toString(),
                 name: 'New Interaction',
                 processingCallback: `(input, output, state) => {
 
@@ -46,24 +46,18 @@
     
     output.defaultOut = input.defaultIn;
 }`,
-                inputFormat: {
-                    source:`[
-    {
-        "internalName": "defaultIn",
-        "messageFormat": "messageFormat"
-    }
-]`,
-                    interpreted: []
-                    },
-                outputFormat: {
-                    source:`[
-    {
-        "internalName": "defaultOut",
-        "messageFormat": "messageFormat"
-    }
-]`,
-                    interpreted: []
-                    },
+                inputFormats: [
+                        {
+                            "internalName": "defaultIn",
+                            "messageFormat": "messageFormat"
+                        }
+                    ],
+                outputFormats: [
+                        {
+                            "internalName": "defaultOut",
+                            "messageFormat": "messageFormat"
+                        }
+                    ],
                 };
 
                 this.addInteraction({interaction: defaultInteraction});
