@@ -63,11 +63,11 @@
             ...mapActions('interactions', {
                 addInteraction: 'add',
                 updateInteraction: 'update',
-                fetchInteractionList: 'fetchInteractionList'
+                pullAll: 'pullAll'
             }),
         },
         mounted: function(){
-            this.fetchInteractionList();
+            this.pullAll();
         }
     }
 </script>
