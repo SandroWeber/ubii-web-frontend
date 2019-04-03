@@ -28,7 +28,7 @@
             processingCallback
         </h4>
         <interaction-mirror-interface-list
-            :interface-list="interaction.inputFormat.interpreted"
+            :interface-list="interaction.inputFormats"
             :interface-key="'input'"
             :code="processingCallbackSource"
         />
@@ -39,7 +39,7 @@
             </source-code-mirror>
         </div>
          <interaction-mirror-interface-list
-            :interfaceList="interaction.outputFormat.interpreted"
+            :interfaceList="interaction.outputFormats"
             :interface-key="'output'"
             :code="processingCallbackSource"
         />
@@ -86,10 +86,6 @@
                 this.$emit('input', this.interaction);
             }
         },
-        mounted: function () {
-            this.inputFormatSource = this.interaction.inputFormat.source;
-            this.outputFormatSource = this.interaction.outputFormat.source;
-        },
         computed: {
             interaction: function(){
                 return this.value;
@@ -116,12 +112,11 @@
             },
             inputFormatSource: {
                 get() {
-                    return this.interaction.inputFormat.source;
+                    return JSON.stringify(this.interaction.inputFormats);
                 },
                 set(value) {
-                    this.interaction.inputFormat.source = value;
                     try{
-                       this.interaction.inputFormat.interpreted = JSON.parse(value);
+                       this.interaction.inputFormats = JSON.parse(value);
                     } catch {
                         // eslint-disable-next-line
                         console.log("Invalid input format string.");
@@ -132,12 +127,11 @@
             },
             outputFormatSource: {
                 get() {
-                    return this.interaction.outputFormat.source;
+                    return JSON.stringify(this.interaction.outputFormats);
                 },
                 set(value) {
-                    this.interaction.outputFormat.source = value;
                     try{
-                       this.interaction.outputFormat.interpreted = JSON.parse(value);
+                       this.interaction.outputFormats = JSON.parse(value);
                     } catch {
                         // eslint-disable-next-line
                         console.log("Invalid output format string.");
