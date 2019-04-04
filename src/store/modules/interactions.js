@@ -4,7 +4,7 @@ import {DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
 
 // default interaction
 let defaultInteraction = {
-  id: uuidv4().toString(),
+  id: uuidv4(),
   name: 'New Interaction',
   processingCallback: `(input, output, state) => {
 
