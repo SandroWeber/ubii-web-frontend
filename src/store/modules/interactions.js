@@ -2,11 +2,10 @@ import uuidv4 from 'uuid/v4';
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import {DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
 
-// dummy interaction
-
-let dummyInteractionTwo = {
-  id: uuidv4(),
-  name: 'Pointer Test',
+// default interaction
+let defaultInteraction = {
+  id: uuidv4().toString(),
+  name: 'New Interaction',
   processingCallback: `(input, output, state) => {
 
 // Your code here.
@@ -14,22 +13,18 @@ let dummyInteractionTwo = {
 output.defaultOut = input.defaultIn;
 }`,
   inputFormats: [
-    {
-        "internalName": "inputClientPointer",
-        "messageFormat": "messageFormat"
-    },
-    {
-        "internalName": "inputMirror",
-        "messageFormat": "messageFormat"
-    }
-  ],
+          {
+              "internalName": "defaultIn",
+              "messageFormat": "messageFormat"
+          }
+      ],
   outputFormats: [
-    {
-        "internalName": "outputServerPointer",
-        "messageFormat": "messageFormat"
-    }
-  ]
-};
+          {
+              "internalName": "defaultOut",
+              "messageFormat": "messageFormat"
+          }
+      ],
+  };
 
 // helpers
 const helpers = {
@@ -37,13 +32,12 @@ const helpers = {
     return new Promise((resolve, reject) => {
       try{
         // fetch all interaction data from the backend
-        console.log("start fetching");
         UbiiClientService.client
         .callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_GET_LIST
         })
         .then((reply) => {
-          console.log("Ive got something: "+reply.interactionList.length);
+          console.log("Fetch Service Reply: Ive got something: "+reply.interactionList.length);
 
           // clear fetched
           context.commit('clearFetched');
@@ -102,12 +96,12 @@ const helpers = {
             }
         })
         .then((reply) => {
-          console.log("Ive got something: "+reply);
+          console.log("Register Sevice Reply: Ive got something: "+reply);
           
           // resolve on success reject otherwise
           return resolve();
         },()=>{
-          console.log("rejecteeed");
+          console.log("Register Sevice Rejected.");
         });
         
       }catch{
@@ -120,7 +114,7 @@ const helpers = {
 
 // initial state
 const state = {
-  all: [dummyInteractionTwo],
+  all: [defaultInteraction],
   fetched: [],
 }
   
@@ -141,12 +135,17 @@ const actions = {
     .then(() => {
       helpers.fetch(context)
       .then(() => {
-        console.log("boing");
+        console.log("after fetched in add");
       })
     })
 
     // then fetch
     // then pull
+  },
+  addDefault (context) {
+    actions.add(context, {
+      interaction: defaultInteraction
+    })
   },
   update (context, payload) {
     context.commit('setInteraction', payload);
@@ -156,10 +155,10 @@ const actions = {
     // then fetch
     // then pull
   },
-  pullAll (context, payload) {
+  pullAll (context) {
     helpers.fetch(context)
     .then(() => {
-      console.log("boing");
+      console.log("after fetched in pullAll");
     })
 
     // then pull
