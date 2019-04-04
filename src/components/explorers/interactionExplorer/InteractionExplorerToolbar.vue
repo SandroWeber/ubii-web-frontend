@@ -34,34 +34,9 @@
         },
         methods: {
             ...mapActions('interactions', {
-                addInteraction: 'add'
+                addInteraction: 'add',
+                addDefaultInteraction: 'addDefault'
             }),
-            addDefaultInteraction: function(){
-                let defaultInteraction = {
-                id: uuidv4().toString(),
-                name: 'New Interaction',
-                processingCallback: `(input, output, state) => {
-
-    // Your code here.
-    
-    output.defaultOut = input.defaultIn;
-}`,
-                inputFormats: [
-                        {
-                            "internalName": "defaultIn",
-                            "messageFormat": "messageFormat"
-                        }
-                    ],
-                outputFormats: [
-                        {
-                            "internalName": "defaultOut",
-                            "messageFormat": "messageFormat"
-                        }
-                    ],
-                };
-
-                this.addInteraction({interaction: defaultInteraction});
-            }
         }
     } 
 </script> 
