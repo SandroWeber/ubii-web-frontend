@@ -26,11 +26,6 @@ let defaultInteraction = {
       ],
   };
 
-let defaultInterfaceEntry = {
-  "internalName": "default",
-  "messageFormat": "messageFormat"
-};
-
 // helpers
 const helpers = {
   fetch: function (context) {
@@ -190,7 +185,7 @@ const mutations = {
         return element.id === id;
     });
     state.all[currentInteractionIndex] = payload.interaction;
-  }
+  },
 }
 
 export default {
