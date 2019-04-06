@@ -8,9 +8,9 @@ let defaultInteraction = {
   name: 'New Interaction',
   processingCallback: `(input, output, state) => {
 
-// Your code here.
+  // Your code here.
 
-output.defaultOut = input.defaultIn;
+  output.defaultOut = input.defaultIn;
 }`,
   inputFormats: [
           {
