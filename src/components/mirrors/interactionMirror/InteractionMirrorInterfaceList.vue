@@ -10,6 +10,17 @@
       />
 
       <app-button 
+        v-if="editMode"
+        :class="'add-interface-entry-button round low-contrast'"
+        @click="addInterfaceEntry"
+      >
+        <font-awesome-icon 
+        icon="plus"
+        class="tool-icon"
+        />
+      </app-button>
+
+      <app-button 
         :class="'edit-button round low-contrast'"
         @click="toggleEditMode"
       >
@@ -17,7 +28,7 @@
         icon="plus"
         class="tool-icon"
         />
-    </app-button>
+      </app-button>
   </div>
 </template>
 
