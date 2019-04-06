@@ -7,10 +7,11 @@
       :text="tokenText"
       :useFixedCornerRadius="editMode"
     >
+    
       <div
         v-if="editMode"
       >
-        <div class="key-value-pair">
+        <div class="edit-entry-row">
           <span class="key">
             Name:
           </span>
@@ -19,7 +20,7 @@
             v-model="interfaceName"
           />
         </div>
-        <div class="key-value-pair">
+        <div class="edit-entry-row">
           <span class="key">
             Message Format:
           </span>
@@ -28,6 +29,20 @@
             v-model="interfaceMessageFormat"
           />
         </div>
+        <div class="edit-entry-row">
+          <app-button 
+            :class="'tool-button delete-button round low-contrast'"
+            @click="removeEntry"
+          >
+            <font-awesome-icon 
+            icon="plus"
+            class="tool-icon"
+            />
+          </app-button>
+        </div>
+
+
+
       </div>
     </app-token>
 
@@ -35,23 +50,38 @@
 </template>
 
 <script>
-import { AppToken, AppInput} from './../../appComponents/appComponents.js';
+import { AppButton, AppToken, AppInput} from './../../appComponents/appComponents.js';
 
   export default { 
     name: 'InteractionMirrorInterfaceListToken',
     components: {
+      AppButton: AppButton,
       AppToken: AppToken,
-      AppInput: AppInput
+      AppInput: AppInput,
     },
     props: {
-      interface: Object,
+      value: Object,
       interfaceKey: String,
       code: String,
       editMode: Boolean,
+      index: Number
+    },
+    methods:{
+      removeEntry: function(){
+        this.$emit('removeInterfaceEntry', this.index);
+      }
     },
     computed: {
+      localValue: {
+        get() {
+            return this.value
+        },
+        set(localValue) {
+            this.$emit('input', localValue)
+        }
+      },
       isUnused: function(){
-        return (this.code.includes(this.interfaceKey+"."+this.interface.internalName) !== true);
+        return (this.code.includes(this.interfaceKey+"."+this.value.internalName) !== true);
       },
       computedClassList: function(){
         return {
@@ -67,22 +97,18 @@ import { AppToken, AppInput} from './../../appComponents/appComponents.js';
       },
       interfaceName: {
         get() {
-            return this.interface.internalName;
+            return this.localValue.internalName;
         },
         set(value) {
-            this.interface.internalName = value;
-
-            //this.$emit('input', this.interaction);
+            this.localValue.internalName = value;
         }
       },
       interfaceMessageFormat: {
         get() {
-            return this.interface.messageFormat;
+            return this.localValue.messageFormat;
         },
         set(value) {
-            this.interface.messageFormat = value;
-
-            //this.$emit('input', this.interaction);
+            this.localValue.messageFormat = value;
         }
       },
     }
@@ -94,7 +120,7 @@ import { AppToken, AppInput} from './../../appComponents/appComponents.js';
     order 1
     margin 5px
 
-  .key-value-pair
+  .edit-entry-row
     display: flex
     flex-direction: row
     width: 30em
@@ -106,4 +132,8 @@ import { AppToken, AppInput} from './../../appComponents/appComponents.js';
 
   .value
     flex-grow: 1
+
+  .tool-button
+    height: 1.5em
+    width: 1.5em
 </style>
