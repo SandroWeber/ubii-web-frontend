@@ -11,7 +11,7 @@
 
       <app-button 
         v-if="editMode"
-        :class="'add-interface-entry-button round low-contrast'"
+        :class="'tool-button add-interface-entry-button round low-contrast'"
         @click="addInterfaceEntry"
       >
         <font-awesome-icon 
@@ -21,7 +21,7 @@
       </app-button>
 
       <app-button 
-        :class="'edit-button round low-contrast'"
+        :class="'tool-button edit-button round low-contrast'"
         @click="toggleEditMode"
       >
         <font-awesome-icon 
@@ -60,6 +60,12 @@
     methods: {
       toggleEditMode: function (){
         this.editMode= this.editMode !== true;
+      },
+      addInterfaceEntry: function(){
+        this.interfaceList.push({
+              "internalName": "defaultIn",
+              "messageFormat": "messageFormat"
+          });
       }
     }
     
@@ -70,12 +76,12 @@
   .interaction-mirror-interface-list
     display: flex
     flex-direction: row
-    flex-wrap: nowrap
+    flex-wrap: wrap
     justify-content: flex-start
     align-items: flex-start
     align-content: flex-start
 
-  .edit-button
+  .tool-button
     height: 1.5em
     width: 1.5em
     order: 1
