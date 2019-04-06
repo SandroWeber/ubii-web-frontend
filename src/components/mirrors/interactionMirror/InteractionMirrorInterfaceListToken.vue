@@ -4,6 +4,7 @@
   >
     <app-token
       :class="computedClassList"
+      :text="tokenText"
       :useFixedCornerRadius="editMode"
     >
       <div
@@ -27,14 +28,6 @@
             v-model="interfaceMessageFormat"
           />
         </div>
-      </div>
-
-      <div
-        v-else
-      >
-        <span>
-          {{interfaceName}}
-        </span>
       </div>
     </app-token>
 
@@ -62,7 +55,14 @@ import { AppToken, AppInput} from './../../appComponents/appComponents.js';
       },
       computedClassList: function(){
         return {
-          "orange-accent": this.isUnused
+          "orange-accent": !this.editMode && this.isUnused
+        }
+      },
+      tokenText: function(){
+        if(this.editMode){
+          return "";
+        }else{
+          return this.interfaceName;
         }
       },
       interfaceName: {
@@ -98,6 +98,7 @@ import { AppToken, AppInput} from './../../appComponents/appComponents.js';
     display: flex
     flex-direction: row
     width: 30em
+    margin: 0.5em
 
   .key
     width: 10em
