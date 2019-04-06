@@ -40,7 +40,7 @@
 <style scoped lang="stylus">
     .interaction-explorer
         height: 100%
-        min-width 200px
+        min-width 300px
         width: 100%
         overflow: hidden
         flex-grow: 0
