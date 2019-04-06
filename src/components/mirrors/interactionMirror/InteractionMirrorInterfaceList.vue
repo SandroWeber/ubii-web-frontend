@@ -3,7 +3,7 @@
       <interaction-mirror-interface-list-token 
         v-for="element in interfaceList"
         :key="element.internalName"
-        :name="element.internalName"
+        :interface="element"
         :interface-key="interfaceKey"
         :editMode="editMode"
         :code="code"
