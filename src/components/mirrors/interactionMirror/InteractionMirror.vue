@@ -12,23 +12,9 @@
                 :size="'huge'"
             />
         </div>
-        
-        <h4 class="medium-contrast">
-            inputFormats
-        </h4>
-        <div class="interface-code-wrapper layer-three border round">
-            <source-code-mirror
-                v-model="inputFormatSource"
-            >
-            </source-code-mirror>
-        </div>
-        
-        
-        <h4 class="medium-contrast">
-            processingCallback
-        </h4>
+    
         <interaction-mirror-interface-list
-            :interface-list="interaction.inputFormats"
+            v-model="inputFormatSource"
             :interface-key="'input'"
             :code="processingCallbackSource"
         />
@@ -39,20 +25,11 @@
             </source-code-mirror>
         </div>
          <interaction-mirror-interface-list
-            :interfaceList="interaction.outputFormats"
+            v-model="outputFormatSource"
             :interface-key="'output'"
             :code="processingCallbackSource"
         />
         
-        <h4 class="medium-contrast">
-            outputFormats
-        </h4>
-        <div class="interface-code-wrapper layer-three border round">
-            <source-code-mirror
-                v-model="outputFormatSource"
-            >
-            </source-code-mirror>
-        </div>
     </app-layer>
 </template>
 
@@ -112,30 +89,20 @@
             },
             inputFormatSource: {
                 get() {
-                    return JSON.stringify(this.interaction.inputFormats);
+                    return this.interaction.inputFormats;
                 },
                 set(value) {
-                    try{
-                       this.interaction.inputFormats = JSON.parse(value);
-                    } catch {
-                        // eslint-disable-next-line
-                        console.log("Invalid input format string.");
-                    }
+                    this.interaction.inputFormats = value;
                     
                     this.$emit('input', this.interaction);
                 }
             },
             outputFormatSource: {
                 get() {
-                    return JSON.stringify(this.interaction.outputFormats);
+                    return this.interaction.outputFormats;
                 },
                 set(value) {
-                    try{
-                       this.interaction.outputFormats = JSON.parse(value);
-                    } catch {
-                        // eslint-disable-next-line
-                        console.log("Invalid output format string.");
-                    }
+                    this.interaction.outputFormats = value;
                     
                     this.$emit('input', this.interaction);
                 }
@@ -155,6 +122,7 @@
     .interaction-mirror-header
         display flex
         flex-direction row-reverse
+        margin-bottom: 2em
 
     .code-wrapper
         text-align: left
