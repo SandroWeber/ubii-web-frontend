@@ -1,12 +1,14 @@
 <template>
   <div class="interaction-mirror-interface-list">
       <interaction-mirror-interface-list-token 
-        v-for="element in interfaceList"
-        :key="element.internalName"
-        :interface="element"
+        v-for="(element, index) in localValue"
+        :key="index"
+        :index="index"
+        v-model="localValue[index]"
         :interface-key="interfaceKey"
         :editMode="editMode"
         :code="code"
+        @removeInterfaceEntry="removeInterfaceEntry"
       />
 
       <app-button 
@@ -48,7 +50,7 @@
       AppButton: AppButton,
     },
     props: {
-      interfaceList: Array,
+      value: Array,
       interfaceKey: String,
       code: String
     },
@@ -57,15 +59,28 @@
         editMode: false
       }
     },
+    computed:{
+      localValue: {
+        get() {
+            return this.value
+        },
+        set(localValue) {
+            this.$emit('input', localValue)
+        }
+      },
+    },
     methods: {
       toggleEditMode: function (){
         this.editMode= this.editMode !== true;
       },
       addInterfaceEntry: function(){
-        this.interfaceList.push({
+        this.localValue.push({
               "internalName": "defaultIn",
               "messageFormat": "messageFormat"
           });
+      },
+      removeInterfaceEntry: function(index){
+        this.localValue.splice(index, 1);
       }
     }
     
@@ -82,7 +97,8 @@
     align-content: flex-start
 
   .tool-button
-    height: 1.5em
-    width: 1.5em
+    width: 27px
+    height: 27px
     order: 1
+    margin: 5px
 </style>
