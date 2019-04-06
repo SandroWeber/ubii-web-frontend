@@ -1,8 +1,12 @@
 <template>
-  <div class="app-token">
+  <div 
+    class="app-token"
+    :class="computedClassList"
+  >
     <span class="token-text">
       {{text}}
     </span>
+    <slot> </slot>
   </div>
 </template>
 
@@ -12,7 +16,14 @@
     components: {},
     props: {
         text: String,
-        editable: Boolean
+        useFixedCornerRadius: Boolean
+    },
+    computed:{
+        computedClassList: function(){
+            return {
+                "fixed-corner-radius": this.useFixedCornerRadius
+            }
+        }
     }
   } 
 </script> 
@@ -26,6 +37,9 @@
     border-radius: 999px
     color: layerOneSecondaryColor
     padding 5px 10px 5px 10px
+
+    &.fixed-corner-radius
+        border-radius: 1em
 
     // Primary:
     &.layer-one
