@@ -30,15 +30,12 @@
           />
         </div>
         <div class="edit-entry-row">
-          <app-button 
-            :class="'tool-button delete-button round low-contrast'"
+          <a
+            class="delete-link"
             @click="removeEntry"
-          >
-            <font-awesome-icon 
-            icon="plus"
-            class="tool-icon"
-            />
-          </app-button>
+          > 
+            delete
+          </a>
         </div>
 
 
@@ -136,4 +133,10 @@ import { AppButton, AppToken, AppInput} from './../../appComponents/appComponent
   .tool-button
     height: 1.5em
     width: 1.5em
+
+  .delete-link
+    cursor pointer
+    text-decoration underline
+    &:hover
+      color: lowContrastColor
 </style>

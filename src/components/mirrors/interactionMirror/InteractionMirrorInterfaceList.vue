@@ -27,7 +27,7 @@
         @click="toggleEditMode"
       >
         <font-awesome-icon 
-        icon="plus"
+        icon="pencil-alt"
         class="tool-icon"
         />
       </app-button>
@@ -38,8 +38,10 @@
   import InteractionMirrorInterfaceListToken from "./InteractionMirrorInterfaceListToken.vue";
 
   import { library } from '@fortawesome/fontawesome-svg-core'
-  import { faPlus } from '@fortawesome/free-solid-svg-icons'
+  import { faPlus, faPencilAlt, faTrash } from '@fortawesome/free-solid-svg-icons'
   library.add(faPlus);
+  library.add(faPencilAlt);
+  library.add(faTrash);
 
   import { AppButton} from './../../appComponents/appComponents.js';
 
@@ -101,4 +103,5 @@
     height: 27px
     order: 1
     margin: 5px
+
 </style>
