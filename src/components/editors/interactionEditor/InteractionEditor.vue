@@ -42,7 +42,12 @@
                     {
                         return found;
                     }else{
-                        return this.interactions[0];
+                        if(this.interactions.length > 0){
+                            return this.interactions[0];
+                        }else{
+                            return {};
+                        }
+                        
                     }
                 },
                 set: function (newValue) {
