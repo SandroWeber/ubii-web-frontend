@@ -5,7 +5,7 @@ import {DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
 // default interaction
 let createDefaultInteraction = () => { return {
   id: uuidv4(),
-  name: 'New Interaction',
+  name: 'New Interaction'+uuidv4(),
   processingCallback: `(input, output, state) => {
 
   // Your code here.
@@ -78,15 +78,15 @@ const helpers = {
     return new Promise((resolve, reject) => {
       try{
         // clear all
-        /*context.commit('clearAll');
+        context.commit('clearAll');
 
         // set all to fetched
         context.state.fetched.map(interaction => {
-          context.commit('setInteraction', 
+          context.commit('pushInteraction', 
             {
               interaction: interaction
             });
-        });*/
+        });
 
         return resolve();
       }catch{
@@ -106,7 +106,7 @@ const helpers = {
         })
         .then((reply) => {
           // todo check if success 
-          
+
           // resolve on success reject otherwise
           return resolve();
         },()=>{
@@ -121,6 +121,7 @@ const helpers = {
   update: function(context, interaction){
     return new Promise((resolve, reject) => {
       try{
+        console.log("start update");
         UbiiClientService.client
         .callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_REPLACE,
@@ -128,11 +129,13 @@ const helpers = {
         })
         .then((reply) => {
           // TODO check if success
+          console.log("Replace service")
 
           // resolve on success reject otherwise
           return resolve();
         },()=>{
-          console.log("Update Sevice Rejected.");
+          console.log("Replace Sevice Rejected.");
+          return reject();
         });
         
       }catch{
