@@ -26,8 +26,8 @@ let createDefaultInteraction = () => { return {
       ],
   }};
 
-// helpers
-const helpers = {
+// Backend data helper:
+const backendData = {
   fetch: async function (context) {
     return new Promise((resolve, reject) => {
       try{
@@ -37,23 +37,6 @@ const helpers = {
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_GET_LIST
         })
         .then(async (reply) => {
-          console.log("Fetch Service Reply: Ive got something: "+ Object.keys(reply.interactionList[0]) + " length: "+reply.interactionList.length);
-          
-          /*
-          // Get each interaction listet in the interaction list from the server
-          const interactionArray = reply.interactionList.map(async listEntry => {
-            return UbiiClientService.client
-            .callService({
-              topic: DEFAULT_TOPICS.SERVICES.INTERACTION_GET,
-              interaction: {
-                id: listEntry.id
-              }
-            }).then((reply) => {
-              return reply.interaction;
-            });
-          });
-          const interactions = await Promise.all(interactionArray);*/
-
           // Clear fetched.
           context.commit('clearFetched');
 
@@ -98,17 +81,17 @@ const helpers = {
     return new Promise((resolve, reject) => {
       try{
         // register new interaction at the backend
-        console.log("start registering");
         UbiiClientService.client
         .callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_REGISTRATION,
           interaction: interaction
         })
         .then((reply) => {
-          // todo check if success 
-
-          // resolve on success reject otherwise
-          return resolve();
+          if(reply.success){
+            return resolve();
+          }else{
+            return reject();
+          }
         },()=>{
           console.log("Register Sevice Rejected.");
         });
@@ -128,17 +111,20 @@ const helpers = {
           interaction: interaction
         })
         .then((reply) => {
-          // TODO check if success
-          console.log("Replace service")
+          console.log("Replace service answer")
 
-          // resolve on success reject otherwise
-          return resolve();
+          if(reply.success){
+            return resolve();
+          }else{
+            return reject();
+          }
         },()=>{
           console.log("Replace Sevice Rejected.");
           return reject();
         });
         
       }catch{
+        console.log("catched");
         return reject();
       }
     });
@@ -164,8 +150,8 @@ const actions = {
       interaction: payload.interaction
     });
 
-    // Register interaction.
-    await helpers.register(context,payload.interaction)
+    // Register interaction at the backend.
+    await backendData.register(context,payload.interaction)
     
     await actions.pullAll(context);
   },
@@ -178,16 +164,16 @@ const actions = {
     context.commit('setInteraction', payload);
 
     // Update interaction.
-    await helpers.update(context, payload.interaction)
+    await backendData.update(context, payload.interaction)
     
     await actions.pullAll(context);
   },
   async pullAll (context) {
     // Fetch ...
-    await helpers.fetch(context);
+    await backendData.fetch(context);
 
     // ... then pull.
-    await helpers.pull(context);
+    await backendData.pull(context);
   },
 }
 
