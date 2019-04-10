@@ -87,10 +87,12 @@ const backendData = {
           interaction: interaction
         })
         .then((reply) => {
-          if(reply.success){
-            return resolve();
-          }else{
+          if(reply.error){
+            console.log("Register Sevice answered with error.");
             return reject();
+          }else{
+            
+            return resolve();
           }
         },()=>{
           console.log("Register Sevice Rejected.");
@@ -113,10 +115,12 @@ const backendData = {
         .then((reply) => {
           console.log("Replace service answer")
 
-          if(reply.success){
-            return resolve();
-          }else{
+          if(reply.error){
+            console.log("Register Sevice answered with error.");
             return reject();
+          }else{
+            
+            return resolve();
           }
         },()=>{
           console.log("Replace Sevice Rejected.");
