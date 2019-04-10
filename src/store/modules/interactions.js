@@ -3,7 +3,7 @@ import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import {DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
 
 // default interaction
-let defaultInteraction = {
+let createDefaultInteraction = () => { return {
   id: uuidv4(),
   name: 'New Interaction',
   processingCallback: `(input, output, state) => {
@@ -24,11 +24,11 @@ let defaultInteraction = {
               "messageFormat": "messageFormat"
           }
       ],
-  };
+  }};
 
 // helpers
 const helpers = {
-  fetch: function (context) {
+  fetch: async function (context) {
     return new Promise((resolve, reject) => {
       try{
         // get th elist with all interactions from the server.
@@ -36,9 +36,10 @@ const helpers = {
         .callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_GET_LIST
         })
-        .then((reply) => {
-          console.log("Fetch Service Reply: Ive got something: "+reply.interactionList.length);
+        .then(async (reply) => {
+          console.log("Fetch Service Reply: Ive got something: "+ Object.keys(reply.interactionList[0]) + " length: "+reply.interactionList.length);
           
+          /*
           // Get each interaction listet in the interaction list from the server
           const interactionArray = reply.interactionList.map(async listEntry => {
             return UbiiClientService.client
@@ -51,14 +52,14 @@ const helpers = {
               return reply.interaction;
             });
           });
-          const interactions = await Promise.all(interactionArray);
+          const interactions = await Promise.all(interactionArray);*/
 
           // Clear fetched.
           context.commit('clearFetched');
 
           // Set local fetched to the interactions fetched from the server.
-          interactions.forEach(interaction => {
-            context.commit('setFetchedInteraction', 
+          reply.interactionList.forEach(interaction => {
+            context.commit('pushFetchedInteraction', 
               {
                 interaction: interaction
               });
@@ -77,7 +78,7 @@ const helpers = {
     return new Promise((resolve, reject) => {
       try{
         // clear all
-        context.commit('clearAll');
+        /*context.commit('clearAll');
 
         // set all to fetched
         context.state.fetched.map(interaction => {
@@ -85,7 +86,7 @@ const helpers = {
             {
               interaction: interaction
             });
-        });
+        });*/
 
         return resolve();
       }catch{
@@ -101,26 +102,10 @@ const helpers = {
         UbiiClientService.client
         .callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_REGISTRATION,
-          interaction: {
-            id: "uuidv4()testid",
-            name: "New Interaction",
-            processingCallback: "(input, output, state) => {}",
-            inputFormats: [
-                    {
-                        "internalName": "defaultIn",
-                        "messageFormat": "messageFormat"
-                    }
-                ],
-            outputFormats: [
-                    {
-                        "internalName": "defaultOut",
-                        "messageFormat": "messageFormat"
-                    }
-                ],
-            }
+          interaction: interaction
         })
         .then((reply) => {
-          console.log("Register Sevice Reply: Ive got something: "+reply.error.message);
+          // todo check if success 
           
           // resolve on success reject otherwise
           return resolve();
@@ -160,7 +145,7 @@ const helpers = {
 
 // initial state
 const state = {
-  all: [defaultInteraction],
+  all: [createDefaultInteraction()],
   fetched: [],
 }
   
@@ -183,7 +168,7 @@ const actions = {
   },
   addDefault (context) {
     actions.add(context, {
-      interaction: defaultInteraction
+      interaction: createDefaultInteraction()
     })
   },
   async update (context, payload) {
@@ -199,7 +184,7 @@ const actions = {
     await helpers.fetch(context);
 
     // ... then pull.
-    await helepers.pullAll(context);
+    await helpers.pull(context);
   },
 }
 
