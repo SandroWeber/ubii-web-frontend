@@ -64,7 +64,7 @@ const backendData = {
         context.commit('clearAll');
 
         // set all to fetched
-        context.state.fetched.map(interaction => {
+        context.state.fetched.forEach(interaction => {
           context.commit('pushInteraction', 
             {
               interaction: interaction
@@ -134,7 +134,7 @@ const backendData = {
 
 // initial state
 const state = {
-  all: [createDefaultInteraction()],
+  all: [],
   fetched: [],
 }
   
