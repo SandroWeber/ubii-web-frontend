@@ -31,23 +31,41 @@ const helpers = {
   fetch: function (context) {
     return new Promise((resolve, reject) => {
       try{
-        // fetch all interaction data from the backend
+        // get th elist with all interactions from the server.
         UbiiClientService.client
         .callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_GET_LIST
         })
         .then((reply) => {
           console.log("Fetch Service Reply: Ive got something: "+reply.interactionList.length);
-
-          // clear fetched
-          context.commit('clearFetched');
           
-          // analyse list and get all interactions and store them to fetched
-          // async with all resolved somehow. all have pushed to fetched when resolved
+          // Get each interaction listet in the interaction list from the server
+          const interactionArray = reply.interactionList.map(async listEntry => {
+            return UbiiClientService.client
+            .callService({
+              topic: DEFAULT_TOPICS.SERVICES.INTERACTION_GET,
+              interaction: {
+                id: listEntry.id
+              }
+            }).then((reply) => {
+              return reply.interaction;
+            });
+          });
+          const interactions = await Promise.all(interactionArray);
+
+          // Clear fetched.
+          context.commit('clearFetched');
+
+          // Set local fetched to the interactions fetched from the server.
+          interactions.forEach(interaction => {
+            context.commit('setFetchedInteraction', 
+              {
+                interaction: interaction
+              });
+          });
 
           return resolve();
         });
-
         
       }catch{
         return reject();
@@ -62,6 +80,12 @@ const helpers = {
         context.commit('clearAll');
 
         // set all to fetched
+        context.state.fetched.map(interaction => {
+          context.commit('setInteraction', 
+            {
+              interaction: interaction
+            });
+        });
 
         return resolve();
       }catch{
@@ -69,7 +93,7 @@ const helpers = {
       }
     });
   },
-  register: function (context, payload) {
+  register: function (context, interaction) {
     return new Promise((resolve, reject) => {
       try{
         // register new interaction at the backend
@@ -96,12 +120,34 @@ const helpers = {
             }
         })
         .then((reply) => {
-          console.log("Register Sevice Reply: Ive got something: "+reply);
+          console.log("Register Sevice Reply: Ive got something: "+reply.error.message);
           
           // resolve on success reject otherwise
           return resolve();
         },()=>{
           console.log("Register Sevice Rejected.");
+        });
+        
+      }catch{
+        return reject();
+      }
+    });
+  },
+  update: function(context, interaction){
+    return new Promise((resolve, reject) => {
+      try{
+        UbiiClientService.client
+        .callService({
+          topic: DEFAULT_TOPICS.SERVICES.INTERACTION_REPLACE,
+          interaction: interaction
+        })
+        .then((reply) => {
+          // TODO check if success
+
+          // resolve on success reject otherwise
+          return resolve();
+        },()=>{
+          console.log("Update Sevice Rejected.");
         });
         
       }catch{
@@ -125,43 +171,35 @@ const getters = {
 
 // actions
 const actions = {
-  add (context, payload) {
+  async add (context, payload) {
     context.commit('pushInteraction', {
       interaction: payload.interaction
     });
 
-    // register interaction
-    helpers.register(context,payload)
-    .then(() => {
-      helpers.fetch(context)
-      .then(() => {
-        console.log("after fetched in add");
-      })
-    })
-
-    // then fetch
-    // then pull
+    // Register interaction.
+    await helpers.register(context,payload.interaction)
+    
+    await actions.pullAll(context);
   },
   addDefault (context) {
     actions.add(context, {
       interaction: defaultInteraction
     })
   },
-  update (context, payload) {
+  async update (context, payload) {
     context.commit('setInteraction', payload);
 
-    // replace interaction
-
-    // then fetch
-    // then pull
+    // Update interaction.
+    await helpers.update(context, payload.interaction)
+    
+    await actions.pullAll(context);
   },
-  pullAll (context) {
-    helpers.fetch(context)
-    .then(() => {
-      console.log("after fetched in pullAll");
-    })
+  async pullAll (context) {
+    // Fetch ...
+    await helpers.fetch(context);
 
-    // then pull
+    // ... then pull.
+    await helepers.pullAll(context);
   },
 }
 
