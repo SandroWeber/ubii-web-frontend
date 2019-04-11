@@ -4,7 +4,7 @@
     @click="onClick"
   >
     <div
-      class=""
+      class="center"
       :style="{width: getSizeStyle, height: getSizeStyle}"
     >
       <slot> </slot>
@@ -40,9 +40,11 @@
 @import "./../../styles/main/color"
 
 .app-button
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    //display: flex;
+    //justify-content: center;
+    //align-items: center;
+    //padding: 70px 0;
+    //text-align: center;
     border: 1px solid mediumContrastColor
     color: mediumContrastColor
     background-color: layerOneSecondaryColor
@@ -88,4 +90,7 @@
     &:hover
         border-color: highContrastColor 
         color: highContrastColor
+
+  .center
+    margin: auto
 </style>

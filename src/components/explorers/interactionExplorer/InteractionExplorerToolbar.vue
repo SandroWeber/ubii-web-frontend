@@ -5,6 +5,7 @@
     <app-button 
         :class="'tool-button round low-contrast'"
         @click="addDefaultInteraction"
+        :contentSizePercentage="70"
     >
         <font-awesome-icon 
         icon="plus"
@@ -52,6 +53,6 @@
     width: 1.5em
 
 .tool-icon
-    height: 1em
-    width: 1em
+    height: 100%
+    width: 100%
 </style>
