@@ -289,23 +289,14 @@
                 };
               });
 
-            // register our session
-            UbiiClientService.registerSession(this.$data.ubiiSession)
-              .then((session) => {
-              // again, accept extended definition that is sent back by the server as confirmation
-                this.$data.ubiiSession = session;
-                return session;
+            // start our session (registering not necessary as we do not want to save it permanently)
+            UbiiClientService.client
+              .callService({
+                topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+                session: this.$data.ubiiSession
               })
               .then(() => {
-                // start the session
-                UbiiClientService.client
-                  .callService({
-                    topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
-                    session: this.$data.ubiiSession
-                  })
-                  .then(() => {
-                    this.$data.demoStarted = true;
-                  });
+                this.$data.demoStarted = true;
               });
           });
       },
