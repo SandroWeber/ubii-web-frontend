@@ -21,10 +21,11 @@
     <app-button 
       :class="buttonClassObject"
       @click="connect"
+      contentSizePercentage="60"
     >
       <font-awesome-icon 
         icon="sync-alt"
-        :class="{ transparent: !ubiiClientService.isConnected }"
+        class="connect-icon"
       />
     </app-button>
   </app-layer>
@@ -78,6 +79,9 @@
 <style scoped lang="stylus">
   .backend-info
     padding: 8px
+    display: flex
+    direction: row
+    align-items center
 
   label
     margin: 0px 5px 0px 10px
@@ -89,5 +93,9 @@
     height: 1.8em
     width 1.8em
     margin: 2px 10px 2px 10px
+
+  .connect-icon
+    width: 100%
+    height: 100%
     
 </style>

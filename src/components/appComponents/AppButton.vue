@@ -3,7 +3,12 @@
     class="app-button"
     @click="onClick"
   >
-    <slot> </slot>
+    <div
+      class=""
+      :style="{width: getSizeStyle, height: getSizeStyle}"
+    >
+      <slot> </slot>
+    </div>
   </button>
 </template>
 
@@ -11,10 +16,21 @@
   export default { 
     name: 'AppButton',
     components: {},
-    props: {},
+    props: {
+      contentSizePercentage: Number
+    },
     methods: {
       onClick: function(value) {
           this.$emit('click', value);
+      }
+    },
+    computed:{
+      getSizeStyle: function(){
+        if(this.contentSizePercentage){
+          return this.contentSizePercentage+"%";
+        }else{
+          return "100%";
+        }
       }
     }
   } 
@@ -24,6 +40,9 @@
 @import "./../../styles/main/color"
 
 .app-button
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border: 1px solid mediumContrastColor
     color: mediumContrastColor
     background-color: layerOneSecondaryColor

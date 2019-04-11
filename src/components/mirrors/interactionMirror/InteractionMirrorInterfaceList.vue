@@ -25,6 +25,7 @@
       <app-button 
         :class="'tool-button edit-button round low-contrast'"
         @click="toggleEditMode"
+        :contentSizePercentage="50"
       >
         <font-awesome-icon 
         icon="pencil-alt"
@@ -103,5 +104,9 @@
     height: 27px
     order: 1
     margin: 5px
+
+  .tool-icon
+    width: 100%
+    height: 100%
 
 </style>
