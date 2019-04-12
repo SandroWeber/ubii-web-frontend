@@ -40,8 +40,6 @@
         ubiiClientService: UbiiClientService,
         testRunningRTT: false,
         testRTT: {
-          running: false,
-          finished: false,
           status: 'unmeasured',
           timings: [],
           avgRTT: undefined,
@@ -73,8 +71,6 @@
         this.$data.testRTT.timings = [];
         this.$data.testRTT.tSent = 0;
         this.$data.testRTT.avgRTT = undefined;
-        this.$data.testRTT.finished = false;
-        this.$data.testRTT.running = true;
         this.$data.testRTT.status = 'running';
       },
       startTestRTT: async function () {
@@ -100,8 +96,6 @@
       },
       stopTestRTT: function () {
         if (this.$data.testRTT) {
-          this.$data.testRTT.running = false;
-          this.$data.testRTT.finished = true;
           this.$data.testRTT.status = this.$data.testRTT.avgRTT.toString() + 'ms';
           UbiiClientService.client.unsubscribe(this.$data.testRTT.topic);
         }
