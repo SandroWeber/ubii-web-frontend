@@ -1,21 +1,27 @@
 <template>
-    <div class="performance-test-rtt">
-        <h3>Round-Trip-Time</h3>
-
-        <div>
-            <button class="start-demo-button" v-on:click="startTestRTT()" :disabled="!ubiiClientService.isConnected">
-                <font-awesome-icon icon="play" v-show="this.$data.testRTT.status !== 'running'"/>
-                <font-awesome-icon icon="spinner" v-show="this.$data.testRTT.status === 'running'"/>
-            </button>
-        </div>
-
-        <span class="performance-test-rtt-status">{{this.$data.testRTT.status}}</span>
+  <div class="performance-test-rtt">
+    <h3 class="header">Round-Trip-Time</h3>
+    <span class="performance-test-rtt-status">{{this.$data.testRTT.status}}</span>
+      
+    <div>
+      <button class="start-demo-button" v-on:click="startTestRTT()" :disabled="!ubiiClientService.isConnected">
+        <font-awesome-icon icon="play" v-show="this.$data.testRTT.status !== 'running'"/>
+        <font-awesome-icon icon="spinner" v-show="this.$data.testRTT.status === 'running'"/>
+      </button>
     </div>
+        
+    <div>
+      <span># messages: </span>
+      <app-input :id="'rtt-message-count'" :type="'# messages'" v-model="testRTT.messageCount" />
+    </div>
+  </div>
 </template>
 
 <script>
   import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
   import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
+  
+  import { AppInput } from '../appComponents/appComponents.js';
 
   /* fontawesome */
   import {library} from '@fortawesome/fontawesome-svg-core'
@@ -26,6 +32,9 @@
 
   export default {
     name: 'PerformanceTestRTT',
+    components: {
+      AppInput: AppInput
+    },
     mounted: function () {
       // unsubscribe before page is unloaded
       window.addEventListener('beforeunload', () => {
@@ -118,6 +127,9 @@
         display: grid
         grid-gap: 15px
         grid-template-columns: 200px 50px auto
+
+    .header
+        grid-column: 1 / 4
 
     @keyframes spinner {
         to { transform: rotate(360deg); }}
