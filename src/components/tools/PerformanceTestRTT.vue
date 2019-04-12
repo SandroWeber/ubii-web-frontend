@@ -76,15 +76,17 @@
         }
       },
       prepareTestRTT: function () {
+        this.$data.testRTT.status = 'running';
         this.$data.testRTT.topic = UbiiClientService.getClientID() + '/test_rtt';
         this.$data.testRTT.timings = [];
         this.$data.testRTT.tSent = 0;
         this.$data.testRTT.avgRTT = undefined;
-        this.$data.testRTT.status = 'running';
       },
       startTestRTT: async function () {
-        await this.ubiiSetupRTT();
+        if (this.$data.testRTT.status === 'running') return;
+
         this.prepareTestRTT();
+        await this.ubiiSetupRTT();
 
         let counter = 0;
 
