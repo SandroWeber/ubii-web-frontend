@@ -97,7 +97,9 @@ import { AppButton, AppToken, AppInput} from './../../appComponents/appComponent
             return this.localValue.internalName;
         },
         set(value) {
-            this.localValue.internalName = value;
+          let raw = this.localValue;
+          raw.internalName = value;
+          this.localValue = raw;
         }
       },
       interfaceMessageFormat: {
@@ -105,7 +107,9 @@ import { AppButton, AppToken, AppInput} from './../../appComponents/appComponent
             return this.localValue.messageFormat;
         },
         set(value) {
-            this.localValue.messageFormat = value;
+          let raw = this.localValue;
+          raw.messageFormat = value;
+          this.localValue = raw;
         }
       },
     }
