@@ -76,11 +76,11 @@ const backendData = {
       }
     });
   },
-  register: function (context, interaction) {
-    return new Promise((resolve, reject) => {
+  register: async function (context, interaction) {
+    return await new Promise((resolve, reject) => {
       try{
         // register new interaction at the backend
-        UbiiClientService.client
+        await UbiiClientService.client
         .callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_REGISTRATION,
           interaction: interaction
