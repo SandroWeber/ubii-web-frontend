@@ -5,6 +5,7 @@
         :key="index"
         :index="index"
         v-model="localValue[index]"
+        @input="fireInputEvent"
         :interface-key="interfaceKey"
         :editMode="editMode"
         :code="code"
@@ -72,19 +73,32 @@
             this.$emit('input', localValue)
         }
       },
+      localValueEntry: {
+        get(index) {
+            return this.value
+        },
+        set(localValue) {
+            this.$emit('input', localValue)
+        }
+      }
     },
     methods: {
       toggleEditMode: function (){
         this.editMode= this.editMode !== true;
       },
       addInterfaceEntry: function(){
-        this.localValue.push({
+        let raw = this.localValue;
+        raw.push({
               "internalName": "defaultIn",
               "messageFormat": "messageFormat"
           });
+        this.localValue = raw;
       },
       removeInterfaceEntry: function(index){
         this.localValue.splice(index, 1);
+      },
+      fireInputEvent: function(){
+        this.$emit('input', this.localValue);
       }
     }
     
