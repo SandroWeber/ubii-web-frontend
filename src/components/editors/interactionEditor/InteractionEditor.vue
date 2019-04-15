@@ -51,6 +51,7 @@
                     }
                 },
                 set: function (newValue) {
+                    console.log("UPDATEEE")
                     this.updateInteraction({
                         currentInteractionId: this.selectedInteractionId,
                         interaction: newValue
