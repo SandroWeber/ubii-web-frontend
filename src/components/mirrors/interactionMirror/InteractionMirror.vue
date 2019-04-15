@@ -64,17 +64,22 @@
             }
         },
         computed: {
-            interaction: function(){
-                return this.value;
+            interaction: {
+                get() {
+                    return this.value;
+                },
+                set(value) {
+                    this.$emit('input', value);
+                }
             },
             nameSource: {
                 get() {
                     return this.interaction.name;
                 },
                 set(value) {
-                    this.interaction.name = value;
-
-                    this.$emit('input', this.interaction);
+                    let raw = this.interaction;
+                    raw.name = value;
+                    this.interaction = raw;
                 }
             },
             processingCallbackSource: {
@@ -82,9 +87,9 @@
                     return this.interaction.processingCallback;
                 },
                 set(value) {
-                    this.interaction.processingCallback = value;
-
-                    this.$emit('input', this.interaction);
+                    let raw = this.interaction;
+                    raw.processingCallback = value;
+                    this.interaction = raw;
                 }
             },
             inputFormatSource: {
@@ -92,9 +97,9 @@
                     return this.interaction.inputFormats;
                 },
                 set(value) {
-                    this.interaction.inputFormats = value;
-                    
-                    this.$emit('input', this.interaction);
+                    let raw = this.interaction;
+                    raw.inputFormats = value;
+                    this.interaction = raw;
                 }
             },
             outputFormatSource: {
@@ -102,9 +107,9 @@
                     return this.interaction.outputFormats;
                 },
                 set(value) {
-                    this.interaction.outputFormats = value;
-                    
-                    this.$emit('input', this.interaction);
+                    let raw = this.interaction;
+                    raw.outputFormats = value;
+                    this.interaction = raw;
                 }
             }
         }
