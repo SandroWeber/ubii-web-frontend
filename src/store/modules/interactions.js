@@ -50,7 +50,6 @@ const backendData = {
 
           return resolve();
         });
-        
       }catch{
         return reject();
       }
