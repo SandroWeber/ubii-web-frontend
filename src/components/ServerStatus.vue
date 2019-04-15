@@ -21,7 +21,7 @@
     <app-button 
       :class="buttonClassObject"
       @click="connect"
-      contentSizePercentage="60"
+      :contentSizePercentage="60"
     >
       <font-awesome-icon 
         icon="sync-alt"
