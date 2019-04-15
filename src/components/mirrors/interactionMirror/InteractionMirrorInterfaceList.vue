@@ -15,6 +15,7 @@
         v-if="editMode"
         :class="'tool-button add-interface-entry-button round low-contrast'"
         @click="addInterfaceEntry"
+        :contentSizePercentage="60"
       >
         <font-awesome-icon 
         icon="plus"
