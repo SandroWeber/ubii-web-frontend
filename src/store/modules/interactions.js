@@ -31,7 +31,7 @@ const backendData = {
   fetch: async function (context) {
     return new Promise((resolve, reject) => {
       try{
-        // get th elist with all interactions from the server.
+        // Get the list with all interactions from the server.
         UbiiClientService.client
         .callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_GET_LIST
@@ -88,47 +88,36 @@ const backendData = {
         })
         .then((reply) => {
           if(reply.error){
-            console.log("Register Sevice answered with error.");
             return reject();
           }else{
-            
             return resolve();
           }
         },()=>{
-          console.log("Register Sevice Rejected.");
+          return reject();
         });
-        
       }catch{
         return reject();
       }
     });
   },
-  update: function(context, interaction){
-    return new Promise((resolve, reject) => {
+  update: async function(context, interaction){
+    return await new Promise(async (resolve, reject) => {
       try{
-        console.log("start update");
-        UbiiClientService.client
+        await UbiiClientService.client
         .callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_REPLACE,
           interaction: interaction
         })
         .then((reply) => {
-          console.log("Replace service answer")
-
           if(reply.error){
-            console.log("Register Sevice answered with error.");
             return reject();
           }else{
-            
             return resolve();
           }
         },()=>{
-          console.log("Replace Sevice Rejected.");
           return reject();
         });
-        
       }catch{
-        console.log("catched");
         return reject();
       }
     });
@@ -166,11 +155,10 @@ const actions = {
   },
   async update (context, payload) {
     context.commit('setInteraction', payload);
-
     // Update interaction.
-    await backendData.update(context, payload.interaction)
-    
-    await actions.pullAll(context);
+    await backendData.update(context, payload.interaction);
+   
+    //await actions.pullAll(context);
   },
   async pullAll (context) {
     // Fetch ...
@@ -189,18 +177,18 @@ const mutations = {
   clearAll (state){
     state.all = [];
   },
-  pushFetchedInteraction (state, payload){
-    state.fetched.push(payload.interaction);
-  },
-  clearFetched (state){
-    state.fetched = [];
-  },
   setInteraction (state, payload){
     let id = payload.currentInteractionId;
     let currentInteractionIndex = state.all.findIndex(function(element) {
         return element.id === id;
     });
     state.all[currentInteractionIndex] = payload.interaction;
+  },
+  pushFetchedInteraction (state, payload){
+    state.fetched.push(payload.interaction);
+  },
+  clearFetched (state){
+    state.fetched = [];
   },
 }
 
