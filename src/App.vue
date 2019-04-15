@@ -130,4 +130,6 @@
 
     flex-grow: 1
 
+  .svg-inline--fa
+    vertical-align 0
 </style>
