@@ -26,6 +26,9 @@ let createDefaultInteraction = () => { return {
       ],
   }};
 
+let interactionsToSync = new Map();
+let synchronizationServiceInterval = null;
+
 // Backend data helper:
 const backendData = {
   fetch: async function (context) {
@@ -77,7 +80,7 @@ const backendData = {
     });
   },
   register: async function (context, interaction) {
-    return await new Promise((resolve, reject) => {
+    return await new Promise(async(resolve, reject) => {
       try{
         // register new interaction at the backend
         await UbiiClientService.client
@@ -120,14 +123,14 @@ const backendData = {
         return reject();
       }
     });
-  }
+  },
 };
 
 
 // initial state
 const state = {
-  all: [],
-  fetched: [],
+  all: new Map,
+  fetched: new Map,
 }
   
 // getters
@@ -144,20 +147,21 @@ const actions = {
 
     // Register interaction at the backend.
     await backendData.register(context,payload.interaction)
-    
-    await actions.pullAll(context);
   },
   addDefault (context) {
     actions.add(context, {
       interaction: createDefaultInteraction()
     })
   },
+  deleteInteraction (context, payload) {
+    context.commit('removeInteraction', payload);
+
+    // todo service call
+  },
   async update (context, payload) {
     context.commit('setInteraction', payload);
-    // Update interaction.
-    await backendData.update(context, payload.interaction);
-   
-    //await actions.pullAll(context);
+
+    interactionsToSync.set(payload.interaction.id, payload.interaction);
   },
   async pullAll (context) {
     // Fetch ...
@@ -166,28 +170,46 @@ const actions = {
     // ... then pull.
     await backendData.pull(context);
   },
+  startSynchronizationService(context){
+    if(synchronizationServiceInterval){
+      clearInterval(synchronizationServiceInterval);
+    }
+
+    synchronizationServiceInterval = setInterval(async ()=>{
+      for (var value of interactionsToSync.values()) {
+        await backendData.update(context, value);
+      }
+      interactionsToSync.clear();
+
+      //await actions.pullAll(context);
+    }, 1000);
+  },
+  stopSynchronizationService(context){
+    if(synchronizationServiceInterval){
+      clearInterval(synchronizationServiceInterval);
+    }
+  },
 }
 
 // mutations
 const mutations = {
   pushInteraction (state, payload){
-    state.all.push(payload.interaction);
+    state.all.set(payload.interaction.id, payload.interaction);
   },
   clearAll (state){
-    state.all = [];
+    state.all = new Map;
   },
   setInteraction (state, payload){
-    let id = payload.currentInteractionId;
-    let currentInteractionIndex = state.all.findIndex(function(element) {
-        return element.id === id;
-    });
-    state.all[currentInteractionIndex] = payload.interaction;
+    state.all.set(payload.currentInteractionId, payload.interaction);
+  },
+  removeInteraction (state, payload){
+    state.all.delete(payload.currentInteractionId, payload.interaction);
   },
   pushFetchedInteraction (state, payload){
-    state.fetched.push(payload.interaction);
+    state.fetched.set(payload.interaction.id, payload.interaction);
   },
   clearFetched (state){
-    state.fetched = [];
+    state.fetched = new Map;
   },
 }
 
