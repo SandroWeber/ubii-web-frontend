@@ -179,14 +179,12 @@ const actions = {
     })
   },
   async deleteInteraction (context, payload) {
-    console.log("deleeeeete");
-    console.log(payload);
-    //context.commit('removeInteraction', payload);
-
     // Delete interaction at the backend.
     await backendData.delete(context, payload.currentInteractionId);
 
     await actions.pullAll(context);
+
+    //context.commit('removeInteraction', payload);
   },
   async update (context, payload) {
     context.commit('setInteraction', payload);
