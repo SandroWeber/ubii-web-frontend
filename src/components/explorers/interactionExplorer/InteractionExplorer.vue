@@ -3,7 +3,7 @@
         <interaction-explorer-toolbar
         />
         <interaction-explorer-item
-            v-for="element in interactions"
+            v-for="element in Array.from(interactions.values())"
             :key="element.id"
             :name="element.name"
             :id="element.id"
@@ -21,7 +21,7 @@
     export default {
         name: 'InteractionExplorer',
         props: {
-            interactions: Array,
+            interactions: Map,
             selectedInteractionId: String
         },
         components: {
