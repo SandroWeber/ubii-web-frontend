@@ -12,6 +12,28 @@
         class="tool-icon"
         />
     </app-button>
+
+    <app-button 
+        :class="'tool-button round low-contrast'"
+        @click="deleteInteraction"
+        :contentSizePercentage="70"
+    >
+        <font-awesome-icon 
+        icon="plus"
+        class="tool-icon"
+        />
+    </app-button>
+
+    <app-button 
+        :class="'tool-button round low-contrast'"
+        @click="pullAll"
+        :contentSizePercentage="65"
+    >
+        <font-awesome-icon 
+        icon="sync-alt"
+        class="tool-icon"
+        />
+    </app-button>
   </div>
 </template>
 
@@ -23,7 +45,6 @@
     import { faPlus } from '@fortawesome/free-solid-svg-icons'
     library.add(faPlus);
 
-    import uuidv4 from 'uuid/v4';
     import { AppButton} from './../../appComponents/appComponents.js';
 
     export default { 
@@ -36,7 +57,9 @@
         methods: {
             ...mapActions('interactions', {
                 addInteraction: 'add',
-                addDefaultInteraction: 'addDefault'
+                addDefaultInteraction: 'addDefault',
+                deleteInteraction: 'deleteInteraction',
+                pullAll: 'pullAll',
             }),
         }
     } 
@@ -49,8 +72,9 @@
     padding 0.5em
 
 .tool-button 
-    height: 1.5em
-    width: 1.5em
+    height: 1.8em
+    width: 1.8em
+    margin-right: 0.5em
 
 .tool-icon
     height: 100%
