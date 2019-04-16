@@ -35,15 +35,12 @@
             selectedInteraction: {
                 get: function () {
                     let id = this.selectedInteractionId;
-                    let found = this.interactions.find(function(element) {
-                        return element.id === id;
-                    });
-                    if(found)
+                    if(this.interactions.has(id))
                     {
-                        return found;
+                        return this.interactions.get(id);
                     }else{
                         if(this.interactions.length > 0){
-                            return this.interactions[0];
+                            return this.interactions.values().next().value;
                         }else{
                             return {};
                         }
@@ -69,11 +66,15 @@
             ...mapActions('interactions', {
                 addInteraction: 'add',
                 updateInteraction: 'update',
-                pullAll: 'pullAll'
+                pullAll: 'pullAll',
+                startSynchronizationService: 'startSynchronizationService',
+                stopSynchronizationService: 'stopSynchronizationService'
             }),
         },
-        mounted: function(){
-            this.pullAll();
+        mounted: async function(){
+            await this.pullAll();
+            await this.startSynchronizationService();
+            console.log(this.interactions)
         }
     }
 </script>
