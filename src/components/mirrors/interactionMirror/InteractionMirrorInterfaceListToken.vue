@@ -47,12 +47,11 @@
 </template>
 
 <script>
-import { AppButton, AppToken, AppInput} from './../../appComponents/appComponents.js';
+import { AppToken, AppInput} from './../../appComponents/appComponents.js';
 
   export default { 
     name: 'InteractionMirrorInterfaceListToken',
     components: {
-      AppButton: AppButton,
       AppToken: AppToken,
       AppInput: AppInput,
     },
@@ -124,11 +123,11 @@ import { AppButton, AppToken, AppInput} from './../../appComponents/appComponent
   .edit-entry-row
     display: flex
     flex-direction: row
-    width: 30em
+    width: 22em
     margin: 0.5em
 
   .key
-    width: 10em
+    width: 8.5em
     flex-grow: 0
 
   .value

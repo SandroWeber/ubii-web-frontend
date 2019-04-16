@@ -1,5 +1,35 @@
 <template>
   <div class="interaction-mirror-interface-list">
+
+      <div
+        class="toolbar"
+        :class="editMode?'expand':''"
+      >
+        <app-button 
+          :class="'tool-button edit-button round low-contrast'"
+          @click="toggleEditMode"
+          :contentSizePercentage="50"
+        >
+          <font-awesome-icon 
+          icon="pencil-alt"
+          class="tool-icon"
+          />
+        </app-button>
+
+        <app-button 
+          v-if="editMode"
+          :class="'tool-button add-interface-entry-button round low-contrast'"
+          @click="addInterfaceEntry"
+          :contentSizePercentage="60"
+        >
+          <font-awesome-icon 
+          icon="plus"
+          class="tool-icon"
+          />
+        </app-button>
+
+      </div>
+
       <interaction-mirror-interface-list-token 
         v-for="(element, index) in localValue"
         :key="index"
@@ -11,29 +41,6 @@
         :code="code"
         @removeInterfaceEntry="removeInterfaceEntry"
       />
-
-      <app-button 
-        v-if="editMode"
-        :class="'tool-button add-interface-entry-button round low-contrast'"
-        @click="addInterfaceEntry"
-        :contentSizePercentage="60"
-      >
-        <font-awesome-icon 
-        icon="plus"
-        class="tool-icon"
-        />
-      </app-button>
-
-      <app-button 
-        :class="'tool-button edit-button round low-contrast'"
-        @click="toggleEditMode"
-        :contentSizePercentage="50"
-      >
-        <font-awesome-icon 
-        icon="pencil-alt"
-        class="tool-icon"
-        />
-      </app-button>
   </div>
 </template>
 
@@ -72,14 +79,6 @@
         set(localValue) {
             this.$emit('input', localValue)
         }
-      },
-      localValueEntry: {
-        get(index) {
-            return this.value
-        },
-        set(localValue) {
-            this.$emit('input', localValue)
-        }
       }
     },
     methods: {
@@ -113,6 +112,16 @@
     justify-content: flex-start
     align-items: flex-start
     align-content: flex-start
+
+  .toolbar
+    display: flex
+    flex-direction: row
+    &.expand
+      width: 100%
+
+  .toolbar-whitespace
+    flex-grow: 2
+    min-width: 1px
 
   .tool-button
     width: 27px
