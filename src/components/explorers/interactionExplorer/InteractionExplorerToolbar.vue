@@ -16,10 +16,10 @@
     <app-button 
         :class="'tool-button round low-contrast'"
         @click="deleteInteraction"
-        :contentSizePercentage="70"
+        :contentSizePercentage="60"
     >
         <font-awesome-icon 
-        icon="plus"
+        icon="trash-alt"
         class="tool-icon"
         />
     </app-button>
@@ -42,8 +42,9 @@
 
 
     import { library } from '@fortawesome/fontawesome-svg-core'
-    import { faPlus } from '@fortawesome/free-solid-svg-icons'
+    import { faPlus, faTrashAlt } from '@fortawesome/free-solid-svg-icons'
     library.add(faPlus);
+    library.add(faTrashAlt);
 
     import { AppButton} from './../../appComponents/appComponents.js';
 
@@ -53,12 +54,20 @@
             AppButton
         },
         props: {
+            selectedInteractionId: String
         },
         methods: {
+            deleteInteraction: function(){
+                this.$emit('delete')
+
+                this.deleteInteractionAtStore({
+                    currentInteractionId: this.selectedInteractionId,
+                });
+            },
             ...mapActions('interactions', {
                 addInteraction: 'add',
                 addDefaultInteraction: 'addDefault',
-                deleteInteraction: 'deleteInteraction',
+                deleteInteractionAtStore: 'deleteInteraction',
                 pullAll: 'pullAll',
             }),
         }

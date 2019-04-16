@@ -1,6 +1,8 @@
 <template>
     <app-layer class="interaction-explorer layer-two background shadow">
         <interaction-explorer-toolbar
+            :selectedInteractionId="selectedInteractionId"
+            @delete="onSelectItem('')"
         />
         <interaction-explorer-item
             v-for="element in Array.from(interactions.values())"

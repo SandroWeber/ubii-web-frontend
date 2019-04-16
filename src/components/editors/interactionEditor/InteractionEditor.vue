@@ -39,7 +39,7 @@
                     {
                         return this.interactions.get(id);
                     }else{
-                        if(this.interactions.length > 0){
+                        if(this.interactions.size > 0){
                             return this.interactions.values().next().value;
                         }else{
                             return {};
@@ -48,11 +48,12 @@
                     }
                 },
                 set: function (newValue) {
-                    console.log("UPDATEEE")
-                    this.updateInteraction({
-                        currentInteractionId: this.selectedInteractionId,
-                        interaction: newValue
-                    });
+                    if(this.interactions.has(this.selectedInteractionId)){
+                        this.updateInteraction({
+                            currentInteractionId: this.selectedInteractionId,
+                            interaction: newValue
+                        });
+                    }
                 }
             },
             ...mapState({
@@ -60,8 +61,8 @@
             })
         },
         methods: {
-            onSelectInteraction: function(id) {
-                this.selectedInteractionId = id;
+            onSelectInteraction: function(id) {        
+                this.selectedInteractionId = id; 
             },
             ...mapActions('interactions', {
                 addInteraction: 'add',

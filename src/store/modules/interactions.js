@@ -102,6 +102,29 @@ const backendData = {
       }
     });
   },
+  delete: async function (context, interactionId) {
+    return await new Promise(async(resolve, reject) => {
+      try{
+        // delete interaction at the backend
+        await UbiiClientService.client
+        .callService({
+          topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DELETE,
+          interaction: state.all.get(interactionId)
+        })
+        .then((reply) => {
+          if(reply.error){
+            return reject();
+          }else{
+            return resolve();
+          }
+        },()=>{
+          return reject();
+        });
+      }catch{
+        return reject();
+      }
+    });
+  },
   update: async function(context, interaction){
     return await new Promise(async (resolve, reject) => {
       try{
@@ -147,16 +170,23 @@ const actions = {
 
     // Register interaction at the backend.
     await backendData.register(context,payload.interaction)
+
+    await actions.pullAll(context);
   },
   addDefault (context) {
     actions.add(context, {
       interaction: createDefaultInteraction()
     })
   },
-  deleteInteraction (context, payload) {
-    context.commit('removeInteraction', payload);
+  async deleteInteraction (context, payload) {
+    console.log("deleeeeete");
+    console.log(payload);
+    //context.commit('removeInteraction', payload);
 
-    // todo service call
+    // Delete interaction at the backend.
+    await backendData.delete(context, payload.currentInteractionId);
+
+    await actions.pullAll(context);
   },
   async update (context, payload) {
     context.commit('setInteraction', payload);
@@ -203,7 +233,7 @@ const mutations = {
     state.all.set(payload.currentInteractionId, payload.interaction);
   },
   removeInteraction (state, payload){
-    state.all.delete(payload.currentInteractionId, payload.interaction);
+    state.all.delete(payload.currentInteractionId);
   },
   pushFetchedInteraction (state, payload){
     state.fetched.set(payload.interaction.id, payload.interaction);
