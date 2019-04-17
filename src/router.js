@@ -53,6 +53,11 @@ export default new Router({
       name: 'Tool - Performance Tests',
       component: () => import('./components/tools/PerformanceTests.vue')
     },
+    {
+      path: '/tools/qrcode_display',
+      name: 'Tool - QR Code Display',
+      component: () => import('./components/tools/QRCodeDisplay.vue')
+    },
     /* demos */
     {
       path: '/demos',
