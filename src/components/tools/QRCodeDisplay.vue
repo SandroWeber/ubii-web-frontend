@@ -7,8 +7,10 @@
 </template>
 
 <script>
-import QRCode from "qrcode";
+  import QRCode from "qrcode";
   import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+
+/* eslint-disable no-console */
 
 export default {
   name: "QRCodeDisplay",
