@@ -19,6 +19,13 @@
           <p>Performance Tests</p>
         </app-tile>
       </router-link>
+
+      <router-link to="/tools/qrcode_display" class="interface-link" tag="div">
+        <app-tile class="layer-three background round shadow orange-accent">
+          <font-awesome-icon icon="qrcode" class="interface-icon"/>
+          <p>QRCode Display</p>
+        </app-tile>
+      </router-link>
     </div>
   </div>
 </template>
@@ -28,9 +35,10 @@
 
   // Fontawesome.
   import { library } from '@fortawesome/fontawesome-svg-core'
-  import { faEye, faStopwatch } from '@fortawesome/free-solid-svg-icons'
+  import { faEye, faStopwatch, faQrcode } from '@fortawesome/free-solid-svg-icons'
   library.add(faEye);
   library.add(faStopwatch);
+  library.add(faQrcode);
 
   export default {
     name: 'Tools',
