@@ -105,11 +105,16 @@ const backendData = {
   delete: async function (context, interactionId) {
     return await new Promise(async(resolve, reject) => {
       try{
+        // Get index of complete interaction sepcification
+        let index = state.all.findIndex(function(element) {
+            return element.id === interactionId;
+        });
+
         // delete interaction at the backend
         await UbiiClientService.client
         .callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DELETE,
-          interaction: state.all.get(interactionId)
+          interaction: state.all[index]
         })
         .then((reply) => {
           if(reply.error){
@@ -152,8 +157,8 @@ const backendData = {
 
 // initial state
 const state = {
-  all: new Map,
-  fetched: new Map,
+  all: [],
+  fetched: [],
 }
   
 // getters
@@ -222,22 +227,34 @@ const actions = {
 // mutations
 const mutations = {
   pushInteraction (state, payload){
-    state.all.set(payload.interaction.id, payload.interaction);
+    state.all.push(payload.interaction);
   },
   clearAll (state){
-    state.all = new Map;
+    state.all = [];
   },
   setInteraction (state, payload){
-    state.all.set(payload.currentInteractionId, payload.interaction);
+    let id = payload.currentInteractionId;
+    let index = state.all.findIndex(function(element) {
+        return element.id === id;
+    });
+    if(index !== -1){
+      state.all[index] = payload.interaction;
+    }
   },
   removeInteraction (state, payload){
-    state.all.delete(payload.currentInteractionId);
+    let id = payload.currentInteractionId;
+    let index = state.all.findIndex(function(element) {
+        return element.id === id;
+    });
+    if(index !== -1){
+      state.all.splice(index, 1);
+    }
   },
   pushFetchedInteraction (state, payload){
-    state.fetched.set(payload.interaction.id, payload.interaction);
+    state.fetched.push(payload.interaction);
   },
   clearFetched (state){
-    state.fetched = new Map;
+    state.fetched = [];
   },
 }
 

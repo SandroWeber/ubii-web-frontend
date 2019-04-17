@@ -35,12 +35,16 @@
             selectedInteraction: {
                 get: function () {
                     let id = this.selectedInteractionId;
-                    if(this.interactions.has(id))
+                    let index = this.interactions.findIndex(function(element) {
+                        return element.id === id;
+                    });
+
+                    if(index !== -1)
                     {
-                        return this.interactions.get(id);
+                        return this.interactions[index];
                     }else{
-                        if(this.interactions.size > 0){
-                            return this.interactions.values().next().value;
+                        if(this.interactions.length > 0){
+                            return this.interactions[0];
                         }else{
                             return {};
                         }
@@ -48,7 +52,12 @@
                     }
                 },
                 set: function (newValue) {
-                    if(this.interactions.has(this.selectedInteractionId)){
+                    let id = this.selectedInteractionId;
+                    let index = this.interactions.findIndex(function(element) {
+                        return element.id === id;
+                    });
+                    
+                    if(index !== -1){
                         this.updateInteraction({
                             currentInteractionId: this.selectedInteractionId,
                             interaction: newValue

@@ -5,7 +5,7 @@
             @delete="onSelectItem('')"
         />
         <interaction-explorer-item
-            v-for="element in Array.from(interactions.values())"
+            v-for="element in interactions"
             :key="element.id"
             :name="element.name"
             :id="element.id"
@@ -23,7 +23,7 @@
     export default {
         name: 'InteractionExplorer',
         props: {
-            interactions: Map,
+            interactions: Array,
             selectedInteractionId: String
         },
         components: {
