@@ -30,17 +30,19 @@
 
       </div>
 
-      <interaction-mirror-interface-list-token 
-        v-for="(element, index) in localValue"
-        :key="index"
-        :index="index"
-        v-model="localValue[index]"
-        @input="fireInputEvent"
-        :interface-key="interfaceKey"
-        :editMode="editMode"
-        :code="code"
-        @removeInterfaceEntry="removeInterfaceEntry"
-      />
+      <div class="token-container">
+        <interaction-mirror-interface-list-token 
+          v-for="(element, index) in localValue"
+          :key="index"
+          :index="index"
+          v-model="localValue[index]"
+          @input="fireInputEvent"
+          :interface-key="interfaceKey"
+          :editMode="editMode"
+          :code="code"
+          @removeInterfaceEntry="removeInterfaceEntry"
+        />
+      </div>
   </div>
 </template>
 
@@ -108,16 +110,22 @@
   .interaction-mirror-interface-list
     display: flex
     flex-direction: row
-    flex-wrap: wrap
+    flex-wrap: nowrap
     justify-content: flex-start
     align-items: flex-start
     align-content: flex-start
 
   .toolbar
     display: flex
-    flex-direction: row
+    flex-direction: column
     &.expand
-      width: 100%
+      height: 100%
+  
+  .token-container
+    display: flex
+    flex-direction: row
+    flex-grow: 1
+    flex-wrap: wrap
 
   .toolbar-whitespace
     flex-grow: 2
