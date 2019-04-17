@@ -123,11 +123,11 @@ import { AppToken, AppInput} from './../../appComponents/appComponents.js';
   .edit-entry-row
     display: flex
     flex-direction: row
-    width: 22em
+    width: 23em
     margin: 0.5em
 
   .key
-    width: 8.5em
+    width: 9em
     flex-grow: 0
 
   .value
