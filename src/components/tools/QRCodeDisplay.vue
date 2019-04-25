@@ -1,7 +1,8 @@
 <template>
   <div>
     <p>Web Frontend over Wifi</p>
-    <p class="warning" :show="ubiiClientService.client.serverSpecification.ipWlan.length === 0">No Wifi Address!</p>
+    <p class="warning" v-show="urlWlan === undefined">No Wifi Address!</p>
+    <p v-show="urlWlan !== undefined">{{urlWlan}}</p>
     <br>
     <canvas id="qrcode-canvas-wlan"></canvas>
   </div>
@@ -17,18 +18,19 @@ export default {
   name: "QRCodeDisplay",
   data() {
     return {
-      ubiiClientService: UbiiClientService
+      ubiiClientService: UbiiClientService,
+      urlWlan: undefined
     };
   },
   mounted() {
     if (UbiiClientService.client.serverSpecification.ipWlan.length > 0) {
       let canvas = document.getElementById("qrcode-canvas-wlan");
-      let url =
-        UbiiClientService.client.serverSpecification.ipWlan +
+      
+      this.urlWlan = UbiiClientService.client.serverSpecification.ipWlan +
         ":" +
         location.port;
 
-      QRCode.toCanvas(canvas, url, { width: 500 }, error => {
+      QRCode.toCanvas(canvas, this.urlWlan, { width: 500 }, error => {
         if (error) console.error(error);
       });
     }
