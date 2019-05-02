@@ -3,6 +3,8 @@ import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import {DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
 
 const SYNCHRONIZATION_SERVICE_INTERVAL_TIME = 1000; // in ms
+let interactionsToSync = new Map();
+let synchronizationServiceInterval = null;
 
 // default interaction
 let createDefaultInteraction = () => { return {
@@ -28,12 +30,9 @@ let createDefaultInteraction = () => { return {
       ],
   }};
 
-let interactionsToSync = new Map();
-let synchronizationServiceInterval = null;
-
 // Backend data helper:
 const backendData = {
-  fetch: async function (context) {
+  pull: async function (context) {
     return new Promise((resolve, reject) => {
       try{
         // Get the list with all interactions from the server.
@@ -42,12 +41,8 @@ const backendData = {
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_GET_LIST
         })
         .then(async (reply) => {
-          // Clear fetched.
-          context.commit('clearFetched');
-
-          // Set local fetched to the interactions fetched from the server.
           reply.interactionList.forEach(interaction => {
-            context.commit('pushFetchedInteraction', 
+            context.commit('pushInteraction', 
               {
                 interaction: interaction
               });
@@ -60,26 +55,6 @@ const backendData = {
       }
     });
     
-  },
-  pull: function (context) {
-    return new Promise((resolve, reject) => {
-      try{
-        // clear all
-        context.commit('clearAll');
-
-        // set all to fetched
-        context.state.fetched.forEach(interaction => {
-          context.commit('pushInteraction', 
-            {
-              interaction: interaction
-            });
-        });
-
-        return resolve();
-      }catch{
-        return reject();
-      }
-    });
   },
   register: async function (context, interaction) {
     return await new Promise(async(resolve, reject) => {
@@ -107,7 +82,7 @@ const backendData = {
   delete: async function (context, interactionId) {
     return await new Promise(async(resolve, reject) => {
       try{
-        // Get index of complete interaction sepcification
+        // Get index of complete interaction specification
         let index = state.all.findIndex(function(element) {
             return element.id === interactionId;
         });
@@ -160,7 +135,6 @@ const backendData = {
 // initial state
 const state = {
   all: [],
-  fetched: [],
 }
   
 // getters
@@ -178,7 +152,7 @@ const actions = {
     // Register interaction at the backend.
     await backendData.register(context,payload.interaction)
 
-    await actions.pullAll(context);
+    await actions.pull(context);
   },
   addDefault (context) {
     actions.add(context, {
@@ -189,7 +163,7 @@ const actions = {
     // Delete interaction at the backend.
     await backendData.delete(context, payload.currentInteractionId);
 
-    await actions.pullAll(context);
+    await actions.pull(context);
   },
   async update (context, payload) {
     // Update immediately locally ...
@@ -198,11 +172,7 @@ const actions = {
     // ... and add it to the toSync list.
     interactionsToSync.set(payload.interaction.id, payload.interaction);
   },
-  async pullAll (context) {
-    // Fetch ...
-    await backendData.fetch(context);
-
-    // ... then pull.
+  async pull (context) {
     await backendData.pull(context);
   },
   startSynchronizationService(context){
@@ -250,13 +220,7 @@ const mutations = {
     if(index !== -1){
       state.all.splice(index, 1);
     }
-  },
-  pushFetchedInteraction (state, payload){
-    state.fetched.push(payload.interaction);
-  },
-  clearFetched (state){
-    state.fetched = [];
-  },
+  }
 }
 
 export default {
