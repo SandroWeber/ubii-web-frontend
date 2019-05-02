@@ -85,7 +85,7 @@
     },
     methods: {
       toggleEditMode: function (){
-        this.editMode= this.editMode !== true;
+        this.editMode = this.editMode !== true;
       },
       addInterfaceEntry: function(){
         let raw = this.localValue;
@@ -96,7 +96,9 @@
         this.localValue = raw;
       },
       removeInterfaceEntry: function(index){
-        this.localValue.splice(index, 1);
+        let raw = this.localValue;
+        raw.splice(index, 1);
+        this.localValue = raw;
       },
       fireInputEvent: function(){
         this.$emit('input', this.localValue);
