@@ -16,17 +16,17 @@ let createDefaultInteraction = () => { return {
   output.defaultOut = input.defaultIn;
 }`,
   inputFormats: [
-          {
-              "internalName": "defaultIn",
-              "messageFormat": "messageFormat"
-          }
-      ],
+      {
+        "internalName": "defaultIn",
+        "messageFormat": "messageFormat"
+      }
+    ],
   outputFormats: [
-          {
-              "internalName": "defaultOut",
-              "messageFormat": "messageFormat"
-          }
-      ],
+      {
+        "internalName": "defaultOut",
+        "messageFormat": "messageFormat"
+      }
+    ],
   }};
 
 // Backend data helper:
@@ -132,7 +132,6 @@ const backendData = {
     });
   },
 };
-
 
 // initial state
 const state = {
