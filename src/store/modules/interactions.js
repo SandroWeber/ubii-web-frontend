@@ -2,6 +2,8 @@ import uuidv4 from 'uuid/v4';
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import {DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
 
+const SYNCHRONIZATION_SERVICE_INTERVAL_TIME = 1000; // in ms
+
 // default interaction
 let createDefaultInteraction = () => { return {
   id: uuidv4(),
@@ -214,8 +216,7 @@ const actions = {
       }
       interactionsToSync.clear();
 
-      //await actions.pullAll(context);
-    }, 1000);
+    }, SYNCHRONIZATION_SERVICE_INTERVAL_TIME);
   },
   stopSynchronizationService(context){
     if(synchronizationServiceInterval){
