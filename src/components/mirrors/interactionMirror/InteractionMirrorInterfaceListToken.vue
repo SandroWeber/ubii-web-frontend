@@ -1,6 +1,7 @@
 <template>
   <div
     class="interaction-mirror-interface-list-token"
+    :title="interfaceName+' : '+interfaceMessageFormat"
   >
     <app-token
       :class="computedClassList"
@@ -116,6 +117,7 @@ import { AppToken, AppInput} from './../../appComponents/appComponents.js';
   .interaction-mirror-interface-list-token
     order 1
     margin 5px
+    cursor default
 
   .edit-entry-row
     display: flex
