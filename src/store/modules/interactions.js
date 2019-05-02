@@ -8,7 +8,7 @@ let interactionsToSync = new Map();
 
 let createDefaultInteraction = () => { return {
   id: uuidv4(),
-  name: 'New Interaction'+uuidv4(),
+  name: 'New Interaction',
   processingCallback: `(input, output, state) => {
 
   // Your code here.
