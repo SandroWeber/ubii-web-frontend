@@ -190,12 +190,12 @@ const actions = {
     await backendData.delete(context, payload.currentInteractionId);
 
     await actions.pullAll(context);
-
-    //context.commit('removeInteraction', payload);
   },
   async update (context, payload) {
+    // Update immediately locally ...
     context.commit('setInteraction', payload);
 
+    // ... and add it to the toSync list.
     interactionsToSync.set(payload.interaction.id, payload.interaction);
   },
   async pullAll (context) {
