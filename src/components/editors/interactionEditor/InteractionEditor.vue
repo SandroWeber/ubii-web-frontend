@@ -48,21 +48,12 @@
                         }else{
                             return {};
                         }
-                        
                     }
                 },
                 set: function (newValue) {
-                    let id = this.selectedInteractionId;
-                    let index = this.interactions.findIndex(function(element) {
-                        return element.id === id;
-                    });
-                    
-                    if(index !== -1){
-                        this.updateInteraction({
-                            currentInteractionId: this.selectedInteractionId,
+                    this.updateInteraction({
                             interaction: newValue
                         });
-                    }
                 }
             },
             ...mapState({
@@ -84,7 +75,6 @@
         mounted: async function(){
             await this.pull();
             await this.startSynchronizationService();
-            console.log(this.interactions)
         }
     }
 </script>
