@@ -6,29 +6,6 @@ const SYNCHRONIZATION_SERVICE_INTERVAL_TIME = 1000; // in ms
 let synchronizationServiceInterval = null;
 let interactionsToSync = new Map();
 
-let createDefaultInteraction = () => { return {
-  id: uuidv4(),
-  name: 'New Interaction',
-  processingCallback: `(input, output, state) => {
-
-  // Your code here.
-
-  output.defaultOut = input.defaultIn;
-}`,
-  inputFormats: [
-      {
-        "internalName": "defaultIn",
-        "messageFormat": "messageFormat"
-      }
-    ],
-  outputFormats: [
-      {
-        "internalName": "defaultOut",
-        "messageFormat": "messageFormat"
-      }
-    ],
-  }};
-
 // Backend data helper:
 const backendData = {
   pull: async function (context) {
@@ -157,8 +134,28 @@ const actions = {
   },
   addDefault (context) {
     actions.add(context, {
-      interaction: createDefaultInteraction()
-    })
+      interaction: {
+        id: uuidv4(),
+        name: 'New Interaction',
+        processingCallback: `(input, output, state) => {
+      
+        // Your code here.
+      
+        output.defaultOut = input.defaultIn;
+      }`,
+        inputFormats: [
+          {
+            "internalName": "defaultIn",
+            "messageFormat": "messageFormat"
+          }
+        ],
+        outputFormats: [
+          {
+            "internalName": "defaultOut",
+            "messageFormat": "messageFormat"
+          }
+        ],
+      }})
   },
   async deleteInteraction (context, payload) {
     // Delete interaction at the backend.
