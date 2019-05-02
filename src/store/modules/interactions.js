@@ -206,7 +206,7 @@ const mutations = {
     state.all = [];
   },
   setInteraction (state, payload){
-    let id = payload.currentInteractionId;
+    let id = payload.interaction.id;
     let index = state.all.findIndex(function(element) {
         return element.id === id;
     });
