@@ -3,10 +3,9 @@ import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import {DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
 
 const SYNCHRONIZATION_SERVICE_INTERVAL_TIME = 1000; // in ms
-let interactionsToSync = new Map();
 let synchronizationServiceInterval = null;
+let interactionsToSync = new Map();
 
-// default interaction
 let createDefaultInteraction = () => { return {
   id: uuidv4(),
   name: 'New Interaction'+uuidv4(),
@@ -35,12 +34,15 @@ const backendData = {
   pull: async function (context) {
     return new Promise((resolve, reject) => {
       try{
-        // Get the list with all interactions from the server.
+        // Get the list with all interactions from the server...
         UbiiClientService.client
         .callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_GET_LIST
         })
         .then(async (reply) => {
+          // ... then clear all ...
+          context.commit('clearAll');
+          // ... and get all new ones. 
           reply.interactionList.forEach(interaction => {
             context.commit('pushInteraction', 
               {
