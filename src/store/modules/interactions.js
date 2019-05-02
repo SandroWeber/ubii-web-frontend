@@ -138,11 +138,11 @@ const actions = {
         id: uuidv4(),
         name: 'New Interaction',
         processingCallback: `(input, output, state) => {
-      
-        // Your code here.
-      
-        output.defaultOut = input.defaultIn;
-      }`,
+
+  // Your code here.
+
+  output.defaultOut = input.defaultIn;
+}`,
         inputFormats: [
           {
             "internalName": "defaultIn",
