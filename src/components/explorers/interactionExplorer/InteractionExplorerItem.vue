@@ -25,21 +25,20 @@
     name: 'InteractionExplorerItem',
     components: {},
     props: {
-        id: String,
-        name: String,
-        selected: Boolean
+      id: String,
+      name: String,
+      selected: Boolean
     },
     methods: {
-        selectItem: function(id) {
-            this.$emit('select', id);
-        }
+      selectItem: function(id) {
+          this.$emit('select', id);
+      }
     }
   } 
 </script> 
 
 <style scoped lang="stylus"> 
   .interaction-explorer-item
-    
     order 1
     padding 5px 10px 5px 10px
     display flex
