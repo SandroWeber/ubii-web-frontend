@@ -37,12 +37,9 @@
             delete
           </a>
         </div>
-
-
-
       </div>
+      
     </app-token>
-
   </div>
 </template>
 
