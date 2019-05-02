@@ -88,7 +88,7 @@
       addInterfaceEntry: function(){
         let raw = this.localValue;
         raw.push({
-            "internalName": "defaultIn",
+            "internalName": "defaultInterface",
             "messageFormat": "messageFormat"
           });
         this.localValue = raw;
