@@ -1,48 +1,46 @@
 <template>
   <div class="interaction-mirror-interface-list">
-
-      <div
-        class="toolbar"
-        :class="editMode?'expand':''"
+    <div
+      class="toolbar"
+      :class="editMode?'expand':''"
+    >
+      <app-button 
+        :class="'tool-button edit-button round low-contrast'"
+        @click="toggleEditMode"
+        :contentSizePercentage="50"
       >
-        <app-button 
-          :class="'tool-button edit-button round low-contrast'"
-          @click="toggleEditMode"
-          :contentSizePercentage="50"
-        >
-          <font-awesome-icon 
-          icon="pencil-alt"
-          class="tool-icon"
-          />
-        </app-button>
-
-        <app-button 
-          v-if="editMode"
-          :class="'tool-button add-interface-entry-button round low-contrast'"
-          @click="addInterfaceEntry"
-          :contentSizePercentage="60"
-        >
-          <font-awesome-icon 
-          icon="plus"
-          class="tool-icon"
-          />
-        </app-button>
-
-      </div>
-
-      <div class="token-container">
-        <interaction-mirror-interface-list-token 
-          v-for="(element, index) in localValue"
-          :key="index"
-          :index="index"
-          v-model="localValue[index]"
-          @input="fireInputEvent"
-          :interface-key="interfaceKey"
-          :editMode="editMode"
-          :code="code"
-          @removeInterfaceEntry="removeInterfaceEntry"
+        <font-awesome-icon 
+        icon="pencil-alt"
+        class="tool-icon"
         />
-      </div>
+      </app-button>
+
+      <app-button 
+        v-if="editMode"
+        :class="'tool-button add-interface-entry-button round low-contrast'"
+        @click="addInterfaceEntry"
+        :contentSizePercentage="60"
+      >
+        <font-awesome-icon 
+        icon="plus"
+        class="tool-icon"
+        />
+      </app-button>
+    </div>
+
+    <div class="token-container">
+      <interaction-mirror-interface-list-token 
+        v-for="(element, index) in localValue"
+        :key="index"
+        :index="index"
+        v-model="localValue[index]"
+        @input="fireInputEvent"
+        :interface-key="interfaceKey"
+        :editMode="editMode"
+        :code="code"
+        @removeInterfaceEntry="removeInterfaceEntry"
+      />
+    </div>
   </div>
 </template>
 
@@ -90,8 +88,8 @@
       addInterfaceEntry: function(){
         let raw = this.localValue;
         raw.push({
-              "internalName": "defaultIn",
-              "messageFormat": "messageFormat"
+            "internalName": "defaultIn",
+            "messageFormat": "messageFormat"
           });
         this.localValue = raw;
       },
