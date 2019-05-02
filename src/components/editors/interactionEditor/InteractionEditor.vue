@@ -1,82 +1,82 @@
 <template>
-    <div>
-        <div class="interaction-editor layer-one background">
-            <interaction-explorer
-                class="interaction-explorer-instance"
-                :interactions="interactions"
-                :selectedInteractionId="selectedInteraction.id"
-                @selectInteraction="onSelectInteraction"
-            />
-            <interaction-mirror    
-                v-model="selectedInteraction"
-            />
-        </div>
+  <div>
+    <div class="interaction-editor layer-one background">
+      <interaction-explorer
+        class="interaction-explorer-instance"
+        :interactions="interactions"
+        :selectedInteractionId="selectedInteraction.id"
+        @selectInteraction="onSelectInteraction"
+      />
+      <interaction-mirror    
+        v-model="selectedInteraction"
+      />
     </div>
+  </div>
 </template>
 
 <script>
-    import InteractionExplorer from './../../explorers/interactionExplorer/InteractionExplorer.vue';
-    import InteractionMirror from './../../mirrors/interactionMirror/InteractionMirror.vue';
-    import { mapState, mapActions } from 'vuex'
+  import InteractionExplorer from './../../explorers/interactionExplorer/InteractionExplorer.vue';
+  import InteractionMirror from './../../mirrors/interactionMirror/InteractionMirror.vue';
+  import { mapState, mapActions } from 'vuex'
 
-    export default {
-        name: 'InteractionEditor',
-        props: {},
-        components: {
-            InteractionExplorer: InteractionExplorer,
-            InteractionMirror: InteractionMirror
-        },
-        data: () => {
-            return {
-                selectedInteractionId: 0,
-            };
-        },
-        computed: {
-            selectedInteraction: {
-                get: function () {
-                    let id = this.selectedInteractionId;
-                    let index = this.interactions.findIndex(function(element) {
-                        return element.id === id;
-                    });
+  export default {
+    name: 'InteractionEditor',
+    props: {},
+    components: {
+      InteractionExplorer: InteractionExplorer,
+      InteractionMirror: InteractionMirror
+    },
+    data: () => {
+      return {
+        selectedInteractionId: 0,
+      };
+    },
+    computed: {
+      selectedInteraction: {
+        get: function () {
+          let id = this.selectedInteractionId;
+          let index = this.interactions.findIndex(function(element) {
+            return element.id === id;
+          });
 
-                    if(index !== -1)
-                    {
-                        return this.interactions[index];
-                    }else{
-                        if(this.interactions.length > 0){
-                            return this.interactions[0];
-                        }else{
-                            return {};
-                        }
-                    }
-                },
-                set: function (newValue) {
-                    this.updateInteraction({
-                            interaction: newValue
-                        });
-                }
-            },
-            ...mapState({
-                interactions: state => state.interactions.all
-            })
+          if(index !== -1)
+          {
+            return this.interactions[index];
+          }else{
+            if(this.interactions.length > 0){
+              return this.interactions[0];
+            }else{
+              return {};
+            }
+          }
         },
-        methods: {
-            onSelectInteraction: function(id) {        
-                this.selectedInteractionId = id; 
-            },
-            ...mapActions('interactions', {
-                addInteraction: 'add',
-                updateInteraction: 'update',
-                pull: 'pull',
-                startSynchronizationService: 'startSynchronizationService',
-                stopSynchronizationService: 'stopSynchronizationService'
-            }),
-        },
-        mounted: async function(){
-            await this.pull();
-            await this.startSynchronizationService();
+        set: function (newValue) {
+          this.updateInteraction({
+              interaction: newValue
+            });
         }
+      },
+      ...mapState({
+        interactions: state => state.interactions.all
+      })
+    },
+    methods: {
+        onSelectInteraction: function(id) {        
+            this.selectedInteractionId = id; 
+        },
+        ...mapActions('interactions', {
+            addInteraction: 'add',
+            updateInteraction: 'update',
+            pull: 'pull',
+            startSynchronizationService: 'startSynchronizationService',
+            stopSynchronizationService: 'stopSynchronizationService'
+        }),
+    },
+    mounted: async function(){
+        await this.pull();
+        await this.startSynchronizationService();
     }
+  }
 </script>
 
 <style scoped lang="stylus">
