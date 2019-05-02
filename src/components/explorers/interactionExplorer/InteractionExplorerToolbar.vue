@@ -26,7 +26,7 @@
 
     <app-button 
         :class="'tool-button round low-contrast'"
-        @click="pullAll"
+        @click="pull"
         :contentSizePercentage="65"
     >
         <font-awesome-icon 
@@ -68,7 +68,7 @@
                 addInteraction: 'add',
                 addDefaultInteraction: 'addDefault',
                 deleteInteractionAtStore: 'deleteInteraction',
-                pullAll: 'pullAll',
+                pull: 'pull',
             }),
         }
     } 

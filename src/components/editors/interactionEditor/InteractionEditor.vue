@@ -76,13 +76,13 @@
             ...mapActions('interactions', {
                 addInteraction: 'add',
                 updateInteraction: 'update',
-                pullAll: 'pullAll',
+                pull: 'pull',
                 startSynchronizationService: 'startSynchronizationService',
                 stopSynchronizationService: 'stopSynchronizationService'
             }),
         },
         mounted: async function(){
-            await this.pullAll();
+            await this.pull();
             await this.startSynchronizationService();
             console.log(this.interactions)
         }
