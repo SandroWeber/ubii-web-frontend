@@ -189,7 +189,7 @@ const actions = {
 
     }, SYNCHRONIZATION_SERVICE_INTERVAL_TIME);
   },
-  stopSynchronizationService(context){
+  stopSynchronizationService(){
     if(synchronizationServiceInterval){
       clearInterval(synchronizationServiceInterval);
     }
