@@ -80,6 +80,11 @@ export default new Router({
       component: () => import('./components/demos/DemoThreejsWebVR.vue')
     },
     {
+      path: '/demos/interaction-webvr',
+      name: 'Demo - Interaction WebVR',
+      component: () => import('./components/demos/DemoInteractionWebVR.vue')
+    },
+    {
       path: '/demos/gatherer-web-interface-smart-devices',
       name: 'Demo - Gathering from Smart Devices connected via Web Interface',
       component: () => import('./components/demos/DemoWebInterfaceSmartDevices.vue')

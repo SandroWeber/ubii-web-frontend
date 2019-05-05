@@ -22,6 +22,13 @@
         </app-tile>
       </router-link>
 
+      <router-link to="/demos/interaction-webvr" class="interface-link" tag="div">
+        <app-tile class="layer-three background round shadow orange-accent">
+          <font-awesome-icon icon="keyboard" class="interface-icon"/>
+          <p>interaction webVR</p>
+        </app-tile>
+      </router-link>
+
       <router-link to="/demos/gatherer-web-interface-smart-devices" class="interface-link" tag="div">
         <app-tile class="layer-three background round shadow orange-accent">
           <font-awesome-icon icon="tablet-alt" class="interface-icon"/>
@@ -37,12 +44,13 @@
 
   // Fontawesome.
   import { library } from '@fortawesome/fontawesome-svg-core'
-  import { faMousePointer, faCube, faVrCardboard, faMobileAlt, faTabletAlt } from '@fortawesome/free-solid-svg-icons'
+  import { faMousePointer, faCube, faVrCardboard, faMobileAlt, faTabletAlt, faKeyboard } from '@fortawesome/free-solid-svg-icons'
   library.add(faMousePointer);
   library.add(faCube);
   library.add(faVrCardboard);
   library.add(faMobileAlt);
   library.add(faTabletAlt);
+  library.add(faKeyboard);
 
   export default {
     name: 'Demos',
