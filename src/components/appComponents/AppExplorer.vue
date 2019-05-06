@@ -1,11 +1,20 @@
 <template>
+  <tree :data="treeData">
 
+  </tree>  
 </template>
 
 <script>
+  import LiquorTree from 'liquor-tree';
+
+
   export default {
     name: 'AppExplorer',
+    components:{
+      Tree: LiquorTree,
+    },
     props: [
+      "treeData",
     ],
     computed: {
       localValue: {
