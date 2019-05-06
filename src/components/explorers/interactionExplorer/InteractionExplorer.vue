@@ -1,24 +1,13 @@
 <template>
   <app-layer class="interaction-explorer layer-two background shadow">
-    <interaction-explorer-toolbar
-      :selectedInteractionId="selectedInteractionId"
-      @delete="onSelectItem('')"
-    />
-    <interaction-explorer-item
-      v-for="element in interactions"
-      :key="element.id"
-      :name="element.name"
-      :id="element.id"
-      :selected="element.id === selectedInteractionId"
-      @select="onSelectItem"
-    />
+    <app-explorer :tree-data="interactions"/>
   </app-layer>
 </template>
 
 <script>
   import InteractionExplorerItem from "./InteractionExplorerItem.vue";
   import InteractionExplorerToolbar from "./InteractionExplorerToolbar.vue";
-  import { AppLayer } from './../../appComponents/appComponents.js';
+  import { AppLayer, AppExplorer } from './../../appComponents/appComponents.js';
 
   export default {
     name: 'InteractionExplorer',
@@ -29,7 +18,8 @@
     components: {
       InteractionExplorerItem,
       InteractionExplorerToolbar,
-      AppLayer
+      AppLayer,
+      AppExplorer,
     },
     methods: {
       onSelectItem: function(id){
