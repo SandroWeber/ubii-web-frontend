@@ -163,9 +163,10 @@ const actions = {
       }})
   },
   async deleteInteraction (context, payload) {
-    // Delete interaction at the backend.
+    // Delete interaction at the backend...
     await backendData.delete(context, payload.currentInteractionId);
 
+    // ... then pull.
     await actions.pull(context);
   },
   async update (context, payload) {
