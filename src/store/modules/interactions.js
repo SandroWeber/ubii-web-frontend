@@ -127,10 +127,6 @@ const getters = {
 // actions
 const actions = {
   async add (context, payload) {
-    context.commit('pushInteraction', {
-      interaction: payload.interaction
-    });
-
     // Register interaction at the backend...
     await backendData.register(context,payload.interaction)
 
