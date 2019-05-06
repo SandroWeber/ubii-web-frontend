@@ -121,13 +121,6 @@ const getters = {
     all: state => state.all,
     tree: state => {
       return state.treeStore;
-      return state.all.map((value)=>{
-        return {
-          "id": value.id,
-          "text": value.name,
-          "data": value,
-        }
-      });
     },
 }
 
