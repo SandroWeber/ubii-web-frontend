@@ -21,10 +21,15 @@ const backendData = {
           context.commit('clearAll');
           // ... and get all new ones. 
           reply.interactionList.forEach(interaction => {
-            context.commit('pushInteraction', 
-              {
-                interaction: interaction
-              });
+            context.commit('pushInteractionRecord', {
+              record: {
+                "id": interaction.id,
+                "text": interaction.name,
+                "data": {
+                  interaction: interaction,
+                }
+              }
+            });
           });
 
           return resolve();
@@ -112,15 +117,18 @@ const backendData = {
 
 // initial state
 const state = {
-  all: [],
+  records: [],
   treeStore: [],
 }
   
 // getters
 const getters = {
-    all: state => state.all,
+    all: state => state.records.map((value)=>{
+      // TODO map nested entries
+      return value.data.interaction;
+    }),
     tree: state => {
-      return state.treeStore;
+      return state.records;
     },
 }
 
@@ -207,19 +215,19 @@ const actions = {
 
 // mutations
 const mutations = {
-  pushInteraction (state, payload){
-    state.all.push(payload.interaction);
+  pushInteractionRecord (state, payload){
+    state.records.push(payload.record);
   },
   clearAll (state){
-    state.all = [];
+    state.records = [];
   },
   setInteraction (state, payload){
     let id = payload.interaction.id;
-    let index = state.all.findIndex(function(element) {
+    let index = state.records.findIndex(function(element) {
         return element.id === id;
     });
     if(index !== -1){
-      state.all[index] = payload.interaction;
+      state.records[index] = payload.interaction;
     }
   },
   removeInteraction (state, payload){
@@ -228,7 +236,7 @@ const mutations = {
         return element.id === id;
     });
     if(index !== -1){
-      state.all.splice(index, 1);
+      state.records.splice(index, 1);
     }
   },
   updateTreeStore(state, newTree) {
