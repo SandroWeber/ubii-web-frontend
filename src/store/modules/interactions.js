@@ -113,11 +113,22 @@ const backendData = {
 // initial state
 const state = {
   all: [],
+  treeStore: [],
 }
   
 // getters
 const getters = {
-    all: state => state.all
+    all: state => state.all,
+    tree: state => {
+      return state.treeStore;
+      return state.all.map((value)=>{
+        return {
+          "id": value.id,
+          "text": value.name,
+          "data": value,
+        }
+      });
+    },
 }
 
 // actions
@@ -172,6 +183,13 @@ const actions = {
   },
   async pull (context) {
     await backendData.pull(context);
+    context.commit('updateTreeStore', context.getters.all.map((value)=>{
+      return {
+        "id": value.id,
+        "text": value.name,
+        "data": value,
+      }
+    }));
   },
   startSynchronizationService(context){
     if(synchronizationServiceInterval){
@@ -191,6 +209,9 @@ const actions = {
       clearInterval(synchronizationServiceInterval);
     }
   },
+  updateTree(context, tree) {
+    context.commit('updateTreeStore', tree)
+  }
 }
 
 // mutations
@@ -218,6 +239,9 @@ const mutations = {
     if(index !== -1){
       state.all.splice(index, 1);
     }
+  },
+  updateTreeStore(state, newTree) {
+    state.treeStore = newTree
   }
 }
 
