@@ -131,9 +131,10 @@ const actions = {
       interaction: payload.interaction
     });
 
-    // Register interaction at the backend.
+    // Register interaction at the backend...
     await backendData.register(context,payload.interaction)
 
+    // ... then pull.
     await actions.pull(context);
   },
   addDefault (context) {
