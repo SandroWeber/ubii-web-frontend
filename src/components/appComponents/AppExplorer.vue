@@ -1,5 +1,5 @@
 <template>
-  <tree :data="treeData">
+  <tree  :options="treeOptions">
 
   </tree>  
 </template>
@@ -7,22 +7,28 @@
 <script>
   import LiquorTree from 'liquor-tree';
 
-
   export default {
     name: 'AppExplorer',
     components:{
       Tree: LiquorTree,
     },
-    props: [
-      "treeData",
-    ],
+    props: {
+      treeData: Array,
+    },
     computed: {
-      localValue: {
-        get() {
-          return this.value
-        },
-        set(localValue) {
-          this.$emit('input', localValue)
+      treeOptions () {
+        let that = this;
+        return {
+          store: {
+            store: this.$store,
+            getter: () => {
+              return this.$store.getters['interactions/tree']
+            },
+            dispatcher(tree) {
+              that.$store.dispatch('interactions/updateTree', tree)
+            }
+          },
+          checkbox: true
         }
       }
     },
