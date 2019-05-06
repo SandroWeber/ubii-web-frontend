@@ -1,6 +1,6 @@
 <template>
   <app-layer class="interaction-explorer layer-two background shadow">
-    <app-explorer :tree-data="interactions"/>
+    <app-explorer :tree-data="interactionTreeData"/>
   </app-layer>
 </template>
 
@@ -24,8 +24,8 @@
     methods: {
       onSelectItem: function(id){
         this.$emit('selectInteraction', id)
-      }
-    }
+      },
+    },
   }
 </script>
 
