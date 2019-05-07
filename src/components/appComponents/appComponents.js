@@ -3,7 +3,7 @@ import _AppButton from './AppButton.vue';
 import _AppInput from './AppInput.vue';
 import _AppTile from './AppTile.vue';
 import _AppToken from './AppToken.vue';
-import _AppExplorer from './AppExplorer.vue';
+import _AppExplorer from './appExplorer/AppExplorer.vue';
 
 export var AppLayer = _AppLayer;
 export var AppButton = _AppButton;
