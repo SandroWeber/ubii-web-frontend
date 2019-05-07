@@ -33,6 +33,8 @@ const backendData = {
           });
 
           return resolve();
+        },()=>{
+          return reject();
         });
       }catch{
         return reject();
@@ -117,18 +119,17 @@ const backendData = {
 
 // initial state
 const state = {
-  records: [],
-  treeStore: [],
+  recordTree: [],
 }
   
 // getters
 const getters = {
-    all: state => state.records.map((value)=>{
+    all: state => state.recordTree.map((value)=>{
       // TODO map nested entries
       return value.data.interaction;
     }),
     tree: state => {
-      return state.records;
+      return state.recordTree;
     },
 }
 
@@ -182,6 +183,7 @@ const actions = {
   },
   async pull (context) {
     await backendData.pull(context);
+
     context.commit('updateTreeStore', context.getters.all.map((value)=>{
       return {
         "id": value.id,
@@ -209,38 +211,39 @@ const actions = {
     }
   },
   updateTree(context, tree) {
-    context.commit('updateTreeStore', tree)
+    context.commit('updateRecordTree', tree)
   }
 }
 
 // mutations
 const mutations = {
   pushInteractionRecord (state, payload){
-    state.records.push(payload.record);
+    state.recordTree.push(payload.record);
   },
   clearAll (state){
-    state.records = [];
+    state.recordTree = [];
   },
   setInteraction (state, payload){
     let id = payload.interaction.id;
-    let index = state.records.findIndex(function(element) {
+    let index = state.recordTree.findIndex(function(element) {
         return element.id === id;
     });
     if(index !== -1){
-      state.records[index] = payload.interaction;
+      state.recordTree[index] = payload.interaction;
     }
   },
   removeInteraction (state, payload){
     let id = payload.currentInteractionId;
-    let index = state.all.findIndex(function(element) {
+    // TODO Add recursive find
+    let index = state.recordTree.findIndex(function(element) {
         return element.id === id;
     });
     if(index !== -1){
-      state.records.splice(index, 1);
+      state.recordTree.splice(index, 1);
     }
   },
-  updateTreeStore(state, newTree) {
-    state.treeStore = newTree
+  updateRecordTree(state, newTree) {
+    state.recordTree = newTree
   }
 }
 
