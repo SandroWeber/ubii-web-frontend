@@ -1,6 +1,6 @@
 <template>
   <app-layer class="interaction-explorer layer-two background shadow">
-    <app-explorer :tree-data="interactionTreeData"/>
+    <app-explorer />
   </app-layer>
 </template>
 
