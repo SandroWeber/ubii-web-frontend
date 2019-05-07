@@ -244,7 +244,7 @@ class ClientNodeWeb {
       this.serviceClient.send('/services', message).then(
         (reply) => {
           let message = this.translatorServiceReply.createMessageFromPayload(reply);
-
+          
           return resolve(message);
         },
         (error) => {

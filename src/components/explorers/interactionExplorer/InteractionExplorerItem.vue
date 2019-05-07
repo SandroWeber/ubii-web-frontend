@@ -25,27 +25,27 @@
     name: 'InteractionExplorerItem',
     components: {},
     props: {
-        id: String,
-        name: String,
-        selected: Boolean
+      id: String,
+      name: String,
+      selected: Boolean
     },
     methods: {
-        selectItem: function(id) {
-            this.$emit('select', id);
-        }
+      selectItem: function(id) {
+          this.$emit('select', id);
+      }
     }
   } 
 </script> 
 
 <style scoped lang="stylus"> 
   .interaction-explorer-item
-    height 20px
     order 1
-    margin 0px
     padding 5px 10px 5px 10px
     display flex
     flex-direction row
     cursor pointer
+    overflow: hidden
+    white-space: nowrap;
     &:hover
       color #ffffff
     &.selected
@@ -53,10 +53,13 @@
       color yellowAccentColor
 
   .icon
-    height 13px
-    width 13px
-    margin-top: 2px
+    height 1em
+    width 1em
+    margin-top: 0px
     
   .label
     margin-left 5px
+    font-size 1em
+    margin-top 0.05em
+
 </style>
