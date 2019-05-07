@@ -48,6 +48,16 @@ export default new Router({
       name: 'Topic Inspector',
       component: () => import('./components/tools/TopicInspector.vue')
     },
+    {
+      path: '/tools/performance_tests',
+      name: 'Tool - Performance Tests',
+      component: () => import('./components/tools/PerformanceTests.vue')
+    },
+    {
+      path: '/tools/qrcode_display',
+      name: 'Tool - QR Code Display',
+      component: () => import('./components/tools/QRCodeDisplay.vue')
+    },
     /* demos */
     {
       path: '/demos',
@@ -73,6 +83,6 @@ export default new Router({
       path: '/demos/gatherer-web-interface-smart-devices',
       name: 'Demo - Gathering from Smart Devices connected via Web Interface',
       component: () => import('./components/demos/DemoWebInterfaceSmartDevices.vue')
-    },
+    }
   ]
 })
