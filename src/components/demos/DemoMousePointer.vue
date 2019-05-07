@@ -256,8 +256,6 @@
         this.$data.ubiiDevice = ubiiDevice;
         this.$data.ubiiInteraction = ubiiInteraction;
 
-        this.addInteraction({interaction: ubiiInteraction});
-
         this.$data.ubiiSession = ubiiSession;
       },
       startDemo: function () {
