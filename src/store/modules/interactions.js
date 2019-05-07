@@ -184,14 +184,6 @@ const actions = {
   },
   async pull (context) {
     await backendData.pull(context);
-
-    context.commit('updateTreeStore', context.getters.all.map((value)=>{
-      return {
-        "id": value.id,
-        "text": value.name,
-        "data": value,
-      }
-    }));
   },
   startSynchronizationService(context){
     if(synchronizationServiceInterval){
@@ -220,6 +212,7 @@ const actions = {
 const mutations = {
   pushInteractionRecord (state, payload){
     state.recordTree.push(payload.record);
+    console.log(state.recordTree);
   },
   clearAll (state){
     state.recordTree = [];
@@ -230,7 +223,8 @@ const mutations = {
         return element.id === id;
     });
     if(index !== -1){
-      state.recordTree[index] = payload.interaction;
+      state.recordTree[index].interaction = payload.interaction;
+      state.recordTree[index].name = payload.interaction.name;
     }
   },
   removeInteraction (state, payload){
