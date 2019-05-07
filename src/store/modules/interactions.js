@@ -25,7 +25,7 @@ const backendData = {
             context.commit('pushInteractionRecord', {
               record: {
                 "id": interaction.id,
-                "text": interaction.name,
+                "label": interaction.name,
                 "data": {
                   interaction: interaction,
                 }
