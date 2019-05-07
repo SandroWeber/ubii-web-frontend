@@ -17,7 +17,7 @@
 <script>
   import InteractionExplorer from './../../explorers/interactionExplorer/InteractionExplorer.vue';
   import InteractionMirror from './../../mirrors/interactionMirror/InteractionMirror.vue';
-  import { mapState, mapActions } from 'vuex'
+  import { mapGetters, mapActions } from 'vuex'
 
   export default {
     name: 'InteractionEditor',
@@ -56,8 +56,8 @@
             });
         }
       },
-      ...mapState({
-        interactions: state => state.interactions.all
+      ...mapGetters('interactions', {
+        interactions: 'all'
       })
     },
     methods: {
