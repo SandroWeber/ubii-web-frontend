@@ -21,6 +21,7 @@ const backendData = {
           context.commit('clearAll');
           // ... and get all new ones. 
           reply.interactionList.forEach(interaction => {
+            // TODO resolve deep interaction structure here
             context.commit('pushInteractionRecord', {
               record: {
                 "id": interaction.id,
