@@ -9,7 +9,7 @@
       :key="record.id"
       :label="record.label"
       :id="record.id"
-      :selected="record.selected"
+      :selected="isSelected(record)"
       @select="selectRecord(record)"
       @deselect="deselectRecord(record)"
     />
@@ -29,11 +29,14 @@
     },
     computed: {
       selectedRecords: function(){
-        return records.filter((record) => selected.some((selected) => selected.id === record.id));
+        return records.filter((record) => isSelected(record));
       },
+      isSelected: function(record){
+        return selected.some((selected) => selected.id === record.id);
+      }
     },
     methods: {
-      deleteRecords: function(){
+      delete: function(){
         this.$emit('delete', {
           records: selectedRecords()
         });
@@ -41,12 +44,29 @@
         // All selected records should be deleted -> reset selected.
         selected.clear();
       },
-      selectRecord: function(record){
+      add: function(){
+        this.$emit('add');
+      },
+      select: function(record){
         selected.push(record);
+
+        this.$emit('select', {
+          records: selectedRecords()
+        });
       },
-      deselectRecord: function(record){
+      deselect: function(record){
         selected = selected.filter((value)=> value.id === record.id);
+
+        this.$emit('select', {
+          records: selectedRecords()
+        });
       },
+      refresh: function(){
+        this.$emit('refresh');
+
+        // refreshed records could miss selected records -> deselect all on refresh
+        selected.clear();
+      }
     }
   }
 </script>
