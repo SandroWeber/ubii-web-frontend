@@ -1,8 +1,13 @@
 <template>
-    <app-layer class="app-explorer layer-two background shadow">
+  <app-layer 
+    class="app-explorer layer-two background shadow"
+    v-on="$listeners"
+  >
     <app-explorer-toolbar
       :selectedRecords="selectedRecords"
-      @delete="deleteRecords()"
+      @add="add()"
+      @refresh="refresh()"
+      @remove="remove()"
     />
     <app-explorer-item
       v-for="record in records"
@@ -10,8 +15,8 @@
       :label="record.label"
       :id="record.id"
       :selected="isSelected(record)"
-      @select="selectRecord(record)"
-      @deselect="deselectRecord(record)"
+      @select="select(record)"
+      @deselect="deselect(record)"
     />
   </app-layer>
 </template>
@@ -42,32 +47,35 @@
       },
     },
     methods: {
-      deleteRecords: function(){
-        this.$emit('delete', {
+      add: function(){
+        this.$emit('add');
+      },
+      refresh: function(){
+        this.$emit('refresh');
+      },
+      remove: function(){
+        this.$emit('remove', {
           records: this.selectedRecords
         });
 
         // All selected records should be deleted -> reset selected.
         this.selected.clear();
       },
-      addRecord: function(){
-        this.$emit('add');
-      },
-      selectRecord: function(record){
+      select: function(record){
         this.selected.push(record);
 
         this.$emit('select', {
           records: this.selectedRecords
         });
       },
-      deselectRecord: function(record){
+      deselect: function(record){
         this.selected = this.selected.filter((value)=> value.id === record.id);
 
         this.$emit('select', {
           records: this.selectedRecords
         });
       },
-      refreshRecords: function(){
+      refresh: function(){
         this.$emit('refresh');
 
         // refreshed records could miss selected records -> deselect all on refresh

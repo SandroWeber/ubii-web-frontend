@@ -4,7 +4,7 @@
   >
     <app-button 
       :class="'tool-button round low-contrast'"
-      @click="addDefaultInteraction"
+      @click="add"
       :contentSizePercentage="70"
     >
       <font-awesome-icon 
@@ -15,7 +15,7 @@
 
     <app-button 
       :class="'tool-button round low-contrast'"
-      @click="deleteInteraction"
+      @click="remove"
       :contentSizePercentage="60"
     >
       <font-awesome-icon 
@@ -26,7 +26,7 @@
 
     <app-button 
       :class="'tool-button round low-contrast'"
-      @click="pull"
+      @click="refresh"
       :contentSizePercentage="65"
     >
       <font-awesome-icon 
@@ -38,9 +38,6 @@
 </template>
 
 <script>
-  import { mapActions } from 'vuex'
-
-
   import { library } from '@fortawesome/fontawesome-svg-core'
   import { faPlus, faTrashAlt } from '@fortawesome/free-solid-svg-icons'
   library.add(faPlus);
@@ -57,19 +54,15 @@
       selectedInteractionId: String
     },
     methods: {
-      deleteInteraction: function(){
-        this.$emit('delete')
-
-        this.deleteInteractionAtStore({
-          currentInteractionId: this.selectedInteractionId,
-        });
+      add: function(){
+        this.$emit('add');
       },
-      ...mapActions('interactions', {
-        addInteraction: 'add',
-        addDefaultInteraction: 'addDefault',
-        deleteInteractionAtStore: 'deleteInteraction',
-        pull: 'pull',
-      }),
+      remove: function(){
+        this.$emit('remove');
+      },
+      refresh: function(){
+        this.$emit('refresh');
+      },
     }
   } 
 </script> 
