@@ -4,7 +4,7 @@
   >
     <app-button 
       :class="'tool-button round low-contrast'"
-      @click="add"
+      @click="add()"
       :contentSizePercentage="70"
     >
       <font-awesome-icon 
@@ -15,7 +15,7 @@
 
     <app-button 
       :class="'tool-button round low-contrast'"
-      @click="remove"
+      @click="remove()"
       :contentSizePercentage="60"
     >
       <font-awesome-icon 
@@ -26,7 +26,7 @@
 
     <app-button 
       :class="'tool-button round low-contrast'"
-      @click="refresh"
+      @click="refresh()"
       :contentSizePercentage="65"
     >
       <font-awesome-icon 

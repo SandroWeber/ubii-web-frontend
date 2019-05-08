@@ -16,6 +16,8 @@
       :id="record.id"
       :selected="isSelected(record)"
       @select="select(record)"
+      @select-ctrl="selectControl(record)"
+      @select-shift="selectShift(record)"
       @deselect="deselect(record)"
     />
   </app-layer>
@@ -46,12 +48,12 @@
         return this.records.filter((record) => this.isSelected(record));
       },
     },
+    watch: {
+      
+    },
     methods: {
       add: function(){
         this.$emit('add');
-      },
-      refresh: function(){
-        this.$emit('refresh');
       },
       remove: function(){
         this.$emit('remove', {
@@ -59,10 +61,29 @@
         });
 
         // All selected records should be deleted -> reset selected.
-        this.selected.clear();
+        this.resetSelected();
       },
       select: function(record){
+        this.clearSelected();
+
         this.selected.push(record);
+
+        this.$emit('select', {
+          records: this.selectedRecords
+        });
+      },
+      selectControl: function(record){
+        console.log("selectControl")
+        this.selected.push(record);
+        // TODO
+
+        this.$emit('select', {
+          records: this.selectedRecords
+        });
+      },
+      selectShift: function(record){
+        this.selected.push(record);
+        // TODO
 
         this.$emit('select', {
           records: this.selectedRecords
@@ -79,12 +100,29 @@
         this.$emit('refresh');
 
         // refreshed records could miss selected records -> deselect all on refresh
-        this.selected.clear();
+        this.resetSelected();
       },
       isSelected: function(record){
+        if(this.selected.length === 0){
+          this.resetSelected();
+        }
         return this.selected.some((value) => value.id === record.id);
+      },
+      resetSelected: function(){
+        this.clearSelected();
+
+        if(this.selected.length === 0 && this.records.length > 0){
+          this.selected.push(this.records[0]);
+        }
+      },
+      clearSelected: function(){
+        this.selected = [];
       }
-    }
+    },
+    mounted: function(){
+      console.log("mounted");
+      this.resetSelected();
+    },
   }
 </script>
 

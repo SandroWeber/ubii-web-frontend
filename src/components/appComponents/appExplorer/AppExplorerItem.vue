@@ -2,7 +2,9 @@
   <div
     class="app-explorer-item low-contrast"
     :class="{ selected: selected }"
-    @click="selectItem(id)"
+    @click.exact="select()"
+    @click.ctrl.exact="selectCtrl()"
+    @click.shift.exact="selectShift()"
   >
     <font-awesome-icon 
       icon="code"
@@ -30,8 +32,14 @@
       selected: Boolean
     },
     methods: {
-      selectItem: function(id) {
-          this.$emit('select', id);
+      select: function() {
+          this.$emit('select');
+      },
+      selectCtrl: function() {
+          this.$emit('select-ctrl');
+      },
+      selectShift: function() {
+          this.$emit('select-shift');
       }
     }
   } 
