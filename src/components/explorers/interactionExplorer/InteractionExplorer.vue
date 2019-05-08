@@ -3,6 +3,7 @@
     <app-explorer 
       :records="interactions"
       @add="addDefaultInteraction"
+      @remove="removeInteractions"
       @refresh="pull"
       @select="onSelect"
     />
@@ -27,17 +28,17 @@
       onSelect: function(payload){
         this.$emit('select', payload)
       },
-      deleteInteraction: function(){
-        this.$emit('delete')
-
-        this.deleteInteractionAtStore({
-          currentInteractionId: this.selectedInteractionId,
-        });
+      removeInteractions: function(payload){
+        for (let i = 0; i < payload.records.length; i++) {
+          this.deleteInteraction({
+            interaction: payload.records[i],
+          });
+        }
       },
       ...mapActions('interactions', {
         addInteraction: 'add',
         addDefaultInteraction: 'addDefault',
-        deleteInteractionAtStore: 'deleteInteraction',
+        deleteInteraction: 'deleteInteraction',
         pull: 'pull',
       }),
     },
