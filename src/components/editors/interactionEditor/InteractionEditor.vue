@@ -57,7 +57,7 @@
         }
       },
       ...mapGetters('interactions', {
-        interactions: 'all'
+        interactions: 'tree'
       })
     },
     methods: {
