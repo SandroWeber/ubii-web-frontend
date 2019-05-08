@@ -102,7 +102,6 @@
         });
       },
       selectControl: function(record){
-        console.log("selectControl")
         this.selected.push(record);
         // TODO
 
@@ -151,10 +150,6 @@
       clearSelected: function(){
         this.selected = [];
       },
-    },
-    mounted: function(){
-      console.log("mounted");
-      this.resetSelected();
     },
   }
 </script>

@@ -67,8 +67,6 @@
     },
     methods: {
         onSelectInteractions: function(payload) {
-          console.log("select");
-          console.log(payload.records);   
             this.selectedInteractions = payload.records; 
         },
         ...mapActions('interactions', {
