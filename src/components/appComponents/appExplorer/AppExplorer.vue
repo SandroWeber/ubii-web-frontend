@@ -73,7 +73,12 @@
       },
     },
     watch: {
-      
+      records: function(){
+        // validate selected
+        this.selected = this.selected.filter((value) => {
+          return this.records.some((record) => record.id === value.id);
+        })
+      }
     },
     methods: {
       add: function(){
@@ -85,7 +90,7 @@
         });
 
         // All selected records should be deleted -> reset selected.
-        this.resetSelected();
+        this.clearSelected();
       },
       select: function(record){
         this.clearSelected();
@@ -145,7 +150,7 @@
       },
       clearSelected: function(){
         this.selected = [];
-      }
+      },
     },
     mounted: function(){
       console.log("mounted");
@@ -156,4 +161,10 @@
 
 <style scoped lang="stylus">
 @import "./../../styles/main/color"
+
+.app-explorer
+  display flex
+  flex-direction column
+  flex-grow 1
+  overflow: scroll
 </style>
