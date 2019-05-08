@@ -10,7 +10,7 @@
       @remove="remove()"
     />
     <app-explorer-item
-      v-for="record in records"
+      v-for="record in sortedRecords"
       :key="record.id"
       :label="record.label"
       :id="record.id"
@@ -36,7 +36,19 @@
       AppLayer,
     },
     props: {
-      records: Array,
+      records: {
+        type: Array,
+        required: true,
+      },
+      options: {
+        type: Object,
+        required: false,
+        default: function() {
+          return {
+            sort: 'alphabetically'
+          };
+        }
+      },
     },
     data: function(){
       return {
@@ -44,6 +56,18 @@
       }
     },
     computed: {
+      sortedRecords: function(){
+        if(this.options.sort === 'byDate'){
+          // Todo
+          return this.records.sort((a,b) => {
+            return a.label.localeCompare(b.label);
+          });
+        }else{
+          return this.records.sort((a,b) => {
+            return a.label.localeCompare(b.label);
+          });
+        }
+      },
       selectedRecords: function(){
         return this.records.filter((record) => this.isSelected(record));
       },
@@ -114,6 +138,10 @@
         if(this.selected.length === 0 && this.records.length > 0){
           this.selected.push(this.records[0]);
         }
+
+        this.$emit('select', {
+          records: this.selectedRecords
+        });
       },
       clearSelected: function(){
         this.selected = [];
