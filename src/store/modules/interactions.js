@@ -212,7 +212,6 @@ const actions = {
 const mutations = {
   pushInteractionRecord (state, payload){
     state.recordTree.push(payload.record);
-    console.log(state.recordTree);
   },
   clearAll (state){
     state.recordTree = [];
