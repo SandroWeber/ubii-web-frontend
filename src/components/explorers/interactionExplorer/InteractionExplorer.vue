@@ -4,6 +4,7 @@
       :records="interactions"
       @add="addDefaultInteraction"
       @refresh="pull"
+      @select="onSelect"
     />
   </app-layer>
 </template>
@@ -23,8 +24,8 @@
       AppExplorer,
     },
     methods: {
-      onSelectItem: function(id){
-        this.$emit('selectInteraction', id)
+      onSelect: function(payload){
+        this.$emit('select', payload)
       },
       deleteInteraction: function(){
         this.$emit('delete')
