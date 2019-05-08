@@ -2,11 +2,14 @@
   <app-layer class="interaction-explorer layer-two background shadow">
     <app-explorer 
       :records="interactions"
+      @add="addDefaultInteraction"
+      @refresh="pull"
     />
   </app-layer>
 </template>
 
 <script>
+  import { mapActions } from 'vuex'
   import { AppLayer, AppExplorer } from './../../appComponents/appComponents.js';
 
   export default {
@@ -23,6 +26,19 @@
       onSelectItem: function(id){
         this.$emit('selectInteraction', id)
       },
+      deleteInteraction: function(){
+        this.$emit('delete')
+
+        this.deleteInteractionAtStore({
+          currentInteractionId: this.selectedInteractionId,
+        });
+      },
+      ...mapActions('interactions', {
+        addInteraction: 'add',
+        addDefaultInteraction: 'addDefault',
+        deleteInteractionAtStore: 'deleteInteraction',
+        pull: 'pull',
+      }),
     },
   }
 </script>
