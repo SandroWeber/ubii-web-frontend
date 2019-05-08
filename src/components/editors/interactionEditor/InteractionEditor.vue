@@ -4,8 +4,7 @@
       <interaction-explorer
         class="interaction-explorer-instance"
         :interactions="interactions"
-        :selectedInteractionId="selectedInteraction.id"
-        @selectInteraction="onSelectInteraction"
+        @select="onSelectInteractions"
       />
       <interaction-mirror    
         v-model="selectedInteraction"
@@ -28,12 +27,18 @@
     },
     data: () => {
       return {
-        selectedInteractionId: 0,
+        selectedInteractions: [],
       };
     },
     computed: {
       selectedInteraction: {
         get: function () {
+          if(this.selectedInteractions.length > 0){
+            return this.selectedInteractions[0].data.interaction;
+          }else{
+            return {}
+          }
+          
           let id = this.selectedInteractionId;
           let index = this.interactions.findIndex(function(element) {
             return element.id === id;
@@ -61,8 +66,10 @@
       })
     },
     methods: {
-        onSelectInteraction: function(id) {        
-            this.selectedInteractionId = id; 
+        onSelectInteractions: function(payload) {
+          console.log("select");
+          console.log(payload.records);   
+            this.selectedInteractions = payload.records; 
         },
         ...mapActions('interactions', {
             addInteraction: 'add',
