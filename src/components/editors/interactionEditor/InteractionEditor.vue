@@ -16,7 +16,7 @@
 <script>
   import InteractionExplorer from './../../explorers/interactionExplorer/InteractionExplorer.vue';
   import InteractionMirror from './../../mirrors/interactionMirror/InteractionMirror.vue';
-  import { mapGetters, mapActions } from 'vuex'
+  import { mapGetters, mapState, mapActions } from 'vuex'
 
   export default {
     name: 'InteractionEditor',
@@ -63,7 +63,7 @@
       },
       ...mapGetters('interactions', {
         interactions: 'tree'
-      })
+      }),
     },
     methods: {
         onSelectInteractions: function(payload) {
