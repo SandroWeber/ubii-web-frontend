@@ -22,20 +22,30 @@
     props: {
       records: Array,
     },
+    data: function(){
+      return {
+        selected: []
+      }
+    },
     computed: {
       selectedRecords: function(){
-        // TODO return all records that are flagged with selected or the first 
+        return records.filter((record) => selected.some((selected) => selected.id === record.id));
       },
     },
     methods: {
       deleteRecords: function(){
-        // TODO delete currently selected records
+        this.$emit('delete', {
+          records: selectedRecords()
+        });
+
+        // All selected records should be deleted -> reset selected.
+        selected.clear();
       },
       selectRecord: function(record){
-        record.selected = true;
+        selected.push(record);
       },
       deselectRecord: function(record){
-        record.selected = false;
+        selected = selected.filter((value)=> value.id === record.id);
       },
     }
   }
