@@ -1,6 +1,6 @@
 <template>
   <div
-    class="interaction-explorer-toolbar"
+    class="app-explorer-toolbar"
   >
     <app-button 
       :class="'tool-button round low-contrast'"
@@ -46,7 +46,7 @@
   library.add(faPlus);
   library.add(faTrashAlt);
 
-  import { AppButton } from './../appComponents.js';
+  import AppButton from './../AppButton.vue';
 
   export default { 
     name: 'AppExplorerToolbar',

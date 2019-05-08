@@ -19,7 +19,7 @@
 <script>
   import AppExplorerItem from "./AppExplorerItem.vue";
   import AppExplorerToolbar from "./AppExplorerToolbar.vue";
-  import { AppLayer } from './../appComponents.js';
+  import AppLayer from './../AppLayer.vue';
 
   export default {
     name: 'AppExplorer',
@@ -44,7 +44,7 @@
     methods: {
       deleteRecords: function(){
         this.$emit('delete', {
-          records: this.selectedRecords()
+          records: this.selectedRecords
         });
 
         // All selected records should be deleted -> reset selected.
@@ -57,14 +57,14 @@
         this.selected.push(record);
 
         this.$emit('select', {
-          records: this.selectedRecords()
+          records: this.selectedRecords
         });
       },
       deselectRecord: function(record){
         this.selected = this.selected.filter((value)=> value.id === record.id);
 
         this.$emit('select', {
-          records: this.selectedRecords()
+          records: this.selectedRecords
         });
       },
       refreshRecords: function(){
