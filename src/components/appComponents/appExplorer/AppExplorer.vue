@@ -17,8 +17,17 @@
 </template>
 
 <script>
+  import AppExplorerItem from "./AppExplorerItem.vue";
+  import AppExplorerToolbar from "./AppExplorerToolbar.vue";
+  import { AppLayer } from './../appComponents.js';
+
   export default {
     name: 'AppExplorer',
+    components: {
+      AppExplorerItem,
+      AppExplorerToolbar,
+      AppLayer,
+    },
     props: {
       records: Array,
     },
@@ -29,43 +38,43 @@
     },
     computed: {
       selectedRecords: function(){
-        return records.filter((record) => isSelected(record));
+        return this.records.filter((record) => this.isSelected(record));
       },
-      isSelected: function(record){
-        return selected.some((selected) => selected.id === record.id);
-      }
     },
     methods: {
-      delete: function(){
+      deleteRecords: function(){
         this.$emit('delete', {
-          records: selectedRecords()
+          records: this.selectedRecords()
         });
 
         // All selected records should be deleted -> reset selected.
-        selected.clear();
+        this.selected.clear();
       },
-      add: function(){
+      addRecord: function(){
         this.$emit('add');
       },
-      select: function(record){
-        selected.push(record);
+      selectRecord: function(record){
+        this.selected.push(record);
 
         this.$emit('select', {
-          records: selectedRecords()
+          records: this.selectedRecords()
         });
       },
-      deselect: function(record){
-        selected = selected.filter((value)=> value.id === record.id);
+      deselectRecord: function(record){
+        this.selected = this.selected.filter((value)=> value.id === record.id);
 
         this.$emit('select', {
-          records: selectedRecords()
+          records: this.selectedRecords()
         });
       },
-      refresh: function(){
+      refreshRecords: function(){
         this.$emit('refresh');
 
         // refreshed records could miss selected records -> deselect all on refresh
-        selected.clear();
+        this.selected.clear();
+      },
+      isSelected: function(record){
+        return this.selected.some((value) => value.id === record.id);
       }
     }
   }

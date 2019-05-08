@@ -75,7 +75,7 @@
 </script> 
 
 <style scoped lang="stylus"> 
-.interaction-explorer-toolbar
+.app-explorer-toolbar
   display flex
   flex-direction row
   padding 0.5em

@@ -38,7 +38,7 @@
 </script> 
 
 <style scoped lang="stylus"> 
-  .interaction-explorer-item
+  .app-explorer-item
     order 1
     padding 5px 10px 5px 10px
     display flex
