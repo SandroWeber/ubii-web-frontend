@@ -1,8 +1,8 @@
 <template>
   <div
-    class="interaction-explorer-item low-contrast"
+    class="app-explorer-item low-contrast"
+    :class="{ selected: selected }"
     @click="selectItem(id)"
-    v-bind:class="{ selected: selected }"
   >
     <font-awesome-icon 
       icon="code"
@@ -11,7 +11,7 @@
     <span 
       class="label"
     >
-      {{name}}
+      {{label}}
     </span>
   </div>
 </template>
@@ -22,11 +22,11 @@
   library.add(faCode);
 
   export default { 
-    name: 'InteractionExplorerItem',
+    name: 'AppExplorerItem',
     components: {},
     props: {
       id: String,
-      name: String,
+      label: String,
       selected: Boolean
     },
     methods: {
