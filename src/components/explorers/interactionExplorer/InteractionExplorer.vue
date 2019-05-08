@@ -1,12 +1,12 @@
 <template>
   <app-layer class="interaction-explorer layer-two background shadow">
-    <app-explorer />
+    <app-explorer 
+      :records="interactions"
+    />
   </app-layer>
 </template>
 
 <script>
-  import InteractionExplorerItem from "./InteractionExplorerItem.vue";
-  import InteractionExplorerToolbar from "./InteractionExplorerToolbar.vue";
   import { AppLayer, AppExplorer } from './../../appComponents/appComponents.js';
 
   export default {
@@ -16,8 +16,6 @@
       selectedInteractionId: String
     },
     components: {
-      InteractionExplorerItem,
-      InteractionExplorerToolbar,
       AppLayer,
       AppExplorer,
     },
