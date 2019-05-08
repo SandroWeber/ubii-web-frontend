@@ -136,7 +136,7 @@
         this.clearSelected();
 
         if(this.selected.length === 0 && this.records.length > 0){
-          this.selected.push(this.records[0]);
+          this.selected.push(this.sortedRecords[0]);
         }
 
         this.$emit('select', {
