@@ -66,19 +66,14 @@ const backendData = {
       }
     });
   },
-  delete: async function (context, interactionId) {
+  delete: async function (context, interaction) {
     return await new Promise(async(resolve, reject) => {
       try{
-        // Get index of complete interaction specification
-        let index = state.all.findIndex(function(element) {
-            return element.id === interactionId;
-        });
-
         // delete interaction at the backend
         await UbiiClientService.client
         .callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DELETE,
-          interaction: state.all[index]
+          interaction: interaction
         })
         .then((reply) => {
           if(reply.error){
@@ -170,7 +165,7 @@ const actions = {
   },
   async deleteInteraction (context, payload) {
     // Delete interaction at the backend...
-    await backendData.delete(context, payload.currentInteractionId);
+    await backendData.delete(context, payload.interaction);
 
     // ... then pull.
     await actions.pull(context);
@@ -223,7 +218,7 @@ const mutations = {
     });
     if(index !== -1){
       state.recordTree[index].interaction = payload.interaction;
-      state.recordTree[index].name = payload.interaction.name;
+      state.recordTree[index].label = payload.interaction.name;
     }
   },
   removeInteraction (state, payload){
