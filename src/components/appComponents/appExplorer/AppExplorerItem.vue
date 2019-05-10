@@ -47,6 +47,9 @@
 
 <style scoped lang="stylus"> 
   .app-explorer-item
+    flex-grow: 0
+    flex-shrink: 0
+    flex-basis: 1.8em
     order 1
     padding 5px 10px 5px 10px
     display flex
