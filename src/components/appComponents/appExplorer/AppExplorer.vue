@@ -163,5 +163,5 @@
   display flex
   flex-direction column
   flex-grow 1
-  overflow: scroll
+  overflow-y: auto
 </style>
