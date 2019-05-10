@@ -59,11 +59,13 @@
       sortedRecords: function(){
         if(this.options.sort === 'byDate'){
           // Todo
-          return this.records.sort((a,b) => {
+          let recordsCopy = [...this.records];
+          return recordsCopy.sort((a,b) => {
             return a.label.localeCompare(b.label);
           });
         }else{
-          return this.records.sort((a,b) => {
+          let recordsCopy = [...this.records];
+          return recordsCopy.sort((a,b) => {
             return a.label.localeCompare(b.label);
           });
         }
