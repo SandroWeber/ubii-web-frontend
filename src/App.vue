@@ -3,8 +3,10 @@
     id="app"
     class="layer-one background"
   >
-    <server-status id="server-status"/>
-    <app-layer class="layer-one layer-one background border shadow">
+    <div class="server-status-wrapper">
+      <server-status id="server-status"/>
+    </div>
+    <app-layer class="navigation-wrapper layer-one background border shadow">
       <nav class="navigation-bar">
         <router-link
           to="/"
@@ -57,7 +59,9 @@
       </nav>
     </app-layer>
     
-    <router-view class="router-view"/>
+    <div class="router-view-wrapper">
+      <router-view class="router-view"/>
+    </div>
   </app-layer>
 </template>
 
@@ -107,6 +111,7 @@
     display flex
     flex-direction column
     color: maxContrastColor
+    overflow hidden
   }
 
   .navigation-bar {
@@ -122,13 +127,22 @@
   #server-status
     position: relative
 
+  .navigation-wrapper
+    flex-grow: 0
+  
+  .server-status-wrapper
+    flex-grow: 0
+  
+  .router-view-wrapper
+    flex-grow: 1
+    overflow: hidden
+
   .server-stats {
     text-align: center;
   }
 
   .router-view
-
-    flex-grow: 1
+    height: 100%
 
   .svg-inline--fa
     vertical-align 0
