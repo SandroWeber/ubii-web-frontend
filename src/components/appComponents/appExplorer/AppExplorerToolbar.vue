@@ -37,6 +37,15 @@
       class="tool-icon"
       />
     </app-button>
+
+    <app-input 
+      class="filter-input layer-one round low-contrast low-contrast-border"
+      :class="filterInputClasses"
+      v-model="filter"
+      placeholder="filter"
+      :id="'app-explorer-input'"
+    >
+    </app-input>
   </div>
 </template>
 
@@ -47,15 +56,22 @@
   library.add(faTrashAlt);
 
   import AppButton from './../AppButton.vue';
+  import AppInput from './../AppInput.vue';
 
   export default { 
     name: 'AppExplorerToolbar',
     components: {
-      AppButton
+      AppButton,
+      AppInput
     },
     props: {
       selectedInteractionId: String,
       options: Object
+    },
+    data: function(){
+      return {
+        localFilter: ""
+      }
     },
     methods: {
       add: function(){
@@ -67,6 +83,23 @@
       refresh: function(){
         this.$emit('refresh');
       },
+    },
+    computed: {
+      filter: {
+        get() {
+          return this.localFilter;
+        },
+        set(value) {
+          this.localFilter = value;
+          this.$emit('filter', this.localFilter);
+        }
+      },
+      filterInputClasses: function(){
+        return{
+          "yellow-border": this.localFilter !== "",
+          "yellow-accent": this.localFilter !== ""
+        }
+      }
     }
   } 
 </script> 
@@ -85,4 +118,7 @@
 .tool-icon
   height: 100%
   width: 100%
+
+.filter-input
+  flex-grow: 1
 </style>

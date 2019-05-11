@@ -9,9 +9,10 @@
       @add="add()"
       @refresh="refresh()"
       @remove="remove()"
+      @filter="filter"
     />
     <app-explorer-item
-      v-for="record in sortedRecords"
+      v-for="record in sortedAndFilteredRecords"
       :key="record.id"
       :label="record.label"
       :id="record.id"
@@ -59,19 +60,26 @@
     },
     data: function(){
       return {
-        selected: []
+        selected: [],
+        filterValue: ""
       }
     },
     computed: {
-      sortedRecords: function(){
+      sortedAndFilteredRecords: function(){
+        let recordsCopy;
+        if(this.filterValue !== ""){
+          recordsCopy = this.records.filter((record) => record.label.includes(this.filterValue));
+        }else{
+          recordsCopy = [...this.records];
+        }
+        
+
         if(this.options.sort === 'byDate'){
           // Todo
-          let recordsCopy = [...this.records];
           return recordsCopy.sort((a,b) => {
             return a.label.localeCompare(b.label);
           });
         }else{
-          let recordsCopy = [...this.records];
           return recordsCopy.sort((a,b) => {
             return a.label.localeCompare(b.label);
           });
@@ -149,7 +157,7 @@
         this.clearSelected();
 
         if(this.selected.length === 0 && this.records.length > 0){
-          this.selected.push(this.sortedRecords[0]);
+          this.selected.push(this.sortedAndFilteredRecords[0]);
         }
 
         this.$emit('select', {
@@ -158,6 +166,10 @@
       },
       clearSelected: function(){
         this.selected = [];
+      },
+      filter: function(value){
+        console.log("EMIT FILTER")
+        this.filterValue = value;
       },
     },
   }
