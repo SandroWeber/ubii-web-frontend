@@ -38,7 +38,8 @@
       />
     </app-button>
 
-    <app-input 
+    <app-input
+      v-if="options.tools.filter"
       class="filter-input layer-one round low-contrast low-contrast-border"
       :class="filterInputClasses"
       v-model="filter"
