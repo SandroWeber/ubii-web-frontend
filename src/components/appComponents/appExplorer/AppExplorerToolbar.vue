@@ -51,7 +51,8 @@
       AppButton
     },
     props: {
-      selectedInteractionId: String
+      selectedInteractionId: String,
+      options: Object
     },
     methods: {
       add: function(){
