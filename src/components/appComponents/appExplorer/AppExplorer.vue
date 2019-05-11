@@ -4,6 +4,7 @@
     v-on="$listeners"
   >
     <app-explorer-toolbar
+      :options="options"
       :selectedRecords="selectedRecords"
       @add="add()"
       @refresh="refresh()"
@@ -45,7 +46,13 @@
         required: false,
         default: function() {
           return {
-            sort: 'alphabetically'
+            sort: 'alphabetically',
+            tools: {
+              add: true,
+              remove: true,
+              refresh: true,
+              filter: true
+            }
           };
         }
       },
