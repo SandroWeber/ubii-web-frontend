@@ -3,6 +3,7 @@
     class="app-explorer-toolbar"
   >
     <app-button 
+      v-if="options.tools.add"
       :class="'tool-button round low-contrast'"
       @click="add()"
       :contentSizePercentage="70"
@@ -13,7 +14,8 @@
       />
     </app-button>
 
-    <app-button 
+    <app-button
+      v-if="options.tools.remove"
       :class="'tool-button round low-contrast'"
       @click="remove()"
       :contentSizePercentage="60"
@@ -25,6 +27,7 @@
     </app-button>
 
     <app-button 
+      v-if="options.tools.refresh"
       :class="'tool-button round low-contrast'"
       @click="refresh()"
       :contentSizePercentage="65"
