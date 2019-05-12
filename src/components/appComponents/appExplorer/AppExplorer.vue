@@ -171,7 +171,6 @@
         this.selected = [];
       },
       filter: function(value){
-        console.log("EMIT FILTER")
         this.filterValue = value;
       },
     },
