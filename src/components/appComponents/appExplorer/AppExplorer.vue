@@ -53,7 +53,8 @@
               remove: true,
               refresh: true,
               filter: true
-            }
+            },
+            alwaysSelected: true
           };
         }
       },
@@ -144,19 +145,21 @@
       refresh: function(){
         this.$emit('refresh');
 
-        // refreshed records could miss selected records -> deselect all on refresh
+        // Refreshed records could miss selected records -> deselect all on refresh
         this.resetSelected();
       },
       isSelected: function(record){
-        if(this.selected.length === 0){
+        if(this.selected.length === 0 &&  this.options.alwaysSelected){
+          // If no record is selected reset selected so that the default one gets selected.
           this.resetSelected();
         }
+
         return this.selected.some((value) => value.id === record.id);
       },
       resetSelected: function(){
         this.clearSelected();
 
-        if(this.selected.length === 0 && this.records.length > 0){
+        if(this.selected.length === 0 && this.records.length > 0 && this.options.alwaysSelected){
           this.selected.push(this.sortedAndFilteredRecords[0]);
         }
 
