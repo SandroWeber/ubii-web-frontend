@@ -6,7 +6,8 @@
         :interactions="interactions"
         @select="onSelectInteractions"
       />
-      <interaction-mirror    
+      <interaction-mirror
+        v-if="selectedInteraction !== undefined" 
         v-model="selectedInteraction"
       />
     </div>
@@ -36,7 +37,7 @@
           if(this.selectedInteractions.length > 0){
             return this.selectedInteractions[0].data.interaction;
           }else{
-            return {}
+            return undefined;
           }
           
           let id = this.selectedInteractionId;
@@ -51,7 +52,7 @@
             if(this.interactions.length > 0){
               return this.interactions[0];
             }else{
-              return {};
+              return undefined;
             }
           }
         },
