@@ -120,8 +120,13 @@
         });
       },
       selectControl: function(record){
-        this.selected.push(record);
-        // TODO
+        if(this.isSelected(record)){
+          // Deselect.
+          this.selected = this.selected.filter((value) => value.id !== record.id);
+        }else{
+          // Select.
+          this.selected.push(record);
+        }
 
         this.$emit('select', {
           records: this.selectedRecords
