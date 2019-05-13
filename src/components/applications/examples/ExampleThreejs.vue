@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div id="demo-threejs-render-container" class="render-container"></div>
+    <div id="example-threejs-render-container" class="render-container"></div>
   </div>
 </template>
 
@@ -10,7 +10,7 @@
   import * as THREE from 'three'
 
   export default {
-    name: 'DemoTHREEjs',
+    name: 'ExampleTHREEjs',
     data() {
       return {
         camera: null,
@@ -21,7 +21,7 @@
     },
     methods: {
       init: function() {
-        let container = document.getElementById('demo-threejs-render-container');
+        let container = document.getElementById('example-threejs-render-container');
 
         this.camera = new THREE.PerspectiveCamera(70, container.clientWidth/container.clientHeight, 0.01, 10);
         this.camera.position.z = 1;

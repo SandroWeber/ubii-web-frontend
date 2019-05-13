@@ -6,14 +6,14 @@
       </span>
         </div>
 
-        <div class="start-demo" v-show="ubiiClientService.isConnected && !demoStarted">
-            <button class="start-demo-button" v-on:click="startDemo()">
+        <div class="start-example" v-show="ubiiClientService.isConnected && !exampleStarted">
+            <button class="start-example-button" v-on:click="startExample()">
                 <font-awesome-icon icon="play"/>
             </button>
         </div>
 
         <div
-                v-show="ubiiClientService.isConnected && demoStarted"
+                v-show="ubiiClientService.isConnected && exampleStarted"
                 class="grid"
         >
             <div class="options">
@@ -78,7 +78,7 @@
 
 <script>
   import uuidv4 from 'uuid/v4';
-  import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+  import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
   import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
   import {DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
 
@@ -93,15 +93,15 @@
   /* eslint-disable no-console */
 
   export default {
-    name: 'DemoMousePointer',
+    name: 'ExampleMousePointer',
     mounted: function () {
       // unsubscribe before page is unloaded
       window.addEventListener('beforeunload', () => {
-        this.stopDemo();
+        this.stopExample();
       });
     },
     beforeDestroy: function () {
-      this.stopDemo();
+      this.stopExample();
     },
     data: () => {
       return {
@@ -109,7 +109,7 @@
         showServerPointer: true,
         mirrorPointer: false,
         ubiiClientService: UbiiClientService,
-        demoStarted: false,
+        exampleStarted: false,
         serverMousePosition: {x: 0, y: 0},
         clientPointerInside: false
       }
@@ -134,7 +134,7 @@
         // create specifications for the protobuf messages
 
         // helper definitions that we can reference later
-        let deviceName = 'web-demo-mouse-pointer';
+        let deviceName = 'web-example-mouse-pointer';
         let topicPrefix = UbiiClientService.getClientID() + '/' + deviceName;
         let inputClientPointer = {
           internalName: 'clientPointer',
@@ -216,7 +216,7 @@
         // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/sessions/session.proto
         let ubiiSession = {
           id: uuidv4(),
-          name: 'web-mouse-demo-session',
+          name: 'web-mouse-example-session',
           interactions: [
             ubiiInteraction
           ],
@@ -258,8 +258,8 @@
 
         this.$data.ubiiSession = ubiiSession;
       },
-      startDemo: function () {
-        // create all the specifications we need to define our demo application
+      startExample: function () {
+        // create all the specifications we need to define our example application
         // these are protobuf messages to be sent to the server (saved in this.$data)
         this.createUbiiSpecs();
 
@@ -294,11 +294,11 @@
                 session: this.$data.ubiiSession
               })
               .then(() => {
-                this.$data.demoStarted = true;
+                this.$data.exampleStarted = true;
               });
           });
       },
-      stopDemo: function () {
+      stopExample: function () {
         // unsubscribe and stop session
         UbiiClientService.client.unsubscribe(this.$data.outputServerPointer.topic);
         UbiiClientService.client
@@ -384,11 +384,11 @@
         height: 10px
         background-color: red
 
-    .start-demo
+    .start-example
         text-align: center
         margin-top: 25px;
 
-    .start-demo-button
+    .start-example-button
         width: 50px;
         height: 50px;
 
