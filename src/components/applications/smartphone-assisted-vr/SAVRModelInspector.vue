@@ -40,10 +40,10 @@
         this.scene.add(this.mesh);
 
         let sky = new SKY();
-        this.scene.add( sky );
+        this.scene.add(sky);
 
         let helper = new THREE.GridHelper(10, 10, 0xf7f7f7, 0xc4c4c4);
-				this.scene.add( helper );
+				this.scene.add(helper);
 
 
         // finialize
@@ -52,7 +52,7 @@
         container.appendChild(this.renderer.domElement);
         this.renderer.autoClear = false;
 
-        container.appendChild( WEBVR.createButton( this.renderer ) );
+        container.appendChild(WEBVR.createButton(this.renderer));
         this.renderer.vr.enabled = true;
       },
       animate: function() {
