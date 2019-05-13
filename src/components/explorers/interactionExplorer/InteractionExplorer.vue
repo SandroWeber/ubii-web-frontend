@@ -2,6 +2,7 @@
   <app-layer class="interaction-explorer layer-two background shadow">
     <app-explorer 
       :records="interactions"
+      :options="options"
       @add="addDefaultInteraction"
       @remove="removeInteractions"
       @refresh="pull"
@@ -19,6 +20,20 @@
     props: {
       interactions: Array,
       selectedInteractionId: String
+    },
+    data: function(){
+      return {
+        options: {
+          sort: 'alphabetically',
+          tools: {
+            add: true,
+            remove: true,
+            refresh: true,
+            filter: true
+          },
+          alwaysSelected: true
+        }
+      }
     },
     components: {
       AppLayer,
