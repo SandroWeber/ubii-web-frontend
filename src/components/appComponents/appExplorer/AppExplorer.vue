@@ -20,7 +20,6 @@
       @select="select(record)"
       @select-ctrl="selectControl(record)"
       @select-shift="selectShift(record)"
-      @deselect="deselect(record)"
     />
   </app-layer>
 </template>
@@ -154,14 +153,7 @@
             records: this.selectedRecords
           });
         }
-      },
-      deselect: function(record){
-        this.selected = this.selected.filter((value)=> value.id !== record.id);
-
-        this.$emit('select', {
-          records: this.selectedRecords
-        });
-      },
+      }
       refresh: function(){
         this.$emit('refresh');
 
