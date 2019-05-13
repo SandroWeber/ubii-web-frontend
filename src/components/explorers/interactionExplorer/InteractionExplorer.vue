@@ -17,9 +17,12 @@
 
   export default {
     name: 'InteractionExplorer',
+    components: {
+      AppLayer,
+      AppExplorer,
+    },
     props: {
       interactions: Array,
-      selectedInteractionId: String
     },
     data: function(){
       return {
@@ -35,10 +38,6 @@
         }
       }
     },
-    components: {
-      AppLayer,
-      AppExplorer,
-    },
     methods: {
       onSelect: function(payload){
         this.$emit('select', payload)
@@ -51,7 +50,6 @@
         }
       },
       ...mapActions('interactions', {
-        addInteraction: 'add',
         addDefaultInteraction: 'addDefault',
         deleteInteraction: 'deleteInteraction',
         pull: 'pull',
