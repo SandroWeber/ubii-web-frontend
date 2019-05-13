@@ -133,23 +133,30 @@
         });
       },
       selectShift: function(record){
-        let currentlyRenderedRecords = this.sortedAndFilteredRecords;
-        
-        let indexFirst = currentlyRenderedRecords.indexOf(this.selected[0]);
-        let indexCurrent = currentlyRenderedRecords.indexOf(record);
-
-        for (let i = indexFirst;
-          (indexFirst<=indexCurrent && i<=indexCurrent) || (indexFirst>indexCurrent && i>=indexCurrent);
-          (indexFirst<=indexCurrent)?i++:i--) {
-          this.selected.push(currentlyRenderedRecords[i]);
+        if(this.selected.length === 0 &&  this.options.alwaysSelected){
+          // If no record is selected reset selected so that the default one gets selected.
+          this.resetSelected();
         }
 
-        this.$emit('select', {
-          records: this.selectedRecords
-        });
+        if(this.selected.length > 0){
+          let currentlyRenderedRecords = this.sortedAndFilteredRecords;
+          
+          let indexFirst = currentlyRenderedRecords.findIndex((value)=> value.id === this.selected[0].id);
+          let indexCurrent = currentlyRenderedRecords.findIndex((value)=> value.id === record.id);
+
+          for (let i = indexFirst;
+            (indexFirst<=indexCurrent && i<=indexCurrent) || (indexFirst>indexCurrent && i>=indexCurrent);
+            (indexFirst<=indexCurrent)?i++:i--) {
+            this.selected.push(currentlyRenderedRecords[i]);
+          }
+
+          this.$emit('select', {
+            records: this.selectedRecords
+          });
+        }
       },
       deselect: function(record){
-        this.selected = this.selected.filter((value)=> value.id === record.id);
+        this.selected = this.selected.filter((value)=> value.id !== record.id);
 
         this.$emit('select', {
           records: this.selectedRecords
@@ -162,12 +169,15 @@
         this.resetSelected();
       },
       isSelected: function(record){
-        if(this.selected.length === 0 &&  this.options.alwaysSelected){
+        if(this.selected.length === 0 && this.options.alwaysSelected){
           // If no record is selected reset selected so that the default one gets selected.
           this.resetSelected();
         }
-
-        return this.selected.some((value) => value.id === record.id);
+        if(this.selected.length > 0){
+          return this.selected.some((value) => value.id === record.id);
+        }else{
+          return false;
+        }
       },
       resetSelected: function(){
         this.clearSelected();
