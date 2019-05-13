@@ -47,16 +47,16 @@
 
 <style scoped lang="stylus"> 
   .app-explorer-item
-    flex-grow: 0
-    flex-shrink: 0
-    flex-basis: 1.8em
+    flex-grow 0
+    flex-shrink 0
+    flex-basis 1.8em
     order 1
     padding 5px 10px 5px 10px
     display flex
     flex-direction row
     cursor pointer
-    overflow: hidden
-    white-space: nowrap;
+    overflow hidden
+    white-space nowrap;
     &:hover
       color #ffffff
     &.selected
@@ -66,12 +66,11 @@
   .icon
     height 1em
     width 1em
-    margin-top: 0px
+    margin-top 0px
     
   .label
     margin-left 5px
     font-size 1em
     margin-top 0.05em
     user-select none
-
 </style>
