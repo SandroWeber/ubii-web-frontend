@@ -1,7 +1,6 @@
 <template>
   <app-layer 
     class="app-explorer layer-two background shadow"
-    v-on="$listeners"
   >
     <app-explorer-toolbar
       :options="options"
@@ -14,8 +13,8 @@
     <app-explorer-item
       v-for="record in sortedAndFilteredRecords"
       :key="record.id"
-      :label="record.label"
       :id="record.id"
+      :label="record.label"
       :selected="isSelected(record)"
       @select="select(record)"
       @select-ctrl="selectControl(record)"
@@ -72,7 +71,6 @@
         }else{
           recordsCopy = [...this.records];
         }
-        
 
         if(this.options.sort === 'byDate'){
           // Todo
@@ -91,7 +89,7 @@
     },
     watch: {
       records: function(){
-        // validate selected
+        // Clean up selected.
         this.selected = this.selected.filter((value) => {
           return this.records.some((record) => record.id === value.id);
         })
@@ -109,14 +107,19 @@
         // All selected records should be deleted -> reset selected.
         this.clearSelected();
       },
+      refresh: function(){
+        this.$emit('refresh');
+
+        // Refreshed records could miss selected records -> deselect all on refresh
+        this.resetSelected();
+      },
       select: function(record){
+        // Clear selected for a normal select.
         this.clearSelected();
 
         this.selected.push(record);
 
-        this.$emit('select', {
-          records: this.selectedRecords
-        });
+        this.emitSelectEvent();
       },
       selectControl: function(record){
         if(this.isSelected(record)){
@@ -127,49 +130,32 @@
           this.selected.push(record);
         }
 
-        this.$emit('select', {
-          records: this.selectedRecords
-        });
+        this.emitSelectEvent();
       },
       selectShift: function(record){
-        if(this.selected.length === 0 &&  this.options.alwaysSelected){
-          // If no record is selected reset selected so that the default one gets selected.
-          this.resetSelected();
-        }
-
         if(this.selected.length > 0){
           let currentlyRenderedRecords = this.sortedAndFilteredRecords;
           
           let indexFirst = currentlyRenderedRecords.findIndex((value)=> value.id === this.selected[0].id);
           let indexCurrent = currentlyRenderedRecords.findIndex((value)=> value.id === record.id);
 
+          // Iterate from first to current and push each entry to selected.
           for (let i = indexFirst;
             (indexFirst<=indexCurrent && i<=indexCurrent) || (indexFirst>indexCurrent && i>=indexCurrent);
-            (indexFirst<=indexCurrent)?i++:i--) {
+            (indexFirst<=indexCurrent) ? i++ : i--) {
             this.selected.push(currentlyRenderedRecords[i]);
           }
 
-          this.$emit('select', {
-            records: this.selectedRecords
-          });
+          this.emitSelectEvent();
         }
-      }
-      refresh: function(){
-        this.$emit('refresh');
-
-        // Refreshed records could miss selected records -> deselect all on refresh
-        this.resetSelected();
       },
       isSelected: function(record){
+        // If no record is selected reset selected so that the default one gets selected.
         if(this.selected.length === 0 && this.options.alwaysSelected){
-          // If no record is selected reset selected so that the default one gets selected.
           this.resetSelected();
         }
-        if(this.selected.length > 0){
-          return this.selected.some((value) => value.id === record.id);
-        }else{
-          return false;
-        }
+
+        return this.selected.some((value) => value.id === record.id);
       },
       resetSelected: function(){
         this.clearSelected();
@@ -178,12 +164,15 @@
           this.selected.push(this.sortedAndFilteredRecords[0]);
         }
 
-        this.$emit('select', {
-          records: this.selectedRecords
-        });
+        this.emitSelectEvent();
       },
       clearSelected: function(){
         this.selected = [];
+      },
+      emitSelectEvent: function(){
+        this.$emit('select', {
+          records: this.selectedRecords
+        });
       },
       filter: function(value){
         this.filterValue = value;
@@ -199,5 +188,5 @@
   display flex
   flex-direction column
   flex-grow 1
-  overflow-y: auto
+  overflow-y auto
 </style>
