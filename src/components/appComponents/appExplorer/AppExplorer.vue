@@ -133,8 +133,16 @@
         });
       },
       selectShift: function(record){
-        this.selected.push(record);
-        // TODO
+        let currentlyRenderedRecords = this.sortedAndFilteredRecords;
+        
+        let indexFirst = currentlyRenderedRecords.indexOf(this.selected[0]);
+        let indexCurrent = currentlyRenderedRecords.indexOf(record);
+
+        for (let i = indexFirst;
+          (indexFirst<=indexCurrent && i<=indexCurrent) || (indexFirst>indexCurrent && i>=indexCurrent);
+          (indexFirst<=indexCurrent)?i++:i--) {
+          this.selected.push(currentlyRenderedRecords[i]);
+        }
 
         this.$emit('select', {
           records: this.selectedRecords
