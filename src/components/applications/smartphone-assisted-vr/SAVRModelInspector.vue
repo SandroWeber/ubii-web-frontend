@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div id="demo-interaction-webvr-render-container" class="render-container"></div>
+    <div id="savr-model-inspector-render-container" class="render-container"></div>
   </div>
 </template>
 
@@ -8,11 +8,11 @@
   /* eslint-disable no-console */
 
   import * as THREE from 'three'
-  import WEBVR from './moduleThreejsWebVR'
-  import SKY from './moduleThreejsSky'
+  import WEBVR from '../sharedModules/moduleThreejsWebVR'
+  import SKY from '../sharedModules/moduleThreejsSky'
 
   export default {
-    name: 'DemoInteractionWebVR',
+    name: 'SAVRModelInspector',
     data() {
       return {
         camera: null,
@@ -25,7 +25,7 @@
     },
     methods: {
       init: function() {
-        let container = document.getElementById('demo-interaction-webvr-render-container');
+        let container = document.getElementById('savr-model-inspector-render-container');
 
         this.scene = new THREE.Scene();
 
