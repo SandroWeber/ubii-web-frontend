@@ -40,11 +40,11 @@
 
     <app-input
       v-if="options.tools.filter"
+      v-model="filter"
+      :id="'app-explorer-input'"
       class="filter-input layer-one round low-contrast low-contrast-border"
       :class="filterInputClasses"
-      v-model="filter"
       placeholder="filter"
-      :id="'app-explorer-input'"
     >
     </app-input>
   </div>
@@ -113,17 +113,17 @@
   padding 0.5em
 
 .tool-button 
-  height: 1.8em
-  width: 1.8em
-  margin-right: 0.5em
-  margin-bottom: 0.5em
+  height 1.8em
+  width 1.8em
+  margin-right 0.5em
+  margin-bottom 0.5em
 
 .tool-icon
-  height: 100%
-  width: 100%
+  height 100%
+  width 100%
 
 .filter-input
-  flex-grow: 1
-  min-width: 150px
-  height: 1.8em
+  flex-grow 1
+  min-width 150px
+  height 1.8em
 </style>
