@@ -65,84 +65,7 @@
   import ClientNode from './services/ubiiClient/ubiiClientService';
   import ServerStatus from './components/ServerStatus.vue'
   import { AppLayer } from './components/appComponents/appComponents.js';
-
-  // Dummy interaction.
-  let dummyInteractionOne =
-  {
-      id: '1234',
-      name: 'Dummy Interaction One',
-      processingCallback: `(input, output, state) => {
-  return true;
-}`,
-  inputFormats: [
-      {
-          internalName: 'input-A',
-          messageFormat: 'topic-A'
-      },
-      {
-          internalName: 'input-B',
-          messageFormat: 'topic-B'
-      }
-  ],
-  outputFormats: [
-      {
-          internalName: 'output-X',
-          messageFormat: 'topic-X'
-      },
-      {
-          internalName: 'output-Y',
-          messageFormat: 'topic-Y'
-      }
-  ]
-  };
-
-  let dummyInteractionTwo = {
-  id: 'uuidv4()',
-  name: 'Second Test',
-  processingCallback: `(input, output, state) => {
-  return true;
-}`,
-  inputFormats: [
-      {
-          internalName: 'inputClientPointer',
-          messageFormat: 'inputClientPointer.messageFormat'
-      },
-      {
-          internalName: 'inputMirror',
-          messageFormat: 'inputMirror.messageFormat'
-      }
-  ],
-  outputFormats: [
-      {
-          internalName: 'outputServerPointer',
-          messageFormat: 'outputServerPointer.messageFormat'
-      }
-  ]
-  };
-
-  let dummyInteractionThree = {
-id: 'three',
-name: 'TestThree',
-processingCallback: `(input, output, state) => {
-return true;
-}`,
-  inputFormats: [
-      {
-          internalName: 'inputClientPointer',
-          messageFormat: 'inputClientPointer.messageFormat'
-      },
-      {
-          internalName: 'inputMirror',
-          messageFormat: 'inputMirror.messageFormat'
-      }
-  ],
-  outputFormats: [
-      {
-          internalName: 'outputServerPointer',
-          messageFormat: 'outputServerPointer.messageFormat'
-      }
-  ]
-  };
+  import uuidv4 from 'uuid/v4';
 
   export default {
     name: 'app',
@@ -155,11 +78,6 @@ return true;
         ubiiClientService: ClientNode
       }
     },
-    mounted(){
-      this.$store.dispatch("interactions/add", {interaction: dummyInteractionOne});
-      this.$store.dispatch("interactions/add", {interaction: dummyInteractionTwo});
-      this.$store.dispatch("interactions/add", {interaction: dummyInteractionThree});
-    }
   }
 </script>
 
@@ -169,7 +87,11 @@ return true;
   * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
   }
+
 
   html, body {
     width: 100%;   
@@ -208,4 +130,6 @@ return true;
 
     flex-grow: 1
 
+  .svg-inline--fa
+    vertical-align 0
 </style>

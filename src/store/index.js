@@ -5,9 +5,11 @@ import sessions from './modules/sessions'
 
 Vue.use(Vuex)
 
-export default new Vuex.Store({
+let store = new Vuex.Store({
   modules: {
     interactions,
     sessions
   },
-})
+});
+
+export default store;
