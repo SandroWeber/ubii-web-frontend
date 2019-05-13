@@ -109,12 +109,14 @@
 .app-explorer-toolbar
   display flex
   flex-direction row
+  flex-wrap wrap
   padding 0.5em
 
 .tool-button 
   height: 1.8em
   width: 1.8em
   margin-right: 0.5em
+  margin-bottom: 0.5em
 
 .tool-icon
   height: 100%
@@ -122,4 +124,6 @@
 
 .filter-input
   flex-grow: 1
+  min-width: 150px
+  height: 1.8em
 </style>
