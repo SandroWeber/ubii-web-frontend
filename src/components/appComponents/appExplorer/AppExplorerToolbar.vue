@@ -126,6 +126,7 @@
 
 .filter-input
   flex-grow 1
-  min-width 9em
+  min-width 6em
+  width: 6em
   height 1.8em
 </style>
