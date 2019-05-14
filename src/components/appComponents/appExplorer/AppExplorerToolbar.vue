@@ -5,8 +5,8 @@
     <app-button 
       v-if="options.tools.add"
       :class="'tool-button round low-contrast'"
-      @click="add()"
       :contentSizePercentage="70"
+      @click="add()"
     >
       <font-awesome-icon 
       icon="plus"
@@ -17,8 +17,8 @@
     <app-button
       v-if="options.tools.remove"
       :class="'tool-button round low-contrast'"
-      @click="remove()"
       :contentSizePercentage="60"
+      @click="remove()"
     >
       <font-awesome-icon 
       icon="trash-alt"
@@ -29,8 +29,8 @@
     <app-button 
       v-if="options.tools.refresh"
       :class="'tool-button round low-contrast'"
-      @click="refresh()"
       :contentSizePercentage="65"
+      @click="refresh()"
     >
       <font-awesome-icon 
       icon="sync-alt"
