@@ -64,6 +64,10 @@
       }
     },
     computed: {
+      /**
+       * The records filtered and sorted.
+       * @return {Object[]}
+       */
       filteredAndSortedRecords: function(){
         // Get all relevant records:
         let recordsCopy;
@@ -90,83 +94,121 @@
 
         return recordsCopy;
       },
+      /**
+       * All selected records.
+       * @return {Object[]}
+       */
       selectedRecords: function(){
         return this.records.filter((record) => this.isSelected(record));
       },
     },
     watch: {
       records: function(){
-        // Clean up selected.
+        // Clean up selected when records changes.
         this.selected = this.selected.filter((value) => {
           return this.records.some((record) => record.id === value.id);
         })
       }
     },
     methods: {
+      /**
+       * Triggers an Add event. This is emitted to the external and solved internally.
+       */
       add: function(){
         this.$emit('add');
       },
+      /**
+       * Triggers a Remove event. This is emitted to the external and solved internally.
+       */
       remove: function(){
         this.$emit('remove', {
           records: this.selectedRecords
         });
 
-        // All selected records should be deleted -> reset selected.
+        // All selected records should be deleted -> reset the selected records.
         this.clearSelected();
       },
+      /**
+       * Triggers a Refresh event. This is emitted to the external and solved internally.
+       */
       refresh: function(){
         this.$emit('refresh');
 
-        // Refreshed records could miss selected records -> deselect all on refresh
+        // Updated records could no longer contain selected records -> reset the selected records.
         this.resetSelected();
       },
+      /**
+       * A normal select action. Triggers a Select event. This is solved internally and emitted to the external.
+       */
       select: function(record){
         // Clear selected for a normal select.
         this.clearSelected();
 
+        // Select the current record.
         this.selected.push(record);
 
         this.emitSelectEvent();
       },
+      /**
+       * A ctrl select action. Triggers a Select event. This is solved internally and emitted to the external.
+       */
       selectControl: function(record){
+        // Depending on whether the element has already been selected...
         if(this.isSelected(record)){
-          // Deselect.
+          // ... the element is deselected...
           this.selected = this.selected.filter((value) => value.id !== record.id);
         }else{
-          // Select.
+          // ... or the element is selected otherwise.
           this.selected.push(record);
         }
 
         this.emitSelectEvent();
       },
+      /**
+       * A shift select action. Triggers a Select event. This is solved internally and emitted to the external.
+       */
       selectShift: function(record){
+        // The shift select does only work if there is already an element selected.
         if(this.selected.length > 0){
+          // Get the currently rendered array of records in the correct order.
           let currentlyRenderedRecords = this.filteredAndSortedRecords;
           
+          // Get the index from the first element of the selected records in the currently rendered list.
           let indexFirst = currentlyRenderedRecords.findIndex((value)=> value.id === this.selected[0].id);
+          // Get the index from the current element in the currently rendered list.
           let indexCurrent = currentlyRenderedRecords.findIndex((value)=> value.id === record.id);
 
-          // Iterate from first to current and push each entry to selected.
+          // Iterate from first to current and select each entry if it is not already selected.
           for (let i = indexFirst;
             (indexFirst<=indexCurrent && i<=indexCurrent) || (indexFirst>indexCurrent && i>=indexCurrent);
             (indexFirst<=indexCurrent) ? i++ : i--) {
-            this.selected.push(currentlyRenderedRecords[i]);
+              if(this.isSelected(currentlyRenderedRecords[i]) !== true){
+                this.selected.push(currentlyRenderedRecords[i]);
+              }
           }
 
           this.emitSelectEvent();
         }
       },
+      /**
+       * Determines if the passed record is currently selected.
+       * @return {boolean}
+       */
       isSelected: function(record){
         // If no record is selected reset selected so that the default one gets selected.
-        if(this.selected.length === 0 && this.options.alwaysSelected){
-          this.resetSelected();
-        }
+        //if(this.selected.length === 0 && this.options.alwaysSelected){
+        //  this.resetSelected();
+        //}
 
         return this.selected.some((value) => value.id === record.id);
       },
+      /**
+       * Resets the selected records.
+       */
       resetSelected: function(){
         this.clearSelected();
 
+        // Select a record if the alwaysSelected option is set to true.
         if(this.selected.length === 0 && this.records.length > 0 && this.options.alwaysSelected){
           this.selected.push(this.filteredAndSortedRecords[0]);
         }
