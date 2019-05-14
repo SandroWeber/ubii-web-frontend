@@ -28,6 +28,20 @@
   import AppExplorerToolbar from "./AppExplorerToolbar.vue";
   import AppLayer from './../AppLayer.vue';
 
+  /**
+   * Implementation of a general explorer as app component that...
+   * <ul>
+   *  <li> ...accepts a list of records.
+   *  <li> ...renders it ordered with regard to a specific schema (only alphabetically for now).
+   *  <li> ...does not mutate the data.
+   *  <li> ...lets you adjust the required features according to forwarded options.
+   *  <li> ...lets you add records.
+   *  <li> ...lets you delete entries.
+   *  <li> ...lets you refresh the binded data.
+   *  <li> ...lets you select entries. (normal, multiselection with ctrl and shift)
+   *  <li> ...lets you filter entries based on a string.
+   * </ul>
+   */
   export default {
     name: 'AppExplorer',
     components: {
