@@ -144,20 +144,23 @@
       },
 
       addClient: function(clientID, topic) {
+        // spwan client mesh
         let geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
         let material = new THREE.MeshNormalMaterial();
+        let mesh = new THREE.Mesh(geometry, material);
 
-        let posSpread = 5.0;
+        // position client objects on a circle
+        let radius = 1;
+        let radians = THREE.Math.degToRad(180 - (30 * this.$data.clients.size));
+        mesh.position.set(radius * Math.sin(radians), 1.2, radius * Math.cos(radians));
 
-        let mmesh = new THREE.Mesh(geometry, material);
-        mmesh.position.set(THREE.Math.randFloatSpread(posSpread), 1.2, THREE.Math.randFloatSpread(posSpread));
-        this.scene.add(mmesh);
-        console.log("added client mesh");
+        this.scene.add(mesh);
 
+        // client object
         let client = {
           topicOrientation: topic,
           orientation: null,
-          mesh: mmesh
+          mesh: mesh
         };
 
         this.$data.clients.set(clientID, client);
@@ -168,7 +171,7 @@
             client.orientation = orientation;
           }
         );
-        
+
       },
 
     },
