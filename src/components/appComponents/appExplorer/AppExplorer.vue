@@ -110,7 +110,20 @@
         })
 
         this.enforceSelectionRequirements();
-      }
+      },
+      selected: function(){
+        this.enforceSelectionRequirements();
+
+        this.emitSelectEvent();
+      },
+      filteredAndSortedRecords: function(){
+        // Clean up selected when records changes.
+        this.selected = this.selected.filter((value) => {
+          return this.filteredAndSortedRecords.some((record) => record.id === value.id);
+        })
+
+        this.enforceSelectionRequirements();
+      },
     },
     methods: {
       /**
@@ -140,7 +153,7 @@
         this.resetSelected();
       },
       /**
-       * A normal select action. Triggers a Select event. This is solved internally and emitted to the external.
+       * A normal select action. This is solved internally and emitted to the external.
        */
       select: function(record){
         // Clear selected for a normal select.
@@ -148,11 +161,9 @@
 
         // Select the current record.
         this.selected.push(record);
-
-        this.emitSelectEvent();
       },
       /**
-       * A ctrl select action. Triggers a Select event. This is solved internally and emitted to the external.
+       * A ctrl select action. This is solved internally and emitted to the external.
        */
       selectControl: function(record){
         // Depending on whether the element has already been selected...
@@ -163,11 +174,9 @@
           // ... or the element is selected otherwise.
           this.selected.push(record);
         }
-
-        this.emitSelectEvent();
       },
       /**
-       * A shift select action. Triggers a Select event. This is solved internally and emitted to the external.
+       * A shift select action. This is solved internally and emitted to the external.
        */
       selectShift: function(record){
         // The shift select does only work if there is already an element selected.
@@ -188,8 +197,6 @@
                 this.selected.push(currentlyRenderedRecords[i]);
               }
           }
-
-          this.emitSelectEvent();
         }
       },
       /**
@@ -204,17 +211,13 @@
        */
       resetSelected: function(){
         this.clearSelected();
-
-        this.enforceSelectionRequirements();
-
-        this.emitSelectEvent();
       },
       clearSelected: function(){
         this.selected = [];
       },
       enforceSelectionRequirements: function(){
         // Select a record if the alwaysSelected option is set to true.
-        if(this.selected.length === 0 && this.records.length > 0 && this.options.alwaysSelected){
+        if(this.selected.length === 0 && this.filteredAndSortedRecords.length > 0 && this.options.alwaysSelected){
           this.selected.push(this.filteredAndSortedRecords[0]);
         }
       },
