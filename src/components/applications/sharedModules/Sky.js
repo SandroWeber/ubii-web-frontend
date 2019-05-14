@@ -1,19 +1,30 @@
-import * as THREE from 'three'
+import * as THREE from 'three';
 
 
 var shader = {
 
 	uniforms: {
-		"skyExp": { value: 0.9 },
-		"azimuthExp": { value: 0.005 },
-		"skyColor": { value: new THREE.Vector3(0.37, 0.52, 0.73) },
-		"groundColor": { value: new THREE.Vector3(0.71, 0.71, 0.71)  },
-		"azimuth": { value: new THREE.Vector3(0.89, 0.96, 1) },
-		"skyIntensity": { value: 1.0 },
+		"skyExp": {
+			value: 0.9
+		},
+		"azimuthExp": {
+			value: 0.005
+		},
+		"skyColor": {
+			value: new THREE.Vector3(0.37, 0.52, 0.73)
+		},
+		"groundColor": {
+			value: new THREE.Vector3(0.71, 0.71, 0.71)
+		},
+		"azimuth": {
+			value: new THREE.Vector3(0.89, 0.96, 1)
+		},
+		"skyIntensity": {
+			value: 1.0
+		},
 	},
 
-	vertexShader:
-	`
+	vertexShader: `
 	varying vec2 vUv;
 
 	void main()	{
@@ -22,8 +33,7 @@ var shader = {
 	}
 	`,
 
-	fragmentShader:
-	`
+	fragmentShader: `
 	varying vec2 vUv;
 
 	uniform float skyExp;
@@ -49,9 +59,9 @@ var shader = {
 	`
 
 };
-	
 
-function SKY() {
+
+function Sky() {
 
 	let material = new THREE.ShaderMaterial({
 		vertexShader: shader.vertexShader,
@@ -64,7 +74,7 @@ function SKY() {
 	THREE.Mesh.call(this, new THREE.SphereBufferGeometry(5, 16, 8), material);
 }
 
-SKY.prototype = Object.create(THREE.Mesh.prototype);
-SKY.prototype.constructor = SKY;
+Sky.prototype = Object.create(THREE.Mesh.prototype);
+Sky.prototype.constructor = Sky;
 
-export default SKY;
+export default Sky;

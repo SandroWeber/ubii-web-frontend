@@ -12,7 +12,7 @@
 
 <script>
   import {DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
-  import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
+  import UbiiClientService from '../../../services/ubiiClient/ubiiClientService';
 
   /* eslint-disable no-console */
 

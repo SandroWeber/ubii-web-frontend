@@ -8,7 +8,7 @@
   /* eslint-disable no-console */
 
   import * as Three from 'three'
-  import WEBVR from '../sharedModules/moduleThreejsWebVR'
+  import WebVR from '../sharedModules/WebVR'
 
   export default {
     name: 'ExampleTHREEjsWebVR',
@@ -40,7 +40,7 @@
         this.renderer.setSize(container.clientWidth, container.clientHeight);
         container.appendChild(this.renderer.domElement);
 
-        container.appendChild( WEBVR.createButton( this.renderer ) );
+        container.appendChild( WebVR.createButton( this.renderer ) );
         this.renderer.vr.enabled = true;
       },
       animate: function() {

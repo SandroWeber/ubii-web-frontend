@@ -4,8 +4,7 @@ import Router from 'vue-router'
 Vue.use(Router);
 
 export default new Router({
-  routes: [
-    {
+  routes: [{
       path: '/',
       name: 'home',
       component: () => import('./components/EntryPage.vue')
@@ -87,7 +86,7 @@ export default new Router({
     {
       path: '/applications/smartphone-assisted-vr/savr-model-inspector',
       name: 'Inspect a 3D Model',
-      component: () => import('./components/applications/smartphone-assisted-vr/SAVRModelInspector.vue')
+      component: () => import('./components/applications/smartphoneAssistedVR/SAVRModelInspector.vue')
     }
   ]
 })
