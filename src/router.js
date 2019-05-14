@@ -48,31 +48,41 @@ export default new Router({
       name: 'Topic Inspector',
       component: () => import('./components/tools/TopicInspector.vue')
     },
-    /* demos */
     {
-      path: '/demos',
-      name: 'Demos',
-      component: () => import('./components/Demos.vue')
+      path: '/tools/performance_tests',
+      name: 'Tool - Performance Tests',
+      component: () => import('./components/tools/PerformanceTests.vue')
     },
     {
-      path: '/demos/mouse-pointer',
-      name: 'Demo - Mouse Pointer',
-      component: () => import('./components/demos/DemoMousePointer.vue')
+      path: '/tools/qrcode_display',
+      name: 'Tool - QR Code Display',
+      component: () => import('./components/tools/QRCodeDisplay.vue')
+    },
+    /* applications */
+    {
+      path: '/applications',
+      name: 'Applications',
+      component: () => import('./components/Applications.vue')
     },
     {
-      path: '/demos/threejs',
-      name: 'Demo - THREEjs',
-      component: () => import('./components/demos/DemoThreejs.vue')
+      path: '/applications/examples/mouse-pointer',
+      name: 'Example - Mouse Pointer',
+      component: () => import('./components/applications/examples/ExampleMousePointer.vue')
     },
     {
-      path: '/demos/threejs-webvr',
-      name: 'Demo - THREEjs WebVR',
-      component: () => import('./components/demos/DemoThreejsWebVR.vue')
+      path: '/applications/examples/threejs',
+      name: 'Example - THREEjs',
+      component: () => import('./components/applications/examples/ExampleThreejs.vue')
     },
     {
-      path: '/demos/gatherer-web-interface-smart-devices',
-      name: 'Demo - Gathering from Smart Devices connected via Web Interface',
-      component: () => import('./components/demos/DemoWebInterfaceSmartDevices.vue')
+      path: '/applications/examples/threejs-webvr',
+      name: 'Example - THREEjs WebVR',
+      component: () => import('./components/applications/examples/ExampleThreejsWebVR.vue')
     },
+    {
+      path: '/applications/examples/gatherer-web-interface-smart-devices',
+      name: 'Example - Gathering from Smart Devices connected via Web Interface',
+      component: () => import('./components/applications/examples/ExampleWebInterfaceSmartDevices.vue')
+    }
   ]
 })

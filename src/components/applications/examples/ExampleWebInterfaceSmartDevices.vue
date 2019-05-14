@@ -4,7 +4,7 @@
             <span class="notification">Please connect to backend before starting the application.</span>
         </div>
 
-        <div id="demo-web-smart-devices-touch-positions" class="touch-position-area"
+        <div id="example-web-smart-devices-touch-positions" class="touch-position-area"
              v-show="ubiiClientService.isConnected">
         </div>
     </div>
@@ -12,22 +12,22 @@
 
 <script>
   import {DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
-  import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+  import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
 
   /* eslint-disable no-console */
 
   export default {
-    name: 'DemoGathererWebInterfaceSmartDevices',
+    name: 'ExampleGathererWebInterfaceSmartDevices',
     mounted: function () {
       // unsubscribe before page is unloaded
       window.addEventListener('beforeunload', () => {
-        this.stopDemo();
+        this.stopExample();
       });
 
-      this.startDemo();
+      this.startExample();
     },
     beforeDestroy: function () {
-      this.stopDemo();
+      this.stopExample();
     },
     data: () => {
       return {
@@ -37,11 +37,11 @@
       }
     },
     methods: {
-      startDemo: function () {
+      startExample: function () {
         this.$data.pollSmartDevices = true;
         this.updateSmartDevices();
       },
-      stopDemo: function () {
+      stopExample: function () {
         this.$data.pollSmartDevices = false;
       },
       updateSmartDevices: function () {
@@ -79,7 +79,7 @@
         touchPosElement.style.height = '10px';
         touchPosElement.style.position = 'relative';
         touchPosElement.style.backgroundColor = this.getRandomColor();
-        document.getElementById('demo-web-smart-devices-touch-positions').appendChild(touchPosElement);
+        document.getElementById('example-web-smart-devices-touch-positions').appendChild(touchPosElement);
 
         // create client object with necessary info
         let client = {
@@ -93,7 +93,7 @@
         UbiiClientService.client.subscribe(
           client.topicTouchPosition,
           (touchPosition) => {
-            let boundingRect = document.getElementById('demo-web-smart-devices-touch-positions').getBoundingClientRect();
+            let boundingRect = document.getElementById('example-web-smart-devices-touch-positions').getBoundingClientRect();
 
             client.touchPosition.x = Math.floor(touchPosition.x * boundingRect.width);
             client.touchPosition.y = Math.floor(touchPosition.y * boundingRect.height);

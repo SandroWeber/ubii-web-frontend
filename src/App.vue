@@ -37,10 +37,10 @@
         </router-link>
         |
         <router-link
-              to="/demos"
+              to="/applications"
               class="navigation-item"
         >
-        Demos
+        Applications
         </router-link>
         |
         <router-link
