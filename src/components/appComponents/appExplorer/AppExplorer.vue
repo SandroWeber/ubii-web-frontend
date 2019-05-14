@@ -65,23 +65,30 @@
     },
     computed: {
       sortedAndFilteredRecords: function(){
+        // Get all relevant records:
         let recordsCopy;
         if(this.filterValue !== ""){
+          // Get the filtered records if the filter value is non-empty...
           recordsCopy = this.records.filter((record) => record.label.includes(this.filterValue));
         }else{
+          // ... or get them all otherwise.
           recordsCopy = [...this.records];
         }
 
+        // Sort the records.
         if(this.options.sort === 'byDate'){
-          // Todo
-          return recordsCopy.sort((a,b) => {
+          // Todo. Currently no date is required in the records data structure -> not possible to sort by date.
+          recordsCopy = recordsCopy.sort((a,b) => {
             return a.label.localeCompare(b.label);
           });
         }else{
-          return recordsCopy.sort((a,b) => {
+          // Default sort mode is alphabetically.
+          recordsCopy = recordsCopy.sort((a,b) => {
             return a.label.localeCompare(b.label);
           });
         }
+
+        return recordsCopy;
       },
       selectedRecords: function(){
         return this.records.filter((record) => this.isSelected(record));
