@@ -54,6 +54,7 @@
             this.selectedInteractions = payload.records; 
         },
         ...mapActions('interactions', {
+            pull: 'pull',
             updateInteraction: 'update',
             startSynchronizationService: 'startSynchronizationService',
             stopSynchronizationService: 'stopSynchronizationService'
