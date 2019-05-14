@@ -35,8 +35,8 @@ var shader = {
 
 	void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
-		float skyFac = 1.0 - pow(min(1.0, 1.0 - vUv.y), skyExp);
-		float azimuthFac = 1.0 - pow(min(1.0, 1.0 + vUv.y), azimuthExp);
+		float skyFac = 1.0 - pow(abs(min(1.0, 1.0 - vUv.y)), skyExp);
+		float azimuthFac = 1.0 - pow(abs(min(1.0, 1.0 + vUv.y)), azimuthExp);
 		float groundFac = 1.0 - skyFac - azimuthFac;
 
 		vec3 sky = skyColor * skyFac + groundColor * groundFac + azimuth * azimuthFac;

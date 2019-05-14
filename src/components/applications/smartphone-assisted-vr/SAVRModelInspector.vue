@@ -22,24 +22,26 @@
   import {DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
   import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
 
-  let ENABLE_VR = false;
+  let ENABLE_VR = true;
 
   export default {
     name: 'SAVRModelInspector',
+
     mounted() {
       this.init();
-      this.animate();
       this.subscribe();
+      this.startRenderLoop();
     },
+
     beforeDestroy: function () {
       this.stopDemo();
     },
+
     data() {
       return {
         camera: null,
         scene: null,
         renderer: null,
-        mesh: null,
         time: 0,
         clock: new THREE.Clock(),
         ubiiClientService: UbiiClientService,
@@ -47,7 +49,9 @@
         pollSmartDevices: false
       }
     },
+
     methods: {
+
       init: function() {
         let container = document.getElementById('savr-model-inspector-render-container');
 
@@ -57,37 +61,26 @@
         this.camera.position.z = 1;
         this.scene.add(this.camera);
 
-        let geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-        let material = new THREE.MeshNormalMaterial();
-
-        this.mesh = new THREE.Mesh(geometry, material);
-        this.scene.add(this.mesh);
-
         let sky = new SKY();
         this.scene.add(sky);
 
         let helper = new THREE.GridHelper(10, 10, 0xf7f7f7, 0xc4c4c4);
 				this.scene.add(helper);
 
-
         // finialize
-        this.renderer = new THREE.WebGLRenderer({antialias: true});
+        this.renderer = new THREE.WebGLRenderer({antialias: true, autoClear: false});
         this.renderer.setSize(container.clientWidth, container.clientHeight);
         container.appendChild(this.renderer.domElement);
-        this.renderer.autoClear = false;
 
-        if (ENABLE_VR)
-        {
-          container.appendChild( WEBVR.createButton( this.renderer ) );
-          this.renderer.vr.enabled = true;
-        }
+        container.appendChild(WEBVR.createButton(this.renderer));
+        this.renderer.vr.enabled = true;
 
       },
-      animate: function() {
+
+      startRenderLoop: function() {
         let renderer = this.renderer;
         let scene = this.scene;
         let camera = this.camera;
-        let mesh = this.mesh;
         // eslint-disable-next-line
         let time = this.time;
         let clock = this.clock;
@@ -98,20 +91,21 @@
           time += delta;
 
           clients.forEach((client) => {
-            if (typeof client.orientation.x !== 'undefined') {
-              mesh.rotation.x = THREE.Math.degToRad(client.orientation.y);
-              mesh.rotation.y = THREE.Math.degToRad(client.orientation.x);
-              mesh.rotation.z = THREE.Math.degToRad(-client.orientation.z);
+            if (client.orientation) {
+              client.mesh.rotation.x = THREE.Math.degToRad(client.orientation.y);
+              client.mesh.rotation.y = THREE.Math.degToRad(client.orientation.x);
+              client.mesh.rotation.z = THREE.Math.degToRad(-client.orientation.z);
             }
           });
-
+          
           renderer.clear();
           renderer.render(scene, camera);
         });
       },
+
       subscribe: function() {
-        window.addEventListener('beforeunload', () => { // unsubscribe before page is unloaded
-          this.stopDemo();
+        window.addEventListener('beforeunload', () => { 
+          this.stopDemo(); // unsubscribe before page is unloaded
         });
 
         this.startDemo();
@@ -150,10 +144,20 @@
       },
 
       addClient: function(clientID, topic) {
-        // create client object with necessary info
+        let geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+        let material = new THREE.MeshNormalMaterial();
+
+        let posSpread = 5.0;
+
+        let mmesh = new THREE.Mesh(geometry, material);
+        mmesh.position.set(THREE.Math.randFloatSpread(posSpread), 1.2, THREE.Math.randFloatSpread(posSpread));
+        this.scene.add(mmesh);
+        console.log("added client mesh");
+
         let client = {
           topicOrientation: topic,
-          orientation: {x: undefined, y: undefined, z: undefined}
+          orientation: null,
+          mesh: mmesh
         };
 
         this.$data.clients.set(clientID, client);
@@ -164,7 +168,9 @@
             client.orientation = orientation;
           }
         );
-      }
+        
+      },
+
     },
   }
 </script>
