@@ -11,7 +11,7 @@
       @filter="filter"
     />
     <app-explorer-item
-      v-for="record in sortedAndFilteredRecords"
+      v-for="record in filteredAndSortedRecords"
       :key="record.id"
       :id="record.id"
       :label="record.label"
@@ -64,7 +64,7 @@
       }
     },
     computed: {
-      sortedAndFilteredRecords: function(){
+      filteredAndSortedRecords: function(){
         // Get all relevant records:
         let recordsCopy;
         if(this.filterValue !== ""){
@@ -141,7 +141,7 @@
       },
       selectShift: function(record){
         if(this.selected.length > 0){
-          let currentlyRenderedRecords = this.sortedAndFilteredRecords;
+          let currentlyRenderedRecords = this.filteredAndSortedRecords;
           
           let indexFirst = currentlyRenderedRecords.findIndex((value)=> value.id === this.selected[0].id);
           let indexCurrent = currentlyRenderedRecords.findIndex((value)=> value.id === record.id);
@@ -168,7 +168,7 @@
         this.clearSelected();
 
         if(this.selected.length === 0 && this.records.length > 0 && this.options.alwaysSelected){
-          this.selected.push(this.sortedAndFilteredRecords[0]);
+          this.selected.push(this.filteredAndSortedRecords[0]);
         }
 
         this.emitSelectEvent();
