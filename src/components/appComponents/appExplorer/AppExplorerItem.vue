@@ -27,9 +27,18 @@
     name: 'AppExplorerItem',
     components: {},
     props: {
-      id: String,
-      label: String,
-      selected: Boolean
+      id: {
+        type: String,
+        required: true,
+      },
+      label: {
+        type: String,
+        required: true,
+      },
+      selected: {
+        type: Boolean,
+        required: true,
+      }
     },
     methods: {
       select: function() {
