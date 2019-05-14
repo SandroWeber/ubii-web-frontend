@@ -66,10 +66,6 @@
       AppInput
     },
     props: {
-      selectedInteractionId: {
-        type: String,
-        required: true,
-      },
       options: {
         type: Object,
         required: true,
