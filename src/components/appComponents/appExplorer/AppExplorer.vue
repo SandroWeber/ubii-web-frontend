@@ -108,6 +108,8 @@
         this.selected = this.selected.filter((value) => {
           return this.records.some((record) => record.id === value.id);
         })
+
+        this.enforceSelectionRequirements();
       }
     },
     methods: {
@@ -126,7 +128,7 @@
         });
 
         // All selected records should be deleted -> reset the selected records.
-        this.clearSelected();
+        this.resetSelected();
       },
       /**
        * Triggers a Refresh event. This is emitted to the external and solved internally.
@@ -195,11 +197,6 @@
        * @return {boolean}
        */
       isSelected: function(record){
-        // If no record is selected reset selected so that the default one gets selected.
-        //if(this.selected.length === 0 && this.options.alwaysSelected){
-        //  this.resetSelected();
-        //}
-
         return this.selected.some((value) => value.id === record.id);
       },
       /**
@@ -208,15 +205,18 @@
       resetSelected: function(){
         this.clearSelected();
 
-        // Select a record if the alwaysSelected option is set to true.
-        if(this.selected.length === 0 && this.records.length > 0 && this.options.alwaysSelected){
-          this.selected.push(this.filteredAndSortedRecords[0]);
-        }
+        this.enforceSelectionRequirements();
 
         this.emitSelectEvent();
       },
       clearSelected: function(){
         this.selected = [];
+      },
+      enforceSelectionRequirements: function(){
+        // Select a record if the alwaysSelected option is set to true.
+        if(this.selected.length === 0 && this.records.length > 0 && this.options.alwaysSelected){
+          this.selected.push(this.filteredAndSortedRecords[0]);
+        }
       },
       emitSelectEvent: function(){
         this.$emit('select', {
@@ -227,6 +227,9 @@
         this.filterValue = value;
       },
     },
+    mounted: function(){
+      this.resetSelected();
+    }
   }
 </script>
 
