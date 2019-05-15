@@ -1,41 +1,60 @@
 <template>
   <app-layer class="interaction-explorer layer-two background shadow">
-    <interaction-explorer-toolbar
-      :selectedInteractionId="selectedInteractionId"
-      @delete="onSelectItem('')"
-    />
-    <interaction-explorer-item
-      v-for="element in interactions"
-      :key="element.id"
-      :name="element.name"
-      :id="element.id"
-      :selected="element.id === selectedInteractionId"
-      @select="onSelectItem"
+    <app-explorer 
+      :records="interactions"
+      :options="options"
+      @add="addDefaultInteraction"
+      @remove="removeInteractions"
+      @refresh="pull"
+      @select="onSelect"
     />
   </app-layer>
 </template>
 
 <script>
-  import InteractionExplorerItem from "./InteractionExplorerItem.vue";
-  import InteractionExplorerToolbar from "./InteractionExplorerToolbar.vue";
-  import { AppLayer } from './../../appComponents/appComponents.js';
+  import { mapActions } from 'vuex'
+  import { AppLayer, AppExplorer } from './../../appComponents/appComponents.js';
 
   export default {
     name: 'InteractionExplorer',
+    components: {
+      AppLayer,
+      AppExplorer,
+    },
     props: {
       interactions: Array,
-      selectedInteractionId: String
     },
-    components: {
-      InteractionExplorerItem,
-      InteractionExplorerToolbar,
-      AppLayer
+    data: function(){
+      return {
+        options: {
+          sort: 'alphabetically',
+          tools: {
+            add: true,
+            remove: true,
+            refresh: true,
+            filter: true
+          },
+          alwaysSelected: true
+        }
+      }
     },
     methods: {
-      onSelectItem: function(id){
-        this.$emit('selectInteraction', id)
-      }
-    }
+      onSelect: function(payload){
+        this.$emit('select', payload)
+      },
+      removeInteractions: function(payload){
+        for (let i = 0; i < payload.records.length; i++) {
+          this.deleteInteraction({
+            interaction: payload.records[i],
+          });
+        }
+      },
+      ...mapActions('interactions', {
+        addDefaultInteraction: 'addDefault',
+        deleteInteraction: 'deleteInteraction',
+        pull: 'pull',
+      }),
+    },
   }
 </script>
 
