@@ -116,6 +116,7 @@ export default {
             client.model.rotation.z = THREE.Math.degToRad(
               -client.orientation.z
             );
+            console.log(client.orientation)
           }
         });
 
@@ -184,17 +185,19 @@ export default {
         materials.preload();
 
         var objLoader = new OBJLoader2();
+        objLoader.setLogging(false, false);
         objLoader.setMaterials(materials);
         objLoader.load("models/skeleton.obj", function(event) {
           let model = event.detail.loaderRootNode;
 
-          let radius = 1;
+          let radius = 0.5;
+          let height = 0.9;
           let radians = THREE.Math.degToRad(180 - 30 * clients.size);
 
           // position client objects on a circle
           model.position.set(
             radius * Math.sin(radians),
-            1.2,
+            height,
             radius * Math.cos(radians)
           );
 
