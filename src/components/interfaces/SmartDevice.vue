@@ -15,20 +15,22 @@
       >
       <span>Touch0: {{touches && touches[0] && touches[0].clientX}} {{touches && touches[0] && touches[0].clientY}}</span>
       <br />
-      <span>Orientation:
-      {{deviceOrientation.absolute}}
-      {{this.round(deviceOrientation.alpha, 1)}}
-      {{this.round(deviceOrientation.beta, 1)}}
-      {{this.round(deviceOrientation.gamma, 1)}}</span>
+      <span>Orientation: </span>
+      <span v-if="deviceOrientation">
+        {{deviceOrientation.absolute}}
+        {{this.round(deviceOrientation.alpha, 1)}}
+        {{this.round(deviceOrientation.beta, 1)}}
+        {{this.round(deviceOrientation.gamma, 1)}}
+      </span>
       <br />
       <span>Acceleration: </span>
-      <span v-if="deviceMotion.acceleration">
+      <span v-if="deviceMotion && deviceMotion.acceleration">
         {{this.round(deviceMotion.acceleration.x, 1)}}
         {{this.round(deviceMotion.acceleration.y, 1)}}
         {{this.round(deviceMotion.acceleration.z, 1)}}</span>
       <br />
       <span>Rotation: </span>
-      <span v-if="deviceMotion.rotationRate">
+      <span v-if="deviceMotion && deviceMotion.rotationRate">
         {{this.round(deviceMotion.rotationRate.alpha, 1)}}
         {{this.round(deviceMotion.rotationRate.beta, 1)}}
         {{this.round(deviceMotion.rotationRate.gamma, 1)}}</span>
