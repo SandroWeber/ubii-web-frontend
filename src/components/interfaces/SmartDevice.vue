@@ -108,7 +108,6 @@
       startInterface: function () {
         // register the mouse pointer device
         UbiiClientService.isConnected().then(() => {
-          console.info('startInterface');
           this.createUbiiSpecs();
           UbiiClientService.registerDevice(this.$data.ubiiDevice)
             .then((device) => {
