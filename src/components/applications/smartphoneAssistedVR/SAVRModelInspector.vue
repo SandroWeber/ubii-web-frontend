@@ -191,7 +191,6 @@ export default {
         topicOrientation: topic,
         orientation: null,
         model: null,
-        rotationOffset: 0
       };
 
       // TODO: move this to another method
@@ -215,7 +214,7 @@ export default {
 
           let radius = 0.75;
           let height = 1.8;
-          client.rotationOffset = 45 * (clients.size - 1);
+          let rotationOffset = 45 * (clients.size - 1);
           let radians = THREE.Math.degToRad(180 - rotationOffset);
 
           // position client objects on a circle
