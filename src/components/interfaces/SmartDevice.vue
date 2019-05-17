@@ -13,8 +13,8 @@
     >
       <span>Touch0: {{touches && touches[0] && touches[0].clientX}} {{touches && touches[0] && touches[0].clientY}}</span>
       <br>
-      <span>
-        Orientation:
+      <span>Orientation:</span>
+      <span v-if="deviceOrientation">
         {{deviceOrientation.absolute}}
         {{this.round(deviceOrientation.alpha, 1)}}
         {{this.round(deviceOrientation.beta, 1)}}
@@ -22,14 +22,14 @@
       </span>
       <br>
       <span>Acceleration:</span>
-      <span v-if="deviceMotion.acceleration">
+      <span v-if="deviceMotion && deviceMotion.acceleration">
         {{this.round(deviceMotion.acceleration.x, 1)}}
         {{this.round(deviceMotion.acceleration.y, 1)}}
         {{this.round(deviceMotion.acceleration.z, 1)}}
       </span>
       <br>
       <span>Rotation:</span>
-      <span v-if="deviceMotion.rotationRate">
+      <span v-if="deviceMotion && deviceMotion.rotationRate">
         {{this.round(deviceMotion.rotationRate.alpha, 1)}}
         {{this.round(deviceMotion.rotationRate.beta, 1)}}
         {{this.round(deviceMotion.rotationRate.gamma, 1)}}
@@ -119,34 +119,37 @@ export default {
       this.$data.componentLinearAcceleration = ubiiDevice.components[2];
     },
     startInterface: function() {
-      this.createUbiiSpecs();
-
-      window.addEventListener(
-        "deviceorientation",
-        this.onDeviceOrientation,
-        true
-      );
-      window.addEventListener("devicemotion", this.onDeviceMotion, true);
-
       // register the mouse pointer device
-      UbiiClientService.registerDevice(this.$data.ubiiDevice)
-        .then(device => {
-          this.$data.ubiiDevice = device;
-          return device;
-        })
-        .then(() => {
-          let vibrationComponent = this.$data.ubiiDevice.components.find(element => {
-            return element.topic.indexOf("/vibration_pattern") !== -1;
-          });
-          if (vibrationComponent) {
-            UbiiClientService.client.subscribe(
-              vibrationComponent.topic,
-              vibrationPattern => {
-                navigator.vibrate(vibrationPattern);
+      UbiiClientService.isConnected().then(() => {
+        this.createUbiiSpecs();
+        UbiiClientService.registerDevice(this.$data.ubiiDevice)
+          .then(device => {
+            this.$data.ubiiDevice = device;
+            return device;
+          })
+          .then(() => {
+            let vibrationComponent = this.$data.ubiiDevice.components.find(
+              element => {
+                return element.topic.indexOf("/vibration_pattern") !== -1;
               }
             );
-          }
-        });
+            if (vibrationComponent) {
+              UbiiClientService.client.subscribe(
+                vibrationComponent.topic,
+                vibrationPattern => {
+                  navigator.vibrate(vibrationPattern);
+                }
+              );
+            }
+          });
+
+        window.addEventListener(
+          "deviceorientation",
+          this.onDeviceOrientation,
+          true
+        );
+        window.addEventListener("devicemotion", this.onDeviceMotion, true);
+      });
     },
     stopInterface: function() {},
     onTouchStart: function(event) {

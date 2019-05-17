@@ -16,6 +16,22 @@
           </p>
         </app-tile>
       </router-link>
+      
+      <router-link
+        to="/tools"
+        class="interface-link"
+        tag="div"
+      >
+        <app-tile class="layer-three background round shadow green-accent">
+          <font-awesome-icon
+            icon="toolbox"
+            class="interface-icon"
+          />
+          <p>
+            Tools
+          </p>
+          </app-tile>
+      </router-link>
 
       <router-link
               to="/interfaces"
@@ -32,25 +48,9 @@
           </p>
         </app-tile>
       </router-link>
-      
-      <router-link
-        to="/tools"
-        class="interface-link"
-        tag="div"
-      >
-        <app-tile class="layer-three background round shadow blue-accent">
-          <font-awesome-icon
-            icon="toolbox"
-            class="interface-icon"
-          />
-          <p>
-            Tools
-          </p>
-          </app-tile>
-      </router-link>
 
       <router-link
-              to="/demos"
+              to="/applications"
               class="interface-link"
               tag="div"
       >
@@ -60,7 +60,7 @@
                   class="interface-icon"
           />
           <p>
-            Demos
+            Applications
           </p>
         </app-tile>
       </router-link>
