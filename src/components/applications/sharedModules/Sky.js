@@ -62,6 +62,7 @@ var shader = {
 
 
 function Sky() {
+	this.name = "Sky";
 
 	let material = new THREE.ShaderMaterial({
 		vertexShader: shader.vertexShader,
