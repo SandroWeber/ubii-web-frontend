@@ -39,7 +39,9 @@
     methods: {
       startExample: function () {
         this.$data.pollSmartDevices = true;
-        this.updateSmartDevices();
+        UbiiClientService.isConnected().then(() => {
+          this.updateSmartDevices();
+        });
       },
       stopExample: function () {
         this.$data.pollSmartDevices = false;
