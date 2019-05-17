@@ -106,17 +106,19 @@
         this.$data.componentLinearAcceleration = ubiiDevice.components[2];
       },
       startInterface: function () {
-        this.createUbiiSpecs();
-
-        window.addEventListener('deviceorientation', this.onDeviceOrientation, true);
-        window.addEventListener('devicemotion', this.onDeviceMotion, true);
-
         // register the mouse pointer device
-        UbiiClientService.registerDevice(this.$data.ubiiDevice)
-          .then((device) => {
-            this.$data.ubiiDevice = device;
-            return device;
-          });
+        UbiiClientService.isConnected().then(() => {
+          console.info('startInterface');
+          this.createUbiiSpecs();
+          UbiiClientService.registerDevice(this.$data.ubiiDevice)
+            .then((device) => {
+              this.$data.ubiiDevice = device;
+              return device;
+            });
+
+          window.addEventListener('deviceorientation', this.onDeviceOrientation, true);
+          window.addEventListener('devicemotion', this.onDeviceMotion, true);
+        });
       },
       stopInterface: function() {},
       onTouchStart: function (event) {

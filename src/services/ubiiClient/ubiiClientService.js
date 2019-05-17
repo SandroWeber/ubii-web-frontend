@@ -8,25 +8,13 @@ class UbiiClientService {
     this.serverIP = window.location.hostname;
     this.serverPort = '8102';
     this.client = undefined;
-    this.isConnected = false;
+    this.connected = false;
     this.connecting = false;
   }
 
   connect() {
-    if (this.isConnected || this.connecting) {
-      return new Promise((resolve, reject) => {
-        let checkConnection = () => {
-          if (this.isConnected) {
-            resolve();
-          } else {
-            setTimeout(() => {
-              checkConnection();
-            }, 100);
-          }
-        };
-
-        checkConnection();
-      });
+    if (this.connected || this.connecting) {
+      return this.isConnected();
     }
     this.connecting = true;
 
@@ -38,13 +26,43 @@ class UbiiClientService {
         if (this.client.isInitialized()) {
           console.info('UbiiClientService - client connected with ID:\n' +
             this.client.clientSpecification.id);
-          this.isConnected = true;
+          this.connected = true;
           this.connecting = false;
         }
       },
       (error) => {
         console.info('UbiiClientService.client.initialize() failed:\n' + error);
       });
+  }
+
+  disconnect() {
+    this.connected = false;
+    this.connecting = false;
+    this.client = undefined;
+  }
+
+  isConnected() {
+    return new Promise((resolve, reject) => {
+      let maxRetries = 1000;
+      let retry = 0;
+
+      let checkConnection = () => {
+        retry += 1;
+        if (this.connected) {
+          resolve();
+          return;
+        } else {
+          if (retry > maxRetries) {
+            reject();
+            return;
+          }
+          setTimeout(() => {
+            checkConnection();
+          }, 100);
+        }
+      };
+      checkConnection();
+    });
   }
 
   getClientID() {
