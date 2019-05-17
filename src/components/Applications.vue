@@ -103,14 +103,14 @@
 
   .category 
     .seperator
-        border-bottom: solid 1px highContrastColor;
-        height: 10px;
-        line-height: 20px;
-        text-align: left;
-        .label 
-            display: inline;
-            padding-left: 15px;
-            padding-right 20px;
-            background-color: layerOneSecondaryColor;
+      border-bottom: solid 1px highContrastColor;
+      height: 10px;
+      line-height: 20px;
+      text-align: left;
+      .label 
+        display: inline;
+        padding-left: 15px;
+        padding-right 20px;
+        background-color: layerOneSecondaryColor;
 
 </style>
