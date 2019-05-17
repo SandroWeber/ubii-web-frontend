@@ -77,8 +77,23 @@ export default {
       directionalLight.position.set(0, 0, 1).normalize();
       scene.add(directionalLight);
 
+      let hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
+      hemiLight.color.setHSL(0.6, 1, 0.6);
+      hemiLight.groundColor.setHSL(0.095, 1, 0.75);
+      hemiLight.position.set(0, 500, 0);
+      scene.add(hemiLight);
+
+      scene.fog = new THREE.Fog( 0x23272a, 0.5, 1700, 4000 );
+
       let sky = new Sky();
       scene.add(sky);
+
+      var geometry = new THREE.CylinderGeometry( 0.3, 0.3, 0.05, 32 );
+      var material = new THREE.MeshBasicMaterial({color: 0x808080});
+      scene.add(new THREE.Mesh(geometry, material));
+
+      scene.add(new THREE.ArrowHelper(new THREE.Vector3( 0, 0, 1 ), new THREE.Vector3( 0, 0.06, 0 ), 0.3, 0x4262f4));
+      scene.add(new THREE.ArrowHelper(new THREE.Vector3( 1, 0, 0 ), new THREE.Vector3( 0, 0.06, 0 ), 0.3, 0xdb3e00));
 
       let helper = new THREE.GridHelper(10, 10, 0xf7f7f7, 0xc4c4c4);
       scene.add(helper);
@@ -110,13 +125,12 @@ export default {
         time += delta;
 
         clients.forEach(client => {
-          if (client.orientation) {
+          if (client.orientation && client.model) {
             client.model.rotation.x = THREE.Math.degToRad(client.orientation.y);
             client.model.rotation.y = THREE.Math.degToRad(client.orientation.x);
             client.model.rotation.z = THREE.Math.degToRad(
               -client.orientation.z
             );
-            console.log(client.orientation)
           }
         });
 
@@ -135,7 +149,9 @@ export default {
 
     startDemo: function() {
       this.$data.pollSmartDevices = true;
-      this.updateSmartDevices();
+      UbiiClientService.isConnected().then(() => {
+        this.updateSmartDevices();
+      });
     },
 
     stopDemo: function() {
@@ -174,7 +190,8 @@ export default {
       let client = {
         topicOrientation: topic,
         orientation: null,
-        model: null
+        model: null,
+        rotationOffset: 0
       };
 
       // TODO: move this to another method
@@ -190,19 +207,28 @@ export default {
         objLoader.load("models/skeleton.obj", function(event) {
           let model = event.detail.loaderRootNode;
 
-          let radius = 0.5;
-          let height = 0.9;
-          let radians = THREE.Math.degToRad(180 - 30 * clients.size);
+         
+          let pivotPoint = new THREE.Object3D();
+          pivotPoint.add(model);
+           //model.position.set(new THREE.Vector3(0, -1, 0));
+          model.position.set(0, -0.5, 0);
+
+          let radius = 0.75;
+          let height = 1.8;
+          client.rotationOffset = 45 * (clients.size - 1);
+          let radians = THREE.Math.degToRad(180 - rotationOffset);
 
           // position client objects on a circle
-          model.position.set(
+          pivotPoint.position.set(
             radius * Math.sin(radians),
             height,
             radius * Math.cos(radians)
           );
 
-          scene.add(model);
-          client.model = model;
+          
+          scene.add(pivotPoint);
+          client.model = pivotPoint;
+          console.log("added model")
         });
       });
 
