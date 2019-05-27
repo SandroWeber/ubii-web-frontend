@@ -1,6 +1,11 @@
 <template>
   <div ref="top-div">
-    <fullscreen ref="fullscreen" @change="onFullScreenChange" style="overflow: hidden">
+    <fullscreen
+      ref="fullscreen"
+      class="fullscreen"
+      @change="onFullScreenChange"
+      style="overflow: hidden;"
+    >
       <div v-show="!ubiiClientService.isConnected">
         <span class="notification">Please connect to backend before starting the application.</span>
       </div>
@@ -214,7 +219,7 @@ export default {
 </script>
 
 <style scoped lang="stylus">
-.touch-area {
+.touch-area, .fullscreen {
   height: 100%;
 }
 
