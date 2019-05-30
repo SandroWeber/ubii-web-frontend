@@ -1,22 +1,18 @@
 <template>
-  <div class="full-height">
-    <div v-show="!ubiiClientService.isConnected">
-      <span class="notification">Please connect to backend before starting the application.</span>
-    </div>
-
-    <div v-show="ubiiClientService.isConnected" class="full-height">
-      <div id="savr-model-inspector-render-container" class="full-height"></div>
-    </div>
-  </div>
+  <UbiiClientContent :ubiiClientService="ubiiClientService">
+    <div id="savr-render-container" class="render-container"></div>
+  </UbiiClientContent>
 </template>
 
 <script>
+// Parent
+import UbiiClientContent from "../sharedModules/UbiiClientContent";
+import SAVRScene from "./SAVRScene";
+
 // Rendering
 import * as THREE from "three";
 import OBJLoader2 from "../sharedModules/OBJLoader2";
 import MTLLoader from "../sharedModules/MTLLoader";
-import WebVR from "../sharedModules/WebVR";
-import DefaultScene from "./modules/DefaultScene";
 
 // Networking
 import uuidv4 from "uuid/v4";
@@ -26,59 +22,17 @@ import { DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
 
 export default {
   name: "SAVRModelInspector",
-
-  mounted() {
-    this.init();
-    this.loadResources(); // runs async
-    this.connect();
-    this.startGameLoop();
-  },
+  extends: SAVRScene,
+  components: { UbiiClientContent },
 
   data() {
     return {
-      defaultScene: undefined,
-      camera: undefined,
-      renderer: undefined,
-      modelPrefab: undefined,
-      time: 0,
-      clock: new THREE.Clock(),
-      ubiiClientService: UbiiClientService,
-      clients: new Map(),
-      pollSmartDevices: false
+      modelPrefab: undefined
     };
   },
 
-  beforeDestroy: function() {
-    this.stopPolling();
-  },
-
   methods: {
-    init: function() {
-      let container = document.getElementById(
-        "savr-model-inspector-render-container"
-      );
-
-      this.scene = new THREE.Scene();
-
-      // setup default scene
-      this.defaultScene = new DefaultScene(
-        this.scene,
-        container.clientWidth / container.clientHeight
-      );
-      this.camera = this.defaultScene.camera;
-
-      // finialize: create renderer
-      this.renderer = new THREE.WebGLRenderer({
-        antialias: true,
-        autoClear: false
-      });
-      this.renderer.setSize(container.clientWidth, container.clientHeight);
-      container.appendChild(this.renderer.domElement);
-
-      container.appendChild(WebVR.createButton(this.renderer));
-    },
-
-    // load resources asynchronously
+    // load resources asynchronously, called by parent
     loadResources: function() {
       const ctx = this;
 
@@ -189,22 +143,7 @@ export default {
       };
     },
 
-    // handles initialization of and in the render loop
-    startGameLoop: function() {
-      const ctx = this;
-
-      this.renderer.setAnimationLoop(function() {
-        let delta = ctx.clock.getDelta();
-        ctx.time += delta;
-
-        ctx.gameLoop(delta);
-
-        ctx.renderer.clear();
-        ctx.renderer.render(ctx.scene, ctx.camera);
-      });
-    },
-
-    // this is the main game loop
+    // this is the main game loop, called by parent
     /* eslint-disable-next-line no-unused-vars */
     gameLoop: function(deltaTime) {
       this.clients.forEach(client => {
@@ -216,21 +155,7 @@ export default {
       });
     },
 
-    connect: function() {
-      window.addEventListener("beforeunload", () => {
-        this.stopPolling(); // unsubscribe before page is unloaded
-      });
-
-      this.pollSmartDevices = true;
-      UbiiClientService.isConnected().then(() => {
-        this.updateSmartDevices();
-      });
-    },
-
-    stopPolling: function() {
-      this.pollSmartDevices = false;
-    },
-
+    // called by parent
     updateSmartDevices: function() {
       UbiiClientService.client
         .callService({ topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST })
@@ -285,6 +210,7 @@ export default {
         .then(() => {
           // subscribe the topic
           UbiiClientService.client.subscribe(specs.topic, orientation => {
+            console.log(orientation);
             client.orientation = orientation;
           });
 
@@ -329,13 +255,3 @@ export default {
   }
 };
 </script>
-
-<style scoped lang="stylus">
-.render-container {
-  height: 100%;
-}
-
-.notification {
-  color: red;
-}
-</style>

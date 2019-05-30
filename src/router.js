@@ -87,6 +87,10 @@ export default new Router({
       path: '/applications/smartphone-assisted-vr/savr-model-inspector',
       name: 'Inspect a 3D Model',
       component: () => import('./components/applications/smartphoneAssistedVR/SAVRModelInspector.vue')
+    }, {
+      path: '/applications/smartphone-assisted-vr/savr-laser-pointer',
+      name: 'Select elements',
+      component: () => import('./components/applications/smartphoneAssistedVR/SAVRLaserPointer.vue')
     }
   ]
 })
