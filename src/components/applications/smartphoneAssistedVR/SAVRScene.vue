@@ -60,6 +60,7 @@ export default {
       container.appendChild(this.renderer.domElement);
 
       container.appendChild(WebVR.createButton(this.renderer));
+      this.renderer.vr.enabled = true;
     },
     // handles initialization of and in the render loop
     startGameLoop: function() {

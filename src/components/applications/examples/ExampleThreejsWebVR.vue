@@ -48,6 +48,7 @@ export default {
       container.appendChild(this.renderer.domElement);
 
       container.appendChild(WebVR.createButton(this.renderer));
+      this.renderer.vr.enabled = true;
     },
     animate: function() {
       const renderer = this.renderer;
