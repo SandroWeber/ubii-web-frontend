@@ -17,7 +17,6 @@ import MTLLoader from "../sharedModules/MTLLoader";
 // Networking
 import uuidv4 from "uuid/v4";
 import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
-import ProtobufLibrary from "@tum-far/ubii-msg-formats/dist/js/protobuf";
 import { DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
 
 export default {
@@ -67,23 +66,6 @@ export default {
         topic: clientID + "/" + deviceName + "/orientation"
       };
 
-      let ubiiDevice = {
-        name: deviceName,
-        deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
-        components: [
-          {
-            topic: orientationInput.topic,
-            messageFormat: orientationInput.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
-          },
-          {
-            topic: orientationOutput.topic,
-            messageFormat: orientationOutput.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
-          }
-        ]
-      };
-
       /* eslint-disable-next-line */
       let processingCallback = (input, output) => {
         /* eslint-disable */
@@ -91,7 +73,7 @@ export default {
           return;
         }
 
-        output.orientationIn = input.orientationOut;
+        output.orientationOut = input.orientationIn;
         console.log("inp:" + JSON.stringify(input));
       };
 
@@ -138,7 +120,6 @@ export default {
       };
 
       return {
-        device: ubiiDevice,
         session: ubiiSession,
         topic: orientationOutput.topic
       };
@@ -204,22 +185,18 @@ export default {
       let specs = this.createUbiiSpecs(clientID, topic);
       client.session = specs.session;
 
-      UbiiClientService.registerDevice(specs.device)
-        .then(device => {
-          return device;
+      // start our session (registering not necessary as we do not want to save it permanently)
+      UbiiClientService.client
+        .callService({
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+          session: client.session
         })
         .then(() => {
           // subscribe the topic
-          UbiiClientService.client.subscribe(specs.topic, orientation => {
-            console.log(orientation);
-            client.orientation = orientation;
-          });
-
-          // start our session (registering not necessary as we do not want to save it permanently)
           UbiiClientService.client
-            .callService({
-              topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
-              session: client.session
+            .subscribe(specs.topic, orientation => {
+              console.log(orientation);
+              client.orientation = orientation;
             })
             .then(() => {
               checkForPrefab();
