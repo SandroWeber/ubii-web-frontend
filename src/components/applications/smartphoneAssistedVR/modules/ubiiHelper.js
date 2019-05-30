@@ -3,14 +3,14 @@ import uuidv4 from "uuid/v4";
 
 function createUbiiSpecs(name, inputs, outputs, callback) {
 
-  let filterTopics = function (x) {
+  const filterTopics = function (x) {
     return {
       internalName: x.internalName,
       messageFormat: x.messageFormat
     };
   };
 
-  let interaction = {
+  const interaction = {
     id: uuidv4(),
     name: name,
     processingCallback: callback.toString(),
@@ -18,7 +18,7 @@ function createUbiiSpecs(name, inputs, outputs, callback) {
     outputFormats: outputs.map(filterTopics)
   };
 
-  let createMappingInp = function (x) {
+  const createMappingInp = function (x) {
     return {
       interactionId: interaction.id,
       interactionInput: {
@@ -29,7 +29,7 @@ function createUbiiSpecs(name, inputs, outputs, callback) {
     };
   };
 
-  let createMappingOut = function (x) {
+  const createMappingOut = function (x) {
     return {
       interactionId: interaction.id,
       interactionOutput: {
@@ -40,7 +40,7 @@ function createUbiiSpecs(name, inputs, outputs, callback) {
     };
   };
 
-  let session = {
+  const session = {
     id: uuidv4(),
     name: name,
     interactions: [interaction],

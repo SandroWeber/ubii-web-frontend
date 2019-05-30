@@ -26,20 +26,22 @@ export default {
 
   data() {
     return {
-      modelPrefab: undefined
+      modelPrefab: undefined,
+      gidCounter: 0,
+      clients: new Map()
     };
   },
 
   methods: {
     // load resources asynchronously, called by parent
-    loadResources: function() {
+    onStart: function() {
       const ctx = this;
 
       // load skeleton model and materials
       new MTLLoader().load("models/skeleton.mtl", function(materials) {
         materials.preload();
 
-        let objLoader = new OBJLoader2();
+        const objLoader = new OBJLoader2();
         objLoader.setLogging(false, false);
         objLoader.setMaterials(materials);
         objLoader.load("models/skeleton.obj", function(event) {
@@ -50,31 +52,40 @@ export default {
 
     // create specifications for the protobuf messages
     createUbiiSpecs: function(clientID, clientTopic) {
-      let deviceName = this.$options.name; // get name property of current view
+      const deviceName = this.$options.name; // get name property of current view
 
-      let orientationInput = {
-        internalName: "orientationIn",
+      const orientationInput = {
+        internalName: "orientation",
         messageFormat: "vector3",
         topic: clientTopic // e.g. 08d58eb6-7b51-4bae-908b-b737cde85429/web-interface-smart-device/orientation
       };
 
-      let orientationOutput = {
-        internalName: "orientationOut",
+      const orientationOutput = {
+        internalName: "orientation",
         messageFormat: "vector3",
         topic: clientID + "/" + deviceName + "/orientation"
       };
 
       /* eslint-disable-next-line */
-      let processingCallback = (input, output) => {
+      const processingCallback = (input, output) => {
         /* eslint-disable */
         if (!input) {
           return;
         }
 
-        output.orientationOut = input.orientationIn;
+        const halfPI = Math.PI / 180;
+        const deg2Rad = function(x) {
+          return x * halfPI;
+        };
+
+        output.orientation = {
+          x: deg2Rad(input.orientation.y),
+          y: deg2Rad(input.orientation.x),
+          z: deg2Rad(-input.orientation.z)
+        };
       };
 
-      let specs = createUbiiSpecs(
+      const specs = createUbiiSpecs(
         deviceName,
         [orientationInput],
         [orientationOutput],
@@ -90,12 +101,12 @@ export default {
 
     // this is the main game loop, called by parent
     /* eslint-disable-next-line no-unused-vars */
-    gameLoop: function(deltaTime) {
+    updateGameLoop: function(deltaTime) {
       this.clients.forEach(client => {
         if (client.orientation && client.model) {
-          client.model.rotation.x = THREE.Math.degToRad(client.orientation.y);
-          client.model.rotation.y = THREE.Math.degToRad(client.orientation.x);
-          client.model.rotation.z = THREE.Math.degToRad(-client.orientation.z);
+          client.model.rotation.x = client.orientation.x;
+          client.model.rotation.y = client.orientation.y;
+          client.model.rotation.z = client.orientation.z;
         }
       });
     },
@@ -108,12 +119,12 @@ export default {
           this.$data.topicList = reply.stringList.list;
 
           this.$data.topicList.forEach(topic => {
-            let topicIndex = topic.indexOf(
+            const topicIndex = topic.indexOf(
               "/web-interface-smart-device/orientation"
             );
 
             if (topicIndex !== -1) {
-              let clientID = topic.substring(0, topicIndex);
+              const clientID = topic.substring(0, topicIndex);
 
               if (!this.$data.clients.has(clientID)) {
                 this.addClient(clientID, topic);
@@ -121,32 +132,30 @@ export default {
             }
           });
         });
-
-      if (this.pollSmartDevices) {
-        setTimeout(this.updateSmartDevices, 1000);
-      }
     },
 
     addClient: function(clientID, topic) {
       // client object
       const client = {
-        orientation: null,
-        model: null,
-        session: null
+        orientation: undefined,
+        model: undefined,
+        session: undefined,
+        topic: undefined,
+        gid: this.gidCounter++
       };
 
       // check if model is loaded
-      const ctx = this;
-      let checkForPrefab = () => {
+      const checkForPrefab = () => {
         if (this.modelPrefab) {
-          client.model = ctx.createClientModel(client);
+          client.model = this.createClientModel(client);
         } else {
           setTimeout(checkForPrefab, 250);
         }
       };
 
-      let specs = this.createUbiiSpecs(clientID, topic);
+      const specs = this.createUbiiSpecs(clientID, topic);
       client.session = specs.session;
+      client.topic = specs.topic;
 
       // start our session (registering not necessary as we do not want to save it permanently)
       UbiiClientService.client
@@ -167,19 +176,21 @@ export default {
 
       // create the client
       this.clients.set(clientID, client);
+
+      console.log("add client " + clientID);
     },
 
-    createClientModel: function() {
-      let model = this.modelPrefab.clone();
+    createClientModel: function(client) {
+      const model = this.modelPrefab.clone();
 
-      let pivotPoint = new THREE.Object3D();
+      const pivotPoint = new THREE.Object3D();
       pivotPoint.add(model);
       model.position.set(0, -0.5, 0);
 
-      let radius = 0.75;
-      let height = 1.2;
-      let rotationOffset = 45 * (this.clients.size - 1);
-      let radians = THREE.Math.degToRad(180 - rotationOffset);
+      const radius = 0.75;
+      const height = 1.2;
+      const rotationOffset = 45 * (client.gid - 1);
+      const radians = THREE.Math.degToRad(180 - rotationOffset);
 
       // position client objects on a circle
       pivotPoint.position.set(
@@ -190,6 +201,18 @@ export default {
 
       this.scene.add(pivotPoint);
       return pivotPoint;
+    },
+
+    onExit: function() {
+      // unsubscribe and stop all sessions
+      this.clients.forEach((v, k) => {
+        UbiiClientService.client.unsubscribe(v.topic);
+
+        UbiiClientService.client.callService({
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+          session: v.session
+        });
+      });
     }
   }
 };

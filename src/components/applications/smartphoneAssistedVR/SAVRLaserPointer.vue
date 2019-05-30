@@ -14,10 +14,11 @@ export default {
   components: { UbiiClientContent },
 
   methods: {
-    loadResources: function() {},
+    onStart: function() {},
     /* eslint-disable-next-line no-unused-vars */
-    gameLoop: function(delta) {},
-    updateSmartDevices: function() {}
+    updateGameLoop: function(delta) {},
+    updateSmartDevices: function() {},
+    onExit: function() {}
   }
 };
 </script>

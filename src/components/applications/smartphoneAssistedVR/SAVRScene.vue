@@ -15,8 +15,9 @@ export default {
   name: "SAVRScene",
 
   mounted() {
+    this.addEventListeners();
     this.initScene();
-    this.loadResources(); // defined in children
+    this.onStart(); // defined in children
     this.connect();
     this.startGameLoop();
   },
@@ -28,16 +29,21 @@ export default {
       time: 0,
       clock: new THREE.Clock(),
       ubiiClientService: UbiiClientService,
-      clients: new Map(),
       pollSmartDevices: false
     };
   },
 
   beforeDestroy: function() {
-    this.stopPolling();
+    this.onExit();
   },
 
   methods: {
+    addEventListeners: function() {
+      window.addEventListener("beforeunload", () => {
+        this.onExit();
+      });
+    },
+
     // RENDERING
     initScene: function() {
       let container = document.getElementById("savr-render-container");
@@ -70,7 +76,7 @@ export default {
         let delta = ctx.clock.getDelta();
         ctx.time += delta;
 
-        ctx.gameLoop(delta); // defined in children
+        ctx.updateGameLoop(delta); // defined in children
 
         ctx.renderer.clear();
         ctx.renderer.render(ctx.scene, ctx.camera);
@@ -79,17 +85,20 @@ export default {
 
     // UBI INTERACT
     connect: function() {
-      window.addEventListener("beforeunload", () => {
-        this.stopPolling(); // unsubscribe before page is unloaded
-      });
-
       this.pollSmartDevices = true;
+
       UbiiClientService.isConnected().then(() => {
-        this.updateSmartDevices();
+        const loop = () => {
+          if (this.pollSmartDevices) {
+            this.updateSmartDevices();
+            setTimeout(loop, 1000);
+          }
+        };
+        loop();
       });
     },
 
-    stopPolling: function() {
+    onExit: function() {
       this.pollSmartDevices = false;
     }
   }

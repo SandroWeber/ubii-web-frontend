@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 
-var shader = {
+const shader = {
 
 	uniforms: {
 		"skyExp": {
@@ -64,7 +64,7 @@ var shader = {
 function Sky() {
 	this.name = "Sky";
 
-	let material = new THREE.ShaderMaterial({
+	const material = new THREE.ShaderMaterial({
 		vertexShader: shader.vertexShader,
 		fragmentShader: shader.fragmentShader,
 		uniforms: shader.uniforms,
