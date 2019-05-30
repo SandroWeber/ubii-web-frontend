@@ -304,29 +304,25 @@ export default {
         y: event.offsetY / boundingRect.height
       };
 
-      this.$data.clientMousePosition = relativeMousePosition;
-      // publish our normalized client mouse position
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.inputClientPointer.topic,
-        "vector2",
-        this.$data.clientMousePosition
-      );
-    },
-    onTouchStart: function(event) {
-      this.$data.clientPointerInside = true;
-      this.onTouchMove(event);
-    },
-    onTouchMove: function(event) {
-      // calculate the current touch position, normalized to the bounds of the interactive area ([0;1], [0;1])
-      let relativeMousePosition = {
-        x:
-          (event.touches[0].clientX - event.target.offsetLeft) /
-          event.target.offsetWidth,
-        y:
-          (event.touches[0].clientY - event.target.offsetTop) /
-          event.target.offsetHeight
-      };
+        this.$data.clientMousePosition = relativeMousePosition;
+        // publish our normalized client mouse position
+        UbiiClientService.client.publish(
+          this.$data.ubiiDevice.name,
+          this.$data.inputClientPointer.topic,
+          'vector2',
+          this.$data.clientMousePosition
+        );
+      },
+      onTouchStart: function (event) {
+        this.$data.clientPointerInside = true;
+        this.onTouchMove(event);
+      },
+      onTouchMove: function (event) {
+        // calculate the current touch position, normalized to the bounds of the interactive area ([0;1], [0;1])
+        let relativeMousePosition = {
+          x: (event.touches[0].clientX - event.target.offsetLeft) / event.target.offsetWidth,
+          y: (event.touches[0].clientY - event.target.offsetTop) / event.target.offsetHeight
+        };
 
       if (
         relativeMousePosition.x < 0 ||
@@ -383,10 +379,9 @@ export default {
   background-color: red;
 }
 
-.start-example {
-  text-align: center;
-  margin-top: 25px;
-}
+    .start-example
+        text-align: center
+        margin-top: 25px;
 
 .start-example-button {
   width: 50px;
