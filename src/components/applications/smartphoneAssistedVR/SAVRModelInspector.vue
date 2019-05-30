@@ -52,8 +52,6 @@ export default {
     createUbiiSpecs: function(clientID, clientTopic) {
       let deviceName = this.$options.name; // get name property of current view
 
-      console.log("topic: " + clientTopic);
-
       let orientationInput = {
         internalName: "orientationIn",
         messageFormat: "vector3",
@@ -74,7 +72,6 @@ export default {
         }
 
         output.orientationOut = input.orientationIn;
-        console.log("inp:" + JSON.stringify(input));
       };
 
       let ubiiInteraction = {
@@ -195,7 +192,6 @@ export default {
           // subscribe the topic
           UbiiClientService.client
             .subscribe(specs.topic, orientation => {
-              console.log(orientation);
               client.orientation = orientation;
             })
             .then(() => {
@@ -212,7 +208,6 @@ export default {
 
       let pivotPoint = new THREE.Object3D();
       pivotPoint.add(model);
-      //model.position.set(new THREE.Vector3(0, -1, 0));
       model.position.set(0, -0.5, 0);
 
       let radius = 0.75;
