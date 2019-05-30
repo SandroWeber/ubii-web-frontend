@@ -255,3 +255,9 @@ export default {
   }
 };
 </script>
+
+<style scoped lang="stylus">
+.render-container {
+  height: 100%;
+}
+</style>
