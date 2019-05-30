@@ -19,8 +19,10 @@ import WebVR from "../sharedModules/WebVR";
 import DefaultScene from "./modules/DefaultScene";
 
 // Networking
-import { DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
+import uuidv4 from "uuid/v4";
 import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
+import ProtobufLibrary from "@tum-far/ubii-msg-formats/dist/js/protobuf";
+import { DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
 
 export default {
   name: "SAVRModelInspector",
@@ -74,12 +76,11 @@ export default {
       container.appendChild(this.renderer.domElement);
 
       container.appendChild(WebVR.createButton(this.renderer));
-      this.renderer.vr.enabled = true;
     },
 
     // load resources asynchronously
     loadResources: function() {
-      let ctx = this;
+      const ctx = this;
 
       // load skeleton model and materials
       new MTLLoader().load("models/skeleton.mtl", function(materials) {
@@ -94,9 +95,103 @@ export default {
       });
     },
 
+    // create specifications for the protobuf messages
+    createUbiiSpecs: function(clientID, clientTopic) {
+      let deviceName = this.$options.name; // get name property of current view
+
+      let orientationInput = {
+        internalName: "orientationIn",
+        messageFormat: "ubii.dataStructure.Vector3",
+        topic: clientTopic
+      };
+
+      let orientationOutput = {
+        internalName: "orientationOut",
+        messageFormat: "ubii.dataStructure.Vector3",
+        topic: clientID + "/" + deviceName + "/orientation"
+      };
+
+      let ubiiDevice = {
+        name: deviceName,
+        deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
+        components: [
+          {
+            topic: orientationInput.topic,
+            messageFormat: orientationInput.messageFormat,
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+          },
+          {
+            topic: orientationOutput.topic,
+            messageFormat: orientationOutput.messageFormat,
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+          }
+        ]
+      };
+
+      /* eslint-disable-next-line */
+      let processingCallback = (input, output) => {
+        /* eslint-disable */
+        if (!input) {
+          return;
+        }
+
+        //output.orientation = input.orientation;
+        output = input;
+        console.log(input);
+      };
+
+      let ubiiInteraction = {
+        id: uuidv4(),
+        name: deviceName,
+        processingCallback: processingCallback.toString(),
+        inputFormats: [
+          {
+            internalName: orientationInput.internalName,
+            messageFormat: orientationInput.messageFormat
+          }
+        ],
+        outputFormats: [
+          {
+            internalName: orientationOutput.internalName,
+            messageFormat: orientationOutput.messageFormat
+          }
+        ]
+      };
+
+      let ubiiSession = {
+        id: uuidv4(),
+        name: deviceName,
+        interactions: [ubiiInteraction],
+        ioMappings: [
+          {
+            interactionId: ubiiInteraction.id,
+            interactionInput: {
+              internalName: orientationInput.internalName,
+              messageFormat: orientationInput.messageFormat
+            },
+            topic: orientationInput.topic
+          },
+          {
+            interactionId: ubiiInteraction.id,
+            interactionOutput: {
+              internalName: orientationOutput.internalName,
+              messageFormat: orientationOutput.messageFormat
+            },
+            topic: orientationOutput.topic
+          }
+        ]
+      };
+
+      return {
+        device: ubiiDevice,
+        session: ubiiSession,
+        topic: orientationOutput.topic
+      };
+    },
+
     // handles initialization of and in the render loop
     startGameLoop: function() {
-      let ctx = this;
+      const ctx = this;
 
       this.renderer.setAnimationLoop(function() {
         let delta = ctx.clock.getDelta();
@@ -164,33 +259,48 @@ export default {
 
     addClient: function(clientID, topic) {
       // client object
-      let client = {
-        topicOrientation: topic,
+      const client = {
         orientation: null,
-        model: null
+        model: null,
+        session: null
       };
 
-      // check if model loaded
-      let ctx = this;
-      var checkForPrefab = () => {
+      // check if model is loaded
+      const ctx = this;
+      let checkForPrefab = () => {
         if (this.modelPrefab) {
           client.model = ctx.createClientModel(client);
         } else {
           setTimeout(checkForPrefab, 250);
         }
       };
-      checkForPrefab();
+
+      let specs = this.createUbiiSpecs(clientID, topic);
+      client.session = specs.session;
+
+      UbiiClientService.registerDevice(specs.device)
+        .then(device => {
+          return device;
+        })
+        .then(() => {
+          // subscribe the topic
+          UbiiClientService.client.subscribe(specs.topic, orientation => {
+            client.orientation = orientation;
+          });
+
+          // start our session (registering not necessary as we do not want to save it permanently)
+          UbiiClientService.client
+            .callService({
+              topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+              session: client.session
+            })
+            .then(() => {
+              checkForPrefab();
+            });
+        });
 
       // create the client
       this.clients.set(clientID, client);
-
-      // subscribe the topic
-      UbiiClientService.client.subscribe(
-        client.topicOrientation,
-        orientation => {
-          client.orientation = orientation;
-        }
-      );
     },
 
     createClientModel: function() {
@@ -202,7 +312,7 @@ export default {
       model.position.set(0, -0.5, 0);
 
       let radius = 0.75;
-      let height = 1.8;
+      let height = 1.2;
       let rotationOffset = 45 * (this.clients.size - 1);
       let radians = THREE.Math.degToRad(180 - rotationOffset);
 
@@ -223,5 +333,9 @@ export default {
 <style scoped lang="stylus">
 .render-container {
   height: 100%;
+}
+
+.notification {
+  color: red;
 }
 </style>
