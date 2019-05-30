@@ -53,15 +53,17 @@ export default {
     createUbiiSpecs: function(clientID, clientTopic) {
       let deviceName = this.$options.name; // get name property of current view
 
+      console.log("topic: " + clientTopic);
+
       let orientationInput = {
         internalName: "orientationIn",
-        messageFormat: "ubii.dataStructure.Vector3",
-        topic: clientTopic
+        messageFormat: "vector3",
+        topic: clientTopic // e.g. 08d58eb6-7b51-4bae-908b-b737cde85429/web-interface-smart-device/orientation
       };
 
       let orientationOutput = {
         internalName: "orientationOut",
-        messageFormat: "ubii.dataStructure.Vector3",
+        messageFormat: "vector3",
         topic: clientID + "/" + deviceName + "/orientation"
       };
 
@@ -89,9 +91,8 @@ export default {
           return;
         }
 
-        //output.orientation = input.orientation;
-        output = input;
-        console.log(input);
+        output.orientationIn = input.orientationOut;
+        console.log("inp:" + JSON.stringify(input));
       };
 
       let ubiiInteraction = {
