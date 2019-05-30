@@ -15,9 +15,9 @@ import OBJLoader2 from "../sharedModules/OBJLoader2";
 import MTLLoader from "../sharedModules/MTLLoader";
 
 // Networking
-import uuidv4 from "uuid/v4";
 import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
 import { DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
+import { createUbiiSpecs } from "./modules/ubiiHelper";
 
 export default {
   name: "SAVRModelInspector",
@@ -74,50 +74,16 @@ export default {
         output.orientationOut = input.orientationIn;
       };
 
-      let ubiiInteraction = {
-        id: uuidv4(),
-        name: deviceName,
-        processingCallback: processingCallback.toString(),
-        inputFormats: [
-          {
-            internalName: orientationInput.internalName,
-            messageFormat: orientationInput.messageFormat
-          }
-        ],
-        outputFormats: [
-          {
-            internalName: orientationOutput.internalName,
-            messageFormat: orientationOutput.messageFormat
-          }
-        ]
-      };
-
-      let ubiiSession = {
-        id: uuidv4(),
-        name: deviceName,
-        interactions: [ubiiInteraction],
-        ioMappings: [
-          {
-            interactionId: ubiiInteraction.id,
-            interactionInput: {
-              internalName: orientationInput.internalName,
-              messageFormat: orientationInput.messageFormat
-            },
-            topic: orientationInput.topic
-          },
-          {
-            interactionId: ubiiInteraction.id,
-            interactionOutput: {
-              internalName: orientationOutput.internalName,
-              messageFormat: orientationOutput.messageFormat
-            },
-            topic: orientationOutput.topic
-          }
-        ]
-      };
+      let specs = createUbiiSpecs(
+        deviceName,
+        [orientationInput],
+        [orientationOutput],
+        processingCallback
+      );
 
       return {
-        session: ubiiSession,
+        session: specs.session,
+        interaction: specs.interaction,
         topic: orientationOutput.topic
       };
     },
