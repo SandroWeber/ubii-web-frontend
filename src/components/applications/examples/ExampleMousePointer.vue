@@ -285,6 +285,8 @@ export default {
         });
     },
     stopExample: function() {
+      if (!this.$data.exampleStarted) return;
+
       // unsubscribe and stop session
       UbiiClientService.client.unsubscribe(
         this.$data.outputServerPointer.topic
@@ -372,10 +374,6 @@ export default {
 
 .hideCursor {
   cursor: none;
-}
-
-.notification {
-  color: red;
 }
 
 .server-mouse-position-indicator {
