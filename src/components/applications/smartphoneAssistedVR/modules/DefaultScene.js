@@ -48,7 +48,8 @@ function addBase(scene) {
     let group = new THREE.Group();
     group.name = "Base";
 
-    let geometry = new THREE.CylinderGeometry(0.3, 0.3, 0.05, 32);
+    let radius = 0.75;
+    let geometry = new THREE.CylinderGeometry(radius, radius, 0.05, 32);
     let material = new THREE.MeshBasicMaterial({
         color: 0x808080
     });
