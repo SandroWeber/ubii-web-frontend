@@ -7,7 +7,9 @@ function loadObj(path, callback) {
   objLoader.loadMtl(path + ".mtl", null, function (materials) {
     objLoader.setMaterials(materials);
     objLoader.load(path + ".obj", function (event) {
-      callback(event.detail.loaderRootNode);
+      let model = event.detail.loaderRootNode;
+      model.name = path;
+      callback(model);
     });
   });
 }
