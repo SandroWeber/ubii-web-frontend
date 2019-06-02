@@ -9,8 +9,10 @@ import UbiiClientContent from "../sharedModules/UbiiClientContent";
 import SAVRScene from "./SAVRScene";
 
 // Rendering
+/* eslint-disable-next-line no-unused-vars */
 import * as THREE from "three";
 import { loadObj } from "./modules/threeHelper";
+import { Vector3 } from "three";
 
 export default {
   name: "SAVRLaserPointer",
@@ -19,7 +21,7 @@ export default {
 
   data() {
     return {
-      modelPrefab: undefined
+      model: undefined
     };
   },
 
@@ -28,14 +30,23 @@ export default {
       const ctx = this;
 
       loadObj("models/smartphone", model => {
-        ctx.modelPrefab = model;
-        ctx.modelPrefab.position.set(0, 1.6, -0.75);
-        ctx.modelPrefab.scale.set(3, 3, 3);
-        ctx.scene.add(ctx.modelPrefab);
+        model.scale.set(3, 3, 3);
+        ctx.scene.add(model);
+        ctx.model = model;
       });
     },
     /* eslint-disable-next-line no-unused-vars */
-    updateGameLoop: function(delta) {},
+    updateGameLoop: function(delta) {
+      if (this.model && this.camera) {
+        let camPos = this.camera.position;
+        let viewDir = new THREE.Vector3(0, 0, -1);
+        viewDir.applyQuaternion(this.camera.quaternion);
+        viewDir.y = 0;
+        this.model.position = new THREE.Vector3(camPos.x, 1.2, camPos.z).add(
+          viewDir
+        );
+      }
+    },
     updateSmartDevices: function() {},
     onExit: function() {}
   }

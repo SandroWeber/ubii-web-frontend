@@ -24,6 +24,7 @@ export default {
 
   data() {
     return {
+      scene: undefined,
       camera: undefined,
       renderer: undefined,
       time: 0,
