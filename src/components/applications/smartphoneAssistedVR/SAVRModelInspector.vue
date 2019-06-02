@@ -11,8 +11,7 @@ import SAVRScene from "./SAVRScene";
 
 // Rendering
 import * as THREE from "three";
-import OBJLoader2 from "../sharedModules/OBJLoader2";
-import MTLLoader from "../sharedModules/MTLLoader";
+import { loadObj } from "./modules/threeHelper";
 
 // Networking
 import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
@@ -37,16 +36,8 @@ export default {
     onStart: function() {
       const ctx = this;
 
-      // load skeleton model and materials
-      new MTLLoader().load("models/skeleton.mtl", function(materials) {
-        materials.preload();
-
-        const objLoader = new OBJLoader2();
-        objLoader.setLogging(false, false);
-        objLoader.setMaterials(materials);
-        objLoader.load("models/skeleton.obj", function(event) {
-          ctx.modelPrefab = event.detail.loaderRootNode;
-        });
+      loadObj("models/skeleton", model => {
+        ctx.modelPrefab = model;
       });
     },
 
