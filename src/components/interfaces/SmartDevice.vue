@@ -10,6 +10,8 @@
         <span class="notification">Please connect to backend before starting the application.</span>
       </div>
 
+      <span v-show="clientId">Client ID: {{clientId}}</span>
+
       <button @click="toggleFullScreen()">Fullscreen Mode</button>
 
       <div
@@ -80,6 +82,7 @@ export default {
   data: () => {
     return {
       ubiiClientService: UbiiClientService,
+      clientId: undefined,
       touches: undefined,
       deviceOrientation: undefined,
       deviceMotion: undefined,
@@ -90,7 +93,8 @@ export default {
     createUbiiSpecs: function() {
       let deviceName = "web-interface-smart-device";
 
-      let topicPrefix = UbiiClientService.getClientID() + "/" + deviceName;
+      this.clientId = UbiiClientService.getClientID();
+      let topicPrefix = this.clientId + "/" + deviceName;
 
       let ubiiDevice = {
         name: deviceName,
