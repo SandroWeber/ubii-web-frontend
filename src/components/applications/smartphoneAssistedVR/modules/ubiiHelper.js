@@ -1,5 +1,8 @@
 import uuidv4 from "uuid/v4";
-
+import UbiiClientService from "../../../../services/ubiiClient/ubiiClientService";
+import {
+  DEFAULT_TOPICS
+} from "@tum-far/ubii-msg-formats";
 
 function createUbiiSpecs(name, inputs, outputs, callback) {
 
@@ -54,6 +57,30 @@ function createUbiiSpecs(name, inputs, outputs, callback) {
 
 }
 
+function subscribe(specs, callback) {
+  // start our session (registering not necessary as we do not want to save it permanently)
+  UbiiClientService.client
+    .callService({
+      topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+      session: specs.session
+    })
+    .then(() => {
+      // subscribe the topic
+      UbiiClientService.client.subscribe(specs.topic, callback);
+    });
+}
+
+function unsubscribe(specs) {
+  UbiiClientService.client.unsubscribe(specs.topic);
+
+  UbiiClientService.client.callService({
+    topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+    session: specs.session
+  });
+}
+
 export {
-  createUbiiSpecs
+  createUbiiSpecs,
+  subscribe,
+  unsubscribe
 };

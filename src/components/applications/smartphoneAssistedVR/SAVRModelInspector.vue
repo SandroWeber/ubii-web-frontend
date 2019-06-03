@@ -42,7 +42,7 @@ export default {
     },
 
     // create specifications for the protobuf messages
-    createUbiiSpecs: function(clientID, clientTopic) {
+    createOrientationSpecs: function(clientID, clientTopic) {
       const deviceName = this.$options.name; // get name property of current view
 
       const orientationInput = {
@@ -144,7 +144,7 @@ export default {
         }
       };
 
-      const specs = this.createUbiiSpecs(clientID, topic);
+      const specs = this.createOrientationSpecs(clientID, topic);
       client.session = specs.session;
       client.topic = specs.topic;
 
