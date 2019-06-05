@@ -57,7 +57,10 @@ function createUbiiSpecs(name, inputs, outputs, callback) {
 
 }
 
-function subscribe(specs, callback) {
+function subscribeSpecs(specs, callback) {
+  // eslint-disable-next-line no-console
+  console.log("subscribed to " + specs.topic);
+
   // start our session (registering not necessary as we do not want to save it permanently)
   UbiiClientService.client
     .callService({
@@ -70,7 +73,10 @@ function subscribe(specs, callback) {
     });
 }
 
-function unsubscribe(specs) {
+function unsubscribeSpecs(specs) {
+  // eslint-disable-next-line no-console
+  console.log("unsubscribed to " + specs.topic);
+
   UbiiClientService.client.unsubscribe(specs.topic);
 
   UbiiClientService.client.callService({
@@ -79,8 +85,34 @@ function unsubscribe(specs) {
   });
 }
 
+function subscribe(topic, callback) {
+  // eslint-disable-next-line no-console
+  console.log("subscribed to " + topic);
+
+  // subscribe the topic
+  UbiiClientService.client.subscribe(topic, callback);
+}
+
+
+function unsubscribe(topics, sessions) {
+  topics.forEach((topic) => {
+    // eslint-disable-next-line no-console
+    console.log("unsubscribed to " + topic);
+
+    UbiiClientService.client.unsubscribe(topic);
+  });
+  sessions.forEach((session) => {
+    UbiiClientService.client.callService({
+      topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+      session: session
+    });
+  });
+}
+
 export {
   createUbiiSpecs,
+  subscribeSpecs,
+  unsubscribeSpecs,
   subscribe,
   unsubscribe
 };
