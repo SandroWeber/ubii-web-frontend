@@ -114,15 +114,21 @@ export default {
             topic: topicPrefix + "/linear_acceleration",
             messageFormat: "ubii.dataStructure.Vector3",
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+          },
+          {
+            topic: topicPrefix + "/touch_events",
+            messageFormat: "ubii.dataStructure.TouchEvent",
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
           }
         ]
       };
 
       this.$data.deviceName = deviceName;
       this.$data.ubiiDevice = ubiiDevice;
-      this.$data.componentTouch = ubiiDevice.components[0];
+      this.$data.componentTouchPosition = ubiiDevice.components[0];
       this.$data.componentOrientation = ubiiDevice.components[1];
       this.$data.componentLinearAcceleration = ubiiDevice.components[2];
+      this.$data.componentTouchEvents = ubiiDevice.components[3];
     },
     startInterface: function() {
       // register the mouse pointer device
@@ -145,17 +151,26 @@ export default {
     onTouchStart: function(event) {
       this.$data.touches = event.touches;
 
-      this.publishNormalizedTouch(event, 0);
+      let position = this.normalizeCoordinates(event, 0);
+      this.publishTouchPosition(position);
+      this.publishTouchEvent(
+        ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN,
+        position
+      );
     },
     onTouchMove: function(event) {
       this.$data.touches = event.touches;
 
-      this.publishNormalizedTouch(event, 0);
+      let position = this.normalizeCoordinates(event, 0);
+      this.publishTouchPosition(position);
     },
     onTouchEnd: function(event) {
       this.$data.touches = event.touches;
 
-      this.publishNormalizedTouch(event, 0);
+      this.publishTouchEvent(
+        ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP,
+        null
+      );
     },
     onDeviceOrientation: function(event) {
       // https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent
@@ -190,30 +205,39 @@ export default {
     round: function(value, digits) {
       return Math.round(value * digits * 10) / (digits * 10);
     },
-    publishTouch: function(index, x, y) {
+    normalizeCoordinates: function(event, touchIndex) {
+      let target = event.target;
+
+      let touchPosition = {
+        x: event.touches[touchIndex].clientX,
+        y: event.touches[touchIndex].clientY
+      };
+
+      let normalizedX =
+        (touchPosition.x - target.offsetLeft) / target.offsetWidth;
+      let normalizedY =
+        (touchPosition.y - target.offsetTop) / target.offsetHeight;
+
+      return { x: normalizedX, y: normalizedY };
+    },
+    publishTouchPosition: function(position) {
       UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
-        this.$data.componentTouch.topic,
+        this.$data.componentTouchPosition.topic,
         "vector2",
-        { x: x, y: y }
+        position
       );
     },
-    publishNormalizedTouch: function(event, touchIndex) {
-      let normalizedTouchX =
-        (event.touches[touchIndex].clientX - event.target.offsetLeft) /
-        event.target.offsetWidth;
-      let normalizedTouchY =
-        (event.touches[touchIndex].clientY - event.target.offsetTop) /
-        event.target.offsetHeight;
+    publishTouchEvent: function(type, position) {
       UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
-        this.$data.componentTouch.topic,
-        "vector2",
-        { x: normalizedTouchX, y: normalizedTouchY }
+        this.$data.componentTouchEvents.topic,
+        "touchEvent",
+        { type: type, position: position }
       );
     },
     toggleFullScreen: function() {
-      this.$refs["fullscreen"].toggle();
+      this.$refs["fullscreeh"].toggle();
     },
     onFullScreenChange: function(fullscreen) {
       this.fullscreen = fullscreen;
