@@ -69,7 +69,6 @@
   import ClientNode from './services/ubiiClient/ubiiClientService';
   import ServerStatus from './components/ServerStatus.vue'
   import { AppLayer } from './components/appComponents/appComponents.js';
-  import uuidv4 from 'uuid/v4';
 
   export default {
     name: 'app',
