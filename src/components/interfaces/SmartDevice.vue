@@ -120,7 +120,7 @@ export default {
 
       this.$data.deviceName = deviceName;
       this.$data.ubiiDevice = ubiiDevice;
-      this.$data.componentTouch = ubiiDevice.components[0];
+      this.$data.componentTouchPosition = ubiiDevice.components[0];
       this.$data.componentOrientation = ubiiDevice.components[1];
       this.$data.componentLinearAcceleration = ubiiDevice.components[2];
     },
@@ -145,7 +145,13 @@ export default {
     onTouchStart: function(event) {
       this.$data.touches = event.touches;
 
-      this.publishNormalizedTouch(event, 0);
+      let touchPos = this.publishNormalizedTouch(event, 0);
+      UbiiClientService.client.publish(
+        this.$data.ubiiDevice.name,
+        this.$data.componentTouchPosition.topic,
+        "vector2",
+        touchPos
+      );
     },
     onTouchMove: function(event) {
       this.$data.touches = event.touches;
@@ -190,30 +196,34 @@ export default {
     round: function(value, digits) {
       return Math.round(value * digits * 10) / (digits * 10);
     },
-    publishTouch: function(index, x, y) {
+    normalizeCoordinates: function(position, target) {
+      let normalizedX = (position.x - target.offsetLeft) / target.offsetWidth;
+      let normalizedY = (position.y - target.offsetTop) / target.offsetHeight;
+
+      return { x: normalizedX, y: normalizedY };
+    },
+    publishTouchPosition: function(position) {
       UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
-        this.$data.componentTouch.topic,
+        this.$data.componentTouchPosition.topic,
         "vector2",
-        { x: x, y: y }
+        position
       );
     },
-    publishNormalizedTouch: function(event, touchIndex) {
-      let normalizedTouchX =
-        (event.touches[touchIndex].clientX - event.target.offsetLeft) /
-        event.target.offsetWidth;
-      let normalizedTouchY =
-        (event.touches[touchIndex].clientY - event.target.offsetTop) /
-        event.target.offsetHeight;
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.componentTouch.topic,
-        "vector2",
-        { x: normalizedTouchX, y: normalizedTouchY }
+    publishNormalizedTouchPosition: function(event, touchIndex) {
+      let touchPosition = {
+        x: event.touches[touchIndex].clientX,
+        y: event.touches[touchIndex].clientY
+      };
+      let normalizedTouch = this.normalizeCoordinates(
+        touchPosition,
+        event.target
       );
+
+      this.publishTouchPosition(normalizedTouch);
     },
     toggleFullScreen: function() {
-      this.$refs["fullscreen"].toggle();
+      this.$refs["fullscreeh"].toggle();
     },
     onFullScreenChange: function(fullscreen) {
       this.fullscreen = fullscreen;
