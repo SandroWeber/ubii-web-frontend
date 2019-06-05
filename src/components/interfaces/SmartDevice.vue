@@ -11,6 +11,7 @@
       </div>
 
       <span v-show="clientId">Client ID: {{clientId}}</span>
+      <br>
 
       <button @click="toggleFullScreen()">Fullscreen Mode</button>
 
@@ -237,7 +238,7 @@ export default {
       );
     },
     toggleFullScreen: function() {
-      this.$refs["fullscreeh"].toggle();
+      this.$refs["fullscreen"].toggle();
     },
     onFullScreenChange: function(fullscreen) {
       this.fullscreen = fullscreen;
