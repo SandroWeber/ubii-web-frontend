@@ -122,7 +122,7 @@ export default {
       };
       let inputMirror = {
         internalName: "mirrorPointer",
-        messageFormat: "boolean",
+        messageFormat: "bool",
         topic: topicPrefix + "/" + "mirror_mouse"
       };
       let outputServerPointer = {
