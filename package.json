@@ -12,7 +12,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.5.0",
     "@fortawesome/vue-fontawesome": "^0.1.2",
     "@riophae/vue-treeselect": "0.0.37",
-    "@tum-far/ubii-msg-formats": "^0.10.0",
+    "@tum-far/ubii-msg-formats": "^0.10.1",
     "axios": "0.18.0",
     "i": "^0.3.6",
     "liquor-tree": "^0.2.56",
