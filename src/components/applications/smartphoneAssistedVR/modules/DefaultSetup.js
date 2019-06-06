@@ -3,7 +3,7 @@ import Sky from "../../sharedModules/Sky";
 
 export default class DefaultSetup extends THREE.Object3D {
 
-  constructor(scene, aspectRatio, camera = true, light = true, sky = true, base = true) {
+  constructor(scene, aspectRatio, camera = true, light = true, sky = true, fog = true, base = true) {
 
     super();
 
@@ -17,6 +17,8 @@ export default class DefaultSetup extends THREE.Object3D {
       this.light = this.addLight();
     if (sky)
       this.sky = this.addSky(scene);
+    if (fog)
+      this.fog = this.addFog(scene);
     if (base)
       this.base = this.addBase();
 
@@ -65,10 +67,12 @@ export default class DefaultSetup extends THREE.Object3D {
   addSky(scene) {
     const sky = new Sky();
 
-    scene.fog = new THREE.Fog(0x23272a, 0.5, 1700, 4000);
-
     this.add(sky);
     return sky;
+  }
+
+  addFog(scene) {
+    scene.fog = new THREE.Fog(0x23272a, 0.5, 1700, 4000);
   }
 
   addBase() {
