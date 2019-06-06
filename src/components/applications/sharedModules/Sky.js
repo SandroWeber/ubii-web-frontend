@@ -11,7 +11,6 @@ export default class Sky extends THREE.Mesh {
 }
 
 Sky._SHADER = {
-
   uniforms: {
     "skyExp": {
       value: 0.9
