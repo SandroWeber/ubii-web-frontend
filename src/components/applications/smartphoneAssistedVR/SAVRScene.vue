@@ -1,5 +1,5 @@
 <template>
-  <div>No content here</div>
+  <div>Error loading view. See console.</div>
 </template>
 
 <script>
@@ -53,8 +53,14 @@ export default {
     // RENDERING
     initScene: function() {
       const container = document.getElementById("savr-render-container");
-      const width = container.clientWidth != 0 ? container.clientWidth : 500;
-      const height = container.clientHeight != 0 ? container.clientHeight : 500;
+      let width = 500;
+      if (container && container.clientWidth) {
+        width = container.clientWidth;
+      }
+      let height = 500;
+      if (container && container.clientHeight) {
+        height = container.clientHeight;
+      }
       const aspectRatio = width / height;
 
       this.scene = new THREE.Scene();
@@ -76,14 +82,24 @@ export default {
       this.renderer.vr.enabled = true;
 
       // workaround: https://github.com/vuejs/Discussion/issues/394
-      setTimeout(() => {
-        const width = container.clientWidth;
-        const height = container.clientHeight;
-        const aspectRatio = width / height;
+      const ctx = this;
+      const fixClientSize = () => {
+        setTimeout(() => {
+          if (!container || container.clientWidth == 0) {
+            fixClientSize();
+          } else {
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            const aspectRatio = width / height;
 
-        this.renderer.setSize(width, height);
-        this.camera.aspect = aspectRatio;
-      }, 1000);
+            console.log(height);
+
+            ctx.renderer.setSize(width, height);
+            ctx.camera.aspect = aspectRatio;
+          }
+        }, 500);
+      };
+      fixClientSize();
     },
     // handles initialization of and in the render loop
     startGameLoop: function() {

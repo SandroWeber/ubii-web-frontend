@@ -23,12 +23,18 @@ export default class DefaultSetup extends THREE.Object3D {
   }
 
   addCamera(scene, aspectRatio) {
+
+    const fov = 70;
+    const nearPlane = 0.01;
+    const farPlane = 100;
+
     const camera = new THREE.PerspectiveCamera(
-      70,
+      fov,
       aspectRatio,
-      0.01,
-      100
+      nearPlane,
+      farPlane
     );
+
     camera.position.z = 1;
 
     this.add(camera);
