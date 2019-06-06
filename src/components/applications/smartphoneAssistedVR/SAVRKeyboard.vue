@@ -28,12 +28,12 @@ export default {
   extends: SAVRScene,
   components: { UbiiClientContent },
 
-  data() {
+  data: function() {
     return {
       model: undefined,
       client: undefined,
       oldClients: [],
-      text: "Hello World!",
+      text: undefined,
       textMesh: undefined,
       font: undefined
     };
@@ -50,7 +50,7 @@ export default {
 
         const cursor = new SmartphoneCursor();
 
-        cursor.position.set(0, 0, 0.5 * 5);
+        cursor.position.set(0, -0.004, 0);
         cursor.rotation.x = THREE.Math.degToRad(90);
         cursor.scale.set(0.01, 0.01, 0.01);
 
@@ -70,7 +70,7 @@ export default {
           mesh.scale.set(0.1, 0.1, 0.1);
           ctx.scene.add(mesh);
 
-          ctx.text = "[       ...       ]";
+          ctx.text = ">_";
         }
       );
     },

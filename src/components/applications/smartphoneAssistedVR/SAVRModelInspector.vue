@@ -23,7 +23,7 @@ export default {
   extends: SAVRScene,
   components: { UbiiClientContent },
 
-  data() {
+  data: function() {
     return {
       modelPrefab: undefined,
       gidCounter: 0,

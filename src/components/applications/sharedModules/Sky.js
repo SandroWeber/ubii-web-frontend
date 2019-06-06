@@ -3,22 +3,14 @@ import * as THREE from 'three';
 export default class Sky extends THREE.Mesh {
 
   constructor() {
-    super(new THREE.SphereBufferGeometry(5, 16, 8), material);
+    super(new THREE.SphereBufferGeometry(5, 16, 8), Sky._MATERIAL);
 
     this.name = "Sky";
   }
 
 }
 
-const material = new THREE.ShaderMaterial({
-  vertexShader: shader.vertexShader,
-  fragmentShader: shader.fragmentShader,
-  uniforms: shader.uniforms,
-  side: THREE.BackSide,
-  depthWrite: false
-});
-
-const shader = {
+Sky._SHADER = {
 
   uniforms: {
     "skyExp": {
@@ -76,3 +68,11 @@ const shader = {
 	`
 
 };
+
+Sky._MATERIAL = new THREE.ShaderMaterial({
+  vertexShader: Sky._SHADER.vertexShader,
+  fragmentShader: Sky._SHADER.fragmentShader,
+  uniforms: Sky._SHADER.uniforms,
+  side: THREE.BackSide,
+  depthWrite: false
+});

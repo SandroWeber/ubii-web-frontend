@@ -108,7 +108,7 @@ var WebVR = {
       button.onmouseenter = null;
       button.onmouseleave = null;
       button.onclick = null;
-      renderer.vr.setDevice(null);
+      //renderer.vr.setDevice(null);
     }
 
     function stylizeElement(element) {

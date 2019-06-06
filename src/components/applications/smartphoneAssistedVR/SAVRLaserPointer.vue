@@ -28,7 +28,7 @@ export default {
   extends: SAVRScene,
   components: { UbiiClientContent },
 
-  data() {
+  data: function() {
     return {
       model: undefined,
       client: undefined,
@@ -145,7 +145,7 @@ export default {
 
       const ctx = this;
       const debugRays = false;
-      subscribe(touchEventTopic, event => {
+      subscribe(touchEventTopic, () => {
         ctx.raycaster.set(
           ctx.model.position,
           new THREE.Vector3(0, 0, -1).applyQuaternion(ctx.model.quaternion)
