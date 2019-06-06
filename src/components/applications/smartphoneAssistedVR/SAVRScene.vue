@@ -89,8 +89,6 @@ export default {
             const height = container.clientHeight;
             const aspectRatio = width / height;
 
-            console.log(height);
-
             ctx.renderer.setSize(width, height);
             ctx.camera.aspect = aspectRatio;
           }

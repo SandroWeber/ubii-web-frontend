@@ -12,11 +12,11 @@ export default class DefaultSetup extends THREE.Object3D {
     this.isGroup = true;
 
     if (camera)
-      this.camera = this.addCamera(scene, aspectRatio);
+      this.camera = this.addCamera(aspectRatio);
     if (light)
       this.light = this.addLight();
     if (sky)
-      this.sky = this.addSky(scene);
+      this.sky = this.addSky();
     if (fog)
       this.fog = this.addFog(scene);
     if (base)
@@ -24,7 +24,7 @@ export default class DefaultSetup extends THREE.Object3D {
 
   }
 
-  addCamera(scene, aspectRatio) {
+  addCamera(aspectRatio) {
 
     const fov = 70;
     const nearPlane = 0.01;
@@ -65,7 +65,7 @@ export default class DefaultSetup extends THREE.Object3D {
     return group;
   }
 
-  addSky(scene) {
+  addSky() {
     const sky = new Sky();
 
     this.add(sky);
