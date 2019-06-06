@@ -14,15 +14,7 @@ import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
 export default {
   name: "SAVRScene",
 
-  mounted() {
-    this.addEventListeners();
-    this.initScene();
-    this.onStart(); // defined in children
-    this.connect();
-    this.startGameLoop();
-  },
-
-  data() {
+  data: function() {
     return {
       scene: undefined,
       camera: undefined,
@@ -34,11 +26,24 @@ export default {
     };
   },
 
+  mounted: function() {
+    this.componentLoaded();
+  },
+
   beforeDestroy: function() {
     this.onExit();
   },
 
   methods: {
+    // INITIALIZATION
+    componentLoaded: function() {
+      this.addEventListeners();
+      this.connect();
+
+      this.initScene();
+      this.onStart(); // defined in children
+      this.startGameLoop();
+    },
     addEventListeners: function() {
       window.addEventListener("beforeunload", () => {
         this.onExit();
@@ -48,14 +53,14 @@ export default {
     // RENDERING
     initScene: function() {
       const container = document.getElementById("savr-render-container");
+      const width = container.clientWidth != 0 ? container.clientWidth : 500;
+      const height = container.clientHeight != 0 ? container.clientHeight : 500;
+      const aspectRatio = width / height;
 
       this.scene = new THREE.Scene();
 
       // setup default scene
-      const defaultSetup = new DefaultSetup(
-        this.scene,
-        container.clientWidth / container.clientHeight
-      );
+      const defaultSetup = new DefaultSetup(this.scene, aspectRatio);
       this.scene.add(defaultSetup);
       this.camera = defaultSetup.camera;
 
@@ -64,11 +69,21 @@ export default {
         antialias: true,
         autoClear: false
       });
-      this.renderer.setSize(container.clientWidth, container.clientHeight);
+      this.renderer.setSize(width, height);
       container.appendChild(this.renderer.domElement);
 
       container.appendChild(WebVR.createButton(this.renderer));
       this.renderer.vr.enabled = true;
+
+      // workaround: https://github.com/vuejs/Discussion/issues/394
+      setTimeout(() => {
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        const aspectRatio = width / height;
+
+        this.renderer.setSize(width, height);
+        this.camera.aspect = aspectRatio;
+      }, 1000);
     },
     // handles initialization of and in the render loop
     startGameLoop: function() {
