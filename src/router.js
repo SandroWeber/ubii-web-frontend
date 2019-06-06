@@ -85,12 +85,17 @@ export default new Router({
     },
     {
       path: '/applications/smartphone-assisted-vr/savr-model-inspector',
-      name: 'Inspect a 3D Model',
+      name: 'VR Model Inspector - Inspect 3D Models',
       component: () => import('./components/applications/smartphoneAssistedVR/SAVRModelInspector.vue')
-    }, {
+    },
+    {
       path: '/applications/smartphone-assisted-vr/savr-laser-pointer',
-      name: 'Select elements',
+      name: 'VR Laser Pointer - Select elements by pointing at them',
       component: () => import('./components/applications/smartphoneAssistedVR/SAVRLaserPointer.vue')
+    }, {
+      path: '/applications/smartphone-assisted-vr/savr-keyboard',
+      name: 'VR Keyboard - A virtual keyboard',
+      component: () => import('./components/applications/smartphoneAssistedVR/SAVRKeyboard.vue')
     }
   ]
 })

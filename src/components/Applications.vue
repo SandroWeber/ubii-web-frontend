@@ -51,7 +51,7 @@
         >
           <app-tile class="layer-three background round shadow orange-accent">
             <font-awesome-icon icon="cubes" class="interface-icon"/>
-            <p>Model Inspector</p>
+            <p>VR Model Inspector</p>
           </app-tile>
         </router-link>
 
@@ -62,7 +62,18 @@
         >
           <app-tile class="layer-three background round shadow orange-accent">
             <font-awesome-icon icon="hand-pointer" class="interface-icon"/>
-            <p>Laser Pointer</p>
+            <p>VR Laser Pointer</p>
+          </app-tile>
+        </router-link>
+
+        <router-link
+          to="/applications/smartphone-assisted-vr/savr-keyboard"
+          class="interface-link"
+          tag="div"
+        >
+          <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="keyboard" class="interface-icon"/>
+            <p>VR Keyboard</p>
           </app-tile>
         </router-link>
       </div>
