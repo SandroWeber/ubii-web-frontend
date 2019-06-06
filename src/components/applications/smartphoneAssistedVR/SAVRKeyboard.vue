@@ -12,7 +12,7 @@ import SAVRScene from "./SAVRScene";
 /* eslint-disable-next-line no-unused-vars */
 import * as THREE from "three";
 import { loadObj } from "./modules/threeHelper";
-//import { Vector3 } from "three";
+import SmartphoneCursor from "./modules/SmartphoneCursor";
 
 // Networking
 import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
@@ -47,6 +47,14 @@ export default {
         model.scale.set(3, -3, -3);
         ctx.scene.add(model);
         ctx.model = model;
+
+        const cursor = new SmartphoneCursor();
+
+        cursor.position.set(0, 0, 0.5 * 5);
+        cursor.rotation.x = THREE.Math.degToRad(90);
+        cursor.scale.set(0.01, 0.01, 0.01);
+
+        model.add(cursor);
       });
 
       new THREE.FontLoader().load(

@@ -12,7 +12,6 @@ import SAVRScene from "./SAVRScene";
 /* eslint-disable-next-line no-unused-vars */
 import * as THREE from "three";
 import { loadObj } from "./modules/threeHelper";
-//import { Vector3 } from "three";
 
 // Networking
 import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";

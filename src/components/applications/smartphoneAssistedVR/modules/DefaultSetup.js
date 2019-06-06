@@ -1,20 +1,41 @@
 import * as THREE from "three";
 import Sky from "../../sharedModules/Sky";
 
-function addCamera(scene, aspectRatio) {
+export default class DefaultSetup extends THREE.Object3D {
+
+  constructor(scene, aspectRatio, camera = true, light = true, sky = true, base = true) {
+
+    super();
+
+    this.name = "Default Setup";
+    this.type = "Group";
+    this.isGroup = true;
+
+    if (camera)
+      this.camera = this.addCamera(scene, aspectRatio);
+    if (light)
+      this.light = this.addLight();
+    if (sky)
+      this.sky = this.addSky(scene);
+    if (base)
+      this.base = this.addBase();
+
+  }
+
+  addCamera(scene, aspectRatio) {
     const camera = new THREE.PerspectiveCamera(
-        70,
-        aspectRatio,
-        0.01,
-        100
+      70,
+      aspectRatio,
+      0.01,
+      100
     );
     camera.position.z = 1;
 
-    scene.add(camera);
+    this.add(camera);
     return camera;
-}
+  }
 
-function addLight(scene) {
+  addLight() {
     const group = new THREE.Group();
     group.name = "Lights";
 
@@ -31,69 +52,51 @@ function addLight(scene) {
     hemiLight.position.set(0, 500, 0);
     group.add(hemiLight);
 
-    scene.add(group);
+    this.add(group);
     return group;
-}
+  }
 
-function addSky(scene) {
+  addSky(scene) {
     const sky = new Sky();
 
     scene.fog = new THREE.Fog(0x23272a, 0.5, 1700, 4000);
 
-    scene.add(sky);
+    this.add(sky);
     return sky;
-}
+  }
 
-function addBase(scene) {
+  addBase() {
     const group = new THREE.Group();
     group.name = "Base";
 
     const radius = 0.75;
     const geometry = new THREE.CylinderGeometry(radius, radius, 0.05, 32);
     const material = new THREE.MeshBasicMaterial({
-        color: 0x808080
+      color: 0x808080
     });
     group.add(new THREE.Mesh(geometry, material));
 
     group.add(
-        new THREE.ArrowHelper(
-            new THREE.Vector3(0, 0, 1),
-            new THREE.Vector3(0, 0.06, 0),
-            0.3,
-            0x4262f4
-        )
+      new THREE.ArrowHelper(
+        new THREE.Vector3(0, 0, 1),
+        new THREE.Vector3(0, 0.06, 0),
+        0.3,
+        0x4262f4
+      )
     );
     group.add(
-        new THREE.ArrowHelper(
-            new THREE.Vector3(1, 0, 0),
-            new THREE.Vector3(0, 0.06, 0),
-            0.3,
-            0xdb3e00
-        )
+      new THREE.ArrowHelper(
+        new THREE.Vector3(1, 0, 0),
+        new THREE.Vector3(0, 0.06, 0),
+        0.3,
+        0xdb3e00
+      )
     );
 
     group.add(new THREE.GridHelper(10, 10, 0xf7f7f7, 0xc4c4c4));
 
-    scene.add(group);
+    this.add(group);
     return group;
+  }
+
 }
-
-let DefaultScene = function (scene, aspectRatio, camera = true, light = true, sky = true, base = true) {
-
-    const group = new THREE.Group();
-    group.name = "Default Scene";
-
-    if (camera)
-        this.camera = addCamera(scene, aspectRatio);
-    if (light)
-        this.light = addLight(scene);
-    if (sky)
-        this.sky = addSky(scene);
-    if (base)
-        this.base = addBase(scene);
-
-
-    scene.add(group);
-}
-
-export default DefaultScene;

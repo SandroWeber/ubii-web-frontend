@@ -6,7 +6,7 @@
 // Rendering
 import * as THREE from "three";
 import WebVR from "../sharedModules/WebVR";
-import DefaultScene from "./modules/DefaultScene";
+import DefaultSetup from "./modules/DefaultSetup";
 
 // Networking
 import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
@@ -47,16 +47,17 @@ export default {
 
     // RENDERING
     initScene: function() {
-      let container = document.getElementById("savr-render-container");
+      const container = document.getElementById("savr-render-container");
 
       this.scene = new THREE.Scene();
 
       // setup default scene
-      let defaultScene = new DefaultScene(
+      const defaultSetup = new DefaultSetup(
         this.scene,
         container.clientWidth / container.clientHeight
       );
-      this.camera = defaultScene.camera;
+      this.scene.add(defaultSetup);
+      this.camera = defaultSetup.camera;
 
       // finialize: create renderer
       this.renderer = new THREE.WebGLRenderer({

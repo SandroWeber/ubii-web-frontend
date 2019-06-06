@@ -1,30 +1,47 @@
 import * as THREE from 'three';
 
+export default class Sky extends THREE.Mesh {
+
+  constructor() {
+    super(new THREE.SphereBufferGeometry(5, 16, 8), material);
+
+    this.name = "Sky";
+  }
+
+}
+
+const material = new THREE.ShaderMaterial({
+  vertexShader: shader.vertexShader,
+  fragmentShader: shader.fragmentShader,
+  uniforms: shader.uniforms,
+  side: THREE.BackSide,
+  depthWrite: false
+});
 
 const shader = {
 
-	uniforms: {
-		"skyExp": {
-			value: 0.9
-		},
-		"azimuthExp": {
-			value: 0.005
-		},
-		"skyColor": {
-			value: new THREE.Vector3(0.37, 0.52, 0.73)
-		},
-		"groundColor": {
-			value: new THREE.Vector3(0.71, 0.71, 0.71)
-		},
-		"azimuth": {
-			value: new THREE.Vector3(0.89, 0.96, 1)
-		},
-		"skyIntensity": {
-			value: 1.0
-		},
-	},
+  uniforms: {
+    "skyExp": {
+      value: 0.9
+    },
+    "azimuthExp": {
+      value: 0.005
+    },
+    "skyColor": {
+      value: new THREE.Vector3(0.37, 0.52, 0.73)
+    },
+    "groundColor": {
+      value: new THREE.Vector3(0.71, 0.71, 0.71)
+    },
+    "azimuth": {
+      value: new THREE.Vector3(0.89, 0.96, 1)
+    },
+    "skyIntensity": {
+      value: 1.0
+    },
+  },
 
-	vertexShader: `
+  vertexShader: `
 	varying vec2 vUv;
 
 	void main()	{
@@ -33,7 +50,7 @@ const shader = {
 	}
 	`,
 
-	fragmentShader: `
+  fragmentShader: `
 	varying vec2 vUv;
 
 	uniform float skyExp;
@@ -59,23 +76,3 @@ const shader = {
 	`
 
 };
-
-
-function Sky() {
-	this.name = "Sky";
-
-	const material = new THREE.ShaderMaterial({
-		vertexShader: shader.vertexShader,
-		fragmentShader: shader.fragmentShader,
-		uniforms: shader.uniforms,
-		side: THREE.BackSide,
-		depthWrite: false
-	});
-
-	THREE.Mesh.call(this, new THREE.SphereBufferGeometry(5, 16, 8), material);
-}
-
-Sky.prototype = Object.create(THREE.Mesh.prototype);
-Sky.prototype.constructor = Sky;
-
-export default Sky;
