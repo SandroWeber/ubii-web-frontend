@@ -1,6 +1,6 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
-    <div id="savr-render-container" class="render-container"></div>
+    <div ref="savr-render-container" id="savr-render-container" class="render-container"></div>
   </UbiiClientContent>
 </template>
 

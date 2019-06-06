@@ -1,5 +1,5 @@
 <template>
-  <div>Error loading view. See console.</div>
+  <div>Error loading scene. See console.</div>
 </template>
 
 <script>
@@ -41,8 +41,6 @@ export default {
       this.connect();
 
       this.initScene();
-      this.onStart(); // defined in children
-      this.startGameLoop();
     },
     addEventListeners: function() {
       window.addEventListener("beforeunload", () => {
@@ -52,37 +50,36 @@ export default {
 
     // RENDERING
     initScene: function() {
+      const ctx = this;
+
       const container = document.getElementById("savr-render-container");
-      let width = 500;
-      if (container && container.clientWidth) {
-        width = container.clientWidth;
-      }
-      let height = 500;
-      if (container && container.clientHeight) {
-        height = container.clientHeight;
-      }
+      const width = container.clientWidth ? container.clientWidth : 500;
+      const height = container.clientHeight ? container.clientHeight : 500;
       const aspectRatio = width / height;
 
-      this.scene = new THREE.Scene();
+      ctx.scene = new THREE.Scene();
 
       // setup default scene
-      const defaultSetup = new DefaultSetup(this.scene, aspectRatio);
-      this.scene.add(defaultSetup);
-      this.camera = defaultSetup.camera;
+      const defaultSetup = new DefaultSetup(ctx.scene, aspectRatio);
+      ctx.scene.add(defaultSetup);
+      ctx.camera = defaultSetup.camera;
 
       // finialize: create renderer
-      this.renderer = new THREE.WebGLRenderer({
+      ctx.renderer = new THREE.WebGLRenderer({
         antialias: true,
         autoClear: false
       });
-      this.renderer.setSize(width, height);
-      container.appendChild(this.renderer.domElement);
+      ctx.renderer.setSize(width, height);
+      container.appendChild(ctx.renderer.domElement);
 
-      container.appendChild(WebVR.createButton(this.renderer));
-      this.renderer.vr.enabled = true;
+      container.appendChild(WebVR.createButton(ctx.renderer));
+      ctx.renderer.vr.enabled = ctx;
+
+      this.onStart(); // defined in children
+      this.startGameLoop();
 
       // workaround: https://github.com/vuejs/Discussion/issues/394
-      const ctx = this;
+      //const ctx = this;
       const fixClientSize = () => {
         setTimeout(() => {
           if (!container || container.clientWidth == 0) {
@@ -123,8 +120,21 @@ export default {
       UbiiClientService.isConnected().then(() => {
         const loop = () => {
           if (this.pollSmartDevices) {
-            this.updateSmartDevices();
-            setTimeout(loop, 1000);
+            if (this.updateSmartDevices) {
+              this.updateSmartDevices();
+              setTimeout(loop, 1000);
+            } else {
+              // eslint-disable-next-line no-console
+              console.warn(
+                "Child component not loaded, but already updating device."
+              );
+
+              // really stupid fix, to fix hot-reloading
+              // without this, for some reason the child component won't load and you would just see the template of this component
+              // to still reload the view, we force-reload the whole page which is absolutely stupid
+              // this should only ever happend during development, after a hot-reload; if not, remove this fix
+              location.reload();
+            }
           }
         };
         loop();
