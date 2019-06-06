@@ -37,6 +37,7 @@ export default class DefaultSetup extends THREE.Object3D {
       farPlane
     );
 
+    camera.name = "Camera";
     camera.position.z = 1;
 
     this.add(camera);
@@ -72,7 +73,7 @@ export default class DefaultSetup extends THREE.Object3D {
   }
 
   addFog(scene) {
-    scene.fog = new THREE.Fog(0x23272a, 0.5, 1700, 4000);
+    scene.fog = new THREE.Fog(0x23272a, 5, 500);
   }
 
   addBase() {

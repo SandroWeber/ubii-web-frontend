@@ -3,7 +3,7 @@ import * as THREE from 'three';
 export default class Sky extends THREE.Mesh {
 
   constructor() {
-    super(new THREE.SphereBufferGeometry(5, 16, 8), Sky._MATERIAL);
+    super(new THREE.SphereBufferGeometry(75, 16, 8), Sky._MATERIAL);
 
     this.name = "Sky";
   }
