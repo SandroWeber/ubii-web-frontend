@@ -37,6 +37,12 @@ export default {
     this.onExit();
   },
 
+  computed: {
+    isDevelopment: function() {
+      return process.env.NODE_ENV === "development";
+    }
+  },
+
   methods: {
     // INITIALIZATION
     componentLoaded: function() {
@@ -57,8 +63,6 @@ export default {
 
     // RENDERING
     initScene: function() {
-      const ctx = this;
-
       const container = (this.container = document.getElementById(
         "savr-render-container"
       ));
@@ -66,28 +70,30 @@ export default {
       const height = container.clientHeight ? container.clientHeight : 500;
       const aspectRatio = width / height;
 
-      ctx.scene = new THREE.Scene();
+      this.scene = new THREE.Scene();
 
       // setup default scene
-      const defaultSetup = new DefaultSetup(ctx.scene, aspectRatio);
-      ctx.scene.add(defaultSetup);
-      ctx.camera = defaultSetup.camera;
+      const defaultSetup = new DefaultSetup(this.scene, aspectRatio);
+      this.scene.add(defaultSetup);
+      this.camera = defaultSetup.camera;
 
       // finialize: create renderer
-      ctx.renderer = new THREE.WebGLRenderer({
+      this.renderer = new THREE.WebGLRenderer({
         antialias: true,
         autoClear: false
       });
-      ctx.renderer.setSize(width, height);
-      container.appendChild(ctx.renderer.domElement);
+      this.renderer.setSize(width, height);
+      container.appendChild(this.renderer.domElement);
 
-      container.appendChild(WebVR.createButton(ctx.renderer));
-      ctx.renderer.vr.enabled = ctx;
+      container.appendChild(WebVR.createButton(this.renderer));
+      this.renderer.vr.enabled = true;
 
-      // performance counter
-      this.stats = new Stats();
-      this.stats.showPanel(0);
-      container.appendChild(this.stats.dom);
+      // performance counter'
+      if (this.isDevelopment) {
+        this.stats = new Stats();
+        this.stats.showPanel(0);
+        container.appendChild(this.stats.dom);
+      }
 
       this.onStart(); // defined in children
       this.startGameLoop();
@@ -123,7 +129,7 @@ export default {
       const ctx = this;
 
       this.renderer.setAnimationLoop(function() {
-        ctx.stats.begin();
+        if (ctx.stats) ctx.stats.begin();
 
         let delta = ctx.clock.getDelta();
         ctx.time += delta;
@@ -133,7 +139,7 @@ export default {
         ctx.renderer.clear();
         ctx.renderer.render(ctx.scene, ctx.camera);
 
-        ctx.stats.end();
+        if (ctx.stats) ctx.stats.end();
       });
     },
 
@@ -153,7 +159,7 @@ export default {
                 "Child component not loaded, but already updating device."
               );
 
-              if (process.env.NODE_ENV === "development") {
+              if (this.isDevelopment) {
                 // really stupid fix, to fix hot-reloading
                 // without this, for some reason the child component won't load and you would just see the template of this component
                 // to still reload the view, we force-reload the whole page which is absolutely stupid
