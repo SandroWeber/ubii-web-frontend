@@ -68,9 +68,12 @@ export default {
 <style scoped lang="stylus">
 .backend-info {
   padding: 8px;
-  display: flex;
-  direction: row;
+  display: grid;
   align-items: center;
+
+  @media (min-width: 600px) {
+    grid-template-columns: auto auto auto auto 1fr;
+  }
 }
 
 label {
