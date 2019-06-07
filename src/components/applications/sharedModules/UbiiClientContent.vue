@@ -20,7 +20,7 @@ export default {
 </script>
 
 <style scoped lang="stylus">
-.full-height {
+.full-height, .full-height > * {
   height: 100%;
 }
 

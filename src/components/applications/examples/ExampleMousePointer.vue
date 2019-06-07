@@ -1,12 +1,6 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
-    <div class="start-example" v-show="!exampleStarted">
-      <button class="start-example-button" v-on:click="startExample()">
-        <font-awesome-icon icon="play"/>
-      </button>
-    </div>
-
-    <div v-show="exampleStarted" class="grid">
+    <div class="grid">
       <div class="options">
         <!-- a checkbox to toggle showing the client side pointer -->
         <input id="checkboxClientPointer" type="checkbox" v-model="showClientPointer">
@@ -50,6 +44,7 @@
 
 <script>
 import UbiiClientContent from "../sharedModules/UbiiClientContent";
+import UbiiEventBus from "../../../services/ubiiClient/ubiiEventBus";
 
 import uuidv4 from "uuid/v4";
 import UbiiClientService from "../../../services/ubiiClient/ubiiClientService.js";
@@ -74,6 +69,9 @@ export default {
     window.addEventListener("beforeunload", () => {
       this.stopExample();
     });
+
+    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.startExample);
+    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopExample);
   },
   beforeDestroy: function() {
     this.stopExample();
@@ -304,25 +302,29 @@ export default {
         y: event.offsetY / boundingRect.height
       };
 
-        this.$data.clientMousePosition = relativeMousePosition;
-        // publish our normalized client mouse position
-        UbiiClientService.client.publish(
-          this.$data.ubiiDevice.name,
-          this.$data.inputClientPointer.topic,
-          'vector2',
-          this.$data.clientMousePosition
-        );
-      },
-      onTouchStart: function (event) {
-        this.$data.clientPointerInside = true;
-        this.onTouchMove(event);
-      },
-      onTouchMove: function (event) {
-        // calculate the current touch position, normalized to the bounds of the interactive area ([0;1], [0;1])
-        let relativeMousePosition = {
-          x: (event.touches[0].clientX - event.target.offsetLeft) / event.target.offsetWidth,
-          y: (event.touches[0].clientY - event.target.offsetTop) / event.target.offsetHeight
-        };
+      this.$data.clientMousePosition = relativeMousePosition;
+      // publish our normalized client mouse position
+      UbiiClientService.client.publish(
+        this.$data.ubiiDevice.name,
+        this.$data.inputClientPointer.topic,
+        "vector2",
+        this.$data.clientMousePosition
+      );
+    },
+    onTouchStart: function(event) {
+      this.$data.clientPointerInside = true;
+      this.onTouchMove(event);
+    },
+    onTouchMove: function(event) {
+      // calculate the current touch position, normalized to the bounds of the interactive area ([0;1], [0;1])
+      let relativeMousePosition = {
+        x:
+          (event.touches[0].clientX - event.target.offsetLeft) /
+          event.target.offsetWidth,
+        y:
+          (event.touches[0].clientY - event.target.offsetTop) /
+          event.target.offsetHeight
+      };
 
       if (
         relativeMousePosition.x < 0 ||
@@ -379,9 +381,10 @@ export default {
   background-color: red;
 }
 
-    .start-example
-        text-align: center
-        margin-top: 25px;
+.start-example {
+  text-align: center;
+  margin-top: 25px;
+}
 
 .start-example-button {
   width: 50px;

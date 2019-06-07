@@ -1,61 +1,61 @@
 <template>
-  <div ref="top-div">
-    <fullscreen
-      ref="fullscreen"
-      class="fullscreen"
-      @change="onFullScreenChange"
-      style="overflow: hidden;"
-    >
-      <div v-show="!ubiiClientService.isConnected">
-        <span class="notification">Please connect to backend before starting the application.</span>
-      </div>
-
-      <span v-show="clientId">Client ID: {{clientId}}</span>
-      <br>
-
-      <button @click="toggleFullScreen()">Fullscreen Mode</button>
-
-      <div
-        id="touch-area"
-        class="touch-area"
-        v-on:touchstart="onTouchStart($event)"
-        v-on:touchmove="onTouchMove($event)"
-        v-on:touchend="onTouchEnd($event)"
+  <UbiiClientContent :ubiiClientService="ubiiClientService">
+    <div ref="top-div">
+      <fullscreen
+        ref="fullscreen"
+        class="fullscreen"
+        @change="onFullScreenChange"
+        style="overflow: hidden;"
       >
-        <span>Touch0: {{touches && touches[0] && touches[0].clientX}} {{touches && touches[0] && touches[0].clientY}}</span>
+        <span v-show="clientId">Client ID: {{clientId}}</span>
         <br>
-        <span>Orientation:</span>
-        <span v-if="deviceOrientation">
-          {{deviceOrientation.absolute}}
-          {{this.round(deviceOrientation.alpha, 1)}}
-          {{this.round(deviceOrientation.beta, 1)}}
-          {{this.round(deviceOrientation.gamma, 1)}}
-        </span>
-        <br>
-        <span>Acceleration:</span>
-        <span v-if="deviceMotion && deviceMotion.acceleration">
-          {{this.round(deviceMotion.acceleration.x, 1)}}
-          {{this.round(deviceMotion.acceleration.y, 1)}}
-          {{this.round(deviceMotion.acceleration.z, 1)}}
-        </span>
-        <br>
-        <span>Rotation:</span>
-        <span v-if="deviceMotion && deviceMotion.rotationRate">
-          {{this.round(deviceMotion.rotationRate.alpha, 1)}}
-          {{this.round(deviceMotion.rotationRate.beta, 1)}}
-          {{this.round(deviceMotion.rotationRate.gamma, 1)}}
-        </span>
-      </div>
-    </fullscreen>
-  </div>
+
+        <button @click="toggleFullScreen()">Fullscreen Mode</button>
+
+        <div
+          id="touch-area"
+          class="touch-area"
+          v-on:touchstart="onTouchStart($event)"
+          v-on:touchmove="onTouchMove($event)"
+          v-on:touchend="onTouchEnd($event)"
+        >
+          <span>Touch0: {{touches && touches[0] && touches[0].clientX}} {{touches && touches[0] && touches[0].clientY}}</span>
+          <br>
+          <span>Orientation:</span>
+          <span v-if="deviceOrientation">
+            {{deviceOrientation.absolute}}
+            {{this.round(deviceOrientation.alpha, 1)}}
+            {{this.round(deviceOrientation.beta, 1)}}
+            {{this.round(deviceOrientation.gamma, 1)}}
+          </span>
+          <br>
+          <span>Acceleration:</span>
+          <span v-if="deviceMotion && deviceMotion.acceleration">
+            {{this.round(deviceMotion.acceleration.x, 1)}}
+            {{this.round(deviceMotion.acceleration.y, 1)}}
+            {{this.round(deviceMotion.acceleration.z, 1)}}
+          </span>
+          <br>
+          <span>Rotation:</span>
+          <span v-if="deviceMotion && deviceMotion.rotationRate">
+            {{this.round(deviceMotion.rotationRate.alpha, 1)}}
+            {{this.round(deviceMotion.rotationRate.beta, 1)}}
+            {{this.round(deviceMotion.rotationRate.gamma, 1)}}
+          </span>
+        </div>
+      </fullscreen>
+    </div>
+  </UbiiClientContent>
 </template>
 
 <script>
 import Vue from "vue";
 import Fullscreen from "vue-fullscreen";
 
+import UbiiClientContent from "../applications/sharedModules/UbiiClientContent";
 import UbiiClientService from "../../services/ubiiClient/ubiiClientService.js";
 import ProtobufLibrary from "@tum-far/ubii-msg-formats/dist/js/protobuf";
+import UbiiEventBus from "../../services/ubiiClient/ubiiEventBus";
 
 /* fontawesome */
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -69,13 +69,15 @@ Vue.use(Fullscreen);
 
 export default {
   name: "Interface-SmartDevice",
+  components: { UbiiClientContent },
   mounted: function() {
     // unsubscribe before page is unloaded
     window.addEventListener("beforeunload", () => {
       this.stopInterface();
     });
 
-    this.startInterface();
+    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.startInterface);
+    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopInterface);
   },
   beforeDestroy: function() {
     this.stopInterface();

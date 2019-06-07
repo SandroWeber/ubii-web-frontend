@@ -54,11 +54,11 @@ export default {
   },
   methods: {
     connect: function() {
-      if (!this.ubiiClientService.connectd) {
+      if (!this.ubiiClientService.connected) {
         this.ubiiClientService.connect();
       } else {
         this.ubiiClientService.disconnect();
-        setTimeout(this.ubiiClientService.connect, 1000);
+        this.ubiiClientService.connect();
       }
     }
   }
