@@ -14,6 +14,7 @@
     "@riophae/vue-treeselect": "0.0.37",
     "@tum-far/ubii-msg-formats": "^0.10.1",
     "axios": "0.18.0",
+    "dat.gui": "^0.7.6",
     "i": "^0.3.6",
     "liquor-tree": "^0.2.56",
     "npm": "^6.4.1",
