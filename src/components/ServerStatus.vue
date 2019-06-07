@@ -77,11 +77,15 @@
 </script>
 
 <style scoped lang="stylus">
-  .backend-info
-    padding: 8px
-    display: flex
-    direction: row
-    align-items center
+.backend-info {
+  padding: 8px;
+  display: grid;
+  align-items: center;
+
+  @media (min-width: 600px) {
+    grid-template-columns: auto auto auto auto 1fr;
+  }
+}
 
   label
     margin: 0px 5px 0px 10px
