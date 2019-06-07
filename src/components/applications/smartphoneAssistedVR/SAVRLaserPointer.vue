@@ -5,7 +5,6 @@
 </template>
 
 <script>
-import UbiiClientContent from "../sharedModules/UbiiClientContent";
 import SAVRScene from "./SAVRScene";
 
 // Rendering
@@ -15,6 +14,8 @@ import { loadObj } from "./modules/threeHelper";
 
 // Networking
 import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
+import UbiiClientContent from "../sharedModules/UbiiClientContent";
+import ProtobufLibrary from "@tum-far/ubii-msg-formats/dist/js/protobuf";
 import { DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
 import {
   createUbiiSpecs,
@@ -145,26 +146,30 @@ export default {
 
       const ctx = this;
       const debugRays = false;
-      subscribe(touchEventTopic, () => {
-        ctx.raycaster.set(
-          ctx.model.position,
-          new THREE.Vector3(0, 0, -1).applyQuaternion(ctx.model.quaternion)
-        );
-        let intersects = ctx.raycaster.intersectObjects(ctx.targets);
-
-        if (debugRays) {
-          ctx.scene.add(
-            new THREE.ArrowHelper(
-              ctx.raycaster.ray.direction,
-              ctx.raycaster.ray.origin,
-              300,
-              0xff0000
-            )
+      subscribe(touchEventTopic, event => {
+        if (
+          event.type == ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN
+        ) {
+          ctx.raycaster.set(
+            ctx.model.position,
+            new THREE.Vector3(0, 0, -1).applyQuaternion(ctx.model.quaternion)
           );
-        }
+          let intersects = ctx.raycaster.intersectObjects(ctx.targets);
 
-        for (var i = 0; i < intersects.length; i++) {
-          intersects[i].object.material.color.set(Math.random() * 0xffffff);
+          if (debugRays) {
+            ctx.scene.add(
+              new THREE.ArrowHelper(
+                ctx.raycaster.ray.direction,
+                ctx.raycaster.ray.origin,
+                300,
+                0xff0000
+              )
+            );
+          }
+
+          for (var i = 0; i < intersects.length; i++) {
+            intersects[i].object.material.color.set(Math.random() * 0xffffff);
+          }
         }
       });
 
@@ -225,9 +230,3 @@ export default {
   }
 };
 </script>
-
-<style scoped lang="stylus">
-.render-container {
-  height: 100%;
-}
-</style>

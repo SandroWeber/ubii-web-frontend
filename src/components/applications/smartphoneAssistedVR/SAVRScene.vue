@@ -8,6 +8,7 @@ import * as THREE from "three";
 import WebVR from "../sharedModules/WebVR";
 import DefaultSetup from "./modules/DefaultSetup";
 import Stats from "../sharedModules/Stats";
+import * as dat from "dat.gui";
 
 // Networking
 import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
@@ -25,7 +26,8 @@ export default {
       ubiiClientService: UbiiClientService,
       pollSmartDevices: false,
       container: undefined,
-      stats: undefined
+      stats: undefined,
+      gui: undefined
     };
   },
 
@@ -77,7 +79,7 @@ export default {
       this.scene.add(defaultSetup);
       this.camera = defaultSetup.camera;
 
-      // finialize: create renderer
+      // create renderer
       this.renderer = new THREE.WebGLRenderer({
         antialias: true,
         autoClear: false
@@ -88,13 +90,21 @@ export default {
       container.appendChild(WebVR.createButton(this.renderer));
       this.renderer.vr.enabled = true;
 
-      // performance counter'
+      // performance counter
       if (this.isDevelopment) {
         this.stats = new Stats();
         this.stats.showPanel(0);
         container.appendChild(this.stats.dom);
       }
 
+      // gui
+      this.gui = new dat.GUI({ autoPlace: false });
+      let guiContainer = document.createElement("div");
+      guiContainer.style.cssText = "position: fixed; bottom: 0; right: 0;";
+      container.appendChild(guiContainer);
+      guiContainer.appendChild(this.gui.domElement);
+
+      // start logic
       this.onStart(); // defined in children
       this.startGameLoop();
 
@@ -117,7 +127,7 @@ export default {
       const aspectRatio = width / height;
 
       // eslint-disable-next-line no-console
-      console.log("Viewport: " + width + " x " + height);
+      console.info("Viewport: " + width + " x " + height);
 
       this.camera.aspect = aspectRatio;
       this.camera.updateProjectionMatrix();
@@ -180,3 +190,11 @@ export default {
 };
 </script>
 
+<style scoped lang="stylus">
+.render-container {
+  height: 100%;
+}
+
+.dg {
+}
+</style>

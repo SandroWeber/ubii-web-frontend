@@ -6,7 +6,6 @@
 
 <script>
 // Parent
-import UbiiClientContent from "../sharedModules/UbiiClientContent";
 import SAVRScene from "./SAVRScene";
 
 // Rendering
@@ -15,6 +14,7 @@ import { loadObj } from "./modules/threeHelper";
 
 // Networking
 import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
+import UbiiClientContent from "../sharedModules/UbiiClientContent";
 import { DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
 import { createUbiiSpecs } from "./modules/ubiiHelper";
 
@@ -208,9 +208,3 @@ export default {
   }
 };
 </script>
-
-<style scoped lang="stylus">
-.render-container {
-  height: 100%;
-}
-</style>
