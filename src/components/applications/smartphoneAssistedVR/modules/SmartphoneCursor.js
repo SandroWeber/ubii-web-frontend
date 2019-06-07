@@ -2,7 +2,7 @@ import * as THREE from "three";
 
 export default class SmartphoneCursor extends THREE.Object3D {
 
-  constructor(areaSize = new THREE.Vector2(1, 1)) {
+  constructor(areaSize = new THREE.Vector2(1, 1), callback) {
     // parent
     super();
     this.name = "Smartphone Cursor";
@@ -13,6 +13,7 @@ export default class SmartphoneCursor extends THREE.Object3D {
 
     // public members
     this.areaSize = areaSize;
+    this.callback = callback;
 
     // private members
     this._normalizedPosition = new THREE.Vector2(0, 0);
@@ -49,6 +50,9 @@ export default class SmartphoneCursor extends THREE.Object3D {
   _onSelect() {
     // eslint-disable-next-line no-console
     console.info("SELECTED: " + this._cursorPosition.x + " " + this._cursorPosition.y)
+
+    if (this.callback)
+      this.callback(this._cursorPosition);
   }
 
   _smartphoneToLocalPosition(pos2d) {
