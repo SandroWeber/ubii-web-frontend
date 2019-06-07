@@ -48,9 +48,10 @@
       AppInput
     },
     beforeMount: function () {
-      if (!UbiiClientService.isConnected) {
-        UbiiClientService.connect();
-      }
+      UbiiClientService.connect();
+    },
+    beforeDestroy: function() {
+      UbiiClientService.disconnect();
     },
     data: () => {
       return {

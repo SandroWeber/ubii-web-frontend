@@ -52,7 +52,7 @@
           status: 'unmeasured',
           timings: [],
           avgRTT: undefined,
-          messageCount: 1000,
+          messageCount: "1000",
           topic: undefined,
           device: {
             name: 'RTT_test_device',
@@ -89,11 +89,12 @@
         await this.ubiiSetupRTT();
 
         let counter = 0;
+        let maxMessages = parseInt(this.$data.testRTT.messageCount);
 
         UbiiClientService.client.subscribe(this.$data.testRTT.topic, () => {
           this.$data.testRTT.timings.push(Date.now() - this.$data.testRTT.tSent);
           counter++;
-          if (counter < this.$data.testRTT.messageCount) {
+          if (counter < maxMessages) {
             this.rttSendPackage();
           } else {
             let sum = this.$data.testRTT.timings.reduce((partial_sum, a) => partial_sum + a);
@@ -106,7 +107,7 @@
         });
       },
       stopTestRTT: function () {
-        if (this.$data.testRTT) {
+        if (this.$data.testRTT && this.$data.testRTT.avgRTT) {
           this.$data.testRTT.status = this.$data.testRTT.avgRTT.toString() + 'ms';
           UbiiClientService.client.unsubscribe(this.$data.testRTT.topic);
         }

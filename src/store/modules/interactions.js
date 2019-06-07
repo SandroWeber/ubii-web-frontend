@@ -21,13 +21,21 @@ const backendData = {
           context.commit('clearAll');
           // ... and get all new ones. 
           reply.interactionList.forEach(interaction => {
-            context.commit('pushInteraction', 
-              {
-                interaction: interaction
-              });
+            // TODO resolve deep interaction structure here
+            context.commit('pushInteractionRecord', {
+              record: {
+                "id": interaction.id,
+                "label": interaction.name,
+                "data": {
+                  interaction: interaction,
+                }
+              }
+            });
           });
 
           return resolve();
+        },()=>{
+          return reject();
         });
       }catch{
         return reject();
@@ -58,19 +66,14 @@ const backendData = {
       }
     });
   },
-  delete: async function (context, interactionId) {
+  delete: async function (context, interaction) {
     return await new Promise(async(resolve, reject) => {
       try{
-        // Get index of complete interaction specification
-        let index = state.all.findIndex(function(element) {
-            return element.id === interactionId;
-        });
-
         // delete interaction at the backend
         await UbiiClientService.client
         .callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DELETE,
-          interaction: state.all[index]
+          interaction: interaction
         })
         .then((reply) => {
           if(reply.error){
@@ -112,24 +115,27 @@ const backendData = {
 
 // initial state
 const state = {
-  all: [],
+  recordTree: [],
 }
   
 // getters
 const getters = {
-    all: state => state.all
+    all: state => state.recordTree.map((value)=>{
+      // TODO map nested entries
+      return value.data.interaction;
+    }),
+    tree: state => {
+      return state.recordTree;
+    },
 }
 
 // actions
 const actions = {
   async add (context, payload) {
-    context.commit('pushInteraction', {
-      interaction: payload.interaction
-    });
-
-    // Register interaction at the backend.
+    // Register interaction at the backend...
     await backendData.register(context,payload.interaction)
 
+    // ... then pull.
     await actions.pull(context);
   },
   addDefault (context) {
@@ -158,9 +164,10 @@ const actions = {
       }})
   },
   async deleteInteraction (context, payload) {
-    // Delete interaction at the backend.
-    await backendData.delete(context, payload.currentInteractionId);
+    // Delete interaction at the backend...
+    await backendData.delete(context, payload.interaction);
 
+    // ... then pull.
     await actions.pull(context);
   },
   async update (context, payload) {
@@ -191,33 +198,41 @@ const actions = {
       clearInterval(synchronizationServiceInterval);
     }
   },
+  updateTree(context, tree) {
+    context.commit('updateRecordTree', tree)
+  }
 }
 
 // mutations
 const mutations = {
-  pushInteraction (state, payload){
-    state.all.push(payload.interaction);
+  pushInteractionRecord (state, payload){
+    state.recordTree.push(payload.record);
   },
   clearAll (state){
-    state.all = [];
+    state.recordTree = [];
   },
   setInteraction (state, payload){
     let id = payload.interaction.id;
-    let index = state.all.findIndex(function(element) {
+    let index = state.recordTree.findIndex(function(element) {
         return element.id === id;
     });
     if(index !== -1){
-      state.all[index] = payload.interaction;
+      state.recordTree[index].interaction = payload.interaction;
+      state.recordTree[index].label = payload.interaction.name;
     }
   },
   removeInteraction (state, payload){
     let id = payload.currentInteractionId;
-    let index = state.all.findIndex(function(element) {
+    // TODO Add recursive find
+    let index = state.recordTree.findIndex(function(element) {
         return element.id === id;
     });
     if(index !== -1){
-      state.all.splice(index, 1);
+      state.recordTree.splice(index, 1);
     }
+  },
+  updateRecordTree(state, newTree) {
+    state.recordTree = newTree
   }
 }
 
