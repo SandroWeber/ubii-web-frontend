@@ -7,6 +7,7 @@
 import * as THREE from "three";
 import WebVR from "../sharedModules/WebVR";
 import DefaultSetup from "./modules/DefaultSetup";
+import Stats from "../sharedModules/Stats";
 
 // Networking
 import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
@@ -23,7 +24,8 @@ export default {
       clock: new THREE.Clock(),
       ubiiClientService: UbiiClientService,
       pollSmartDevices: false,
-      container: undefined
+      container: undefined,
+      stats: undefined
     };
   },
 
@@ -82,6 +84,11 @@ export default {
       container.appendChild(WebVR.createButton(ctx.renderer));
       ctx.renderer.vr.enabled = ctx;
 
+      // performance counter
+      this.stats = new Stats();
+      this.stats.showPanel(0);
+      container.appendChild(this.stats.dom);
+
       this.onStart(); // defined in children
       this.startGameLoop();
 
@@ -116,6 +123,8 @@ export default {
       const ctx = this;
 
       this.renderer.setAnimationLoop(function() {
+        ctx.stats.begin();
+
         let delta = ctx.clock.getDelta();
         ctx.time += delta;
 
@@ -123,6 +132,8 @@ export default {
 
         ctx.renderer.clear();
         ctx.renderer.render(ctx.scene, ctx.camera);
+
+        ctx.stats.end();
       });
     },
 
