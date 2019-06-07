@@ -22,7 +22,8 @@ export default {
       time: 0,
       clock: new THREE.Clock(),
       ubiiClientService: UbiiClientService,
-      pollSmartDevices: false
+      pollSmartDevices: false,
+      container: undefined
     };
   },
 
@@ -46,13 +47,19 @@ export default {
       window.addEventListener("beforeunload", () => {
         this.onExit();
       });
+
+      window.addEventListener("resize", () => {
+        this.handleResize();
+      });
     },
 
     // RENDERING
     initScene: function() {
       const ctx = this;
 
-      const container = document.getElementById("savr-render-container");
+      const container = (this.container = document.getElementById(
+        "savr-render-container"
+      ));
       const width = container.clientWidth ? container.clientWidth : 500;
       const height = container.clientHeight ? container.clientHeight : 500;
       const aspectRatio = width / height;
@@ -85,16 +92,24 @@ export default {
           if (!container || container.clientWidth == 0) {
             fixClientSize();
           } else {
-            const width = container.clientWidth;
-            const height = container.clientHeight;
-            const aspectRatio = width / height;
-
-            ctx.renderer.setSize(width, height);
-            ctx.camera.aspect = aspectRatio;
+            this.handleResize();
           }
         }, 500);
       };
       fixClientSize();
+    },
+    handleResize: function() {
+      const width = this.container.clientWidth;
+      const height = this.container.clientHeight;
+      const aspectRatio = width / height;
+
+      // eslint-disable-next-line no-console
+      console.log("Viewport: " + width + " x " + height);
+
+      this.camera.aspect = aspectRatio;
+      this.camera.updateProjectionMatrix();
+
+      this.renderer.setSize(width, height);
     },
     // handles initialization of and in the render loop
     startGameLoop: function() {
