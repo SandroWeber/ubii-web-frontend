@@ -48,14 +48,14 @@ export default class DefaultSetup extends THREE.Object3D {
     const group = new THREE.Group();
     group.name = "Lights";
 
-    const ambient = new THREE.AmbientLight(0x444444);
+    const ambient = new THREE.AmbientLight(0x444444, 0.5);
     group.add(ambient);
 
-    const directionalLight = new THREE.DirectionalLight(0xffeedd);
+    const directionalLight = new THREE.DirectionalLight(0xffeedd, 0.9);
     directionalLight.position.set(0, 0, 1).normalize();
     group.add(directionalLight);
 
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.75);
     hemiLight.color.setHSL(0.6, 1, 0.6);
     hemiLight.groundColor.setHSL(0.095, 1, 0.75);
     hemiLight.position.set(0, 500, 0);
