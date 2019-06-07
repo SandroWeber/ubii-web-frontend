@@ -5,23 +5,20 @@
 </template>
 
 <script>
-import UbiiClientContent from "../sharedModules/UbiiClientContent";
 import SAVRScene from "./SAVRScene";
 
 // Rendering
 /* eslint-disable-next-line no-unused-vars */
 import * as THREE from "three";
-import { loadObj } from "./modules/threeHelper";
 import SmartphoneCursor from "./modules/SmartphoneCursor";
+//import * as dat from "dat.gui";
 
 // Networking
 import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
+import UbiiClientContent from "../sharedModules/UbiiClientContent";
+import ProtobufLibrary from "@tum-far/ubii-msg-formats/dist/js/protobuf";
 import { DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
-import {
-  createUbiiSpecs,
-  subscribeSpecs,
-  unsubscribe
-} from "./modules/ubiiHelper";
+import { unsubscribe, subscribe } from "./modules/ubiiHelper";
 
 export default {
   name: "SAVRKeyboard",
@@ -30,12 +27,12 @@ export default {
 
   data: function() {
     return {
-      model: undefined,
       client: undefined,
       oldClients: [],
       text: undefined,
       textMesh: undefined,
-      font: undefined
+      font: undefined,
+      cursor: undefined
     };
   },
 
@@ -43,20 +40,7 @@ export default {
     onStart: function() {
       const ctx = this;
 
-      loadObj("models/smartphone", model => {
-        model.scale.set(3, -3, -3);
-        ctx.scene.add(model);
-        ctx.model = model;
-
-        const cursor = new SmartphoneCursor();
-
-        cursor.position.set(0, -0.004, 0);
-        cursor.rotation.x = THREE.Math.degToRad(90);
-        cursor.scale.set(0.01, 0.01, 0.01);
-
-        model.add(cursor);
-      });
-
+      // setup text
       new THREE.FontLoader().load(
         "fonts/typeface/helvetiker_regular.typeface.json",
         function(font) {
@@ -66,41 +50,27 @@ export default {
             new THREE.Geometry(),
             new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff })
           ));
-          mesh.position.set(-3, 2, -10);
+          mesh.position.set(-3, 4, -10);
           mesh.scale.set(0.1, 0.1, 0.1);
           ctx.scene.add(mesh);
 
           ctx.text = ">_";
         }
       );
+
+      // setup cursor
+      const cursor = (this.cursor = new SmartphoneCursor({ x: 20, y: 15 }));
+      cursor.position.set(-5, 3, -9);
+      cursor.scale.set(0.5, 0.5, 0.5);
+      this.scene.add(cursor);
+
+      // gui
+      this.gui.add(cursor, "SELECT_TIME");
+      this.gui.add(cursor, "MAX_VELOCITY");
     },
     /* eslint-disable-next-line no-unused-vars */
     updateGameLoop: function(delta) {
-      // calculate model position
-      if (this.model && this.camera) {
-        const height = 1.2;
-        const distance = 0.7;
-
-        const camPos = this.camera.position;
-        const viewDir = new THREE.Vector3(0, 0, -1);
-
-        viewDir.applyQuaternion(this.camera.quaternion);
-        viewDir.y = 0;
-        viewDir.normalize();
-        //viewDir.divideScalar(viewDir.lengthSq()); // fast normalize
-        viewDir.multiplyScalar(distance);
-
-        this.model.position = new THREE.Vector3(camPos.x, height, camPos.z).add(
-          viewDir
-        );
-      }
-
-      // calculate model rotation
-      if (this.model && this.client && this.client.orientation) {
-        this.model.rotation.x = this.client.orientation.x;
-        this.model.rotation.y = this.client.orientation.y;
-        this.model.rotation.z = this.client.orientation.z;
-      }
+      this.cursor.render(delta);
     },
     updateSmartDevices: function() {
       UbiiClientService.client
@@ -134,24 +104,31 @@ export default {
       }
 
       // create sessions and topics
-      const orientationSpecs = this.createOrientationSpecs(id);
       const touchEventTopic = id + "/web-interface-smart-device/touch_events";
+      const touchPositionTopic =
+        id + "/web-interface-smart-device/touch_position";
 
-      const client = (this.client = {
+      this.client = {
         id: id,
-        sessions: [orientationSpecs.session],
-        topics: [orientationSpecs.topic, touchEventTopic],
-        orientation: undefined
+        sessions: [],
+        topics: [touchEventTopic, touchPositionTopic]
+      };
+
+      subscribe(touchEventTopic, event => {
+        this.cursor.touched =
+          event.type == ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN;
+
+        if (event.position) {
+          this.cursor.cursorPosition = new THREE.Vector2(
+            event.position.x,
+            event.position.y
+          );
+        }
       });
 
-      // subscribe client
-      subscribeSpecs(orientationSpecs, orientation => {
-        client.orientation = orientation;
+      subscribe(touchPositionTopic, position => {
+        this.cursor.cursorPosition = new THREE.Vector2(position.x, position.y);
       });
-
-      //const ctx = this;
-      //const debugRays = false;
-      //subscribe(touchEventTopic, event => {});
 
       this.oldClients.push(id);
     },
@@ -173,53 +150,6 @@ export default {
       }
       this.textMesh.geometry = geometry;
     },
-    createOrientationSpecs: function(clientID) {
-      const deviceName = this.$options.name; // get name property of current view
-
-      const orientationInput = {
-        internalName: "orientation",
-        messageFormat: "vector3",
-        topic: clientID + "/web-interface-smart-device/orientation" // e.g. 08d58eb6-7b51-4bae-908b-b737cde85429/web-interface-smart-device/orientation
-      };
-
-      const orientationOutput = {
-        internalName: "orientation",
-        messageFormat: "vector3",
-        topic: clientID + "/" + deviceName + "/orientation"
-      };
-
-      /* eslint-disable-next-line */
-      const processingCallback = (input, output) => {
-        /* eslint-disable */
-        if (!input) {
-          return;
-        }
-
-        const halfPI = Math.PI / 180;
-        const deg2Rad = function(x) {
-          return x * halfPI;
-        };
-
-        output.orientation = {
-          x: deg2Rad(input.orientation.y),
-          y: deg2Rad(input.orientation.x),
-          z: deg2Rad(-input.orientation.z)
-        };
-      };
-
-      const specs = createUbiiSpecs(
-        deviceName,
-        [orientationInput],
-        [orientationOutput],
-        processingCallback
-      );
-
-      return {
-        session: specs.session,
-        interaction: specs.interaction,
-        topic: orientationOutput.topic
-      };
-    },
     onExit: function() {
       if (this.client) {
         unsubscribe(this.client.topics, this.client.sessions);
@@ -227,15 +157,9 @@ export default {
     }
   },
   watch: {
-    text: function(newValue, oldValue) {
+    text: function(newValue) {
       this.updateText(newValue);
     }
   }
 };
 </script>
-
-<style scoped lang="stylus">
-.render-container {
-  height: 100%;
-}
-</style>
