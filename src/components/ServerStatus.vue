@@ -47,14 +47,14 @@ export default {
       return {
         "button-connect": true,
         round: true,
-        "green-accent": this.ubiiClientService.isConnected,
-        "red-accent": !this.ubiiClientService.isConnected
+        "green-accent": this.ubiiClientService.connected,
+        "red-accent": !this.ubiiClientService.connected
       };
     }
   },
   methods: {
     connect: function() {
-      if (!this.ubiiClientService.isConnected) {
+      if (!this.ubiiClientService.connectd) {
         this.ubiiClientService.connect();
       } else {
         this.ubiiClientService.disconnect();
