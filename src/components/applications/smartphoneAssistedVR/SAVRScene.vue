@@ -142,11 +142,13 @@ export default {
                 "Child component not loaded, but already updating device."
               );
 
-              // really stupid fix, to fix hot-reloading
-              // without this, for some reason the child component won't load and you would just see the template of this component
-              // to still reload the view, we force-reload the whole page which is absolutely stupid
-              // this should only ever happend during development, after a hot-reload; if not, remove this fix
-              location.reload();
+              if (process.env.NODE_ENV === "development") {
+                // really stupid fix, to fix hot-reloading
+                // without this, for some reason the child component won't load and you would just see the template of this component
+                // to still reload the view, we force-reload the whole page which is absolutely stupid
+                // this should only ever happend during development, after a hot-reload; if not, remove this fix
+                location.reload();
+              }
             }
           }
         };
