@@ -33,6 +33,7 @@ export default class SmartphoneCursor extends THREE.Object3D {
       map: new THREE.TextureLoader().load("images/circle.png"),
       transparent: true,
     }));
+    this._cursor.scale.set(0.5, 0.5, 0.5);
     this._cursor.visible = false;
     this.add(this._cursor);
 
@@ -51,8 +52,9 @@ export default class SmartphoneCursor extends THREE.Object3D {
     // eslint-disable-next-line no-console
     console.info("SELECTED: " + this._cursorPosition.x + " " + this._cursorPosition.y)
 
-    if (this.callback)
+    if (this.callback) {
       this.callback(this._cursorPosition);
+    }
   }
 
   _smartphoneToLocalPosition(pos2d) {
@@ -109,12 +111,14 @@ export default class SmartphoneCursor extends THREE.Object3D {
     return this._cursorPosition;
   }
 
-  set touched(value) {
-    this._isTouching = value;
-    this._cursor.visible = value;
-    this._selector.visible = value;
+  set touched(isTouching) {
+    this._isTouching = isTouching;
+    this._cursor.visible = isTouching;
+    this._selector.visible = isTouching;
 
-    if (!value) {
+    if (isTouching) {
+      this._selectProgress = 0;
+    } else {
       this._isSelecting = false;
     }
   }

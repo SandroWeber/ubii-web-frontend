@@ -11,7 +11,7 @@ import SAVRScene from "./SAVRScene";
 /* eslint-disable-next-line no-unused-vars */
 import * as THREE from "three";
 import SmartphoneCursor from "./modules/SmartphoneCursor";
-//import * as dat from "dat.gui";
+import VirtualKeyboard from "./modules/VirtualKeyboard";
 
 // Networking
 import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
@@ -32,7 +32,8 @@ export default {
       text: undefined,
       textMesh: undefined,
       font: undefined,
-      cursor: undefined
+      cursor: undefined,
+      keyboard: undefined
     };
   },
 
@@ -58,10 +59,18 @@ export default {
         }
       );
 
+      // setup keyboard
+      const area = new THREE.Vector2(20, 15);
+      const keyboard = (this.keyboard = new VirtualKeyboard(area));
+      keyboard.position.set(-5, 3, -9);
+      this.scene.add(keyboard);
+
       // setup cursor
-      const cursor = (this.cursor = new SmartphoneCursor({ x: 20, y: 15 }));
+      const cursor = (this.cursor = new SmartphoneCursor(
+        area,
+        keyboard.onPress
+      ));
       cursor.position.set(-5, 3, -9);
-      cursor.scale.set(0.5, 0.5, 0.5);
       this.scene.add(cursor);
 
       // gui
