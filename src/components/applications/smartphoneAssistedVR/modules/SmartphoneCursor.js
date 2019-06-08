@@ -32,6 +32,7 @@ export default class SmartphoneCursor extends THREE.Object3D {
     this._cursor = new THREE.Mesh(new THREE.PlaneBufferGeometry(), new THREE.MeshBasicMaterial({
       map: new THREE.TextureLoader().load("images/circle.png"),
       transparent: true,
+      opacity: 1
     }));
     this._cursor.scale.set(0.5, 0.5, 0.5);
     this._cursor.visible = false;
@@ -40,6 +41,7 @@ export default class SmartphoneCursor extends THREE.Object3D {
     this._selector = new THREE.Mesh(new THREE.PlaneBufferGeometry(), new THREE.MeshBasicMaterial({
       map: new THREE.TextureLoader().load("images/circle_filled.png"),
       transparent: true,
+      opacity: 1
     }));
     this._selector.visible = false;
     this._selector.position.set(0, 0, 0.01);

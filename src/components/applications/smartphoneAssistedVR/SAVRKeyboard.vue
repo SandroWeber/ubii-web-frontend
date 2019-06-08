@@ -29,7 +29,7 @@ export default {
     return {
       client: undefined,
       oldClients: [],
-      text: undefined,
+      text: "",
       textMesh: undefined,
       font: undefined,
       cursor: undefined,
@@ -54,8 +54,6 @@ export default {
           mesh.position.set(-3, 4, -10);
           mesh.scale.set(0.1, 0.1, 0.1);
           ctx.scene.add(mesh);
-
-          ctx.text = ">_";
         }
       );
 
@@ -64,8 +62,21 @@ export default {
       const keyboardArea = new THREE.Vector2(15, 5);
 
       // setup keyboard
-      this.keyboard = new VirtualKeyboard(keyboardArea, key => {
-        this.text += key;
+      this.keyboard = new VirtualKeyboard(keyboardArea, event => {
+        switch (event.action) {
+          case VirtualKeyboard.KEY_ACTIONS.DELETE_ONE:
+            this.text = this.text.substring(0, this.text.length - 1);
+            break;
+          case VirtualKeyboard.KEY_ACTIONS.CLEAR:
+          case VirtualKeyboard.KEY_ACTIONS.RETURN:
+            this.text = "";
+            break;
+          case VirtualKeyboard.KEY_ACTIONS.NONE:
+          case undefined:
+          default:
+            this.text += event.key;
+            break;
+        }
       });
       keyboardCursorGroup.add(this.keyboard);
 
