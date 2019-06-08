@@ -104,7 +104,7 @@ export default class DefaultSetup extends THREE.Object3D {
       )
     );
 
-    group.add(new THREE.GridHelper(10, 10, 0xf7f7f7, 0xc4c4c4));
+    group.add(new THREE.GridHelper(20, 20, 0xf7f7f7, 0xc4c4c4));
 
     this.add(group);
     return group;
