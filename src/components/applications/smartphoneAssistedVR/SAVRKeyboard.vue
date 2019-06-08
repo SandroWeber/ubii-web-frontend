@@ -59,23 +59,30 @@ export default {
         }
       );
 
+      // setup keyboard and cursor
+      const keyboardCursorGroup = new THREE.Group();
+      const keyboardArea = new THREE.Vector2(15, 5);
+
       // setup keyboard
-      const area = new THREE.Vector2(20, 15);
-      const keyboard = (this.keyboard = new VirtualKeyboard(area));
-      keyboard.position.set(-5, 3, -9);
-      this.scene.add(keyboard);
+      this.keyboard = new VirtualKeyboard(keyboardArea, key => {
+        this.text += key;
+      });
+      keyboardCursorGroup.add(this.keyboard);
 
       // setup cursor
-      const cursor = (this.cursor = new SmartphoneCursor(
-        area,
-        keyboard.onPress
-      ));
-      cursor.position.set(-5, 3, -9);
-      this.scene.add(cursor);
+      this.cursor = new SmartphoneCursor(keyboardArea, event => {
+        this.keyboard.onPress(event);
+      });
+      this.cursor.position.set(0, 0, 0.001);
+      keyboardCursorGroup.add(this.cursor);
+
+      keyboardCursorGroup.position.set(0, 0, -9);
+      keyboardCursorGroup.rotation.set(-THREE.Math.degToRad(20), 0, 0);
+      this.scene.add(keyboardCursorGroup);
 
       // gui
-      this.gui.add(cursor, "SELECT_TIME");
-      this.gui.add(cursor, "MAX_VELOCITY");
+      this.gui.add(this.cursor, "SELECT_TIME");
+      this.gui.add(this.cursor, "MAX_VELOCITY");
     },
     /* eslint-disable-next-line no-unused-vars */
     updateGameLoop: function(delta) {
