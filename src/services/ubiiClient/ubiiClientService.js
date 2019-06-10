@@ -46,12 +46,13 @@ class UbiiClientService {
 
     let id = this.client.clientSpecification.id;
 
+    UbiiEventBus.$emit(UbiiEventBus.DISCONNECT_EVENT);
+
     this.connected = false;
     this.connecting = false;
     this.client = undefined;
 
     console.info("client disconnected with ID: " + id);
-    UbiiEventBus.$emit(UbiiEventBus.DISCONNECT_EVENT);
   }
 
   isConnected() {

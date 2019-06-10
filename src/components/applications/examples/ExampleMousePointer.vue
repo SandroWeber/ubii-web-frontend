@@ -283,7 +283,9 @@ export default {
         });
     },
     stopExample: function() {
-      if (!this.$data.exampleStarted) return;
+      if (!this.exampleStarted) return;
+
+      this.exampleStarted = false;
 
       // unsubscribe and stop session
       UbiiClientService.client.unsubscribe(
@@ -295,6 +297,10 @@ export default {
       });
     },
     onMouseMove: function(event) {
+      if (!this.exampleStarted) {
+        return;
+      }
+
       // calculate the current mouse position, normalized to the bounds of the interactive area ([0;1], [0;1])
       let boundingRect = event.currentTarget.getBoundingClientRect();
       let relativeMousePosition = {
@@ -316,6 +322,10 @@ export default {
       this.onTouchMove(event);
     },
     onTouchMove: function(event) {
+      if (!this.exampleStarted) {
+        return;
+      }
+
       // calculate the current touch position, normalized to the bounds of the interactive area ([0;1], [0;1])
       let relativeMousePosition = {
         x:
