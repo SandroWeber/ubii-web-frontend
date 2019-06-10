@@ -12,6 +12,7 @@ import SAVRScene from "./SAVRScene";
 import * as THREE from "three";
 import SmartphoneCursor from "./modules/SmartphoneCursor";
 import VirtualKeyboard from "./modules/VirtualKeyboard";
+import TextDisplay from "./modules/TextDisplay";
 
 // Networking
 import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
@@ -30,32 +31,18 @@ export default {
       client: undefined,
       oldClients: [],
       text: "",
-      textMesh: undefined,
-      font: undefined,
       cursor: undefined,
-      keyboard: undefined
+      keyboard: undefined,
+      textDisplay: undefined
     };
   },
 
   methods: {
     onStart: function() {
-      const ctx = this;
-
-      // setup text
-      new THREE.FontLoader().load(
-        "fonts/typeface/helvetiker_regular.typeface.json",
-        function(font) {
-          ctx.font = font;
-
-          const mesh = (ctx.textMesh = new THREE.Mesh(
-            new THREE.Geometry(),
-            new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff })
-          ));
-          mesh.position.set(-3, 4, -10);
-          mesh.scale.set(0.1, 0.1, 0.1);
-          ctx.scene.add(mesh);
-        }
-      );
+      // setup text display
+      this.textDisplay = new TextDisplay(new THREE.Vector2(10, 5));
+      this.textDisplay.position.set(0, 5, -9);
+      this.scene.add(this.textDisplay);
 
       // setup keyboard and cursor
       const keyboardCursorGroup = new THREE.Group();
@@ -69,7 +56,7 @@ export default {
             break;
           case VirtualKeyboard.KEY_ACTIONS.CLEAR:
           case VirtualKeyboard.KEY_ACTIONS.RETURN:
-            this.text = "";
+            this.text += "\n";
             break;
           case VirtualKeyboard.KEY_ACTIONS.NONE:
           case undefined:
@@ -159,24 +146,6 @@ export default {
 
       this.oldClients.push(id);
     },
-    updateText: function(text) {
-      if (!this.font || !this.textMesh) {
-        // eslint-disable-next-line no-console
-        console.warn("Can't update text, because the font or mesh is null.");
-        return;
-      }
-
-      let geometry = new THREE.TextGeometry(text, {
-        font: this.font,
-        size: 10,
-        height: 1
-      });
-
-      if (this.textMesh.geometry) {
-        this.textMesh.geometry.dispose();
-      }
-      this.textMesh.geometry = geometry;
-    },
     onExit: function() {
       if (this.client) {
         unsubscribe(this.client.topics, this.client.sessions);
@@ -185,7 +154,7 @@ export default {
   },
   watch: {
     text: function(newValue) {
-      this.updateText(newValue);
+      this.textDisplay.text = newValue;
     }
   }
 };
