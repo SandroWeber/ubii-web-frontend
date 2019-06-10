@@ -16,13 +16,17 @@ export default class VirtualKeyboard extends THREE.Object3D {
     this.capsLock = false;
 
     // private members
-    this.actionMap = [];
+    this._actionMap = [];
+    this._canvas = undefined;
+    this._mesh = undefined;
+    this._material = undefined;
+    this._texture = undefined;
 
-    this._build();
+    this._draw(true);
   }
 
   // private methods
-  _build() {
+  _draw(actionMap = false) {
 
     // constants
     const padding = 2;
@@ -53,10 +57,14 @@ export default class VirtualKeyboard extends THREE.Object3D {
     const keyHeightPixel = keyHeight * _RESOLUTION;
 
     // create canvas
-    const canvas = document.createElement("canvas");
-    canvas.width = canvasWidth * _RESOLUTION + padding;
-    canvas.height = canvasHeight * _RESOLUTION + padding;
-    const context = canvas.getContext("2d");
+    if (!this._context) {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvasWidth * _RESOLUTION + padding;
+      canvas.height = canvasHeight * _RESOLUTION + padding;
+      this._canvas = canvas;
+    }
+    const context = this._canvas.getContext("2d");
+    context.clearRect(0, 0, this._canvas.width, this._canvas.height);
 
     // ensemble keyboard
     for (let y = 0; y < VirtualKeyboard.KEY_MAP.length; y++) {
@@ -72,17 +80,25 @@ export default class VirtualKeyboard extends THREE.Object3D {
         const pixelWidth = width * keyWidthPixel
 
         // write action map
-        actions.push({
-          width: currentX,
-          key: key
-        })
+        if (actionMap) {
+          actions.push({
+            width: currentX,
+            key: key
+          })
+        }
 
         // draw the key
         context.strokeStyle = "#333333";
-        context.fillStyle = "#666666";
         context.beginPath();
         context.rect(currentX, currentY, pixelWidth, keyHeightPixel);
         if (key.key || key.label) {
+          if (this.capsLock && key.action == VirtualKeyboard.KEY_ACTIONS.CAPS_LOCK) {
+            context.fillStyle = "#42b3f4";
+          } else if (this.shift && key.action == VirtualKeyboard.KEY_ACTIONS.SHIFT) {
+            context.fillStyle = "#42b3f4";
+          } else {
+            context.fillStyle = "#666666";
+          }
           context.fill();
         }
         context.stroke();
@@ -113,24 +129,34 @@ export default class VirtualKeyboard extends THREE.Object3D {
         currentX += pixelWidth;
       }
 
-      this.actionMap.push(actions);
+      if (actionMap){
+        this._actionMap.push(actions);
+      }
     }
 
-    const texture = new THREE.Texture(canvas);
-    texture.minFilter = THREE.LinearFilter;
-    texture.needsUpdate = true;
+    if (!this._mesh) {
+      this._texture = new THREE.Texture(this._canvas);
+      this._texture.minFilter = THREE.LinearFilter;
+      this._texture.needsUpdate = true;
+      
+      this._material = new THREE.MeshBasicMaterial({
+        map: this._texture,
+        opacity: 1,
+        transparent: true
+      });
+      this._mesh = new THREE.Mesh(
+        new THREE.PlaneBufferGeometry(canvasWidth, canvasHeight),
+        this._material
+      );
 
-    const material = new THREE.MeshBasicMaterial({
-      map: texture,
-      opacity: 1,
-      transparent: true
-    });
-    const mesh = new THREE.Mesh(
-      new THREE.PlaneBufferGeometry(canvasWidth, canvasHeight),
-      material
-    );
-
-    this.add(mesh);
+      this.add(this._mesh);
+    } else if (this._texture && this._material) {
+      this._texture = new THREE.Texture(this._canvas);
+      this._texture.minFilter = THREE.LinearFilter;
+      this._texture.needsUpdate = true;
+      this._material.map = this._texture;
+      this._material.needsUpdate = true;
+    }
   }
 
   // public methods
@@ -139,22 +165,24 @@ export default class VirtualKeyboard extends THREE.Object3D {
 
     const localPos = event.localPos;
     const pixelPosX = localPos.x * this.area.width * _RESOLUTION;
-    const keyRow = Math.floor(localPos.y * this.actionMap.length);
-    if (keyRow >= 0 && keyRow < this.actionMap.length && pixelPosX >= 0 && pixelPosX < this.area.width * _RESOLUTION) {
+    const keyRow = Math.floor(localPos.y * this._actionMap.length);
+    if (keyRow >= 0 && keyRow < this._actionMap.length && pixelPosX >= 0 && pixelPosX < this.area.width * _RESOLUTION) {
 
       // eslint-disable-next-line for-direction
-      for (let x = this.actionMap[keyRow].length - 1; x >= 0; x--) {
-        const action = this.actionMap[keyRow][x];
+      for (let x = this._actionMap[keyRow].length - 1; x >= 0; x--) {
+        const action = this._actionMap[keyRow][x];
 
         if (action.width <= pixelPosX) {
 
           switch (action.key.action) {
             case VirtualKeyboard.KEY_ACTIONS.SHIFT:
               this.shift = !this.shift;
+              this._draw();
               break;
             case VirtualKeyboard.KEY_ACTIONS.CAPS_LOCK:
               this.shift = false;
               this.capsLock = !this.capsLock;
+              this._draw();
               break;
             case VirtualKeyboard.KEY_ACTIONS.NONE:
             case undefined:
@@ -163,7 +191,10 @@ export default class VirtualKeyboard extends THREE.Object3D {
                 action: action.key.action,
                 key: (this.capsLock || this.shift) && action.key.keyCaps ? action.key.keyCaps : action.key.key
               });
-              this.shift = false;
+              if (this.shift) {
+                this.shift = false;
+                this._draw();
+              }
               break;
           }
           return;
@@ -223,7 +254,7 @@ VirtualKeyboard.KEY_MAP = [
     key: "9",
     keyCaps: "("
   }, {
-    key: "10",
+    key: "0",
     keyCaps: ")"
   }, {
     key: "-",
