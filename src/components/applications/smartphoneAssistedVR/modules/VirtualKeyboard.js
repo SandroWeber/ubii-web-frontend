@@ -375,7 +375,7 @@ VirtualKeyboard.KEY_MAP = [
     keyCaps: "B"
   }, {
     key: "n",
-    keyCaps: "n"
+    keyCaps: "N"
   }, {
     key: "m",
     keyCaps: "M"
