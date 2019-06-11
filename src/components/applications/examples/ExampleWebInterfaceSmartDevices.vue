@@ -8,6 +8,7 @@
 import UbiiClientContent from "../sharedModules/UbiiClientContent";
 import { DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
 import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
+import UbiiEventBus from "../../../services/ubiiClient/ubiiEventBus";
 
 /* eslint-disable no-console */
 
@@ -20,7 +21,8 @@ export default {
       this.stopExample();
     });
 
-    this.startExample();
+    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.startExample);
+    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopExample);
   },
   beforeDestroy: function() {
     this.stopExample();
@@ -34,6 +36,7 @@ export default {
   },
   methods: {
     startExample: function() {
+      console.log("start");
       this.$data.pollSmartDevices = true;
       UbiiClientService.isConnected().then(() => {
         this.updateSmartDevices();
@@ -43,6 +46,10 @@ export default {
       this.$data.pollSmartDevices = false;
     },
     updateSmartDevices: function() {
+      if (!this.$data.pollSmartDevices) {
+        return;
+      }
+
       UbiiClientService.client
         .callService({ topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST })
         .then(reply => {
@@ -62,9 +69,7 @@ export default {
           });
         });
 
-      if (this.$data.pollSmartDevices) {
-        setTimeout(this.updateSmartDevices, 1000);
-      }
+      setTimeout(this.updateSmartDevices, 1000);
     },
     getRandomColor: function() {
       let letters = "0123456789ABCDEF";
