@@ -4,13 +4,14 @@ const _RESOLUTION = 64;
 
 export default class VirtualKeyboard extends THREE.Object3D {
 
-  constructor(area, callback) {
+  constructor(area, fontSize = 35, callback) {
     // parent
     super();
     this.name = "Smartphone Cursor";
 
     // public members
     this.area = area;
+    this.fontSize = fontSize;
     this.callback = callback;
     this.shift = false;
     this.capsLock = false;
@@ -103,7 +104,7 @@ export default class VirtualKeyboard extends THREE.Object3D {
         }
         context.stroke();
         context.textAlign = "center";
-        context.font = "Normal 40px Arial";
+        context.font = "Normal " + this.fontSize + "px Arial";
         context.fillStyle = "#99FF33";
 
         if (key.key || key.label) {
@@ -123,13 +124,13 @@ export default class VirtualKeyboard extends THREE.Object3D {
           }
 
           const label = key.label ? key.label : ((this.capsLock || this.shift) && key.keyCaps ? key.keyCaps : key.key)
-          context.fillText(label, currentX + keyWidthPixel / 2 + offset, currentY + keyHeightPixel / 2 + 10);
+          context.fillText(label, currentX + keyWidthPixel / 2 + offset, currentY + keyHeightPixel / 2 + 5);
         }
 
         currentX += pixelWidth;
       }
 
-      if (actionMap){
+      if (actionMap) {
         this._actionMap.push(actions);
       }
     }
@@ -138,7 +139,7 @@ export default class VirtualKeyboard extends THREE.Object3D {
       this._texture = new THREE.Texture(this._canvas);
       this._texture.minFilter = THREE.LinearFilter;
       this._texture.needsUpdate = true;
-      
+
       this._material = new THREE.MeshBasicMaterial({
         map: this._texture,
         opacity: 1,

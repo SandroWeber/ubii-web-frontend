@@ -200,6 +200,11 @@ export default {
     },
 
     onExit: function() {
+      if (this.renderer) {
+        this.renderer.vr.enabled = false;
+        //this.renderer.setAnimationLoop(null); produces error, but shouldn't as it says in the docs
+        this.renderer.dispose();
+      }
       this.onDisconnectToUbii();
     }
   }

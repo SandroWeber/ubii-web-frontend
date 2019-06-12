@@ -40,16 +40,16 @@ export default {
   methods: {
     onStart: function() {
       // setup text display
-      this.textDisplay = new TextDisplay(new THREE.Vector2(10, 5));
-      this.textDisplay.position.set(0, 5, -9);
+      this.textDisplay = new TextDisplay(new THREE.Vector2(7.5, 2.5));
+      this.textDisplay.position.set(0, 3, -7);
       this.scene.add(this.textDisplay);
 
       // setup keyboard and cursor
       const keyboardCursorGroup = new THREE.Group();
-      const keyboardArea = new THREE.Vector2(15, 5);
+      const keyboardArea = new THREE.Vector2(5, 2);
 
       // setup keyboard
-      this.keyboard = new VirtualKeyboard(keyboardArea, event => {
+      this.keyboard = new VirtualKeyboard(keyboardArea, 12, event => {
         switch (event.action) {
           case VirtualKeyboard.KEY_ACTIONS.DELETE_ONE:
             this.text = this.text.substring(0, this.text.length - 1);
@@ -71,10 +71,10 @@ export default {
       this.cursor = new SmartphoneCursor(keyboardArea, event => {
         this.keyboard.onPress(event);
       });
-      this.cursor.position.set(0, 0, 0.001);
+      this.cursor.position.set(0, 0, 0.15);
       keyboardCursorGroup.add(this.cursor);
 
-      keyboardCursorGroup.position.set(0, 0, -9);
+      keyboardCursorGroup.position.set(0, 1.1, -6);
       keyboardCursorGroup.rotation.set(-THREE.Math.degToRad(20), 0, 0);
       this.scene.add(keyboardCursorGroup);
 

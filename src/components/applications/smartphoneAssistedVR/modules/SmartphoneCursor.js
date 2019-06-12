@@ -34,7 +34,7 @@ export default class SmartphoneCursor extends THREE.Object3D {
       transparent: true,
       opacity: 1
     }));
-    this._cursor.scale.set(0.5, 0.5, 0.5);
+    this._cursor.scale.set(0.25, 0.25, 0.25);
     this._cursor.visible = false;
     this.add(this._cursor);
 
