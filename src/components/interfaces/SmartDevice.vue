@@ -10,9 +10,12 @@
         <span v-show="clientId">Client ID: {{clientId}}</span>
         <br>
 
-        <button @click="toggleFullScreen()">Fullscreen Mode</button>
+        <button @click="toggleFullScreen()">
+          <span v-show="fullscreen">x</span>
+          <span v-show="!fullscreen">Fullscreen Mode</span>
+        </button>
         <br>
-        <button @click="calibrate()">Calibrate Orientation</button>
+        <button v-show="!fullscreen" @click="calibrate()">Calibrate Orientation</button>
 
         <div
           id="touch-area"
