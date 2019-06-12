@@ -11,6 +11,8 @@
         <br>
 
         <button @click="toggleFullScreen()">Fullscreen Mode</button>
+        <br>
+        <button @click="calibrate()">Calibrate Orientation</button>
 
         <div
           id="touch-area"
@@ -21,22 +23,28 @@
         >
           <span>Touch0: {{touches && touches[0] && touches[0].clientX}} {{touches && touches[0] && touches[0].clientY}}</span>
           <br>
-          <span>Orientation:</span>
+          <span>Raw Orientation:</span>
           <span v-if="deviceOrientation">
-            {{deviceOrientation.absolute}}
             {{this.round(deviceOrientation.alpha, 1)}}
             {{this.round(deviceOrientation.beta, 1)}}
             {{this.round(deviceOrientation.gamma, 1)}}
           </span>
           <br>
-          <span>Acceleration:</span>
+          <span>Calibrated Orientation:</span>
+          <span v-if="fixedCalibratedOrientation">
+            {{this.round(fixedCalibratedOrientation.x, 1)}}
+            {{this.round(fixedCalibratedOrientation.y, 1)}}
+            {{this.round(fixedCalibratedOrientation.z, 1)}}
+          </span>
+          <br>
+          <span>Raw Acceleration:</span>
           <span v-if="deviceMotion && deviceMotion.acceleration">
             {{this.round(deviceMotion.acceleration.x, 1)}}
             {{this.round(deviceMotion.acceleration.y, 1)}}
             {{this.round(deviceMotion.acceleration.z, 1)}}
           </span>
           <br>
-          <span>Rotation:</span>
+          <span>Raw Rotation:</span>
           <span v-if="deviceMotion && deviceMotion.rotationRate">
             {{this.round(deviceMotion.rotationRate.alpha, 1)}}
             {{this.round(deviceMotion.rotationRate.beta, 1)}}
@@ -89,7 +97,10 @@ export default {
       touches: undefined,
       deviceOrientation: undefined,
       deviceMotion: undefined,
-      fullscreen: false
+      fullscreen: false,
+      currentOrientation: undefined,
+      calibratedOrientation: { x: 0, y: 0, z: 0 },
+      fixedCalibratedOrientation: undefined
     };
   },
   methods: {
@@ -179,15 +190,26 @@ export default {
       // https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent
       this.$data.deviceOrientation = event;
 
+      let current = (this.$data.currentOrientation = {
+        x: this.round(event.alpha, 2),
+        y: this.round(event.beta, 2),
+        z: this.round(event.gamma, 2)
+      });
+      let calibrated = this.$data.calibratedOrientation;
+
+      let fixed = {
+        x: current.x - calibrated.x,
+        y: current.y - calibrated.y,
+        z: current.z - calibrated.z
+      };
+
+      this.fixedCalibratedOrientation = fixed;
+
       UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
         this.$data.componentOrientation.topic,
         "vector3",
-        {
-          x: this.round(event.alpha, 2),
-          y: this.round(event.beta, 2),
-          z: this.round(event.gamma, 2)
-        }
+        fixed
       );
     },
     onDeviceMotion: function(event) {
@@ -244,6 +266,11 @@ export default {
     },
     onFullScreenChange: function(fullscreen) {
       this.fullscreen = fullscreen;
+    },
+    calibrate: function() {
+      if (this.currentOrientation) {
+        this.calibratedOrientation = this.currentOrientation;
+      }
     }
   }
 };
