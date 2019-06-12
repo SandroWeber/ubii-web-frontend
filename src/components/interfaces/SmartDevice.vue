@@ -76,8 +76,11 @@ export default {
       this.stopInterface();
     });
 
-    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.startInterface);
-    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopInterface);
+    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.onConnectToUbii);
+    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.onDisconnectToUbii);
+
+    this.startInterface();
+    if (UbiiClientService.isConnected) this.onConnectToUbii();
   },
   beforeDestroy: function() {
     this.stopInterface();
@@ -133,7 +136,7 @@ export default {
       this.$data.componentLinearAcceleration = ubiiDevice.components[2];
       this.$data.componentTouchEvents = ubiiDevice.components[3];
     },
-    startInterface: function() {
+    onConnectToUbii: function() {
       // register the mouse pointer device
       UbiiClientService.isConnected().then(() => {
         this.createUbiiSpecs();
@@ -141,14 +144,25 @@ export default {
           this.$data.ubiiDevice = device;
           return device;
         });
-
-        window.addEventListener(
-          "deviceorientation",
-          this.onDeviceOrientation,
-          true
-        );
-        window.addEventListener("devicemotion", this.onDeviceMotion, true);
       });
+    },
+    onDisconnectToUbii: function() {
+      this.ubiiDevice.components.forEach(component => {
+        // eslint-disable-next-line no-console
+        console.log("unsubscribed to " + component.topic);
+
+        UbiiClientService.client.unsubscribe(component.topic);
+      });
+
+      // TODO: unregister device
+    },
+    startInterface: function() {
+      window.addEventListener(
+        "deviceorientation",
+        this.onDeviceOrientation,
+        true
+      );
+      window.addEventListener("devicemotion", this.onDeviceMotion, true);
     },
     stopInterface: function() {},
     onTouchStart: function(event) {
