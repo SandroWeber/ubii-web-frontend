@@ -72,6 +72,8 @@ export default {
 
     UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.startExample);
     UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopExample);
+
+    if (UbiiClientService.isConnected) this.startExample();
   },
   beforeDestroy: function() {
     this.stopExample();
@@ -240,47 +242,49 @@ export default {
       this.$data.ubiiSession = ubiiSession;
     },
     startExample: function() {
-      // create all the specifications we need to define our example application
-      // these are protobuf messages to be sent to the server (saved in this.$data)
-      this.createUbiiSpecs();
+      UbiiClientService.isConnected().then(() => {
+        // create all the specifications we need to define our example application
+        // these are protobuf messages to be sent to the server (saved in this.$data)
+        this.createUbiiSpecs();
 
-      // register the mouse pointer device
-      UbiiClientService.registerDevice(this.$data.ubiiDevice)
-        .then(device => {
-          // on success, the response will be the (possibly extended) device specification we just sent
-          // we accept any additions the server might have made, like an ID that was left blank so the backend
-          // would automatically assign one, to our local state
-          this.$data.ubiiDevice = device;
-          return device;
-        })
-        .then(() => {
-          // subscribe to the device topics so we are notified when new data arrives on the topic
-          UbiiClientService.client.subscribe(
-            this.$data.outputServerPointer.topic,
-            // a callback to be called when new data on this topic arrives
-            mousePosition => {
-              // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
-              // interaction area and set our red square indicator
-              let boundingRect = document
-                .getElementById("mouse-pointer-area")
-                .getBoundingClientRect();
-              this.$data.serverMousePosition = {
-                x: mousePosition.x * boundingRect.width,
-                y: mousePosition.y * boundingRect.height
-              };
-            }
-          );
+        // register the mouse pointer device
+        UbiiClientService.registerDevice(this.$data.ubiiDevice)
+          .then(device => {
+            // on success, the response will be the (possibly extended) device specification we just sent
+            // we accept any additions the server might have made, like an ID that was left blank so the backend
+            // would automatically assign one, to our local state
+            this.$data.ubiiDevice = device;
+            return device;
+          })
+          .then(() => {
+            // subscribe to the device topics so we are notified when new data arrives on the topic
+            UbiiClientService.client.subscribe(
+              this.$data.outputServerPointer.topic,
+              // a callback to be called when new data on this topic arrives
+              mousePosition => {
+                // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
+                // interaction area and set our red square indicator
+                let boundingRect = document
+                  .getElementById("mouse-pointer-area")
+                  .getBoundingClientRect();
+                this.$data.serverMousePosition = {
+                  x: mousePosition.x * boundingRect.width,
+                  y: mousePosition.y * boundingRect.height
+                };
+              }
+            );
 
-          // start our session (registering not necessary as we do not want to save it permanently)
-          UbiiClientService.client
-            .callService({
-              topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
-              session: this.$data.ubiiSession
-            })
-            .then(() => {
-              this.$data.exampleStarted = true;
-            });
-        });
+            // start our session (registering not necessary as we do not want to save it permanently)
+            UbiiClientService.client
+              .callService({
+                topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+                session: this.$data.ubiiSession
+              })
+              .then(() => {
+                this.$data.exampleStarted = true;
+              });
+          });
+      });
     },
     stopExample: function() {
       if (!this.exampleStarted) return;

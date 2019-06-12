@@ -23,6 +23,8 @@ export default {
 
     UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.startExample);
     UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopExample);
+
+    if (UbiiClientService.isConnected) this.startExample();
   },
   beforeDestroy: function() {
     this.stopExample();
@@ -36,7 +38,6 @@ export default {
   },
   methods: {
     startExample: function() {
-      console.log("start");
       this.$data.pollSmartDevices = true;
       UbiiClientService.isConnected().then(() => {
         this.updateSmartDevices();
