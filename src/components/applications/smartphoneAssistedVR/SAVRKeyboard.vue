@@ -146,10 +146,11 @@ export default {
 
       this.oldClients.push(id);
     },
-    onExit: function() {
+    onDisconnectToUbii: function() {
       if (this.client) {
         unsubscribe(this.client.topics, this.client.sessions);
       }
+      this.oldClients = [];
     }
   },
   watch: {

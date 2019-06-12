@@ -132,7 +132,8 @@ export default {
         model: undefined,
         session: undefined,
         topic: undefined,
-        gid: this.gidCounter++
+        gid: this.gidCounter++,
+        subscribe: undefined
       };
 
       // check if model is loaded
@@ -149,21 +150,23 @@ export default {
       client.topic = specs.topic;
 
       // start our session (registering not necessary as we do not want to save it permanently)
-      UbiiClientService.client
-        .callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
-          session: client.session
-        })
-        .then(() => {
-          // subscribe the topic
-          UbiiClientService.client
-            .subscribe(specs.topic, orientation => {
-              client.orientation = orientation;
-            })
-            .then(() => {
-              checkForPrefab();
-            });
-        });
+      client.subscribe = (createModel = false) =>
+        UbiiClientService.client
+          .callService({
+            topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+            session: client.session
+          })
+          .then(() => {
+            // subscribe the topic
+            UbiiClientService.client
+              .subscribe(specs.topic, orientation => {
+                client.orientation = orientation;
+              })
+              .then(() => {
+                if (createModel) checkForPrefab();
+              });
+          });
+      client.subscribe(true);
 
       // create the client
       this.clients.set(clientID, client);
@@ -194,7 +197,13 @@ export default {
       return pivotPoint;
     },
 
-    onExit: function() {
+    onConnectToUbii: function() {
+      // resubscribe to previous topics
+      this.clients.forEach((v, k) => {
+        v.subscribe();
+      });
+    },
+    onDisconnectToUbii: function() {
       // unsubscribe and stop all sessions
       this.clients.forEach((v, k) => {
         UbiiClientService.client.unsubscribe(v.topic);

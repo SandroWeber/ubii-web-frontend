@@ -12,6 +12,7 @@ import * as dat from "dat.gui";
 
 // Networking
 import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
+import UbiiEventBus from "../../../services/ubiiClient/ubiiEventBus";
 
 export default {
   name: "SAVRScene",
@@ -48,18 +49,28 @@ export default {
   methods: {
     // INITIALIZATION
     componentLoaded: function() {
-      this.addEventListeners();
-      this.connect();
+      this.registerEvents();
 
       this.initScene();
+
+      if (UbiiClientService.isConnected) {
+        this.onConnectToUbii();
+      }
     },
-    addEventListeners: function() {
+    registerEvents: function() {
       window.addEventListener("beforeunload", () => {
         this.onExit();
       });
 
       window.addEventListener("resize", () => {
         this.handleResize();
+      });
+
+      UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
+        this.onConnectToUbii();
+      });
+      UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, () => {
+        this.onDisconnectToUbii();
       });
     },
 
@@ -109,7 +120,6 @@ export default {
       this.startGameLoop();
 
       // workaround: https://github.com/vuejs/Discussion/issues/394
-      //const ctx = this;
       const fixClientSize = () => {
         setTimeout(() => {
           if (!container || container.clientWidth == 0) {
@@ -154,7 +164,7 @@ export default {
     },
 
     // UBI INTERACT
-    connect: function() {
+    startPollLoop: function() {
       this.pollSmartDevices = true;
 
       UbiiClientService.isConnected().then(() => {
@@ -170,10 +180,10 @@ export default {
               );
 
               if (this.isDevelopment) {
-                // really stupid fix, to fix hot-reloading
+                // really stupid workaround, to fix hot-reloading
                 // without this, for some reason the child component won't load and you would just see the template of this component
-                // to still reload the view, we force-reload the whole page which is absolutely stupid
-                // this should only ever happend during development, after a hot-reload; if not, remove this fix
+                // to reload the view, we force-reload the whole page which is absolutely stupid
+                // this should only ever happend during development, after a hot-reload
                 location.reload();
               }
             }
@@ -182,9 +192,15 @@ export default {
         loop();
       });
     },
+    onConnectToUbii: function() {
+      this.startPollLoop();
+    },
+    onDisconnectToUbii: function() {
+      this.pollSmartDevices = false;
+    },
 
     onExit: function() {
-      this.pollSmartDevices = false;
+      this.onDisconnectToUbii();
     }
   }
 };
@@ -193,8 +209,5 @@ export default {
 <style scoped lang="stylus">
 .render-container {
   height: 100%;
-}
-
-.dg {
 }
 </style>

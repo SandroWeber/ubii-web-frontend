@@ -110,7 +110,6 @@ export default {
               const clientID = topic.substring(0, topicIndex);
 
               // create new client if we dont have one yet or a new client just connected
-
               if (!this.$data.client) {
                 this.createClient(clientID);
               } else {
@@ -222,10 +221,11 @@ export default {
         topic: orientationOutput.topic
       };
     },
-    onExit: function() {
+    onDisconnectToUbii: function() {
       if (this.client) {
         unsubscribe(this.client.topics, this.client.sessions);
       }
+      this.oldClients = [];
     }
   }
 };
