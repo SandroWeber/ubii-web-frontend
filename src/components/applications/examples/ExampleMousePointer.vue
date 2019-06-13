@@ -70,8 +70,13 @@ export default {
       this.stopExample();
     });
 
-    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.startExample);
+    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
+      this.stopExample();
+      this.startExample();
+    });
     UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopExample);
+    
+    this.startExample();
   },
   beforeDestroy: function() {
     this.stopExample();
