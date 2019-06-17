@@ -10,7 +10,12 @@
         <span v-show="clientId">Client ID: {{clientId}}</span>
         <br>
 
-        <button @click="toggleFullScreen()">Fullscreen Mode</button>
+        <button @click="toggleFullScreen()">
+          <span v-show="fullscreen">x</span>
+          <span v-show="!fullscreen">Fullscreen Mode</span>
+        </button>
+        <br>
+        <button v-show="!fullscreen" @click="calibrate()">Calibrate Orientation</button>
 
         <div
           id="touch-area"
@@ -21,12 +26,18 @@
         >
           <span>Touch0: {{touches && touches[0] && touches[0].clientX}} {{touches && touches[0] && touches[0].clientY}}</span>
           <br>
-          <span>Orientation:</span>
+          <span>Device Orientation:</span>
           <span v-if="deviceOrientation">
-            {{deviceOrientation.absolute}}
             {{this.round(deviceOrientation.alpha, 1)}}
             {{this.round(deviceOrientation.beta, 1)}}
             {{this.round(deviceOrientation.gamma, 1)}}
+          </span>
+          <br>
+          <span>Rotation Rate:</span>
+          <span v-if="deviceMotion && deviceMotion.rotationRate">
+            {{this.round(deviceMotion.rotationRate.alpha, 1)}}
+            {{this.round(deviceMotion.rotationRate.beta, 1)}}
+            {{this.round(deviceMotion.rotationRate.gamma, 1)}}
           </span>
           <br>
           <span>Acceleration:</span>
@@ -36,11 +47,18 @@
             {{this.round(deviceMotion.acceleration.z, 1)}}
           </span>
           <br>
-          <span>Rotation:</span>
-          <span v-if="deviceMotion && deviceMotion.rotationRate">
-            {{this.round(deviceMotion.rotationRate.alpha, 1)}}
-            {{this.round(deviceMotion.rotationRate.beta, 1)}}
-            {{this.round(deviceMotion.rotationRate.gamma, 1)}}
+          <span>Acceleration including Gravity:</span>
+          <span v-if="deviceMotion && deviceMotion.accelerationIncludingGravity">
+            {{this.round(deviceMotion.accelerationIncludingGravity.x, 1)}}
+            {{this.round(deviceMotion.accelerationIncludingGravity.y, 1)}}
+            {{this.round(deviceMotion.accelerationIncludingGravity.z, 1)}}
+          </span>
+          <br>
+          <span>Calibrated Rotation:</span>
+          <span v-if="fixedCalibratedRotation">
+            {{this.round(fixedCalibratedRotation.x, 1)}}
+            {{this.round(fixedCalibratedRotation.y, 1)}}
+            {{this.round(fixedCalibratedRotation.z, 1)}}
           </span>
         </div>
       </fullscreen>
@@ -92,7 +110,10 @@ export default {
       touches: undefined,
       deviceOrientation: undefined,
       deviceMotion: undefined,
-      fullscreen: false
+      fullscreen: false,
+      currentRotation: undefined,
+      calibratedRotation: { x: 0, y: 0, z: 0 },
+      fixedCalibratedRotation: undefined
     };
   },
   methods: {
@@ -125,6 +146,11 @@ export default {
             topic: topicPrefix + "/touch_events",
             messageFormat: "ubii.dataStructure.TouchEvent",
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+          },
+          {
+            topic: topicPrefix + "/calibrated_rotation",
+            messageFormat: "ubii.dataStructure.Vector3",
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
           }
         ]
       };
@@ -132,9 +158,10 @@ export default {
       this.$data.deviceName = deviceName;
       this.$data.ubiiDevice = ubiiDevice;
       this.$data.componentTouchPosition = ubiiDevice.components[0];
-      this.$data.componentOrientation = ubiiDevice.components[1];
+      this.$data.componentDeviceOrientation = ubiiDevice.components[1];
       this.$data.componentLinearAcceleration = ubiiDevice.components[2];
       this.$data.componentTouchEvents = ubiiDevice.components[3];
+      this.$data.componentCalibratedRotation = ubiiDevice.components[3];
     },
     onConnectToUbii: function() {
       // register the mouse pointer device
@@ -195,7 +222,7 @@ export default {
 
       UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
-        this.$data.componentOrientation.topic,
+        this.$data.componentDeviceOrientation.topic,
         "vector3",
         {
           x: this.round(event.alpha, 2),
@@ -216,6 +243,33 @@ export default {
           x: this.round(event.acceleration.x, 2),
           y: this.round(event.acceleration.y, 2),
           z: this.round(event.acceleration.z, 2)
+        }
+      );
+
+      // calibrated rotation
+      let current = (this.$data.currentRotation = {
+        x: this.round(event.accelerationIncludingGravity.x, 2),
+        y: this.round(event.accelerationIncludingGravity.y, 2),
+        z: this.round(event.accelerationIncludingGravity.z, 2)
+      });
+      let calibrated = this.$data.calibratedRotation;
+
+      let fixed = {
+        x: current.x - calibrated.x,
+        y: current.y - calibrated.y,
+        z: current.z - calibrated.z
+      };
+
+      this.fixedCalibratedRotation = fixed;
+
+      UbiiClientService.client.publish(
+        this.$data.ubiiDevice.name,
+        this.$data.componentCalibratedRotation.topic,
+        "vector3",
+        {
+          x: this.round(fixed.x, 2),
+          y: this.round(fixed.z, 2),
+          z: this.round(fixed.y, 2)
         }
       );
     },
@@ -258,6 +312,11 @@ export default {
     },
     onFullScreenChange: function(fullscreen) {
       this.fullscreen = fullscreen;
+    },
+    calibrate: function() {
+      if (this.currentRotation) {
+        this.calibratedRotation = this.currentRotation;
+      }
     }
   }
 };
