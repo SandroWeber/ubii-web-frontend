@@ -54,7 +54,7 @@ export default {
       this.initScene();
 
       if (UbiiClientService.isConnected) {
-        this.onConnectToUbii();
+        this.onConnectToUbiiParent();
       }
     },
     registerEvents: function() {
@@ -67,10 +67,10 @@ export default {
       });
 
       UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
-        this.onConnectToUbii();
+        this.onConnectToUbiiParent();
       });
       UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, () => {
-        this.onDisconnectToUbii();
+        this.onDisconnectToUbiiParent();
       });
     },
 
@@ -192,11 +192,15 @@ export default {
         loop();
       });
     },
-    onConnectToUbii: function() {
+    onConnectToUbiiParent: function() {
       this.startPollLoop();
+
+      if (this.onConnectToUbii) this.onConnectToUbii();
     },
-    onDisconnectToUbii: function() {
+    onDisconnectToUbiiParent: function() {
       this.pollSmartDevices = false;
+
+      if (this.onDisconnectToUbii) this.onDisconnectToUbii();
     },
 
     onExit: function() {
@@ -205,7 +209,7 @@ export default {
         //this.renderer.setAnimationLoop(null); produces error, but shouldn't as it says in the docs
         this.renderer.dispose();
       }
-      this.onDisconnectToUbii();
+      this.onDisconnectToUbiiParent();
     }
   }
 };
