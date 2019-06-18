@@ -76,8 +76,11 @@ export default {
       this.stopInterface();
     });
 
-    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.startInterface);
-    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopInterface);
+    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.registerUbiiSpecs);
+    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.unregisterUbiiSpecs);
+
+    this.registerEventListeners();
+    if (UbiiClientService.isConnected) this.registerUbiiSpecs();
   },
   beforeDestroy: function() {
     this.stopInterface();
@@ -133,7 +136,7 @@ export default {
       this.$data.componentLinearAcceleration = ubiiDevice.components[2];
       this.$data.componentTouchEvents = ubiiDevice.components[3];
     },
-    startInterface: function() {
+    registerUbiiSpecs: function() {
       // register the mouse pointer device
       UbiiClientService.isConnected().then(() => {
         this.createUbiiSpecs();
@@ -141,16 +144,36 @@ export default {
           this.$data.ubiiDevice = device;
           return device;
         });
-
-        window.addEventListener(
-          'deviceorientation',
-          this.onDeviceOrientation,
-          true
-        );
-        window.addEventListener('devicemotion', this.onDeviceMotion, true);
       });
     },
-    stopInterface: function() {},
+    unregisterUbiiSpecs: function() {
+      if (this.ubiiDevice.components) {
+        this.ubiiDevice.components.forEach(component => {
+          // eslint-disable-next-line no-console
+          console.log('unsubscribed to ' + component.topic);
+
+          UbiiClientService.client.unsubscribe(component.topic);
+        });
+      }
+
+      // TODO: unregister device
+    },
+    registerEventListeners: function() {
+      window.addEventListener(
+        'deviceorientation',
+        this.onDeviceOrientation,
+        true
+      );
+      window.addEventListener('devicemotion', this.onDeviceMotion, true);
+    },
+    unregisterEventListeners: function() {
+      window.removeEventListener('deviceorientation', this.onDeviceOrientation);
+      window.removeEventListener('devicemotion', this.onDeviceMotion);
+    },
+    stopInterface: function() {
+      this.unregisterEventListeners();
+      this.unregisterUbiiSpecs();
+    },
     onTouchStart: function(event) {
       this.$data.touches = event.touches;
 
