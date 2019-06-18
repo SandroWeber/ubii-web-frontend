@@ -89,10 +89,10 @@
 </template>
 
 <script>
-import { AppTile } from "./appComponents/appComponents.js";
+import { AppTile } from './appComponents/appComponents.js';
 
 // Fontawesome.
-import { library } from "@fortawesome/fontawesome-svg-core";
+import { library } from '@fortawesome/fontawesome-svg-core';
 import {
   faMousePointer,
   faCube,
@@ -102,7 +102,7 @@ import {
   faTabletAlt,
   faKeyboard,
   faHandPointer
-} from "@fortawesome/free-solid-svg-icons";
+} from '@fortawesome/free-solid-svg-icons';
 library.add(faMousePointer);
 library.add(faCube);
 library.add(faCubes);
@@ -113,7 +113,7 @@ library.add(faKeyboard);
 library.add(faHandPointer);
 
 export default {
-  name: "Applications",
+  name: 'Applications',
   components: {
     AppTile
   }

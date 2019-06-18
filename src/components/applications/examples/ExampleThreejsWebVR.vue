@@ -7,11 +7,11 @@
 <script>
 /* eslint-disable no-console */
 
-import * as Three from "three";
-import WebVR from "../sharedModules/WebVR";
+import * as Three from 'three';
+import WebVR from '../sharedModules/WebVR';
 
 export default {
-  name: "ExampleTHREEjsWebVR",
+  name: 'ExampleTHREEjsWebVR',
   data() {
     return {
       camera: null,
@@ -23,7 +23,7 @@ export default {
   methods: {
     init: function() {
       let container = document.getElementById(
-        "example-threejs-webvr-render-container"
+        'example-threejs-webvr-render-container'
       );
 
       this.scene = new Three.Scene();
