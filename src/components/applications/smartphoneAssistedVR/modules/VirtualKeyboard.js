@@ -1,13 +1,12 @@
-import * as THREE from "three";
+import * as THREE from 'three';
 
 const _RESOLUTION = 64;
 
 export default class VirtualKeyboard extends THREE.Object3D {
-
   constructor(area, fontSize = 35, callback) {
     // parent
     super();
-    this.name = "Smartphone Cursor";
+    this.name = 'Smartphone Cursor';
 
     // public members
     this.area = area;
@@ -28,7 +27,6 @@ export default class VirtualKeyboard extends THREE.Object3D {
 
   // private methods
   _draw(actionMap = false) {
-
     // constants
     const padding = 2;
 
@@ -41,7 +39,7 @@ export default class VirtualKeyboard extends THREE.Object3D {
 
     for (let y = 0; y < VirtualKeyboard.KEY_MAP.length; y++) {
       const row = VirtualKeyboard.KEY_MAP[y];
-      let currWidth = 0
+      let currWidth = 0;
       for (let x = 0; x < row.length; x++) {
         const key = VirtualKeyboard.KEY_MAP[y][x];
         currWidth += key.width ? key.width : 1;
@@ -59,53 +57,59 @@ export default class VirtualKeyboard extends THREE.Object3D {
 
     // create canvas
     if (!this._context) {
-      const canvas = document.createElement("canvas");
+      const canvas = document.createElement('canvas');
       canvas.width = canvasWidth * _RESOLUTION + padding;
       canvas.height = canvasHeight * _RESOLUTION + padding;
       this._canvas = canvas;
     }
-    const context = this._canvas.getContext("2d");
+    const context = this._canvas.getContext('2d');
     context.clearRect(0, 0, this._canvas.width, this._canvas.height);
 
     // ensemble keyboard
     for (let y = 0; y < VirtualKeyboard.KEY_MAP.length; y++) {
       const row = VirtualKeyboard.KEY_MAP[y];
 
-      const actions = []
+      const actions = [];
       const currentY = y * keyHeightPixel;
       let currentX = 0;
 
       for (let x = 0; x < row.length; x++) {
         const key = VirtualKeyboard.KEY_MAP[y][x];
         const width = key.width ? key.width : 1;
-        const pixelWidth = width * keyWidthPixel
+        const pixelWidth = width * keyWidthPixel;
 
         // write action map
         if (actionMap) {
           actions.push({
             width: currentX,
             key: key
-          })
+          });
         }
 
         // draw the key
-        context.strokeStyle = "#333333";
+        context.strokeStyle = '#333333';
         context.beginPath();
         context.rect(currentX, currentY, pixelWidth, keyHeightPixel);
         if (key.key || key.label) {
-          if (this.capsLock && key.action == VirtualKeyboard.KEY_ACTIONS.CAPS_LOCK) {
-            context.fillStyle = "#42b3f4";
-          } else if (this.shift && key.action == VirtualKeyboard.KEY_ACTIONS.SHIFT) {
-            context.fillStyle = "#42b3f4";
+          if (
+            this.capsLock &&
+            key.action == VirtualKeyboard.KEY_ACTIONS.CAPS_LOCK
+          ) {
+            context.fillStyle = '#42b3f4';
+          } else if (
+            this.shift &&
+            key.action == VirtualKeyboard.KEY_ACTIONS.SHIFT
+          ) {
+            context.fillStyle = '#42b3f4';
           } else {
-            context.fillStyle = "#666666";
+            context.fillStyle = '#666666';
           }
           context.fill();
         }
         context.stroke();
-        context.textAlign = "center";
-        context.font = "Normal " + this.fontSize + "px Arial";
-        context.fillStyle = "#99FF33";
+        context.textAlign = 'center';
+        context.font = 'Normal ' + this.fontSize + 'px Arial';
+        context.fillStyle = '#99FF33';
 
         if (key.key || key.label) {
           let offset = 0;
@@ -123,8 +127,16 @@ export default class VirtualKeyboard extends THREE.Object3D {
               break;
           }
 
-          const label = key.label ? key.label : ((this.capsLock || this.shift) && key.keyCaps ? key.keyCaps : key.key)
-          context.fillText(label, currentX + keyWidthPixel / 2 + offset, currentY + keyHeightPixel / 2 + 5);
+          const label = key.label
+            ? key.label
+            : (this.capsLock || this.shift) && key.keyCaps
+            ? key.keyCaps
+            : key.key;
+          context.fillText(
+            label,
+            currentX + keyWidthPixel / 2 + offset,
+            currentY + keyHeightPixel / 2 + 5
+          );
         }
 
         currentX += pixelWidth;
@@ -163,18 +175,20 @@ export default class VirtualKeyboard extends THREE.Object3D {
   // public methods
   // eslint-disable-next-line no-unused-vars
   onPress(event) {
-
     const localPos = event.localPos;
     const pixelPosX = localPos.x * this.area.width * _RESOLUTION;
     const keyRow = Math.floor(localPos.y * this._actionMap.length);
-    if (keyRow >= 0 && keyRow < this._actionMap.length && pixelPosX >= 0 && pixelPosX < this.area.width * _RESOLUTION) {
-
+    if (
+      keyRow >= 0 &&
+      keyRow < this._actionMap.length &&
+      pixelPosX >= 0 &&
+      pixelPosX < this.area.width * _RESOLUTION
+    ) {
       // eslint-disable-next-line for-direction
       for (let x = this._actionMap[keyRow].length - 1; x >= 0; x--) {
         const action = this._actionMap[keyRow][x];
 
         if (action.width <= pixelPosX) {
-
           switch (action.key.action) {
             case VirtualKeyboard.KEY_ACTIONS.SHIFT:
               this.shift = !this.shift;
@@ -190,7 +204,10 @@ export default class VirtualKeyboard extends THREE.Object3D {
             default:
               this.callback({
                 action: action.key.action,
-                key: (this.capsLock || this.shift) && action.key.keyCaps ? action.key.keyCaps : action.key.key
+                key:
+                  (this.capsLock || this.shift) && action.key.keyCaps
+                    ? action.key.keyCaps
+                    : action.key.key
               });
               if (this.shift) {
                 this.shift = false;
@@ -199,12 +216,9 @@ export default class VirtualKeyboard extends THREE.Object3D {
               break;
           }
           return;
-
         }
       }
-
     }
-
   }
 }
 
@@ -215,194 +229,255 @@ VirtualKeyboard.KEY_ACTIONS = {
   RETURN: 3,
   SHIFT: 4,
   CAPS_LOCK: 5
-}
+};
 
 VirtualKeyboard.KEY_ALIGNMENT = {
   LEFT: 0,
   RIGHT: 1,
   CENTER: 2
-}
+};
 
 VirtualKeyboard.KEY_MAP = [
-  [{
-    key: "`",
-    keyCaps: "~"
-  }, {
-    key: "1",
-    keyCaps: "!"
-  }, {
-    key: "2",
-    keyCaps: "@"
-  }, {
-    key: "3",
-    keyCaps: "#"
-  }, {
-    key: "4",
-    keyCaps: "$"
-  }, {
-    key: "5",
-    keyCaps: "%"
-  }, {
-    key: "6",
-    keyCaps: "^"
-  }, {
-    key: "7",
-    keyCaps: "&"
-  }, {
-    key: "8",
-    keyCaps: "*"
-  }, {
-    key: "9",
-    keyCaps: "("
-  }, {
-    key: "0",
-    keyCaps: ")"
-  }, {
-    key: "-",
-    keyCaps: "_"
-  }, {
-    key: "=",
-    keyCaps: "+"
-  }, {
-    key: "←",
-    action: VirtualKeyboard.KEY_ACTIONS.DELETE_ONE,
-    width: 2,
-    align: VirtualKeyboard.KEY_ALIGNMENT.RIGHT
-  }],
-  [{
-    width: 1.5
-  }, {
-    key: "q",
-    keyCaps: "Q",
-  }, {
-    key: "w",
-    keyCaps: "W"
-  }, {
-    key: "e",
-    keyCaps: "E"
-  }, {
-    key: "r",
-    keyCaps: "R"
-  }, {
-    key: "t",
-    keyCaps: "T"
-  }, {
-    key: "y",
-    keyCaps: "Y"
-  }, {
-    key: "u",
-    keyCaps: "U"
-  }, {
-    key: "i",
-    keyCaps: "I"
-  }, {
-    key: "o",
-    keyCaps: "O"
-  }, {
-    key: "p",
-    keyCaps: "P"
-  }, {
-    key: "[",
-    keyCaps: "{"
-  }, {
-    key: "]",
-    keyCaps: "}"
-  }, {
-    key: "\\",
-    keyCaps: "|",
-    width: 1.5
-  }],
-  [{
-    key: "↓",
-    action: VirtualKeyboard.KEY_ACTIONS.CAPS_LOCK,
-    width: 2
-  }, {
-    key: "a",
-    keyCaps: "A"
-  }, {
-    key: "s",
-    keyCaps: "S"
-  }, {
-    key: "d",
-    keyCaps: "D"
-  }, {
-    key: "f",
-    keyCaps: "F"
-  }, {
-    key: "g",
-    keyCaps: "G"
-  }, {
-    key: "h",
-    keyCaps: "H"
-  }, {
-    key: "j",
-    keyCaps: "J"
-  }, {
-    key: "k",
-    keyCaps: "K"
-  }, {
-    key: "l",
-    keyCaps: "L"
-  }, {
-    key: ";",
-    keyCaps: ":"
-  }, {
-    key: "'",
-    keyCaps: "\""
-  }, {
-    key: " ◄┘",
-    action: VirtualKeyboard.KEY_ACTIONS.RETURN,
-    width: 2,
-    align: VirtualKeyboard.KEY_ALIGNMENT.RIGHT
-  }],
-  [{
-    key: "↑",
-    action: VirtualKeyboard.KEY_ACTIONS.SHIFT,
-    width: 2.5
-  }, {
-    key: "z",
-    keyCaps: "Z"
-  }, {
-    key: "x",
-    keyCaps: "X"
-  }, {
-    key: "c",
-    keyCaps: "C"
-  }, {
-    key: "v",
-    keyCaps: "V"
-  }, {
-    key: "b",
-    keyCaps: "B"
-  }, {
-    key: "n",
-    keyCaps: "N"
-  }, {
-    key: "m",
-    keyCaps: "M"
-  }, {
-    key: ",",
-    keyCaps: "<"
-  }, {
-    key: ".",
-    keyCaps: ">"
-  }, {
-    key: "/",
-    keyCaps: "?"
-  }, {
-    key: "↑",
-    action: VirtualKeyboard.KEY_ACTIONS.SHIFT,
-    width: 2.5,
-    align: VirtualKeyboard.KEY_ALIGNMENT.RIGHT
-  }],
-  [{
-    width: 3.5
-  }, {
-    key: " ",
-    label: "_",
-    width: 8,
-    align: VirtualKeyboard.KEY_ALIGNMENT.CENTER
-  }, {
-    width: 3.5
-  }]
+  [
+    {
+      key: '`',
+      keyCaps: '~'
+    },
+    {
+      key: '1',
+      keyCaps: '!'
+    },
+    {
+      key: '2',
+      keyCaps: '@'
+    },
+    {
+      key: '3',
+      keyCaps: '#'
+    },
+    {
+      key: '4',
+      keyCaps: '$'
+    },
+    {
+      key: '5',
+      keyCaps: '%'
+    },
+    {
+      key: '6',
+      keyCaps: '^'
+    },
+    {
+      key: '7',
+      keyCaps: '&'
+    },
+    {
+      key: '8',
+      keyCaps: '*'
+    },
+    {
+      key: '9',
+      keyCaps: '('
+    },
+    {
+      key: '0',
+      keyCaps: ')'
+    },
+    {
+      key: '-',
+      keyCaps: '_'
+    },
+    {
+      key: '=',
+      keyCaps: '+'
+    },
+    {
+      key: '←',
+      action: VirtualKeyboard.KEY_ACTIONS.DELETE_ONE,
+      width: 2,
+      align: VirtualKeyboard.KEY_ALIGNMENT.RIGHT
+    }
+  ],
+  [
+    {
+      width: 1.5
+    },
+    {
+      key: 'q',
+      keyCaps: 'Q'
+    },
+    {
+      key: 'w',
+      keyCaps: 'W'
+    },
+    {
+      key: 'e',
+      keyCaps: 'E'
+    },
+    {
+      key: 'r',
+      keyCaps: 'R'
+    },
+    {
+      key: 't',
+      keyCaps: 'T'
+    },
+    {
+      key: 'y',
+      keyCaps: 'Y'
+    },
+    {
+      key: 'u',
+      keyCaps: 'U'
+    },
+    {
+      key: 'i',
+      keyCaps: 'I'
+    },
+    {
+      key: 'o',
+      keyCaps: 'O'
+    },
+    {
+      key: 'p',
+      keyCaps: 'P'
+    },
+    {
+      key: '[',
+      keyCaps: '{'
+    },
+    {
+      key: ']',
+      keyCaps: '}'
+    },
+    {
+      key: '\\',
+      keyCaps: '|',
+      width: 1.5
+    }
+  ],
+  [
+    {
+      key: '↓',
+      action: VirtualKeyboard.KEY_ACTIONS.CAPS_LOCK,
+      width: 2
+    },
+    {
+      key: 'a',
+      keyCaps: 'A'
+    },
+    {
+      key: 's',
+      keyCaps: 'S'
+    },
+    {
+      key: 'd',
+      keyCaps: 'D'
+    },
+    {
+      key: 'f',
+      keyCaps: 'F'
+    },
+    {
+      key: 'g',
+      keyCaps: 'G'
+    },
+    {
+      key: 'h',
+      keyCaps: 'H'
+    },
+    {
+      key: 'j',
+      keyCaps: 'J'
+    },
+    {
+      key: 'k',
+      keyCaps: 'K'
+    },
+    {
+      key: 'l',
+      keyCaps: 'L'
+    },
+    {
+      key: ';',
+      keyCaps: ':'
+    },
+    {
+      key: "'",
+      keyCaps: '"'
+    },
+    {
+      key: ' ◄┘',
+      action: VirtualKeyboard.KEY_ACTIONS.RETURN,
+      width: 2,
+      align: VirtualKeyboard.KEY_ALIGNMENT.RIGHT
+    }
+  ],
+  [
+    {
+      key: '↑',
+      action: VirtualKeyboard.KEY_ACTIONS.SHIFT,
+      width: 2.5
+    },
+    {
+      key: 'z',
+      keyCaps: 'Z'
+    },
+    {
+      key: 'x',
+      keyCaps: 'X'
+    },
+    {
+      key: 'c',
+      keyCaps: 'C'
+    },
+    {
+      key: 'v',
+      keyCaps: 'V'
+    },
+    {
+      key: 'b',
+      keyCaps: 'B'
+    },
+    {
+      key: 'n',
+      keyCaps: 'N'
+    },
+    {
+      key: 'm',
+      keyCaps: 'M'
+    },
+    {
+      key: ',',
+      keyCaps: '<'
+    },
+    {
+      key: '.',
+      keyCaps: '>'
+    },
+    {
+      key: '/',
+      keyCaps: '?'
+    },
+    {
+      key: '↑',
+      action: VirtualKeyboard.KEY_ACTIONS.SHIFT,
+      width: 2.5,
+      align: VirtualKeyboard.KEY_ALIGNMENT.RIGHT
+    }
+  ],
+  [
+    {
+      width: 3.5
+    },
+    {
+      key: ' ',
+      label: '_',
+      width: 8,
+      align: VirtualKeyboard.KEY_ALIGNMENT.CENTER
+    },
+    {
+      width: 3.5
+    }
+  ]
 ];

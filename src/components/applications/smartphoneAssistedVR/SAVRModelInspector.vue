@@ -6,20 +6,20 @@
 
 <script>
 // Parent
-import SAVRScene from "./SAVRScene";
+import SAVRScene from './SAVRScene';
 
 // Rendering
-import * as THREE from "three";
-import { loadObj } from "./modules/threeHelper";
+import * as THREE from 'three';
+import { loadObj } from './modules/threeHelper';
 
 // Networking
-import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
-import UbiiClientContent from "../sharedModules/UbiiClientContent";
-import { DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
-import { createUbiiSpecs } from "./modules/ubiiHelper";
+import UbiiClientService from '../../../services/ubiiClient/ubiiClientService';
+import UbiiClientContent from '../sharedModules/UbiiClientContent';
+import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
+import { createUbiiSpecs } from './modules/ubiiHelper';
 
 export default {
-  name: "SAVRModelInspector",
+  name: 'SAVRModelInspector',
   extends: SAVRScene,
   components: { UbiiClientContent },
 
@@ -36,7 +36,7 @@ export default {
     onStart: function() {
       const ctx = this;
 
-      loadObj("models/skeleton", model => {
+      loadObj('models/skeleton', model => {
         ctx.modelPrefab = model;
       });
     },
@@ -46,15 +46,15 @@ export default {
       const deviceName = this.$options.name; // get name property of current view
 
       const orientationInput = {
-        internalName: "orientation",
-        messageFormat: "vector3",
+        internalName: 'orientation',
+        messageFormat: 'vector3',
         topic: clientTopic // e.g. 08d58eb6-7b51-4bae-908b-b737cde85429/web-interface-smart-device/orientation
       };
 
       const orientationOutput = {
-        internalName: "orientation",
-        messageFormat: "vector3",
-        topic: clientID + "/" + deviceName + "/orientation"
+        internalName: 'orientation',
+        messageFormat: 'vector3',
+        topic: clientID + '/' + deviceName + '/orientation'
       };
 
       /* eslint-disable-next-line */
@@ -111,7 +111,7 @@ export default {
 
           this.$data.topicList.forEach(topic => {
             const topicIndex = topic.indexOf(
-              "/web-interface-smart-device/orientation"
+              '/web-interface-smart-device/orientation'
             );
 
             if (topicIndex !== -1) {
@@ -171,7 +171,7 @@ export default {
       // create the client
       this.clients.set(clientID, client);
 
-      console.log("add client " + clientID);
+      console.log('add client ' + clientID);
     },
 
     createClientModel: function(client) {

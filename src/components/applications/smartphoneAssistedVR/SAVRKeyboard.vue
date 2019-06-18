@@ -5,24 +5,24 @@
 </template>
 
 <script>
-import SAVRScene from "./SAVRScene";
+import SAVRScene from './SAVRScene';
 
 // Rendering
 /* eslint-disable-next-line no-unused-vars */
-import * as THREE from "three";
-import SmartphoneCursor from "./modules/SmartphoneCursor";
-import VirtualKeyboard from "./modules/VirtualKeyboard";
-import TextDisplay from "./modules/TextDisplay";
+import * as THREE from 'three';
+import SmartphoneCursor from './modules/SmartphoneCursor';
+import VirtualKeyboard from './modules/VirtualKeyboard';
+import TextDisplay from './modules/TextDisplay';
 
 // Networking
-import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
-import UbiiClientContent from "../sharedModules/UbiiClientContent";
-import ProtobufLibrary from "@tum-far/ubii-msg-formats/dist/js/protobuf";
-import { DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
-import { unsubscribe, subscribe } from "./modules/ubiiHelper";
+import UbiiClientService from '../../../services/ubiiClient/ubiiClientService';
+import UbiiClientContent from '../sharedModules/UbiiClientContent';
+import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
+import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
+import { unsubscribe, subscribe } from './modules/ubiiHelper';
 
 export default {
-  name: "SAVRKeyboard",
+  name: 'SAVRKeyboard',
   extends: SAVRScene,
   components: { UbiiClientContent },
 
@@ -30,7 +30,7 @@ export default {
     return {
       client: undefined,
       oldClients: [],
-      text: "",
+      text: '',
       cursor: undefined,
       keyboard: undefined,
       textDisplay: undefined
@@ -56,7 +56,7 @@ export default {
             break;
           case VirtualKeyboard.KEY_ACTIONS.CLEAR:
           case VirtualKeyboard.KEY_ACTIONS.RETURN:
-            this.text += "\n";
+            this.text += '\n';
             break;
           case VirtualKeyboard.KEY_ACTIONS.NONE:
           case undefined:
@@ -79,8 +79,8 @@ export default {
       this.scene.add(keyboardCursorGroup);
 
       // gui
-      this.gui.add(this.cursor, "SELECT_TIME");
-      this.gui.add(this.cursor, "MAX_VELOCITY");
+      this.gui.add(this.cursor, 'SELECT_TIME');
+      this.gui.add(this.cursor, 'MAX_VELOCITY');
     },
     /* eslint-disable-next-line no-unused-vars */
     updateGameLoop: function(delta) {
@@ -93,7 +93,7 @@ export default {
           this.$data.topicList = reply.stringList.list;
 
           this.$data.topicList.forEach(topic => {
-            const topicIndex = topic.indexOf("/web-interface-smart-device/");
+            const topicIndex = topic.indexOf('/web-interface-smart-device/');
 
             if (topicIndex !== -1) {
               const clientID = topic.substring(0, topicIndex);
@@ -118,9 +118,9 @@ export default {
       }
 
       // create sessions and topics
-      const touchEventTopic = id + "/web-interface-smart-device/touch_events";
+      const touchEventTopic = id + '/web-interface-smart-device/touch_events';
       const touchPositionTopic =
-        id + "/web-interface-smart-device/touch_position";
+        id + '/web-interface-smart-device/touch_position';
 
       this.client = {
         id: id,

@@ -1,19 +1,18 @@
-import * as THREE from "three";
+import * as THREE from 'three';
 
 const _RESOLUTION = 64;
 
 export default class TextDisplay extends THREE.Object3D {
-
   constructor(area) {
     // parent
     super();
-    this.name = "Text Display";
+    this.name = 'Text Display';
 
     // public members
     this.area = area;
 
     // private members
-    this._text = "";
+    this._text = '';
     this._canvas = undefined;
     this._mesh = undefined;
     this._material = undefined;
@@ -24,7 +23,6 @@ export default class TextDisplay extends THREE.Object3D {
 
   // private methods
   _draw() {
-
     // constants
     const canvasWidth = this.area.width;
     const canvasHeight = this.area.height;
@@ -34,27 +32,27 @@ export default class TextDisplay extends THREE.Object3D {
 
     // create canvas
     if (!this._context) {
-      const canvas = document.createElement("canvas");
+      const canvas = document.createElement('canvas');
       canvas.width = canvasWidth * _RESOLUTION + padding;
       canvas.height = canvasHeight * _RESOLUTION + padding;
       this._canvas = canvas;
     }
-    const context = this._canvas.getContext("2d");
+    const context = this._canvas.getContext('2d');
     context.clearRect(0, 0, this._canvas.width, this._canvas.height);
 
-    context.textAlign = "left";
-    context.font = "Normal 40px Arial";
-    context.fillStyle = "#99FF33";
+    context.textAlign = 'left';
+    context.font = 'Normal 40px Arial';
+    context.fillStyle = '#99FF33';
 
     for (let i = 0; i < lines.length; i++) {
-      context.fillText(lines[i], padding, padding + ((i+1)*lineheight));
+      context.fillText(lines[i], padding, padding + (i + 1) * lineheight);
     }
 
     if (!this._mesh) {
       this._texture = new THREE.Texture(this._canvas);
       this._texture.minFilter = THREE.LinearFilter;
       this._texture.needsUpdate = true;
-      
+
       this._material = new THREE.MeshBasicMaterial({
         map: this._texture,
         opacity: 1,

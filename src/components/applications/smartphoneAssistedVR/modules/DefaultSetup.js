@@ -1,31 +1,30 @@
-import * as THREE from "three";
-import Sky from "../../sharedModules/Sky";
+import * as THREE from 'three';
+import Sky from '../../sharedModules/Sky';
 
 export default class DefaultSetup extends THREE.Object3D {
-
-  constructor(scene, aspectRatio, camera = true, light = true, sky = true, fog = true, base = true) {
-
+  constructor(
+    scene,
+    aspectRatio,
+    camera = true,
+    light = true,
+    sky = true,
+    fog = true,
+    base = true
+  ) {
     super();
 
-    this.name = "Default Setup";
-    this.type = "Group";
+    this.name = 'Default Setup';
+    this.type = 'Group';
     this.isGroup = true;
 
-    if (camera)
-      this.camera = this.addCamera(aspectRatio);
-    if (light)
-      this.light = this.addLight();
-    if (sky)
-      this.sky = this.addSky();
-    if (fog)
-      this.fog = this.addFog(scene);
-    if (base)
-      this.base = this.addBase();
-
+    if (camera) this.camera = this.addCamera(aspectRatio);
+    if (light) this.light = this.addLight();
+    if (sky) this.sky = this.addSky();
+    if (fog) this.fog = this.addFog(scene);
+    if (base) this.base = this.addBase();
   }
 
   addCamera(aspectRatio) {
-
     const fov = 70;
     const nearPlane = 0.01;
     const farPlane = 100;
@@ -37,7 +36,7 @@ export default class DefaultSetup extends THREE.Object3D {
       farPlane
     );
 
-    camera.name = "Camera";
+    camera.name = 'Camera';
     camera.position.z = 1;
 
     this.add(camera);
@@ -46,7 +45,7 @@ export default class DefaultSetup extends THREE.Object3D {
 
   addLight() {
     const group = new THREE.Group();
-    group.name = "Lights";
+    group.name = 'Lights';
 
     const ambient = new THREE.AmbientLight(0x444444, 0.5);
     group.add(ambient);
@@ -78,7 +77,7 @@ export default class DefaultSetup extends THREE.Object3D {
 
   addBase() {
     const group = new THREE.Group();
-    group.name = "Base";
+    group.name = 'Base';
 
     const radius = 0.75;
     const geometry = new THREE.CylinderGeometry(radius, radius, 0.05, 32);
@@ -109,5 +108,4 @@ export default class DefaultSetup extends THREE.Object3D {
     this.add(group);
     return group;
   }
-
 }

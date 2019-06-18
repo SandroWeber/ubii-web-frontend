@@ -5,27 +5,27 @@
 </template>
 
 <script>
-import SAVRScene from "./SAVRScene";
+import SAVRScene from './SAVRScene';
 
 // Rendering
 /* eslint-disable-next-line no-unused-vars */
-import * as THREE from "three";
-import { loadObj } from "./modules/threeHelper";
+import * as THREE from 'three';
+import { loadObj } from './modules/threeHelper';
 
 // Networking
-import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
-import UbiiClientContent from "../sharedModules/UbiiClientContent";
-import ProtobufLibrary from "@tum-far/ubii-msg-formats/dist/js/protobuf";
-import { DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
+import UbiiClientService from '../../../services/ubiiClient/ubiiClientService';
+import UbiiClientContent from '../sharedModules/UbiiClientContent';
+import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
+import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 import {
   createUbiiSpecs,
   subscribeSpecs,
   subscribe,
   unsubscribe
-} from "./modules/ubiiHelper";
+} from './modules/ubiiHelper';
 
 export default {
-  name: "SAVRLaserPointer",
+  name: 'SAVRLaserPointer',
   extends: SAVRScene,
   components: { UbiiClientContent },
 
@@ -41,7 +41,7 @@ export default {
 
   methods: {
     onStart: function() {
-      loadObj("models/smartphone", model => {
+      loadObj('models/smartphone', model => {
         model.scale.set(3, -3, -3);
         this.$data.scene.add(model);
         this.$data.model = model;
@@ -104,7 +104,7 @@ export default {
           this.$data.topicList = reply.stringList.list;
 
           this.$data.topicList.forEach(topic => {
-            const topicIndex = topic.indexOf("/web-interface-smart-device/");
+            const topicIndex = topic.indexOf('/web-interface-smart-device/');
 
             if (topicIndex !== -1) {
               const clientID = topic.substring(0, topicIndex);
@@ -129,7 +129,7 @@ export default {
 
       // create sessions and topics
       const orientationSpecs = this.createOrientationSpecs(id);
-      const touchEventTopic = id + "/web-interface-smart-device/touch_events";
+      const touchEventTopic = id + '/web-interface-smart-device/touch_events';
 
       const client = (this.client = {
         id: id,
@@ -178,15 +178,15 @@ export default {
       const deviceName = this.$options.name; // get name property of current view
 
       const orientationInput = {
-        internalName: "orientation",
-        messageFormat: "vector3",
-        topic: clientID + "/web-interface-smart-device/orientation" // e.g. 08d58eb6-7b51-4bae-908b-b737cde85429/web-interface-smart-device/orientation
+        internalName: 'orientation',
+        messageFormat: 'vector3',
+        topic: clientID + '/web-interface-smart-device/orientation' // e.g. 08d58eb6-7b51-4bae-908b-b737cde85429/web-interface-smart-device/orientation
       };
 
       const orientationOutput = {
-        internalName: "orientation",
-        messageFormat: "vector3",
-        topic: clientID + "/" + deviceName + "/orientation"
+        internalName: 'orientation',
+        messageFormat: 'vector3',
+        topic: clientID + '/' + deviceName + '/orientation'
       };
 
       /* eslint-disable-next-line */

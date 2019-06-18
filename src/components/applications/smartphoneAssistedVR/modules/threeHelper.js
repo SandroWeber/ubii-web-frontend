@@ -1,12 +1,12 @@
-import OBJLoader2 from "../../sharedModules/OBJLoader2";
+import OBJLoader2 from '../../sharedModules/OBJLoader2';
 
 function loadObj(path, callback) {
   const objLoader = new OBJLoader2();
   objLoader.setLogging(false, false);
 
-  objLoader.loadMtl(path + ".mtl", null, function (materials) {
+  objLoader.loadMtl(path + '.mtl', null, function(materials) {
     objLoader.setMaterials(materials);
-    objLoader.load(path + ".obj", function (event) {
+    objLoader.load(path + '.obj', function(event) {
       let model = event.detail.loaderRootNode;
       model.name = path;
       callback(model);
@@ -14,6 +14,4 @@ function loadObj(path, callback) {
   });
 }
 
-export {
-  loadObj
-};
+export { loadObj };

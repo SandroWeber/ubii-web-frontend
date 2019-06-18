@@ -1,35 +1,33 @@
 import * as THREE from 'three';
 
 export default class Sky extends THREE.Mesh {
-
   constructor() {
     super(new THREE.SphereBufferGeometry(75, 16, 8), _MATERIAL);
 
-    this.name = "Sky";
+    this.name = 'Sky';
   }
-
 }
 
 const _SHADER = {
   uniforms: {
-    "skyExp": {
+    skyExp: {
       value: 0.9
     },
-    "azimuthExp": {
+    azimuthExp: {
       value: 0.005
     },
-    "skyColor": {
+    skyColor: {
       value: new THREE.Vector3(0.37, 0.52, 0.73)
     },
-    "groundColor": {
+    groundColor: {
       value: new THREE.Vector3(0.71, 0.71, 0.71)
     },
-    "azimuth": {
+    azimuth: {
       value: new THREE.Vector3(0.89, 0.96, 1)
     },
-    "skyIntensity": {
+    skyIntensity: {
       value: 1.0
-    },
+    }
   },
 
   vertexShader: `
@@ -65,7 +63,6 @@ const _SHADER = {
 		mainImage(gl_FragColor, gl_FragCoord.xy);
 	}
 	`
-
 };
 
 const _MATERIAL = new THREE.ShaderMaterial({

@@ -4,18 +4,18 @@
 
 <script>
 // Rendering
-import * as THREE from "three";
-import WebVR from "../sharedModules/WebVR";
-import DefaultSetup from "./modules/DefaultSetup";
-import Stats from "../sharedModules/Stats";
-import * as dat from "dat.gui";
+import * as THREE from 'three';
+import WebVR from '../sharedModules/WebVR';
+import DefaultSetup from './modules/DefaultSetup';
+import Stats from '../sharedModules/Stats';
+import * as dat from 'dat.gui';
 
 // Networking
-import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
-import UbiiEventBus from "../../../services/ubiiClient/ubiiEventBus";
+import UbiiClientService from '../../../services/ubiiClient/ubiiClientService';
+import UbiiEventBus from '../../../services/ubiiClient/ubiiEventBus';
 
 export default {
-  name: "SAVRScene",
+  name: 'SAVRScene',
 
   data: function() {
     return {
@@ -42,7 +42,7 @@ export default {
 
   computed: {
     isDevelopment: function() {
-      return process.env.NODE_ENV === "development";
+      return process.env.NODE_ENV === 'development';
     }
   },
 
@@ -58,11 +58,11 @@ export default {
       }
     },
     registerEvents: function() {
-      window.addEventListener("beforeunload", () => {
+      window.addEventListener('beforeunload', () => {
         this.onExit();
       });
 
-      window.addEventListener("resize", () => {
+      window.addEventListener('resize', () => {
         this.handleResize();
       });
 
@@ -77,7 +77,7 @@ export default {
     // RENDERING
     initScene: function() {
       const container = (this.container = document.getElementById(
-        "savr-render-container"
+        'savr-render-container'
       ));
       const width = container.clientWidth ? container.clientWidth : 500;
       const height = container.clientHeight ? container.clientHeight : 500;
@@ -110,8 +110,8 @@ export default {
 
       // gui
       this.gui = new dat.GUI({ autoPlace: false });
-      let guiContainer = document.createElement("div");
-      guiContainer.style.cssText = "position: fixed; bottom: 0; right: 0;";
+      let guiContainer = document.createElement('div');
+      guiContainer.style.cssText = 'position: fixed; bottom: 0; right: 0;';
       container.appendChild(guiContainer);
       guiContainer.appendChild(this.gui.domElement);
 
@@ -137,7 +137,7 @@ export default {
       const aspectRatio = width / height;
 
       // eslint-disable-next-line no-console
-      console.info("Viewport: " + width + " x " + height);
+      console.info('Viewport: ' + width + ' x ' + height);
 
       this.camera.aspect = aspectRatio;
       this.camera.updateProjectionMatrix();
@@ -176,7 +176,7 @@ export default {
             } else {
               // eslint-disable-next-line no-console
               console.warn(
-                "Child component not loaded, but already updating device."
+                'Child component not loaded, but already updating device.'
               );
 
               if (this.isDevelopment) {

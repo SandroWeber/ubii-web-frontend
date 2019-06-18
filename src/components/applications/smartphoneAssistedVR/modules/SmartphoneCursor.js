@@ -1,11 +1,10 @@
-import * as THREE from "three";
+import * as THREE from 'three';
 
 export default class SmartphoneCursor extends THREE.Object3D {
-
   constructor(areaSize = new THREE.Vector2(1, 1), callback) {
     // parent
     super();
-    this.name = "Smartphone Cursor";
+    this.name = 'Smartphone Cursor';
 
     // consts
     this.SELECT_TIME = 0.9; // in seconds
@@ -26,23 +25,28 @@ export default class SmartphoneCursor extends THREE.Object3D {
     this._build();
   }
 
-
   // private methods
   _build() {
-    this._cursor = new THREE.Mesh(new THREE.PlaneBufferGeometry(), new THREE.MeshBasicMaterial({
-      map: new THREE.TextureLoader().load("images/circle.png"),
-      transparent: true,
-      opacity: 1
-    }));
+    this._cursor = new THREE.Mesh(
+      new THREE.PlaneBufferGeometry(),
+      new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load('images/circle.png'),
+        transparent: true,
+        opacity: 1
+      })
+    );
     this._cursor.scale.set(0.25, 0.25, 0.25);
     this._cursor.visible = false;
     this.add(this._cursor);
 
-    this._selector = new THREE.Mesh(new THREE.PlaneBufferGeometry(), new THREE.MeshBasicMaterial({
-      map: new THREE.TextureLoader().load("images/circle_filled.png"),
-      transparent: true,
-      opacity: 1
-    }));
+    this._selector = new THREE.Mesh(
+      new THREE.PlaneBufferGeometry(),
+      new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load('images/circle_filled.png'),
+        transparent: true,
+        opacity: 1
+      })
+    );
     this._selector.visible = false;
     this._selector.position.set(0, 0, 0.01);
     this._cursor.add(this._selector);
@@ -52,7 +56,12 @@ export default class SmartphoneCursor extends THREE.Object3D {
 
   _onSelect() {
     // eslint-disable-next-line no-console
-    console.info("SELECTED: " + this._normalizedPosition.x + " " + this._normalizedPosition.y)
+    console.info(
+      'SELECTED: ' +
+        this._normalizedPosition.x +
+        ' ' +
+        this._normalizedPosition.y
+    );
 
     if (this.callback) {
       this.callback({
@@ -63,18 +72,21 @@ export default class SmartphoneCursor extends THREE.Object3D {
   }
 
   _smartphoneToLocalPosition(pos2d) {
-    const pos3d = new THREE.Vector3(pos2d.x * this.areaSize.x - this.areaSize.x / 2, -pos2d.y * this.areaSize.y + this.areaSize.y / 2, 0);
+    const pos3d = new THREE.Vector3(
+      pos2d.x * this.areaSize.x - this.areaSize.x / 2,
+      -pos2d.y * this.areaSize.y + this.areaSize.y / 2,
+      0
+    );
 
     return pos3d;
   }
-
 
   // public methods
   /* eslint-disable-next-line no-unused-vars */
   render(delta) {
     const isNotMoving = this._cursorVelocity.lengthSq() < this.MAX_VELOCITY;
 
-    const percentage = (this._selectProgress / this.SELECT_TIME) + 0.0001; // size should never be 0
+    const percentage = this._selectProgress / this.SELECT_TIME + 0.0001; // size should never be 0
     this._selector.scale.set(percentage, percentage, percentage);
 
     // detect selecting state
@@ -96,7 +108,6 @@ export default class SmartphoneCursor extends THREE.Object3D {
       }
     }
   }
-
 
   // getters & setters
   set cursorPosition(pos2d) {
@@ -131,5 +142,4 @@ export default class SmartphoneCursor extends THREE.Object3D {
   get touched() {
     return this._isTouching;
   }
-
 }
