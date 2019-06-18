@@ -5,19 +5,19 @@
 </template>
 
 <script>
-import UbiiClientContent from "../sharedModules/UbiiClientContent";
-import { DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
-import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
-import UbiiEventBus from "../../../services/ubiiClient/ubiiEventBus";
+import UbiiClientContent from '../sharedModules/UbiiClientContent';
+import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
+import UbiiClientService from '../../../services/ubiiClient/ubiiClientService';
+import UbiiEventBus from '../../../services/ubiiClient/ubiiEventBus';
 
 /* eslint-disable no-console */
 
 export default {
-  name: "ExampleGathererWebInterfaceSmartDevices",
+  name: 'ExampleGathererWebInterfaceSmartDevices',
   components: { UbiiClientContent },
   mounted: function() {
     // unsubscribe before page is unloaded
-    window.addEventListener("beforeunload", () => {
+    window.addEventListener('beforeunload', () => {
       this.stopExample();
     });
 
@@ -58,7 +58,7 @@ export default {
 
           this.$data.topicList.forEach(topic => {
             let smart_device_touch_topic_index = topic.indexOf(
-              "/web-interface-smart-device/touch_position"
+              '/web-interface-smart-device/touch_position'
             );
             if (smart_device_touch_topic_index !== -1) {
               let clientID = topic.substring(0, smart_device_touch_topic_index);
@@ -73,21 +73,21 @@ export default {
       setTimeout(this.updateSmartDevices, 1000);
     },
     getRandomColor: function() {
-      let letters = "0123456789ABCDEF";
-      let color = "#";
+      let letters = '0123456789ABCDEF';
+      let color = '#';
       for (let i = 0; i < 6; i++) {
         color += letters[Math.floor(Math.random() * 16)];
       }
       return color;
     },
     addClient: function(clientID, topic) {
-      let touchPosElement = document.createElement("div");
-      touchPosElement.style.width = "10px";
-      touchPosElement.style.height = "10px";
-      touchPosElement.style.position = "relative";
+      let touchPosElement = document.createElement('div');
+      touchPosElement.style.width = '10px';
+      touchPosElement.style.height = '10px';
+      touchPosElement.style.position = 'relative';
       touchPosElement.style.backgroundColor = this.getRandomColor();
       document
-        .getElementById("example-web-smart-devices-touch-positions")
+        .getElementById('example-web-smart-devices-touch-positions')
         .appendChild(touchPosElement);
 
       // create client object with necessary info
@@ -103,7 +103,7 @@ export default {
         client.topicTouchPosition,
         touchPosition => {
           let boundingRect = document
-            .getElementById("example-web-smart-devices-touch-positions")
+            .getElementById('example-web-smart-devices-touch-positions')
             .getBoundingClientRect();
 
           client.touchPosition.x = Math.floor(
@@ -114,9 +114,9 @@ export default {
           );
 
           client.touchPosIndicator.style.left =
-            client.touchPosition.x.toString() + "px";
+            client.touchPosition.x.toString() + 'px';
           client.touchPosIndicator.style.top =
-            client.touchPosition.y.toString() + "px";
+            client.touchPosition.y.toString() + 'px';
         }
       );
     }

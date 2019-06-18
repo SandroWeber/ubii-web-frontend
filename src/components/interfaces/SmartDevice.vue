@@ -49,17 +49,17 @@
 </template>
 
 <script>
-import Vue from "vue";
-import Fullscreen from "vue-fullscreen";
+import Vue from 'vue';
+import Fullscreen from 'vue-fullscreen';
 
-import UbiiClientContent from "../applications/sharedModules/UbiiClientContent";
-import UbiiClientService from "../../services/ubiiClient/ubiiClientService.js";
-import ProtobufLibrary from "@tum-far/ubii-msg-formats/dist/js/protobuf";
-import UbiiEventBus from "../../services/ubiiClient/ubiiEventBus";
+import UbiiClientContent from '../applications/sharedModules/UbiiClientContent';
+import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
+import UbiiEventBus from '../../services/ubiiClient/ubiiEventBus';
 
 /* fontawesome */
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faPlay } from "@fortawesome/free-solid-svg-icons";
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faPlay } from '@fortawesome/free-solid-svg-icons';
 
 library.add(faPlay);
 
@@ -68,11 +68,11 @@ Vue.use(Fullscreen);
 /* eslint-disable no-console */
 
 export default {
-  name: "Interface-SmartDevice",
+  name: 'Interface-SmartDevice',
   components: { UbiiClientContent },
   mounted: function() {
     // unsubscribe before page is unloaded
-    window.addEventListener("beforeunload", () => {
+    window.addEventListener('beforeunload', () => {
       this.stopInterface();
     });
 
@@ -97,33 +97,33 @@ export default {
   },
   methods: {
     createUbiiSpecs: function() {
-      let deviceName = "web-interface-smart-device";
+      let deviceName = 'web-interface-smart-device';
 
       this.clientId = UbiiClientService.getClientID();
-      let topicPrefix = this.clientId + "/" + deviceName;
+      let topicPrefix = this.clientId + '/' + deviceName;
 
       let ubiiDevice = {
         name: deviceName,
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
         components: [
           {
-            topic: topicPrefix + "/touch_position",
-            messageFormat: "ubii.dataStructure.Vector2",
+            topic: topicPrefix + '/touch_position',
+            messageFormat: 'ubii.dataStructure.Vector2',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
           },
           {
-            topic: topicPrefix + "/orientation",
-            messageFormat: "ubii.dataStructure.Vector3",
+            topic: topicPrefix + '/orientation',
+            messageFormat: 'ubii.dataStructure.Vector3',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
           },
           {
-            topic: topicPrefix + "/linear_acceleration",
-            messageFormat: "ubii.dataStructure.Vector3",
+            topic: topicPrefix + '/linear_acceleration',
+            messageFormat: 'ubii.dataStructure.Vector3',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
           },
           {
-            topic: topicPrefix + "/touch_events",
-            messageFormat: "ubii.dataStructure.TouchEvent",
+            topic: topicPrefix + '/touch_events',
+            messageFormat: 'ubii.dataStructure.TouchEvent',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
           }
         ]
@@ -149,7 +149,7 @@ export default {
     unregisterUbiiSpecs: function() {
       this.ubiiDevice.components.forEach(component => {
         // eslint-disable-next-line no-console
-        console.log("unsubscribed to " + component.topic);
+        console.log('unsubscribed to ' + component.topic);
 
         UbiiClientService.client.unsubscribe(component.topic);
       });
@@ -158,15 +158,15 @@ export default {
     },
     registerEventListeners: function() {
       window.addEventListener(
-        "deviceorientation",
+        'deviceorientation',
         this.onDeviceOrientation,
         true
       );
-      window.addEventListener("devicemotion", this.onDeviceMotion, true);
+      window.addEventListener('devicemotion', this.onDeviceMotion, true);
     },
     unregisterEventListeners: function() {
-      window.removeEventListener("deviceorientation", this.onDeviceOrientation);
-      window.removeEventListener("devicemotion", this.onDeviceMotion);
+      window.removeEventListener('deviceorientation', this.onDeviceOrientation);
+      window.removeEventListener('devicemotion', this.onDeviceMotion);
     },
     stopInterface: function() {
       this.unregisterEventListeners();
@@ -203,7 +203,7 @@ export default {
       UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
         this.$data.componentOrientation.topic,
-        "vector3",
+        'vector3',
         {
           x: this.round(event.alpha, 2),
           y: this.round(event.beta, 2),
@@ -218,7 +218,7 @@ export default {
       UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
         this.$data.componentLinearAcceleration.topic,
-        "vector3",
+        'vector3',
         {
           x: this.round(event.acceleration.x, 2),
           y: this.round(event.acceleration.y, 2),
@@ -248,7 +248,7 @@ export default {
       UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
         this.$data.componentTouchPosition.topic,
-        "vector2",
+        'vector2',
         position
       );
     },
@@ -256,12 +256,12 @@ export default {
       UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
         this.$data.componentTouchEvents.topic,
-        "touchEvent",
+        'touchEvent',
         { type: type, position: position }
       );
     },
     toggleFullScreen: function() {
-      this.$refs["fullscreen"].toggle();
+      this.$refs['fullscreen'].toggle();
     },
     onFullScreenChange: function(fullscreen) {
       this.fullscreen = fullscreen;
