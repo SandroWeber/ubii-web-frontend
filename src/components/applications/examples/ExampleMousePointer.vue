@@ -43,30 +43,30 @@
 </template>
 
 <script>
-import UbiiClientContent from "../sharedModules/UbiiClientContent";
-import UbiiEventBus from "../../../services/ubiiClient/ubiiEventBus";
+import UbiiClientContent from '../sharedModules/UbiiClientContent';
+import UbiiEventBus from '../../../services/ubiiClient/ubiiEventBus';
 
-import uuidv4 from "uuid/v4";
-import UbiiClientService from "../../../services/ubiiClient/ubiiClientService.js";
-import ProtobufLibrary from "@tum-far/ubii-msg-formats/dist/js/protobuf";
-import { DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
+import uuidv4 from 'uuid/v4';
+import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
+import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
+import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
-import { mapActions } from "vuex";
+import { mapActions } from 'vuex';
 
 /* fontawesome */
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faPlay } from "@fortawesome/free-solid-svg-icons";
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faPlay } from '@fortawesome/free-solid-svg-icons';
 
 library.add(faPlay);
 
 /* eslint-disable no-console */
 
 export default {
-  name: "ExampleMousePointer",
+  name: 'ExampleMousePointer',
   components: { UbiiClientContent },
   mounted: function() {
     // unsubscribe before page is unloaded
-    window.addEventListener("beforeunload", () => {
+    window.addEventListener('beforeunload', () => {
       this.stopExample();
     });
 
@@ -75,8 +75,8 @@ export default {
       this.startExample();
     });
     UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopExample);
-    
-    this.startExample();
+
+    if (UbiiClientService.isConnected) this.startExample();
   },
   beforeDestroy: function() {
     this.stopExample();
@@ -116,22 +116,22 @@ export default {
       // create specifications for the protobuf messages
 
       // helper definitions that we can reference later
-      let deviceName = "web-example-mouse-pointer";
-      let topicPrefix = UbiiClientService.getClientID() + "/" + deviceName;
+      let deviceName = 'web-example-mouse-pointer';
+      let topicPrefix = UbiiClientService.getClientID() + '/' + deviceName;
       let inputClientPointer = {
-        internalName: "clientPointer",
-        messageFormat: "ubii.dataStructure.Vector2",
-        topic: topicPrefix + "/" + "mouse_client_position"
+        internalName: 'clientPointer',
+        messageFormat: 'ubii.dataStructure.Vector2',
+        topic: topicPrefix + '/' + 'mouse_client_position'
       };
       let inputMirror = {
-        internalName: "mirrorPointer",
-        messageFormat: "bool",
-        topic: topicPrefix + "/" + "mirror_mouse"
+        internalName: 'mirrorPointer',
+        messageFormat: 'bool',
+        topic: topicPrefix + '/' + 'mirror_mouse'
       };
       let outputServerPointer = {
-        internalName: "serverPointer",
-        messageFormat: "ubii.dataStructure.Vector2",
-        topic: topicPrefix + "/" + "mouse_server_position"
+        internalName: 'serverPointer',
+        messageFormat: 'ubii.dataStructure.Vector2',
+        topic: topicPrefix + '/' + 'mouse_server_position'
       };
 
       // specification of a ubii.devices.Device
@@ -180,7 +180,7 @@ export default {
 
       let ubiiInteraction = {
         id: uuidv4(),
-        name: "mirror-mouse-pointer",
+        name: 'mirror-mouse-pointer',
         processingCallback: processingCallback.toString(),
         inputFormats: [
           {
@@ -204,7 +204,7 @@ export default {
       // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/sessions/session.proto
       let ubiiSession = {
         id: uuidv4(),
-        name: "web-mouse-example-session",
+        name: 'web-mouse-example-session',
         interactions: [ubiiInteraction],
         ioMappings: [
           {
@@ -245,47 +245,49 @@ export default {
       this.$data.ubiiSession = ubiiSession;
     },
     startExample: function() {
-      // create all the specifications we need to define our example application
-      // these are protobuf messages to be sent to the server (saved in this.$data)
-      this.createUbiiSpecs();
+      UbiiClientService.isConnected().then(() => {
+        // create all the specifications we need to define our example application
+        // these are protobuf messages to be sent to the server (saved in this.$data)
+        this.createUbiiSpecs();
 
-      // register the mouse pointer device
-      UbiiClientService.registerDevice(this.$data.ubiiDevice)
-        .then(device => {
-          // on success, the response will be the (possibly extended) device specification we just sent
-          // we accept any additions the server might have made, like an ID that was left blank so the backend
-          // would automatically assign one, to our local state
-          this.$data.ubiiDevice = device;
-          return device;
-        })
-        .then(() => {
-          // subscribe to the device topics so we are notified when new data arrives on the topic
-          UbiiClientService.client.subscribe(
-            this.$data.outputServerPointer.topic,
-            // a callback to be called when new data on this topic arrives
-            mousePosition => {
-              // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
-              // interaction area and set our red square indicator
-              let boundingRect = document
-                .getElementById("mouse-pointer-area")
-                .getBoundingClientRect();
-              this.$data.serverMousePosition = {
-                x: mousePosition.x * boundingRect.width,
-                y: mousePosition.y * boundingRect.height
-              };
-            }
-          );
+        // register the mouse pointer device
+        UbiiClientService.registerDevice(this.$data.ubiiDevice)
+          .then(device => {
+            // on success, the response will be the (possibly extended) device specification we just sent
+            // we accept any additions the server might have made, like an ID that was left blank so the backend
+            // would automatically assign one, to our local state
+            this.$data.ubiiDevice = device;
+            return device;
+          })
+          .then(() => {
+            // subscribe to the device topics so we are notified when new data arrives on the topic
+            UbiiClientService.client.subscribe(
+              this.$data.outputServerPointer.topic,
+              // a callback to be called when new data on this topic arrives
+              mousePosition => {
+                // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
+                // interaction area and set our red square indicator
+                let boundingRect = document
+                  .getElementById('mouse-pointer-area')
+                  .getBoundingClientRect();
+                this.$data.serverMousePosition = {
+                  x: mousePosition.x * boundingRect.width,
+                  y: mousePosition.y * boundingRect.height
+                };
+              }
+            );
 
-          // start our session (registering not necessary as we do not want to save it permanently)
-          UbiiClientService.client
-            .callService({
-              topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
-              session: this.$data.ubiiSession
-            })
-            .then(() => {
-              this.$data.exampleStarted = true;
-            });
-        });
+            // start our session (registering not necessary as we do not want to save it permanently)
+            UbiiClientService.client
+              .callService({
+                topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+                session: this.$data.ubiiSession
+              })
+              .then(() => {
+                this.$data.exampleStarted = true;
+              });
+          });
+      });
     },
     stopExample: function() {
       if (!this.exampleStarted) return;
@@ -318,7 +320,7 @@ export default {
       UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
         this.$data.inputClientPointer.topic,
-        "vector2",
+        'vector2',
         this.$data.clientMousePosition
       );
     },
@@ -356,12 +358,12 @@ export default {
       UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
         this.$data.inputClientPointer.topic,
-        "vector2",
+        'vector2',
         this.$data.clientMousePosition
       );
     },
-    ...mapActions("interactions", {
-      addInteraction: "add"
+    ...mapActions('interactions', {
+      addInteraction: 'add'
     })
   }
 };
