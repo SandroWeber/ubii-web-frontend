@@ -147,12 +147,14 @@ export default {
       });
     },
     unregisterUbiiSpecs: function() {
-      this.ubiiDevice.components.forEach(component => {
-        // eslint-disable-next-line no-console
-        console.log('unsubscribed to ' + component.topic);
+      if (this.ubiiDevice.components) {
+        this.ubiiDevice.components.forEach(component => {
+          // eslint-disable-next-line no-console
+          console.log('unsubscribed to ' + component.topic);
 
-        UbiiClientService.client.unsubscribe(component.topic);
-      });
+          UbiiClientService.client.unsubscribe(component.topic);
+        });
+      }
 
       // TODO: unregister device
     },
