@@ -15,7 +15,7 @@
           <span v-show="!fullscreen">Fullscreen Mode</span>
         </button>
         <br>
-        <button v-show="!fullscreen" @click="calibrate()">Calibrate Orientation</button>
+        <button v-show="!fullscreen" @click="calibrate()">Calibrate</button>
 
         <div
           id="touch-area"
@@ -26,7 +26,7 @@
         >
           <span>Touch0: {{touches && touches[0] && touches[0].clientX}} {{touches && touches[0] && touches[0].clientY}}</span>
           <br>
-          <span>Raw Orientation:</span>
+          <span>Orientation:</span>
           <span v-if="deviceOrientation">
             {{this.round(deviceOrientation.alpha, 1)}}
             {{this.round(deviceOrientation.beta, 1)}}
@@ -40,14 +40,14 @@
             {{this.round(fixedCalibratedOrientation.z, 1)}}
           </span>
           <br>
-          <span>Raw Acceleration:</span>
+          <span>Acceleration:</span>
           <span v-if="deviceMotion && deviceMotion.acceleration">
             {{this.round(deviceMotion.acceleration.x, 1)}}
             {{this.round(deviceMotion.acceleration.y, 1)}}
             {{this.round(deviceMotion.acceleration.z, 1)}}
           </span>
           <br>
-          <span>Raw Rotation:</span>
+          <span>Rotation:</span>
           <span v-if="deviceMotion && deviceMotion.rotationRate">
             {{this.round(deviceMotion.rotationRate.alpha, 1)}}
             {{this.round(deviceMotion.rotationRate.beta, 1)}}
