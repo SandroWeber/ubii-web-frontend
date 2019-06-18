@@ -58,7 +58,7 @@
     /* eslint-disable no-console */
 
     export default {
-        name: "ExampleMousePointer",
+        name: "ExampleUbiiCon",
         components: { UbiiClientContent },
         mounted: function () {
             // unsubscribe before page is unloaded
@@ -112,7 +112,7 @@
                 // create specifications for the protobuf messages
 
                 // helper definitions that we can reference later
-                let deviceName = "web-example-mouse-pointer";
+                let deviceName = "web-example-ubii-con";
                 let topicPrefix = UbiiClientService.getClientID() + "/" + deviceName;
                 let inputClientPointer = {
                     internalName: "clientPointer",

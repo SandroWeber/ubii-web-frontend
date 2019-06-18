@@ -1,0 +1,18 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\public",
+    "\\src",
+    "\\src\\components",
+    "\\src\\components\\appComponents",
+    "\\src\\components\\applications",
+    "\\src\\components\\applications\\examples",
+    "\\src\\components\\editors",
+    "\\src\\components\\interfaces",
+    "\\src\\components\\mirrors",
+    "\\src\\components\\mirrors\\interactionMirror",
+    "\\src\\styles"
+  ],
+  "SelectedNode": "\\src\\components\\EntryPage.vue",
+  "PreviewInSolutionExplorer": false
+}

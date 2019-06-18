@@ -5,33 +5,39 @@
         <span class="label">Examples</span>
       </div>
       <div class="grid">
-        <router-link to="/applications/examples/mouse-pointer" class="interface-link" tag="div">
-          <app-tile class="layer-three background round shadow orange-accent"> 
-            <font-awesome-icon icon="mouse-pointer" class="interface-icon"/>
-            <p>Mouse Demo</p>
-          </app-tile>
-        </router-link>
+          <router-link to="/applications/examples/mouse-pointer" class="interface-link" tag="div">
+              <app-tile class="layer-three background round shadow orange-accent">
+                  <font-awesome-icon icon="mouse-pointer" class="interface-icon" />
+                  <p>Mouse Demo</p>
+              </app-tile>
+          </router-link>
 
-        <router-link to="/applications/examples/threejs" class="interface-link" tag="div">
-          <app-tile class="layer-three background round shadow orange-accent">
-            <font-awesome-icon icon="cube" class="interface-icon"/>
-            <p>three.js web rendering</p>
-          </app-tile>
-        </router-link>
+          <router-link to="/applications/examples/threejs" class="interface-link" tag="div">
+              <app-tile class="layer-three background round shadow orange-accent">
+                  <font-awesome-icon icon="cube" class="interface-icon" />
+                  <p>three.js web rendering</p>
+              </app-tile>
+          </router-link>
 
-        <router-link to="/applications/examples/threejs-webvr" class="interface-link" tag="div">
-          <app-tile class="layer-three background round shadow orange-accent">
-            <font-awesome-icon icon="vr-cardboard" class="interface-icon"/>
-            <p>three.js webVR rendering</p>
-          </app-tile>
-        </router-link>
+          <router-link to="/applications/examples/threejs-webvr" class="interface-link" tag="div">
+              <app-tile class="layer-three background round shadow orange-accent">
+                  <font-awesome-icon icon="vr-cardboard" class="interface-icon" />
+                  <p>three.js webVR rendering</p>
+              </app-tile>
+          </router-link>
 
-        <router-link to="/applications/examples/gatherer-web-interface-smart-devices" class="interface-link" tag="div">
-          <app-tile class="layer-three background round shadow orange-accent">
-            <font-awesome-icon icon="tablet-alt" class="interface-icon"/>
-            <p>Gatherer - Web Interface, Smart Devices</p>
-          </app-tile>
-        </router-link>
+          <router-link to="/applications/examples/gatherer-web-interface-smart-devices" class="interface-link" tag="div">
+              <app-tile class="layer-three background round shadow orange-accent">
+                  <font-awesome-icon icon="tablet-alt" class="interface-icon" />
+                  <p>Gatherer - Web Interface, Smart Devices</p>
+              </app-tile>
+          </router-link>
+          <router-link to="/applications/examples/ubii-con" class="interface-link" tag="div">
+              <app-tile class="layer-three background round shadow orange-accent">
+                  <font-awesome-icon icon="gamepad" class="interface-icon" />
+                  <p>Ubii Con</p>
+              </app-tile>
+          </router-link>
       </div>
     </div>
     <div class="category">
@@ -60,12 +66,13 @@
 
   // Fontawesome.
   import { library } from '@fortawesome/fontawesome-svg-core'
-  import { faMousePointer, faCube, faVrCardboard, faMobileAlt, faTabletAlt } from '@fortawesome/free-solid-svg-icons'
+  import { faMousePointer, faCube, faVrCardboard, faMobileAlt, faTabletAlt, faGamepad } from '@fortawesome/free-solid-svg-icons'
   library.add(faMousePointer);
   library.add(faCube);
   library.add(faVrCardboard);
   library.add(faMobileAlt);
   library.add(faTabletAlt);
+  library.add(faGamepad);
 
   export default {
     name: 'Applications',
