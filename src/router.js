@@ -83,6 +83,11 @@ export default new Router({
       path: '/applications/examples/gatherer-web-interface-smart-devices',
       name: 'Example - Gathering from Smart Devices connected via Web Interface',
       component: () => import('./components/applications/examples/ExampleWebInterfaceSmartDevices.vue')
-    }
+    },
+    {
+          path: '/applications/examples/ubii-con',
+          name: 'Example - Ubii Con',
+          component: () => import('./components/applications/examples/ExampleUbiiCon.vue')
+    },
   ]
 })

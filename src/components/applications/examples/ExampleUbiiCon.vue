@@ -126,7 +126,7 @@
                 };
                 let outputServerPointer = {
                     internalName: "serverPointer",
-                    messageFormat: "ubii.dataStructure.Vector2",
+                    messageFormat: "vector2",
                     topic: topicPrefix + "/" + "mouse_server_position"
                 };
 
