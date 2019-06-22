@@ -24,7 +24,7 @@
           v-on:touchmove="onTouchMove($event)"
           v-on:touchend="onTouchEnd($event)"
         >
-          <span>Touch0: {{touches && touches[0] && touches[0].clientX}} {{touches && touches[0] && touches[0].clientY}}</span>
+          <!--<span>Touch0: {{touch0 && touch0.clientX}} {{touch0 && touch0.clientY}}</span>
           <br>
           <span>Orientation:</span>
           <span v-if="deviceOrientation">
@@ -41,18 +41,18 @@
           </span>
           <br>
           <span>Acceleration:</span>
-          <span v-if="deviceMotion && deviceMotion.acceleration">
-            {{this.round(deviceMotion.acceleration.x, 1)}}
-            {{this.round(deviceMotion.acceleration.y, 1)}}
-            {{this.round(deviceMotion.acceleration.z, 1)}}
+          <span v-if="deviceData.accelerationTest">
+            {{this.round(deviceData.acceleration.x, 1)}}
+            {{this.round(deviceData.acceleration.y, 1)}}
+            {{this.round(deviceData.acceleration.z, 1)}}
           </span>
           <br>
           <span>Rotation:</span>
-          <span v-if="deviceMotion && deviceMotion.rotationRate">
-            {{this.round(deviceMotion.rotationRate.alpha, 1)}}
-            {{this.round(deviceMotion.rotationRate.beta, 1)}}
-            {{this.round(deviceMotion.rotationRate.gamma, 1)}}
-          </span>
+          <span v-if="deviceData.rotationRate">
+            {{this.round(deviceData.rotationRate.alpha, 1)}}
+            {{this.round(deviceData.rotationRate.beta, 1)}}
+            {{this.round(deviceData.rotationRate.gamma, 1)}}
+          </span>-->
         </div>
       </fullscreen>
     </div>
@@ -91,6 +91,7 @@ export default {
     UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.registerUbiiSpecs);
     UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.unregisterUbiiSpecs);
 
+    this.deviceData = {};
     this.registerEventListeners();
     UbiiClientService.isConnected().then(() => {
       this.registerUbiiSpecs();
@@ -106,16 +107,19 @@ export default {
       hasRegisteredUbiiDevice: false,
       clientId: undefined,
       publishFrequency: 0.01,
-      tLastPublished: undefined,
-      touches: undefined,
-      deviceOrientation: undefined,
-      deviceMotion: undefined,
       fullscreen: false,
       currentOrientation: undefined,
       calibratedOrientation: { x: 0, y: 0, z: 0 },
       fixedCalibratedOrientation: undefined
     };
   },
+  /*computed: {
+    touch0: function() {
+      return (
+        this.deviceData && this.deviceData.touches && this.deviceData.touches[0]
+      );
+    }
+  },*/
   methods: {
     stopInterface: function() {
       this.unregisterEventListeners();
@@ -212,14 +216,14 @@ export default {
       // TODO: unregister device
     },
     publishContinuousDeviceData: function() {
-      this.$data.touchPosition &&
-        this.publishTouchPosition(this.$data.touchPosition);
+      this.deviceData.touchPosition &&
+        this.publishTouchPosition(this.deviceData.touchPosition);
 
-      this.$data.deviceOrientation &&
-        this.publishDeviceOrientation(this.$data.deviceOrientation);
+      /*this.deviceData.currentOrientation &&
+        this.publishDeviceOrientation(this.deviceData.currentOrientation);*/
 
-      this.$data.deviceMotion &&
-        this.publishDeviceMotion(this.$data.deviceMotion);
+      this.deviceData.acceleration &&
+        this.publishDeviceMotion(this.deviceData.acceleration);
 
       // call loop
       if (this.hasRegisteredUbiiDevice) {
@@ -249,13 +253,13 @@ export default {
         );
       }
     },
-    publishDeviceOrientation: function(orientationEvent) {
-      let current = (this.$data.currentOrientation = {
-        x: this.round(orientationEvent.alpha, 2),
-        y: this.round(orientationEvent.beta, 2),
-        z: this.round(orientationEvent.gamma, 2)
+    publishDeviceOrientation: function(orientation) {
+      let current = (this.deviceData.currentOrientation = {
+        x: this.round(orientation.alpha, 2),
+        y: this.round(orientation.beta, 2),
+        z: this.round(orientation.gamma, 2)
       });
-      let calibrated = this.$data.calibratedOrientation;
+      let calibrated = this.deviceData.calibratedOrientation;
 
       let fixed = {
         x: current.x - calibrated.x,
@@ -263,7 +267,7 @@ export default {
         z: current.z - calibrated.z
       };
 
-      this.fixedCalibratedOrientation = fixed;
+      this.deviceData.fixedCalibratedOrientation = fixed;
 
       UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
@@ -272,15 +276,15 @@ export default {
         fixed
       );
     },
-    publishDeviceMotion: function(motionEvent) {
+    publishDeviceMotion: function(acceleration) {
       UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
         this.$data.componentLinearAcceleration.topic,
         'vector3',
         {
-          x: this.round(motionEvent.acceleration.x, 2),
-          y: this.round(motionEvent.acceleration.y, 2),
-          z: this.round(motionEvent.acceleration.z, 2)
+          x: this.round(acceleration.x, 2),
+          y: this.round(acceleration.y, 2),
+          z: this.round(acceleration.z, 2)
         }
       );
     },
@@ -298,22 +302,22 @@ export default {
       window.removeEventListener('devicemotion', this.onDeviceMotion);
     },
     onTouchStart: function(event) {
-      this.$data.touches = event.touches;
+      this.deviceData.touches = event.touches;
 
-      this.$data.touchPosition = this.normalizeCoordinates(event, 0);
+      this.deviceData.touchPosition = this.normalizeCoordinates(event, 0);
       this.publishTouchEvent(
         ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN,
-        this.$data.touchPosition
+        this.deviceData.touchPosition
       );
     },
     onTouchMove: function(event) {
-      this.$data.touches = event.touches;
+      this.deviceData.touches = event.touches;
 
-      this.$data.touchPosition = this.normalizeCoordinates(event, 0);
+      this.deviceData.touchPosition = this.normalizeCoordinates(event, 0);
     },
     onTouchEnd: function(event) {
-      this.$data.touches = event.touches;
-      this.$data.touchPosition = undefined;
+      this.deviceData.touches = event.touches;
+      this.deviceData.touchPosition = undefined;
 
       this.publishTouchEvent(
         ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP,
@@ -322,11 +326,12 @@ export default {
     },
     onDeviceOrientation: function(event) {
       // https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent
-      this.$data.deviceOrientation = event;
+      this.deviceData.currentOrientation = {alpha: event.alpha, beta: event.beta, gamma: event.gamma};
     },
     onDeviceMotion: function(event) {
       // https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent
-      this.$data.deviceMotion = event;
+      this.deviceData.acceleration = event.acceleration;
+      this.deviceData.rotationRate = event.rotationRate;
     },
     /* helper methods */
     round: function(value, digits) {
@@ -354,8 +359,8 @@ export default {
       this.fullscreen = fullscreen;
     },
     calibrate: function() {
-      if (this.currentOrientation) {
-        this.calibratedOrientation = this.currentOrientation;
+      if (this.deviceData.currentOrientation) {
+        this.deviceData.calibratedOrientation = this.deviceData.currentOrientation;
       }
     }
   }
