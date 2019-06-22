@@ -173,8 +173,6 @@ export default {
         });
       });
 
-      // TODO: unregister device
-
       this.hasRegisteredUbiiDevice = true;
     },
     unregisterUbiiSpecs: function() {
