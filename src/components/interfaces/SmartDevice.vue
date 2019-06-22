@@ -259,7 +259,7 @@ export default {
         y: this.round(orientation.beta, 2),
         z: this.round(orientation.gamma, 2)
       });
-      let calibrated = this.deviceData.calibratedOrientation;
+      let calibrated = this.deviceData.calibratedOrientation || { x: 0, y: 0, z: 0 };
 
       let fixed = {
         x: current.x - calibrated.x,
