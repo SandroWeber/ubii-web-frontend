@@ -10,9 +10,9 @@
         <span v-show="clientId">Client ID: {{clientId}}</span>
         <br>
 
-        <button @click="toggleFullScreen()">
-          <span v-show="fullscreen">x</span>
-          <span v-show="!fullscreen">Fullscreen Mode</span>
+        <button class="button-fullscreen" @click="toggleFullScreen()">
+          <font-awesome-icon icon="compress" class="interface-icon" v-show="fullscreen"/>
+          <font-awesome-icon icon="expand" class="interface-icon" v-show="!fullscreen"/>
         </button>
         <br>
         <button v-show="!fullscreen" @click="calibrate()">Calibrate</button>
@@ -24,7 +24,7 @@
           v-on:touchmove="onTouchMove($event)"
           v-on:touchend="onTouchEnd($event)"
         >
-          <!--<span>Touch0: {{touch0 && touch0.clientX}} {{touch0 && touch0.clientY}}</span>
+          <!--<span>Touch0: {{getTouch0X()}} {{getTouch0Y()}}</span>
           <br>
           <span>Orientation:</span>
           <span v-if="deviceOrientation">
@@ -70,10 +70,10 @@ import UbiiEventBus from '../../services/ubiiClient/ubiiEventBus';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faPlay } from '@fortawesome/free-solid-svg-icons';
+import { faExpand, faCompress } from '@fortawesome/free-solid-svg-icons';
 import { setTimeout } from 'timers';
 
-library.add(faPlay);
+library.add([faExpand, faCompress]);
 
 Vue.use(Fullscreen);
 
@@ -113,13 +113,6 @@ export default {
       fixedCalibratedOrientation: undefined
     };
   },
-  /*computed: {
-    touch0: function() {
-      return (
-        this.deviceData && this.deviceData.touches && this.deviceData.touches[0]
-      );
-    }
-  },*/
   methods: {
     stopInterface: function() {
       this.unregisterEventListeners();
@@ -362,6 +355,15 @@ export default {
       if (this.deviceData.currentOrientation) {
         this.deviceData.calibratedOrientation = this.deviceData.currentOrientation;
       }
+    },
+    /* interface methods */
+    getTouch0X: function() {
+      //console.info(this.deviceData);
+      return this.deviceData && this.deviceData.touches && this.deviceData.touches[0] && this.deviceData.touches[0].clientX;
+    },
+    
+    getTouch0Y: function() {
+      return this.deviceData && this.deviceData.touches && this.deviceData.touches[0] && this.deviceData.touches[0].clientY;
     }
   }
 };
@@ -380,5 +382,10 @@ export default {
 
 .notification {
   color: red;
+}
+
+.button-fullscreen {
+  width: 20px;
+  height: 20px;
 }
 </style>
