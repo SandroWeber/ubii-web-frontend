@@ -26,8 +26,12 @@ export default {
   data: function() {
     return {
       modelPrefab: undefined,
+      clientModel: undefined,
       gidCounter: 0,
-      clients: new Map()
+      client: undefined,
+      template: undefined,
+      oldClients: [],
+      taskStarted: false
     };
   },
 
@@ -36,9 +40,60 @@ export default {
     onStart: function() {
       const ctx = this;
 
-      loadObj('models/skeleton', model => {
-        ctx.modelPrefab = model;
+      loadObj('models/skeleton', modell => {
+        ctx.modelPrefab = modell;
+
+        const model = ctx.modelPrefab.clone();
+        const pivotPoint = new THREE.Object3D();
+        ctx.template = pivotPoint;
+        pivotPoint.add(model);
+        model.position.set(0, -0.5, 0);
+
+        pivotPoint.position.set(0, 1.2, -1);
+
+        this.scene.add(pivotPoint);
+
+        pivotPoint.add(new THREE.AxesHelper(0.5));
+        model.traverse(function(child) {
+          if (child instanceof THREE.Mesh) {
+            child.material = child.material.clone();
+            child.material.color.setHex(0xf49e42);
+            child.material.transparent = true;
+            child.material.opacity = 0;
+          }
+        });
+        this.template.traverse(child => {
+          if (child instanceof THREE.Mesh || child instanceof THREE.Line) {
+            child.material.transparent = true;
+            child.material.opacity = 0;
+          }
+        });
+
+        this.randomlyRotateTemplate();
       });
+
+      var guiProp = {
+        startTask: () => {
+          this.template.traverse(child => {
+            if (child instanceof THREE.Mesh || child instanceof THREE.Line) {
+              child.material.transparent = false;
+            }
+          });
+          this.randomlyRotateTemplate();
+          this.taskStarted = true;
+        }
+      };
+
+      this.gui.add(guiProp, 'startTask');
+    },
+
+    randomlyRotateTemplate: function() {
+      const offset = 30;
+      this.template.rotation.set(
+        ((Math.random() * -(180 - offset * 2) - offset + 90) * Math.PI) / 180,
+        ((Math.random() * -(180 - offset * 2) - offset + 90) * Math.PI) / 180,
+        ((Math.random() * -(180 - offset * 2) - offset + 90) * Math.PI) / 180 //((0 * offset * 2 + offset) * -Math.PI) / 180
+      );
     },
 
     // create specifications for the protobuf messages
@@ -93,13 +148,22 @@ export default {
     // this is the main game loop, called by parent
     /* eslint-disable-next-line no-unused-vars */
     updateGameLoop: function(deltaTime) {
-      this.clients.forEach(client => {
-        if (client.orientation && client.model) {
-          client.model.rotation.x = client.orientation.x;
-          client.model.rotation.y = client.orientation.y;
-          client.model.rotation.z = client.orientation.z;
+      if (!this.client) return;
+
+      if (this.client.orientation && this.clientModel) {
+        this.clientModel.rotation.x = this.client.orientation.x;
+        this.clientModel.rotation.y = this.client.orientation.y;
+        this.clientModel.rotation.z = this.client.orientation.z;
+
+        if (this.taskStarted) {
+          var diff = THREE.Math.radToDeg(
+            this.clientModel.quaternion.angleTo(this.template.quaternion)
+          );
+          if (diff < 20.0) {
+            this.randomlyRotateTemplate();
+          }
         }
-      });
+      }
     },
 
     // called by parent
@@ -117,40 +181,38 @@ export default {
             if (topicIndex !== -1) {
               const clientID = topic.substring(0, topicIndex);
 
-              if (!this.$data.clients.has(clientID)) {
-                this.addClient(clientID, topic);
+              // create new client if we dont have one yet or a new client just connected
+              if (!this.$data.client) {
+                this.createClient(clientID, topic);
+              } else {
+                if (!this.$data.oldClients.includes(clientID)) {
+                  this.createClient(clientID, topic);
+                }
               }
             }
           });
         });
     },
 
-    addClient: function(clientID, topic) {
+    createClient: function(clientID, topic) {
+      this.oldClients.push(clientID);
+
       // client object
       const client = {
         orientation: undefined,
-        model: undefined,
         session: undefined,
         topic: undefined,
         gid: this.gidCounter++,
         subscribe: undefined
       };
-
-      // check if model is loaded
-      const checkForPrefab = () => {
-        if (this.modelPrefab) {
-          client.model = this.createClientModel(client);
-        } else {
-          setTimeout(checkForPrefab, 250);
-        }
-      };
+      this.client = client;
 
       const specs = this.createOrientationSpecs(clientID, topic);
       client.session = specs.session;
       client.topic = specs.topic;
 
       // start our session (registering not necessary as we do not want to save it permanently)
-      client.subscribe = (createModel = false) =>
+      client.subscribe = () =>
         UbiiClientService.client
           .callService({
             topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
@@ -163,13 +225,11 @@ export default {
                 client.orientation = orientation;
               })
               .then(() => {
-                if (createModel) checkForPrefab();
+                if (!this.clientModel)
+                  this.clientModel = this.createClientModel(client);
               });
           });
-      client.subscribe(true);
-
-      // create the client
-      this.clients.set(clientID, client);
+      client.subscribe();
 
       console.log('add client ' + clientID);
     },
@@ -178,20 +238,12 @@ export default {
       const model = this.modelPrefab.clone();
 
       const pivotPoint = new THREE.Object3D();
+
+      pivotPoint.add(new THREE.AxesHelper(0.5));
       pivotPoint.add(model);
       model.position.set(0, -0.5, 0);
 
-      const radius = 0.75;
-      const height = 1.2;
-      const rotationOffset = 45 * (client.gid - 1);
-      const radians = THREE.Math.degToRad(180 - rotationOffset);
-
-      // position client objects on a circle
-      pivotPoint.position.set(
-        radius * Math.sin(radians),
-        height,
-        radius * Math.cos(radians)
-      );
+      pivotPoint.position.set(0, 1.2, -1);
 
       this.scene.add(pivotPoint);
       return pivotPoint;
@@ -199,19 +251,15 @@ export default {
 
     onConnectToUbii: function() {
       // resubscribe to previous topics
-      this.clients.forEach((v, k) => {
-        v.subscribe();
-      });
+      if (this.client) this.client.subscribe();
     },
     onDisconnectToUbii: function() {
       // unsubscribe and stop all sessions
-      this.clients.forEach((v, k) => {
-        UbiiClientService.client.unsubscribe(v.topic);
+      UbiiClientService.client.unsubscribe(this.client.topic);
 
-        UbiiClientService.client.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
-          session: v.session
-        });
+      UbiiClientService.client.callService({
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+        session: this.client.session
       });
     }
   }
