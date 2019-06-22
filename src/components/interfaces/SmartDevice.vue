@@ -108,9 +108,6 @@ export default {
       clientId: undefined,
       publishFrequency: 0.01,
       fullscreen: false,
-      currentOrientation: undefined,
-      calibratedOrientation: { x: 0, y: 0, z: 0 },
-      fixedCalibratedOrientation: undefined
     };
   },
   methods: {
@@ -212,8 +209,8 @@ export default {
       this.deviceData.touchPosition &&
         this.publishTouchPosition(this.deviceData.touchPosition);
 
-      /*this.deviceData.currentOrientation &&
-        this.publishDeviceOrientation(this.deviceData.currentOrientation);*/
+      this.deviceData.currentOrientation &&
+        this.publishDeviceOrientation(this.deviceData.currentOrientation);
 
       this.deviceData.acceleration &&
         this.publishDeviceMotion(this.deviceData.acceleration);
