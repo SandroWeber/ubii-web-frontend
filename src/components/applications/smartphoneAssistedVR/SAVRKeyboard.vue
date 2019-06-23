@@ -5,6 +5,7 @@
 </template>
 
 <script>
+/* eslint-disable no-console */
 import SAVRScene from './SAVRScene';
 
 // Rendering
@@ -33,14 +34,25 @@ export default {
       text: '',
       cursor: undefined,
       keyboard: undefined,
-      textDisplay: undefined
+      textDisplay: undefined,
+      taskStarted: false,
+      correctionCount: 0,
+      startTime: 0,
+      //targetString: 'asd'
+      targetString: 'The quick brown fox jumps over the lazy dog!'
     };
   },
 
   methods: {
     onStart: function() {
+      const ctx = this;
+      var txt = new TextDisplay(new THREE.Vector2(8.5, 2.5), 25, '#FFFFFF');
+      txt.position.set(0, 3.5, -7);
+      txt.text = this.targetString;
+      this.scene.add(txt);
+
       // setup text display
-      this.textDisplay = new TextDisplay(new THREE.Vector2(7.5, 2.5));
+      this.textDisplay = new TextDisplay(new THREE.Vector2(8.5, 2.5), 25);
       this.textDisplay.position.set(0, 3, -7);
       this.scene.add(this.textDisplay);
 
@@ -52,11 +64,31 @@ export default {
       this.keyboard = new VirtualKeyboard(keyboardArea, 12, event => {
         switch (event.action) {
           case VirtualKeyboard.KEY_ACTIONS.DELETE_ONE:
+            if (this.taskStarted) this.correctionCount++;
             this.text = this.text.substring(0, this.text.length - 1);
             break;
           case VirtualKeyboard.KEY_ACTIONS.CLEAR:
           case VirtualKeyboard.KEY_ACTIONS.RETURN:
-            this.text += '\n';
+            if (this.taskStarted && this.text == this.targetString) {
+              const id =
+                'savr_kb_' +
+                Math.random()
+                  .toString(36)
+                  .substring(7);
+
+              ctx.taskStarted = false;
+              console.log(ctx.correctionCount);
+              ctx.generateFile({
+                id: id,
+                correctionCount: ctx.correctionCount,
+                type: 'kb', // model viewer
+                time: new Date(),
+                timeTaken: new Date() - this.startTime
+              });
+
+              this.text = '';
+            }
+            if (!this.taskStarted) this.text = '';
             break;
           case VirtualKeyboard.KEY_ACTIONS.NONE:
           case undefined:
@@ -81,6 +113,34 @@ export default {
       // gui
       this.gui.add(this.cursor, 'SELECT_TIME');
       this.gui.add(this.cursor, 'MAX_VELOCITY');
+
+      var guiProp = {
+        startTask: function() {
+          if (ctx.taskStarted) {
+            return;
+          }
+          console.log('started');
+
+          ctx.taskStarted = true;
+          ctx.correctionCount = 0;
+          ctx.startTime = new Date();
+          this.text = '';
+        }
+      };
+
+      this.gui.add(guiProp, 'startTask');
+    },
+
+    generateFile: function(data) {
+      var dataStr =
+        'data:text/json;charset=utf-8,' +
+        encodeURIComponent(JSON.stringify(data));
+      var downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute('href', dataStr);
+      downloadAnchorNode.setAttribute('download', data.id + '.json');
+      document.body.appendChild(downloadAnchorNode); // required for firefox
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
     },
     /* eslint-disable-next-line no-unused-vars */
     updateGameLoop: function(delta) {

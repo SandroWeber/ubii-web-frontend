@@ -323,8 +323,8 @@ VirtualKeyboard.KEY_MAP = [
       keyCaps: 'T'
     },
     {
-      key: 'y',
-      keyCaps: 'Y'
+      key: 'z',
+      keyCaps: 'Z'
     },
     {
       key: 'u',
@@ -420,8 +420,8 @@ VirtualKeyboard.KEY_MAP = [
       width: 2.5
     },
     {
-      key: 'z',
-      keyCaps: 'Z'
+      key: 'y',
+      keyCaps: 'Y'
     },
     {
       key: 'x',

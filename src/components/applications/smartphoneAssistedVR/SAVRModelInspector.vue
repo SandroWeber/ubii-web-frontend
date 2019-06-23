@@ -5,6 +5,7 @@
 </template>
 
 <script>
+/* eslint-disable no-console */
 // Parent
 import SAVRScene from './SAVRScene';
 

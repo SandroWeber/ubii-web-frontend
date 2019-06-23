@@ -5,6 +5,7 @@
 </template>
 
 <script>
+/* eslint-disable no-console */
 import SAVRScene from './SAVRScene';
 
 // Rendering
@@ -87,6 +88,7 @@ export default {
 
           ctx.taskStarted = true;
           ctx.hitCount = 0;
+          ctx.clickCount = 0;
 
           const id =
             'savr_lp_' +
@@ -103,7 +105,7 @@ export default {
               hitCount: ctx.hitCount,
               clickCount: ctx.clickCount,
               seconds: timeout,
-              type: 'mv', // model viewer
+              type: 'lp', // model viewer
               time: new Date()
             });
           }, timeout * 1000);

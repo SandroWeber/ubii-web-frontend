@@ -3,13 +3,15 @@ import * as THREE from 'three';
 const _RESOLUTION = 64;
 
 export default class TextDisplay extends THREE.Object3D {
-  constructor(area) {
+  constructor(area, fontSize = 40, color = '#99FF33') {
     // parent
     super();
     this.name = 'Text Display';
 
     // public members
     this.area = area;
+    this.fontSize = fontSize;
+    this.color = color;
 
     // private members
     this._text = '';
@@ -41,8 +43,8 @@ export default class TextDisplay extends THREE.Object3D {
     context.clearRect(0, 0, this._canvas.width, this._canvas.height);
 
     context.textAlign = 'left';
-    context.font = 'Normal 40px Arial';
-    context.fillStyle = '#99FF33';
+    context.font = 'Normal ' + this.fontSize + 'px Arial';
+    context.fillStyle = this.color;
 
     for (let i = 0; i < lines.length; i++) {
       context.fillText(lines[i], padding, padding + (i + 1) * lineheight);
