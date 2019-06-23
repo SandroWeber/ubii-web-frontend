@@ -245,9 +245,9 @@ export default {
     },
     publishDeviceOrientation: function(orientation) {
       let current = (this.deviceData.currentOrientation = {
-        x: this.round(orientation.alpha, 2),
-        y: this.round(orientation.beta, 2),
-        z: this.round(orientation.gamma, 2)
+        x: this.round(orientation.x, 2),
+        y: this.round(orientation.y, 2),
+        z: this.round(orientation.z, 2)
       });
       let calibrated = this.deviceData.calibratedOrientation || { x: 0, y: 0, z: 0 };
 
@@ -316,7 +316,7 @@ export default {
     },
     onDeviceOrientation: function(event) {
       // https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent
-      this.deviceData.currentOrientation = {alpha: event.alpha, beta: event.beta, gamma: event.gamma};
+      this.deviceData.currentOrientation = {x: event.alpha, y: event.beta, z: event.gamma};
     },
     onDeviceMotion: function(event) {
       // https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent
