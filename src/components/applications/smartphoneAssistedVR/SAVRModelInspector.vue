@@ -31,7 +31,9 @@ export default {
       client: undefined,
       template: undefined,
       oldClients: [],
-      taskStarted: false
+      taskStarted: false,
+      startTime: undefined,
+      hitCount: 0
     };
   },
 
@@ -41,11 +43,11 @@ export default {
       const ctx = this;
 
       loadObj('models/skeleton', modell => {
-        ctx.modelPrefab = modell;
+        this.modelPrefab = modell;
 
-        const model = ctx.modelPrefab.clone();
+        const model = this.modelPrefab.clone();
         const pivotPoint = new THREE.Object3D();
-        ctx.template = pivotPoint;
+        this.template = pivotPoint;
         pivotPoint.add(model);
         model.position.set(0, -0.5, 0);
 
@@ -73,18 +75,62 @@ export default {
       });
 
       var guiProp = {
-        startTask: () => {
-          this.template.traverse(child => {
+        startTask: function() {
+          if (ctx.startTask) {
+            return;
+          }
+
+          ctx.template.traverse(child => {
             if (child instanceof THREE.Mesh || child instanceof THREE.Line) {
               child.material.transparent = false;
             }
           });
-          this.randomlyRotateTemplate();
-          this.taskStarted = true;
+          ctx.randomlyRotateTemplate();
+          ctx.taskStarted = true;
+          ctx.startTime = new Date();
+          ctx.hitCount = 0;
+
+          const id =
+            'savr_mv_' +
+            Math.random()
+              .toString(36)
+              .substring(7);
+
+          const timeout = 60;
+          setTimeout(() => {
+            ctx.taskStarted = false;
+            console.log(ctx.hitCount);
+            ctx.dataObj.hitCount = ctx.hitCount;
+            ctx.dataObj.ctx.generateFile({
+              id: id,
+              hitCount: ctx.hitCount,
+              seconds: timeout,
+              type: 'mv' // model viewer
+            });
+
+            this.template.traverse(child => {
+              if (child instanceof THREE.Mesh || child instanceof THREE.Line) {
+                child.material.transparent = true;
+                child.material.opacity = 0;
+              }
+            });
+          }, timeout * 1000);
         }
       };
 
       this.gui.add(guiProp, 'startTask');
+    },
+
+    generateFile: function(data) {
+      var dataStr =
+        'data:text/json;charset=utf-8,' +
+        encodeURIComponent(JSON.stringify(data));
+      var downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute('href', dataStr);
+      downloadAnchorNode.setAttribute('download', data.id + '.json');
+      document.body.appendChild(downloadAnchorNode); // required for firefox
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
     },
 
     randomlyRotateTemplate: function() {
@@ -161,6 +207,7 @@ export default {
           );
           if (diff < 20.0) {
             this.randomlyRotateTemplate();
+            this.hitCount++;
           }
         }
       }
