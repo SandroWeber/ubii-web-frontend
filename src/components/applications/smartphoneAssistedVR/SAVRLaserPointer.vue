@@ -35,7 +35,10 @@ export default {
       client: undefined,
       oldClients: [],
       raycaster: new THREE.Raycaster(),
-      targets: []
+      targets: [],
+      taskStarted: false,
+      hitCount: 0,
+      clickCount: 0
     };
   },
 
@@ -58,16 +61,67 @@ export default {
         model.add(laser);
       });
 
-      let geometry = new THREE.BoxBufferGeometry(1, 1, 1);
+      let geometry = new THREE.BoxBufferGeometry(0.5, 0.5, 0.5);
       for (var i = 0; i < 3; i++) {
         let object = new THREE.Mesh(
           geometry,
           new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff })
         );
-        object.position.set(i * 3 - 2.5, 2, -10);
+        //object.position.set(i * 3 - 2.5, 2, -10);
+        object.position.set(
+          this.getRandomArbitrary(-10, 10),
+          this.getRandomArbitrary(-1.5, 4),
+          -10
+        );
         this.scene.add(object);
         this.targets.push(object);
       }
+
+      const ctx = this;
+      var guiProp = {
+        startTask: function() {
+          if (ctx.taskStarted) {
+            return;
+          }
+          console.log('started');
+
+          ctx.taskStarted = true;
+          ctx.hitCount = 0;
+
+          const id =
+            'savr_lp_' +
+            Math.random()
+              .toString(36)
+              .substring(7);
+
+          const timeout = 30;
+          setTimeout(() => {
+            ctx.taskStarted = false;
+            console.log(ctx.hitCount);
+            ctx.generateFile({
+              id: id,
+              hitCount: ctx.hitCount,
+              clickCount: ctx.clickCount,
+              seconds: timeout,
+              type: 'mv', // model viewer
+              time: new Date()
+            });
+          }, timeout * 1000);
+        }
+      };
+
+      this.gui.add(guiProp, 'startTask');
+    },
+    generateFile: function(data) {
+      var dataStr =
+        'data:text/json;charset=utf-8,' +
+        encodeURIComponent(JSON.stringify(data));
+      var downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute('href', dataStr);
+      downloadAnchorNode.setAttribute('download', data.id + '.json');
+      document.body.appendChild(downloadAnchorNode); // required for firefox
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
     },
     /* eslint-disable-next-line no-unused-vars */
     updateGameLoop: function(delta) {
@@ -149,6 +203,8 @@ export default {
         if (
           event.type == ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN
         ) {
+          if (this.taskStarted) this.clickCount++;
+
           ctx.raycaster.set(
             ctx.model.position,
             new THREE.Vector3(0, 0, -1).applyQuaternion(ctx.model.quaternion)
@@ -167,7 +223,15 @@ export default {
           }
 
           for (var i = 0; i < intersects.length; i++) {
+            intersects[i].object.position.set(
+              this.getRandomArbitrary(-10, 10),
+              this.getRandomArbitrary(-0.5, 4),
+              -10
+            );
             intersects[i].object.material.color.set(Math.random() * 0xffffff);
+            if (this.taskStarted) this.hitCount++;
+
+            break;
           }
         }
       });
@@ -226,6 +290,9 @@ export default {
         unsubscribe(this.client.topics, this.client.sessions);
       }
       this.oldClients = [];
+    },
+    getRandomArbitrary: function(min, max) {
+      return Math.random() * (max - min) + min;
     }
   }
 };

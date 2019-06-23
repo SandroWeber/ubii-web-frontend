@@ -32,7 +32,6 @@ export default {
       template: undefined,
       oldClients: [],
       taskStarted: false,
-      startTime: undefined,
       hitCount: 0
     };
   },
@@ -87,7 +86,6 @@ export default {
           });
           ctx.randomlyRotateTemplate();
           ctx.taskStarted = true;
-          ctx.startTime = new Date();
           ctx.hitCount = 0;
 
           const id =
@@ -96,16 +94,16 @@ export default {
               .toString(36)
               .substring(7);
 
-          const timeout = 60;
+          const timeout = 30;
           setTimeout(() => {
             ctx.taskStarted = false;
             console.log(ctx.hitCount);
-            ctx.dataObj.hitCount = ctx.hitCount;
-            ctx.dataObj.ctx.generateFile({
+            ctx.generateFile({
               id: id,
               hitCount: ctx.hitCount,
               seconds: timeout,
-              type: 'mv' // model viewer
+              type: 'mv', // model viewer
+              time: new Date()
             });
 
             this.template.traverse(child => {
