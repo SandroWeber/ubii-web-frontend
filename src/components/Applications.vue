@@ -43,7 +43,40 @@
         <span class="label">Smartphone Assisted VR</span>
       </div>
 
-      <div class="grid"></div>
+      <div class="grid">
+        <router-link
+          to="/applications/smartphone-assisted-vr/savr-model-inspector"
+          class="interface-link"
+          tag="div"
+        >
+          <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="cubes" class="interface-icon"/>
+            <p>VR Model Inspector</p>
+          </app-tile>
+        </router-link>
+
+        <router-link
+          to="/applications/smartphone-assisted-vr/savr-laser-pointer"
+          class="interface-link"
+          tag="div"
+        >
+          <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="hand-pointer" class="interface-icon"/>
+            <p>VR Laser Pointer</p>
+          </app-tile>
+        </router-link>
+
+        <router-link
+          to="/applications/smartphone-assisted-vr/savr-keyboard"
+          class="interface-link"
+          tag="div"
+        >
+          <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="keyboard" class="interface-icon"/>
+            <p>VR Keyboard</p>
+          </app-tile>
+        </router-link>
+      </div>
     </div>
     <div class="category">
       <div class="seperator">
@@ -63,15 +96,21 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import {
   faMousePointer,
   faCube,
+  faCubes,
   faVrCardboard,
   faMobileAlt,
-  faTabletAlt
+  faTabletAlt,
+  faKeyboard,
+  faHandPointer
 } from '@fortawesome/free-solid-svg-icons';
 library.add(faMousePointer);
 library.add(faCube);
+library.add(faCubes);
 library.add(faVrCardboard);
 library.add(faMobileAlt);
 library.add(faTabletAlt);
+library.add(faKeyboard);
+library.add(faHandPointer);
 
 export default {
   name: 'Applications',
