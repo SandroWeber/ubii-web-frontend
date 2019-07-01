@@ -7,6 +7,13 @@
           <p>Smart Device</p>
         </app-tile>
       </router-link>
+
+      <router-link to="/interfaces/myo" class="interface-link" tag="div">
+        <app-tile class="layer-three background round shadow orange-accent">
+          <font-awesome-icon icon="mobile-alt" class="interface-icon"/>
+          <p>Myo</p>
+        </app-tile>
+      </router-link>
     </div>
   </div>
 </template>

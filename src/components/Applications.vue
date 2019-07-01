@@ -82,8 +82,18 @@
       <div class="seperator">
         <span class="label">Misc</span>
       </div>
-
-      <div class="grid"></div>
+      <div class="grid">
+        <router-link
+          to="/applications/smartphone-assisted-vr/savr-laser-pointer"
+          class="interface-link"
+          tag="div"
+        >
+          <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="hand-pointer" class="interface-icon"/>
+            <p>Scissor Paper Rock?</p>
+          </app-tile>
+        </router-link>
+      </div>
     </div>
   </div>
 </template>

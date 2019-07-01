@@ -25,6 +25,11 @@ export default new Router({
       name: 'Interface - Smart Device',
       component: () => import('./components/interfaces/SmartDevice.vue')
     },
+    {
+      path: '/interfaces/myo',
+      name: 'Interface - Myo',
+      component: () => import('./components/interfaces/Myo.vue')
+    },
     /* editors */
     {
       path: '/nodeEditor',
