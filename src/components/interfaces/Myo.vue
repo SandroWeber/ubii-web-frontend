@@ -3,51 +3,51 @@
     <div ref="top-div">
         <span v-show="clientId">Client ID: {{clientId}}</span>
         <br>
-          <span>Myo is connected: {{deviceIsConnected}}</span>
+          <button v-on:click="connectMyo()">Connect Myo</button>
           <br>
-          <span>Gesture: {{touches && touches[0] && touches[0].clientX}} {{touches && touches[0] && touches[0].clientY}}</span>
+          <button v-on:click="getMyoData()">Get Myo Data</button>
+          <br>
+          <span>Gesture: {{myoGesture}}</span>
           <br>
           <span>EMG:</span>
-          <span v-if="deviceEmg">
-            {{this.round(deviceEmg.v0, 1)}}
-            {{this.round(deviceEmg.v1, 1)}}
-            {{this.round(deviceEmg.v2, 1)}}
-            {{this.round(deviceEmg.v3, 1)}}
-            {{this.round(deviceEmg.v4, 1)}}
-            {{this.round(deviceEmg.v5, 1)}}
-            {{this.round(deviceEmg.v6, 1)}}
-            {{this.round(deviceEmg.v7, 1)}}
+          <span>
+            {{this.round(myoEmg.v0, 1)}}
+            {{this.round(myoEmg.v1, 1)}}
+            {{this.round(myoEmg.v2, 1)}}
+            {{this.round(myoEmg.v3, 1)}}
+            {{this.round(myoEmg.v4, 1)}}
+            {{this.round(myoEmg.v5, 1)}}
+            {{this.round(myoEmg.v6, 1)}}
+            {{this.round(myoEmg.v7, 1)}}
           </span>
           <br>
           <span>Orientation:</span>
-          <span v-if="deviceOrientation">
-            {{deviceOrientation.absolute}}
-            {{this.round(deviceOrientation.alpha, 1)}}
-            {{this.round(deviceOrientation.beta, 1)}}
-            {{this.round(deviceOrientation.gamma, 1)}}
+          <span>
+            {{this.round(myoOrientation.x, 1)}}
+            {{this.round(myoOrientation.y, 1)}}
+            {{this.round(myoOrientation.z, 1)}}
+            {{this.round(myoOrientation.w, 1)}}
           </span>
           <br>
-          <span>Acceleration:</span>
-          <span v-if="deviceMotion && deviceMotion.acceleration">
-            {{this.round(deviceMotion.acceleration.x, 1)}}
-            {{this.round(deviceMotion.acceleration.y, 1)}}
-            {{this.round(deviceMotion.acceleration.z, 1)}}
+          <span>Gyroscope:</span>
+          <span>
+            {{this.round(myoRotation.x, 1)}}
+            {{this.round(myoRotation.y, 1)}}
+            {{this.round(myoRotation.z, 1)}}
           </span>
           <br>
-          <span>Rotation:</span>
-          <span v-if="deviceMotion && deviceMotion.rotationRate">
-            {{this.round(deviceMotion.rotationRate.alpha, 1)}}
-            {{this.round(deviceMotion.rotationRate.beta, 1)}}
-            {{this.round(deviceMotion.rotationRate.gamma, 1)}}
+          <span>Accelerometer:</span>
+          <span>
+            {{this.round(myoAcceleration.x, 1)}}
+            {{this.round(myoAcceleration.y, 1)}}
+            {{this.round(myoAcceleration.z, 1)}}            
           </span>
         </div>
   </UbiiClientContent>
 </template>
 
 <script>
-import Vue from "vue";
 import Myo from "myo";
-//import Fullscreen from "vue-fullscreen";
 
 import UbiiClientContent from "../applications/sharedModules/UbiiClientContent";
 import UbiiClientService from "../../services/ubiiClient/ubiiClientService.js";
@@ -59,8 +59,6 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import { faPlay } from "@fortawesome/free-solid-svg-icons";
 
 library.add(faPlay);
-
-//Vue.use(Fullscreen);
 
 /* eslint-disable no-console */
 
@@ -83,14 +81,60 @@ export default {
     return {
       ubiiClientService: UbiiClientService,
       clientId: undefined,
-      deviceIsConnected: undefined,
-      deviceEmg: undefined,
-      deviceOrientation: undefined,
-      deviceMotion: undefined,
-      deviceGesture: undefined
+      deviceIsConnected: false,
+      myoEmg: {v0:0,v1:0,v2:0,v3:0,v4:0,v5:0,v6:0,v7:0},
+      myoOrientation: {x:0,y:0,z:0,w:0},
+      myoRotation: {x:0,y:0,z:0},
+      myoAcceleration: {x:0,y:0,z:0},
+      myoGesture: ""
     };
   },
+  computed:{
+    updateAccX: function(){
+      Myo.on("imu", function(data, timestep){
+        return data.accelerometer.x;
+      });
+    }
+  },
   methods: {
+    getMyoData: function() {
+      Myo.on("imu", (data, timestamp) => {
+        this.$data.myoOrientation = {
+          x:data.orientation.x,
+          y:data.orientation.y,
+          z:data.orientation.z,
+          w:data.orientation.w
+        };
+        this.$data.myoRotation = {
+          x:data.gyroscope .x,
+          y:data.gyroscope .y,
+          z:data.gyroscope .z
+        };
+        this.$data.myoAcceleration = {
+          x:data.accelerometer.x,
+          y:data.accelerometer.y,
+          z:data.accelerometer.z
+        };
+      });
+      Myo.on("emg", (data,timestep) => {
+        this.$data.myoEmg = {
+          v0:data[0],
+          v1:data[1],
+          v2:data[2],
+          v3:data[3],
+          v4:data[4],
+          v5:data[5],
+          v6:data[6],
+          v7:data[7]
+          }
+      });
+      Myo.on("pose", (data,timestep) => {
+        this.$data.myoGesture = data;
+      });
+      Myo.on("pose_off", (data,timestemp) => {
+        this.$data.myoGesture = "";
+      })
+    },
     createUbiiSpecs: function() {
       let deviceName = "web-interface-myo";
 
@@ -113,21 +157,22 @@ export default {
 
       this.$data.deviceName = deviceName;
       this.$data.ubiiDevice = ubiiDevice;
-      this.$data.componentTouchPosition = ubiiDevice.components[0];
+/*       this.$data.componentTouchPosition = ubiiDevice.components[0];
       this.$data.componentOrientation = ubiiDevice.components[1];
       this.$data.componentLinearAcceleration = ubiiDevice.components[2];
-      this.$data.componentTouchEvents = ubiiDevice.components[3];
+      this.$data.componentTouchEvents = ubiiDevice.components[3]; */
     },
     startInterface: function() {
+      Myo.connect('com.ubii.myoInterface');
+      console.log("connected");
+
+      Myo.on("connected", function(data, timestamp) {
+      console.log("Myo successfully connected. Data: " + JSON.stringify(data) + ". Timestamp: " + timestamp + ".");
+      });
+      
       // register the mouse pointer device
       UbiiClientService.isConnected().then(() => {
 
-        Myo.connect('com.stolksdorf.myAwesomeApp');
-
-        Myo.on('fist', function(){
-	        console.log('Hello Myo!');
-	        this.vibrate();
-        });
 
         // create all the specifications we need to define our example application
         // these are protobuf messages to be sent to the server (saved in this.$data)
@@ -169,80 +214,25 @@ export default {
                 this.$data.exampleStarted = true;
               });
         });
-
-        window.addEventListener(
-          "deviceorientation",
-          this.onDeviceOrientation,
-          true
-        );
-        window.addEventListener("devicemotion", this.onDeviceMotion, true);
       });
     },
-    stopInterface: function() {},
-    onDeviceOrientation: function(event) {
-      // https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent
-      this.$data.deviceOrientation = event;
-
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.componentOrientation.topic,
-        "vector3",
-        {
-          x: this.round(event.alpha, 2),
-          y: this.round(event.beta, 2),
-          z: this.round(event.gamma, 2)
-        }
-      );
-    },
-    onDeviceMotion: function(event) {
-      // https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent
-      this.$data.deviceMotion = event;
-
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.componentLinearAcceleration.topic,
-        "vector3",
-        {
-          x: this.round(event.acceleration.x, 2),
-          y: this.round(event.acceleration.y, 2),
-          z: this.round(event.acceleration.z, 2)
-        }
-      );
+    stopInterface: function() {
+      //Myo.streamEMG(false);
+      Myo.disconnect();      
     },
     round: function(value, digits) {
       return Math.round(value * digits * 10) / (digits * 10);
     },
-    normalizeCoordinates: function(event, touchIndex) {
-      let target = event.target;
+    connectMyo: function() {
+        Myo.connect('com.ubii.myoInterface');
 
-      let touchPosition = {
-        x: event.touches[touchIndex].clientX,
-        y: event.touches[touchIndex].clientY
-      };
-
-      let normalizedX =
-        (touchPosition.x - target.offsetLeft) / target.offsetWidth;
-      let normalizedY =
-        (touchPosition.y - target.offsetTop) / target.offsetHeight;
-
-      return { x: normalizedX, y: normalizedY };
-    },
-    publishTouchPosition: function(position) {
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.componentTouchPosition.topic,
-        "vector2",
-        position
-      );
-    },
-    publishTouchEvent: function(type, position) {
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.componentTouchEvents.topic,
-        "touchEvent",
-        { type: type, position: position }
-      );
-    },
+        Myo.on("connected", function(data, timestamp) {
+        this.streamEMG(true);
+        console.log("Myo successfully connected. Data: " + JSON.stringify(data) + ". Timestamp: " + timestamp + ".");
+        });
+        this.deviceIsConnected = Myo.connected;
+        //Myo.streamEMG(true);
+    }
   }
 };
 </script>

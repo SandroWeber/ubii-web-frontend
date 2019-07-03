@@ -10,7 +10,7 @@
 
       <router-link to="/interfaces/myo" class="interface-link" tag="div">
         <app-tile class="layer-three background round shadow orange-accent">
-          <font-awesome-icon icon="mobile-alt" class="interface-icon"/>
+          <font-awesome-icon icon="ring" class="interface-icon"/>
           <p>Myo</p>
         </app-tile>
       </router-link>
@@ -23,8 +23,12 @@ import { AppTile } from "./appComponents/appComponents.js";
 
 // Fontawesome.
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faMobileAlt } from "@fortawesome/free-solid-svg-icons";
+import { 
+  faMobileAlt,
+  faRing 
+  } from "@fortawesome/free-solid-svg-icons";
 library.add(faMobileAlt);
+library.add(faRing);
 
 export default {
   name: "Interfaces",
