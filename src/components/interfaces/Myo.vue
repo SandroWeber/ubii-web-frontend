@@ -53,12 +53,7 @@ import UbiiClientContent from "../applications/sharedModules/UbiiClientContent";
 import UbiiClientService from "../../services/ubiiClient/ubiiClientService.js";
 import ProtobufLibrary from "@tum-far/ubii-msg-formats/dist/js/protobuf";
 import UbiiEventBus from "../../services/ubiiClient/ubiiEventBus";
-
-/* fontawesome */
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faPlay } from "@fortawesome/free-solid-svg-icons";
-
-library.add(faPlay);
+import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 /* eslint-disable no-console */
 
@@ -71,8 +66,13 @@ export default {
       this.stopInterface();
     });
 
-    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.startInterface);
+    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
+      this.startInterface();
+      this.stopInterface();
+    });
     UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopInterface);
+
+    if (UbiiClientService.isConnected) this.startInterface();
   },
   beforeDestroy: function() {
     this.stopInterface();
@@ -80,7 +80,6 @@ export default {
   data: () => {
     return {
       ubiiClientService: UbiiClientService,
-      clientId: undefined,
       deviceIsConnected: false,
       myoEmg: {v0:0,v1:0,v2:0,v3:0,v4:0,v5:0,v6:0,v7:0},
       myoOrientation: {x:0,y:0,z:0,w:0},
@@ -90,56 +89,29 @@ export default {
     };
   },
   computed:{
-    updateAccX: function(){
-      Myo.on("imu", function(data, timestep){
-        return data.accelerometer.x;
-      });
-    }
+  },
+  watch:{
+    //something something publish on change?
   },
   methods: {
-    getMyoData: function() {
-      Myo.on("imu", (data, timestamp) => {
-        this.$data.myoOrientation = {
-          x:data.orientation.x,
-          y:data.orientation.y,
-          z:data.orientation.z,
-          w:data.orientation.w
-        };
-        this.$data.myoRotation = {
-          x:data.gyroscope .x,
-          y:data.gyroscope .y,
-          z:data.gyroscope .z
-        };
-        this.$data.myoAcceleration = {
-          x:data.accelerometer.x,
-          y:data.accelerometer.y,
-          z:data.accelerometer.z
-        };
-      });
-      Myo.on("emg", (data,timestep) => {
-        this.$data.myoEmg = {
-          v0:data[0],
-          v1:data[1],
-          v2:data[2],
-          v3:data[3],
-          v4:data[4],
-          v5:data[5],
-          v6:data[6],
-          v7:data[7]
-          }
-      });
-      Myo.on("pose", (data,timestep) => {
-        this.$data.myoGesture = data;
-      });
-      Myo.on("pose_off", (data,timestemp) => {
-        this.$data.myoGesture = "";
-      })
-    },
     createUbiiSpecs: function() {
-      let deviceName = "web-interface-myo";
+      //create specifications for the protobuff messages
 
+      //helper definitions that we can reference later
+      let deviceName = "web-interface-myo";
       this.clientId = UbiiClientService.getClientID();
       let topicPrefix = this.clientId + "/" + deviceName;
+
+      let inputClientMyoData = {
+        internalName: 'clientMyoData',
+        messageFormat: 'ubii.dataStructure.MyoEvent',
+        topic: topicPrefix + '/' + 'myo_client_data'
+      };
+      let outputServerMyoData = {
+        internalName: 'serverMyoData',
+        messageFormat: 'ubii.dataStructure.MyoEvent',
+        topic: topicPrefix + '/' + 'myo_server_data'
+      };
     
       // specification of a ubii.devices.Device
       // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/devices/device.proto
@@ -148,19 +120,83 @@ export default {
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
         components: [
           {
-            topic: topicPrefix + "/myo_event",
-            messageFormat: "ubii.dataStructure.myoEvent",
+            topic: inputClientMyoData.topic,
+            messageFormat: inputClientMyoData.messageFormat,
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+          },
+          {
+            topic: outputServerMyoData.topic,
+            messageFormat: outputServerMyoData.messageFormat,
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
           }
         ]
       };
 
+      // specification of a ubii.interactions.Interaction
+      // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/interactions/interaction.proto
+      let processingCallback = (input, output) => {
+        if (!input.clientMyoData) {
+          return;
+        }
+        output.serverMyoData = {
+          emg:          input.clientMyoData.emg,
+          orientation:  input.clientMyoData.orientation,
+          gyroscope:    input.clientMyoData.gyroscope,
+          accelerometer:input.clientMyoData.accelerometer,
+          gesture:      input.clientMyoData.gesture 
+        };  
+      };      
+
+      let ubiiInteraction = {
+        id: uuidv4(),
+        name: '?????????????????????????????????????????????????????',
+        processingCallback: processingCallback.toString(),
+        inputFormats: [
+          {
+            internalName: inputClientMyoData.internalName,
+            messageFormat: inputClientMyoData.messageFormat
+          }
+        ],
+        outputFormats: [
+          {
+            internalName: outputServerMyoData.internalName,
+            messageFormat: outputServerMyoData.messageFormat
+          }
+        ]
+      };
+      // specification of a ubii.sessions.Session
+      // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/sessions/session.proto
+      let ubiiSession = {
+        id: uuidv4(),
+        name: '??????????????????????????????????????????????????????2',
+        interactions: [ubiiInteraction],
+        ioMappings: [
+          {
+            interactionId: ubiiInteraction.id,
+            interactionInput: {
+              internalName: inputClientMyoData.internalName,
+              messageFormat: inputClientMyoData.messageFormat
+            },
+            topic: inputClientMyoData.topic
+          },
+          {
+            interactionId: ubiiInteraction.id,
+            interactionOutput: {
+              internalName: outputServerMyoData.internalName,
+              messageFormat: outputServerMyoData.messageFormat
+            },
+            topic: outputServerMyoData.topic
+          }
+        ]
+      };
+      //assign to local state for future reference
       this.$data.deviceName = deviceName;
       this.$data.ubiiDevice = ubiiDevice;
-/*       this.$data.componentTouchPosition = ubiiDevice.components[0];
-      this.$data.componentOrientation = ubiiDevice.components[1];
-      this.$data.componentLinearAcceleration = ubiiDevice.components[2];
-      this.$data.componentTouchEvents = ubiiDevice.components[3]; */
+      this.$data.ubiiSession = ubiiSession;
+      this.$data.ubiiInteraction = ubiiInteraction;
+      this.$data.inputClientMyoData = inputClientMyoData;
+      this.$data.outputServerMyoData = outputServerMyoData;
+
     },
     startInterface: function() {
       Myo.connect('com.ubii.myoInterface');
@@ -217,7 +253,6 @@ export default {
       });
     },
     stopInterface: function() {
-      //Myo.streamEMG(false);
       Myo.disconnect();      
     },
     round: function(value, digits) {
@@ -231,7 +266,44 @@ export default {
         console.log("Myo successfully connected. Data: " + JSON.stringify(data) + ". Timestamp: " + timestamp + ".");
         });
         this.deviceIsConnected = Myo.connected;
-        //Myo.streamEMG(true);
+    },
+        getMyoData: function() {
+      Myo.on("imu", (data, timestamp) => {
+        this.$data.myoOrientation = {
+          x:data.orientation.x,
+          y:data.orientation.y,
+          z:data.orientation.z,
+          w:data.orientation.w
+        };
+        this.$data.myoRotation = {
+          x:data.gyroscope .x,
+          y:data.gyroscope .y,
+          z:data.gyroscope .z
+        };
+        this.$data.myoAcceleration = {
+          x:data.accelerometer.x,
+          y:data.accelerometer.y,
+          z:data.accelerometer.z
+        };
+      });
+      Myo.on("emg", (data,timestep) => {
+        this.$data.myoEmg = {
+          v0:data[0],
+          v1:data[1],
+          v2:data[2],
+          v3:data[3],
+          v4:data[4],
+          v5:data[5],
+          v6:data[6],
+          v7:data[7]
+          }
+      });
+      Myo.on("pose", (data,timestep) => {
+        this.$data.myoGesture = data;
+      });
+      Myo.on("pose_off", (data,timestemp) => {
+        this.$data.myoGesture = "";
+      })
     }
   }
 };
