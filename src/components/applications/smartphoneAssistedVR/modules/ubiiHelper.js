@@ -18,7 +18,7 @@ function createUbiiSpecs(name, inputs, outputs, callback) {
     outputFormats: outputs.map(filterTopics)
   };
 
-  const createMappingInp = function(x) {
+  /*const createMappingInp = function(x) {
     return {
       interactionId: interaction.id,
       interactionInput: {
@@ -27,9 +27,15 @@ function createUbiiSpecs(name, inputs, outputs, callback) {
       },
       topic: x.topic
     };
-  };
+  };*/
+  const createMappingInp = function(x) {
+    return {
+      name: x.internalName,
+      topicSource: x.topic
+    };
+  }
 
-  const createMappingOut = function(x) {
+  /*const createMappingOut = function(x) {
     return {
       interactionId: interaction.id,
       interactionOutput: {
@@ -38,15 +44,28 @@ function createUbiiSpecs(name, inputs, outputs, callback) {
       },
       topic: x.topic
     };
+  };*/
+  const createMappingOut = function(x) {
+    return {
+      name: x.internalName,
+      topicDestination: x.topic
+    };
   };
 
   const session = {
     id: uuidv4(),
     name: name,
     interactions: [interaction],
-    ioMappings: inputs
+    ioMappings: [
+      {
+        interactionId: interaction.id,
+        inputMappings: inputs.map(createMappingInp),
+        outputMappings: outputs.map(createMappingOut)
+      }
+    ]
+    /*ioMappings: inputs
       .map(createMappingInp)
-      .concat(outputs.map(createMappingOut))
+      .concat(outputs.map(createMappingOut))*/
   };
 
   return {
