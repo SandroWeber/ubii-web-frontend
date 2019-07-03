@@ -209,27 +209,22 @@ export default {
         ioMappings: [
           {
             interactionId: ubiiInteraction.id,
-            interactionInput: {
-              internalName: inputClientPointer.internalName,
-              messageFormat: inputClientPointer.messageFormat
-            },
-            topic: inputClientPointer.topic
-          },
-          {
-            interactionId: ubiiInteraction.id,
-            interactionInput: {
-              internalName: inputMirror.internalName,
-              messageFormat: inputMirror.messageFormat
-            },
-            topic: inputMirror.topic
-          },
-          {
-            interactionId: ubiiInteraction.id,
-            interactionOutput: {
-              internalName: outputServerPointer.internalName,
-              messageFormat: outputServerPointer.messageFormat
-            },
-            topic: outputServerPointer.topic
+            inputMappings: [
+              {
+                name: inputClientPointer.internalName,
+                topicSource: inputClientPointer.topic
+              },
+              {
+                name: inputMirror.internalName,
+                topicSource: inputMirror.topic
+              }
+            ],
+            outputMappings: [
+              {
+                name: outputServerPointer.internalName,
+                topicDestination: outputServerPointer.topic
+              }
+            ]
           }
         ]
       };
