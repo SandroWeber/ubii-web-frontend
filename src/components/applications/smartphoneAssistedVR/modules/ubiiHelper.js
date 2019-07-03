@@ -18,16 +18,6 @@ function createUbiiSpecs(name, inputs, outputs, callback) {
     outputFormats: outputs.map(filterTopics)
   };
 
-  /*const createMappingInp = function(x) {
-    return {
-      interactionId: interaction.id,
-      interactionInput: {
-        internalName: x.internalName,
-        messageFormat: x.messageFormat
-      },
-      topic: x.topic
-    };
-  };*/
   const createMappingInp = function(x) {
     return {
       name: x.internalName,
@@ -35,16 +25,6 @@ function createUbiiSpecs(name, inputs, outputs, callback) {
     };
   }
 
-  /*const createMappingOut = function(x) {
-    return {
-      interactionId: interaction.id,
-      interactionOutput: {
-        internalName: x.internalName,
-        messageFormat: x.messageFormat
-      },
-      topic: x.topic
-    };
-  };*/
   const createMappingOut = function(x) {
     return {
       name: x.internalName,
@@ -63,9 +43,6 @@ function createUbiiSpecs(name, inputs, outputs, callback) {
         outputMappings: outputs.map(createMappingOut)
       }
     ]
-    /*ioMappings: inputs
-      .map(createMappingInp)
-      .concat(outputs.map(createMappingOut))*/
   };
 
   return {
