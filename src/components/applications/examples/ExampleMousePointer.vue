@@ -3,19 +3,19 @@
     <div class="grid">
       <div class="options">
         <!-- a checkbox to toggle showing the client side pointer -->
-        <input id="checkboxClientPointer" type="checkbox" v-model="showClientPointer">
+        <input id="checkboxClientPointer" type="checkbox" v-model="showClientPointer" />
         <label for="checkboxClientPointer">Show Client Pointer</label>
 
-        <br>
+        <br />
 
         <!-- a checkbox to toggle showing the server side pointer -->
-        <input id="checkboxServerPointer" type="checkbox" v-model="showServerPointer">
+        <input id="checkboxServerPointer" type="checkbox" v-model="showServerPointer" />
         <label for="checkboxServerPointer">Show Server Pointer</label>
 
-        <br>
+        <br />
 
         <!-- a checkbox to toggle inverting the pointer position at the server before sending it back to client -->
-        <input id="checkboxMirrorPointer" type="checkbox" v-model="mirrorPointer">
+        <input id="checkboxMirrorPointer" type="checkbox" v-model="mirrorPointer" />
         <label for="checkboxMirrorPointer">Mirror Pointer</label>
       </div>
 
@@ -278,7 +278,8 @@ export default {
                 topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
                 session: this.$data.ubiiSession
               })
-              .then(() => {
+              .then(response => {
+                console.info(response);
                 this.$data.exampleStarted = true;
               });
           });
