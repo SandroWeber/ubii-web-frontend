@@ -5,69 +5,73 @@
 </template>
 
 <script>
-  /* eslint-disable no-console */
+/* eslint-disable no-console */
 
-  import * as Three from 'three'
-  import WEBVR from '../sharedModules/moduleThreejsWebVR'
+import * as Three from 'three';
+import WebVR from '../sharedModules/WebVR';
 
-  export default {
-    name: 'ExampleTHREEjsWebVR',
-    data() {
-      return {
-        camera: null,
-        scene: null,
-        renderer: null,
-        mesh: null
-      }
+export default {
+  name: 'ExampleTHREEjsWebVR',
+  data() {
+    return {
+      camera: null,
+      scene: null,
+      renderer: null,
+      mesh: null
+    };
+  },
+  methods: {
+    init: function() {
+      let container = document.getElementById(
+        'example-threejs-webvr-render-container'
+      );
+
+      this.scene = new Three.Scene();
+
+      this.camera = new Three.PerspectiveCamera(
+        70,
+        container.clientWidth / container.clientHeight,
+        0.01,
+        10
+      );
+      this.camera.position.z = 1;
+      this.scene.add(this.camera);
+
+      let geometry = new Three.BoxGeometry(0.2, 0.2, 0.2);
+      let material = new Three.MeshNormalMaterial();
+
+      this.mesh = new Three.Mesh(geometry, material);
+      this.scene.add(this.mesh);
+
+      this.renderer = new Three.WebGLRenderer({ antialias: true });
+      this.renderer.setSize(container.clientWidth, container.clientHeight);
+      container.appendChild(this.renderer.domElement);
+
+      container.appendChild(WebVR.createButton(this.renderer));
+      this.renderer.vr.enabled = true;
     },
-    methods: {
-      init: function() {
-        let container = document.getElementById('example-threejs-webvr-render-container');
+    animate: function() {
+      const renderer = this.renderer;
+      const scene = this.scene;
+      const camera = this.camera;
+      const mesh = this.mesh;
 
-        this.scene = new Three.Scene();
-
-        this.camera = new Three.PerspectiveCamera(70, container.clientWidth/container.clientHeight, 0.01, 10);
-        this.camera.position.z = 1;
-        this.scene.add(this.camera);
-
-        let geometry = new Three.BoxGeometry(0.2, 0.2, 0.2);
-        let material = new Three.MeshNormalMaterial();
-
-        this.mesh = new Three.Mesh(geometry, material);
-        this.scene.add(this.mesh);
-
-        this.renderer = new Three.WebGLRenderer({antialias: true});
-        this.renderer.setSize(container.clientWidth, container.clientHeight);
-        container.appendChild(this.renderer.domElement);
-
-        container.appendChild( WEBVR.createButton( this.renderer ) );
-        this.renderer.vr.enabled = true;
-      },
-      animate: function() {
-        /*requestAnimationFrame(this.animate);
-        this.mesh.rotation.x += 0.01;
-        this.mesh.rotation.y += 0.02;
-        this.renderer.render(this.scene, this.camera);*/
-
-        let renderer = this.renderer;
-        let scene = this.scene;
-        let camera = this.camera;
-        let mesh = this.mesh;
-        this.renderer.setAnimationLoop( function () {
-          mesh.rotation.x += 0.01;
-          mesh.rotation.y += 0.02;
-          renderer.render(scene, camera);
-        });
-      }
-    },
-    mounted() {
-      this.init();
-      this.animate();
+      this.renderer.setAnimationLoop(function() {
+        mesh.rotation.x += 0.01;
+        mesh.rotation.y += 0.02;
+        renderer.render(scene, camera);
+      });
     }
+  },
+  mounted() {
+    this.init();
+    this.animate();
   }
+};
 </script>
 
 <style scoped lang="stylus">
-  .render-container
-    height: 100%
+.render-container {
+  height: 100%;
+}
 </style>

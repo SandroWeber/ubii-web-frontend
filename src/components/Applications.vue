@@ -6,7 +6,7 @@
       </div>
       <div class="grid">
         <router-link to="/applications/examples/mouse-pointer" class="interface-link" tag="div">
-          <app-tile class="layer-three background round shadow orange-accent"> 
+          <app-tile class="layer-three background round shadow orange-accent">
             <font-awesome-icon icon="mouse-pointer" class="interface-icon"/>
             <p>Mouse Demo</p>
           </app-tile>
@@ -26,7 +26,11 @@
           </app-tile>
         </router-link>
 
-        <router-link to="/applications/examples/gatherer-web-interface-smart-devices" class="interface-link" tag="div">
+        <router-link
+          to="/applications/examples/gatherer-web-interface-smart-devices"
+          class="interface-link"
+          tag="div"
+        >
           <app-tile class="layer-three background round shadow orange-accent">
             <font-awesome-icon icon="tablet-alt" class="interface-icon"/>
             <p>Gatherer - Web Interface, Smart Devices</p>
@@ -40,7 +44,38 @@
       </div>
 
       <div class="grid">
-        
+        <router-link
+          to="/applications/smartphone-assisted-vr/savr-model-inspector"
+          class="interface-link"
+          tag="div"
+        >
+          <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="cubes" class="interface-icon"/>
+            <p>VR Model Inspector</p>
+          </app-tile>
+        </router-link>
+
+        <router-link
+          to="/applications/smartphone-assisted-vr/savr-laser-pointer"
+          class="interface-link"
+          tag="div"
+        >
+          <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="hand-pointer" class="interface-icon"/>
+            <p>VR Laser Pointer</p>
+          </app-tile>
+        </router-link>
+
+        <router-link
+          to="/applications/smartphone-assisted-vr/savr-keyboard"
+          class="interface-link"
+          tag="div"
+        >
+          <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="keyboard" class="interface-icon"/>
+            <p>VR Keyboard</p>
+          </app-tile>
+        </router-link>
       </div>
     </div>
     <div class="category">
@@ -48,58 +83,74 @@
         <span class="label">Misc</span>
       </div>
 
-      <div class="grid">
-        
-      </div>
+      <div class="grid"></div>
     </div>
   </div>
 </template>
 
 <script>
-  import { AppTile } from './appComponents/appComponents.js';
+import { AppTile } from './appComponents/appComponents.js';
 
-  // Fontawesome.
-  import { library } from '@fortawesome/fontawesome-svg-core'
-  import { faMousePointer, faCube, faVrCardboard, faMobileAlt, faTabletAlt } from '@fortawesome/free-solid-svg-icons'
-  library.add(faMousePointer);
-  library.add(faCube);
-  library.add(faVrCardboard);
-  library.add(faMobileAlt);
-  library.add(faTabletAlt);
+// Fontawesome.
+import { library } from '@fortawesome/fontawesome-svg-core';
+import {
+  faMousePointer,
+  faCube,
+  faCubes,
+  faVrCardboard,
+  faMobileAlt,
+  faTabletAlt,
+  faKeyboard,
+  faHandPointer
+} from '@fortawesome/free-solid-svg-icons';
+library.add(faMousePointer);
+library.add(faCube);
+library.add(faCubes);
+library.add(faVrCardboard);
+library.add(faMobileAlt);
+library.add(faTabletAlt);
+library.add(faKeyboard);
+library.add(faHandPointer);
 
-  export default {
-    name: 'Applications',
-    components: {
-      AppTile,
-    }
+export default {
+  name: 'Applications',
+  components: {
+    AppTile
   }
+};
 </script>
 
 <style scoped lang="stylus">
-  .grid
-    display: grid
-    grid-gap: 15px
-    grid-template-columns: 1fr 1fr 1fr 1fr
-    margin: 25px
+.grid {
+  display: grid;
+  grid-gap: 15px;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  margin: 25px;
+}
 
-  .interface-link
-    text-align: center
-    cursor:pointer
+.interface-link {
+  text-align: center;
+  cursor: pointer;
+}
 
-  .interface-icon
-    width: 50px
-    height: 50px
+.interface-icon {
+  width: 50px;
+  height: 50px;
+}
 
-  .category 
-    .seperator
-      border-bottom: solid 1px highContrastColor;
-      height: 10px;
-      line-height: 20px;
-      text-align: left;
-      .label 
-        display: inline;
-        padding-left: 15px;
-        padding-right 20px;
-        background-color: layerOneSecondaryColor;
+.category {
+  .seperator {
+    border-bottom: solid 1px highContrastColor;
+    height: 10px;
+    line-height: 20px;
+    text-align: left;
 
+    .label {
+      display: inline;
+      padding-left: 15px;
+      padding-right: 20px;
+      background-color: layerOneSecondaryColor;
+    }
+  }
+}
 </style>

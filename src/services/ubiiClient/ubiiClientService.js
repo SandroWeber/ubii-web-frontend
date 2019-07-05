@@ -1,12 +1,13 @@
 /* eslint-disable no-console */
 
-import ClientNodeWeb from './clientNodeWeb';
+import ClientNodeWeb from "./clientNodeWeb";
+import UbiiEventBus from "./ubiiEventBus";
 
 
 class UbiiClientService {
   constructor() {
     this.serverIP = window.location.hostname;
-    this.serverPort = '8102';
+    this.serverPort = "8102";
     this.client = undefined;
     this.connected = false;
     this.connecting = false;
@@ -18,27 +19,40 @@ class UbiiClientService {
     }
     this.connecting = true;
 
-    console.info('connecting to backend ' + this.serverIP + ':' + this.serverPort);
+    console.info("connecting to backend " + this.serverIP + ":" + this.serverPort);
 
-    this.client = new ClientNodeWeb('web frontend', this.serverIP, this.serverPort);
+    this.client = new ClientNodeWeb("web frontend", this.serverIP, this.serverPort);
     return this.client.initialize().then(
       () => {
         if (this.client.isInitialized()) {
-          console.info('UbiiClientService - client connected with ID:\n' +
+          console.info("UbiiClientService - client connected with ID:\n" +
             this.client.clientSpecification.id);
           this.connected = true;
           this.connecting = false;
+
+          UbiiEventBus.$emit(UbiiEventBus.CONNECT_EVENT);
         }
       },
       (error) => {
-        console.info('UbiiClientService.client.initialize() failed:\n' + error);
+        console.info("UbiiClientService.client.initialize() failed:\n" + error);
       });
   }
 
   disconnect() {
+    if (!this.connected) {
+      console.warn("Client tried to disconnect without beeing connected.")
+      return;
+    }
+
+    let id = this.client.clientSpecification.id;
+
+    UbiiEventBus.$emit(UbiiEventBus.DISCONNECT_EVENT);
+
     this.connected = false;
     this.connecting = false;
     this.client = undefined;
+
+    console.info("client disconnected with ID: " + id);
   }
 
   isConnected() {

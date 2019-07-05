@@ -14,7 +14,7 @@ const backendData = {
         // Get the list with all interactions from the server...
         UbiiClientService.client
         .callService({
-          topic: DEFAULT_TOPICS.SERVICES.INTERACTION_GET_LIST
+          topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_GET_LIST
         })
         .then(async (reply) => {
           // ... then clear all ...
