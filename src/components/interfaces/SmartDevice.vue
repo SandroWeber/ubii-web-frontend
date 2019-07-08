@@ -165,6 +165,8 @@ export default {
           messageFormat: 'double',
           ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
         });
+        this.tNextVibrate = Date.now();
+        navigator.vibrate(100);
       }
 
       this.$data.deviceName = deviceName;
@@ -206,7 +208,11 @@ export default {
               UbiiClientService.client.subscribe(
                 vibrationComponent.topic,
                 vibrationPattern => {
-                  navigator.vibrate(vibrationPattern);
+                  if (Date.now() >= this.tNextVibrate) {
+                    navigator.vibrate(vibrationPattern);
+                    this.tNextVibrate = Date.now() + 2 * vibrationPattern;
+                  }
+                  //console.info('vibrate ' + vibrationPattern);
                 }
               );
             }
