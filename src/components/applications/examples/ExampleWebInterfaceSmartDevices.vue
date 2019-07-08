@@ -48,6 +48,7 @@ export default {
       UbiiClientService.isConnected().then(() => {
         this.updateSmartDevices();
 
+        /* we register our device needed to publish the vibration distance threshold */
         UbiiClientService.registerDevice(this.device)
           .then(response => {
             if (response.id) {
@@ -58,6 +59,7 @@ export default {
             }
           })
           .then(() => {
+            /* we publish the vibration distance threshold */
             UbiiClientService.client.publish(
               this.device.name,
               this.topicVibrationDistanceThreshold,
@@ -65,6 +67,7 @@ export default {
               0.03
             );
 
+            /* we start the session with the specs created in createUbiiSpecs() */
             UbiiClientService.client
               .callService({
                 topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
@@ -90,6 +93,7 @@ export default {
       }
     },
     createUbiiSpecs: function() {
+      /* this is the processing callback that compares touch positions and lets devices vibrate whose positions are close */
       let processCB = (inputs, outputs) => {
         /* compare touch positions of all smart devices, let those who are close (distance below threshold) vibrate */
         let positionRecords = inputs.muxTouchPositions;
@@ -118,17 +122,21 @@ export default {
           }
         });
         // get rid of all duplicates
-        /*vibrationIndices = vibrationIndices.filter((element, index) => {
-          vibrationIndices.indexOf(element) === index;
-        });*/
+        vibrationIndices = vibrationIndices.filter((current, currentIndex) => {
+          return (
+            vibrationIndices.findIndex(element => {
+              return element === current;
+            }) === currentIndex
+          );
+        });
 
-        /* demux output list */
+        /* write demux output list */
         /**
          * Check the "muxerTouchPositions" specifications below. The identityMatchPattern extracts the client UUID and
          * provides it as "positionRecords[index].identity". We use this UUID as our outputTopicParams for the demuxer,
          * i.e. it will fill in when constructing the output topic.
          * Take a look at the "demuxerVibrations" specifications below. The outputTopicParams (i.e. the client UUID) provided here
-         * will fill in for the outputTopicFormat's %s placeholder.
+         * will fill in for the outputTopicFormat's "%s" placeholder.
          * */
         let vibrationDemuxOutput = vibrationIndices.map(index => {
           return {
@@ -139,6 +147,7 @@ export default {
         outputs.demuxVibration = vibrationDemuxOutput;
       };
 
+      /* our interaction with the I/O specifications fitting the processCB */
       this.interaction = {
         id: uuidv4(),
         name: 'SmartDeviceGathererExample - Interaction',
@@ -161,6 +170,7 @@ export default {
         ]
       };
 
+      /* our muxer gathers all topics "<ID>/web-interface-smart-device/touch_position" and extracts <ID> as identity */
       this.muxerTouchPositions = {
         id: uuidv4(),
         name: 'SmartDeviceGathererExample - TopicMux positions',
@@ -171,6 +181,7 @@ export default {
         identityMatchPattern: UbiiClientService.getUUIDv4Regex()
       };
 
+      /* our demuxer will publish to "<ID>/web-interface-smart-device/vibration_pattern" when provided the ID as outputTopicParams */
       this.demuxerVibrations = {
         id: uuidv4(),
         name: 'SmartDeviceGathererExample - TopicDemux vibrations',
@@ -182,6 +193,8 @@ export default {
         '/' +
         UbiiClientService.getClientID() +
         '/smart_device_gatherer_example/vibration_distance_threshold';
+
+      /* our session that contains the interaction and the mapping between "muxer -> interaction input" and "interaction output -> demuxer" */
       this.session = {
         id: uuidv4(),
         name: 'SmartDeviceGathererExample - Session',
