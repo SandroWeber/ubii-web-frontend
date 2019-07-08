@@ -212,7 +212,6 @@ export default {
                     navigator.vibrate(vibrationPattern);
                     this.tNextVibrate = Date.now() + 2 * vibrationPattern;
                   }
-                  //console.info('vibrate ' + vibrationPattern);
                 }
               );
             }

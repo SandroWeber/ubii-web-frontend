@@ -29,7 +29,9 @@ export default {
     UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopExample);
 
     this.createUbiiSpecs();
-    if (UbiiClientService.isConnected) this.startExample();
+    UbiiClientService.isConnected().then(() => {
+      this.startExample();
+    });
   },
   beforeDestroy: function() {
     this.stopExample();
@@ -37,13 +39,12 @@ export default {
   data: () => {
     return {
       ubiiClientService: UbiiClientService,
-      clients: new Map(),
-      pollSmartDevices: false
+      clients: new Map()
     };
   },
   methods: {
     startExample: function() {
-      this.$data.pollSmartDevices = true;
+      this.pollSmartDevices = true;
       UbiiClientService.isConnected().then(() => {
         this.updateSmartDevices();
 
@@ -79,7 +80,7 @@ export default {
       });
     },
     stopExample: function() {
-      this.$data.pollSmartDevices = false;
+      this.pollSmartDevices = false;
 
       if (this.session) {
         UbiiClientService.client.callService({
@@ -221,7 +222,7 @@ export default {
       };
     },
     updateSmartDevices: function() {
-      if (!this.$data.pollSmartDevices) {
+      if (!this.pollSmartDevices) {
         return;
       }
 
