@@ -46,6 +46,36 @@ export default {
     stopExample: function() {
       this.$data.pollSmartDevices = false;
     },
+    createUbiiSpecs: function() {
+      let processCB = (inputs, outputs, state) => {
+        /* compare touch positions of all smart devices, let those who are close (distance below threshold) vibrate */
+        let positionRecords = inputs.muxPositions;
+        let vibrationIndixes = [];
+        let threshold = inputs.vibrationDistanceThreshold;
+        positionRecords.forEach((current, index) => {
+          if (vibrationIndixes.some((el) => { return el === index; })) {
+            continue;
+          }
+          // compare to the remaining other positions
+          for (let i=index+1; i < positionRecords.size; i++) {
+            if (vibrationIndixes.some((el) => { return el === i })) {
+              continue;
+            }
+            let distance = this.getEuclidianDistance2D(current.data, positionRecords[i].data);
+            if (distance < threshold) {
+              vibrationIndixes.push(index, i);
+            }
+          }
+        });
+
+        let vibrationDemuxOutput = vibrationIndixes.map((index) => {
+          return {
+            topicFormatParams: [positionRecords[index].identity],
+            data: 1
+          };
+        })
+      }
+    },
     updateSmartDevices: function() {
       if (!this.$data.pollSmartDevices) {
         return;
@@ -80,6 +110,9 @@ export default {
       }
       return color;
     },
+    getEuclidianDistance2D: function(vec1, vec2) {
+      return Math.sqrt(Math.pow(vec1.x - vec2.x, 2) + Math.pow(vec1.y - vec2.y, 2));
+    }
     addClient: function(clientID, topic) {
       let touchPosElement = document.createElement('div');
       touchPosElement.style.width = '10px';
