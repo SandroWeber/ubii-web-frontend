@@ -10,6 +10,6 @@
     "\\src\\components\\editors",
     "\\src\\components\\interfaces"
   ],
-  "SelectedNode": "\\src\\App.vue",
+  "SelectedNode": "\\src\\components\\applications\\examples\\ExampleUbiiCon.vue",
   "PreviewInSolutionExplorer": false
 }

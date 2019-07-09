@@ -1,12 +1,14 @@
 <template>
     <UbiiClientContent :ubiiClientService="ubiiClientService">
         <div class="controller">
-            <div>
-
-            </div>
             <h1>Ubii Controller</h1>
-            <button @click="clickActionButton(A)" class="action-button">Button A</button>
-
+            <div>
+                <button @click="clickActionButton(1)" class="action-button">Button A</button>
+                <button @click="clickActionButton(2)" class="action-button">Button B</button>
+            </div>
+        <div>
+            <button @click="startExample()" class="start-button">Start</button>
+        </div>
 
 
         </div>
@@ -30,13 +32,35 @@
 </template>
 
 <script>
-   
+    //import UbiiClientContent from "../sharedModules/UbiiClientContent";
+    //import { DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
+    import UbiiClientService from "../../../services/ubiiClient/ubiiClientService";
+    //import UbiiEventBus from "../../../services/ubiiClient/ubiiEventBus";
     export default {
         name: "ExampleUbiiCon",
         components: {
-            
+
         },
-      
+        methods: {
+            startExample: function () {
+                UbiiClientService.isConnected().then(() => {
+                    this.registerController();
+                });
+            }, 
+            stopExample: function () {
+                // Quit
+            },
+            registerController: function(){
+                UbiiClientService.isConnected().then(() => {
+                    // Publish(UbiiParser.UnityToProto("registerNewClient", GetID()));
+                });
+            },
+            clickedActionButton: function(buttonID){
+                return buttonID;
+                //Publish(UbiiParser.UnityToProto("playerInput" + GetID(), buttonID));
+            }
+        }
+
         //data: () => {
         //    return {
         //        showClientPointer: true,
@@ -48,13 +72,13 @@
         //        clientPointerInside: false
         //    };
         //},
-        
+
     };
 </script>
 
 <style scoped lang="stylus">
     .controller {
-        display:normal;
+        display: normal;
         color: aqua;
         text-align: center;
         margin-top: 10%;
@@ -65,12 +89,22 @@
         border: groove;
     }
 
-    .action-button{
+    .action-button {
         background: #808080;
         color: aquamarine;
         border: none;
         padding: 20px 20px;
         border-radius: 50%;
+        cursor: pointer;
+        margin-left: 50%;
+        margin-top : 5%;
+    }
+
+    .start-button {
+        background: #808080;
+        color: aquamarine;
+        border: none;
+        padding: 5px 5px;
         cursor: pointer;
     }
 
