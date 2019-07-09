@@ -64,14 +64,14 @@ export default {
       this.keyboard = new VirtualKeyboard(keyboardArea, 12, event => {
         switch (event.action) {
           case VirtualKeyboard.KEY_ACTIONS.DELETE_ONE:
-            if (this.taskStarted) this.correctionCount++;
-            this.text = this.text.substring(0, this.text.length - 1);
+            if (ctx.taskStarted) ctx.correctionCount++;
+            ctx.text = ctx.text.substring(0, ctx.text.length - 1);
             break;
           case VirtualKeyboard.KEY_ACTIONS.CLEAR:
           case VirtualKeyboard.KEY_ACTIONS.RETURN:
-            if (this.taskStarted && this.text == this.targetString) {
+            if (ctx.taskStarted) {
               const id =
-                'savr_kb_' +
+                'savr_vk_' +
                 Math.random()
                   .toString(36)
                   .substring(7);
@@ -81,19 +81,19 @@ export default {
               ctx.generateFile({
                 id: id,
                 correctionCount: ctx.correctionCount,
-                type: 'kb', // model viewer
+                type: 'vk', // model viewer
                 time: new Date(),
-                timeTaken: new Date() - this.startTime
+                timeTaken: new Date() - ctx.startTime
               });
 
-              this.text = '';
+              ctx.text = '';
             }
-            if (!this.taskStarted) this.text = '';
+            if (!ctx.taskStarted) ctx.text = '';
             break;
           case VirtualKeyboard.KEY_ACTIONS.NONE:
           case undefined:
           default:
-            this.text += event.key;
+            ctx.text += event.key;
             break;
         }
       });
@@ -124,7 +124,7 @@ export default {
           ctx.taskStarted = true;
           ctx.correctionCount = 0;
           ctx.startTime = new Date();
-          this.text = '';
+          ctx.text = '';
         }
       };
 

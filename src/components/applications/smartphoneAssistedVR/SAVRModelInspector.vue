@@ -51,7 +51,7 @@ export default {
         pivotPoint.add(model);
         model.position.set(0, -0.5, 0);
 
-        pivotPoint.position.set(0, 1.2, -1);
+        pivotPoint.position.set(0, 1.8, -1);
 
         this.scene.add(pivotPoint);
 
@@ -289,7 +289,7 @@ export default {
       pivotPoint.add(model);
       model.position.set(0, -0.5, 0);
 
-      pivotPoint.position.set(0, 1.2, -1);
+      pivotPoint.position.set(0, 1.8, -1);
 
       this.scene.add(pivotPoint);
       return pivotPoint;
