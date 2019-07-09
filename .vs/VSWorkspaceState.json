@@ -8,11 +8,8 @@
     "\\src\\components\\applications",
     "\\src\\components\\applications\\examples",
     "\\src\\components\\editors",
-    "\\src\\components\\interfaces",
-    "\\src\\components\\mirrors",
-    "\\src\\components\\mirrors\\interactionMirror",
-    "\\src\\styles"
+    "\\src\\components\\interfaces"
   ],
-  "SelectedNode": "\\src\\components\\EntryPage.vue",
+  "SelectedNode": "\\src\\App.vue",
   "PreviewInSolutionExplorer": false
 }
