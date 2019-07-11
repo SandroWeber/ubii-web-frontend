@@ -1,3 +1,4 @@
+
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
     <div ref="top-div">
@@ -42,6 +43,43 @@
             {{this.round(myoAcceleration.y, 1)}}
             {{this.round(myoAcceleration.z, 1)}}            
           </span>
+          <br>
+          <span>Server-Gesture: {{serverMyoData.gesture}}</span>
+          <br>
+          <span>Server-EMG:</span>
+          <span>
+            {{this.round(serverMyoData.emg.v0, 1)}}
+            {{this.round(serverMyoData.emg.v1, 1)}}
+            {{this.round(serverMyoData.emg.v2, 1)}}
+            {{this.round(serverMyoData.emg.v3, 1)}}
+            {{this.round(serverMyoData.emg.v4, 1)}}
+            {{this.round(serverMyoData.emg.v5, 1)}}
+            {{this.round(serverMyoData.emg.v6, 1)}}
+            {{this.round(serverMyoData.emg.v7, 1)}}
+          </span>
+          <br>
+          <span>Server-Orientation:</span>
+          <span>
+            {{this.round(serverMyoData.orientation.x, 1)}}
+            {{this.round(serverMyoData.orientation.y, 1)}}
+            {{this.round(serverMyoData.orientation.z, 1)}}
+            {{this.round(serverMyoData.orientation.w, 1)}}
+          </span>
+          <br>
+          <span>Server-Gyroscope:</span>
+          <span>
+            {{this.round(serverMyoData.gyroscope.x, 1)}}
+            {{this.round(serverMyoData.gyroscope.y, 1)}}
+            {{this.round(serverMyoData.gyroscope.z, 1)}}
+          </span>
+          <br>
+          <span>Server-Accelerometer:</span>
+          <span>
+            {{this.round(serverMyoData.accelerometer.x, 1)}}
+            {{this.round(serverMyoData.accelerometer.y, 1)}}
+            {{this.round(serverMyoData.accelerometer.z, 1)}}            
+          </span>
+
         </div>
   </UbiiClientContent>
 </template>
@@ -50,9 +88,11 @@
 import Myo from "myo";
 
 import UbiiClientContent from "../applications/sharedModules/UbiiClientContent";
+import UbiiEventBus from "../../services/ubiiClient/ubiiEventBus";
+
+import uuidv4 from 'uuid/v4';
 import UbiiClientService from "../../services/ubiiClient/ubiiClientService.js";
 import ProtobufLibrary from "@tum-far/ubii-msg-formats/dist/js/protobuf";
-import UbiiEventBus from "../../services/ubiiClient/ubiiEventBus";
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 /* eslint-disable no-console */
@@ -85,7 +125,25 @@ export default {
       myoOrientation: {x:0,y:0,z:0,w:0},
       myoRotation: {x:0,y:0,z:0},
       myoAcceleration: {x:0,y:0,z:0},
-      myoGesture: ""
+      myoGesture: "",
+      interfaceStarted: false,
+      serverMyoEmg: {v0:0,v1:0,v2:0,v3:0,v4:0,v5:0,v6:0,v7:0},
+
+      serverMyoData: {
+        emg: {v0:0,v1:0,v2:0,v3:0,v4:0,v5:0,v6:0,v7:0},
+        orientation: {x:0,y:0,z:0,w:0},
+        gyroscope: {x:0,y:0,z:0},
+        accelerometer: {x:0,y:0,z:0},
+        gesture: ""
+      },
+
+      clientMyoData: {
+        emg: {v0:0,v1:0,v2:0,v3:0,v4:0,v5:0,v6:0,v7:0},
+        orientation: {x:0,y:0,z:0,w:0},
+        gyroscope: {x:0,y:0,z:0},
+        accelerometer: {x:0,y:0,z:0},
+        gesture: ""
+      }
     };
   },
   computed:{
@@ -94,6 +152,8 @@ export default {
     //something something publish on change?
   },
   methods: {
+
+    //ubii methods
     createUbiiSpecs: function() {
       //create specifications for the protobuff messages
 
@@ -149,7 +209,7 @@ export default {
 
       let ubiiInteraction = {
         id: uuidv4(),
-        name: '?????????????????????????????????????????????????????',
+        name: 'myo-interaction',
         processingCallback: processingCallback.toString(),
         inputFormats: [
           {
@@ -168,7 +228,7 @@ export default {
       // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/sessions/session.proto
       let ubiiSession = {
         id: uuidv4(),
-        name: '??????????????????????????????????????????????????????2',
+        name: 'myo-session',
         interactions: [ubiiInteraction],
         ioMappings: [
           {
@@ -206,7 +266,6 @@ export default {
       console.log("Myo successfully connected. Data: " + JSON.stringify(data) + ". Timestamp: " + timestamp + ".");
       });
       
-      // register the mouse pointer device
       UbiiClientService.isConnected().then(() => {
 
 
@@ -225,18 +284,38 @@ export default {
         .then(() => {
             // subscribe to the device topics so we are notified when new data arrives on the topic
             UbiiClientService.client.subscribe(
-              this.$data.outputServerPointer.topic,
-              // a callback to be called when new data on this topic arrives
-              mousePosition => {
-                // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
-                // interaction area and set our red square indicator
-                let boundingRect = document
-                  .getElementById('mouse-pointer-area')
-                  .getBoundingClientRect();
-                this.$data.serverMousePosition = {
-                  x: mousePosition.x * boundingRect.width,
-                  y: mousePosition.y * boundingRect.height
-                };
+              this.$data.outputServerMyoData.topic,
+
+              myoData => {
+
+                this.$data.serverMyoData = 
+                  emg = {
+                    v0: myoData.emg.v0,
+                    v1: myoData.emg.v1,
+                    v2: myoData.emg.v2,
+                    v3: myoData.emg.v3,
+                    v4: myoData.emg.v4,
+                    v5: myoData.emg.v5,
+                    v6: myoData.emg.v6,
+                    v7: myoData.emg.v7
+                  },
+                  orientation = {
+                    x:0,
+                    y:0,
+                    z:0,
+                    w:0
+                  },
+                  gyroscope = {
+                    x:0,
+                    y:0,
+                    z:0
+                  },
+                  accelerometer = {
+                    x:0,
+                    y:0,
+                    z:0
+                  },
+                  gesture = ""
               }
             );
 
@@ -247,13 +326,26 @@ export default {
                 session: this.$data.ubiiSession
               })
               .then(() => {
-                this.$data.exampleStarted = true;
+                this.$data.interfaceStarted = true;
               });
         });
       });
     },
     stopInterface: function() {
-      Myo.disconnect();      
+      if(!this.interfaceStarted) return;
+      this.interfaceStarted = false;
+
+      //disconnect Myo
+      Myo.disconnect();
+      
+      //unsubscribe and stop session
+      UbiiClientService.client.unsubscribe(
+        this.$data.outputServerMyoData.topic
+      );
+      UbiiClientService.client.callService({
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+        session: this.$data.ubiiSession
+      });
     },
     round: function(value, digits) {
       return Math.round(value * digits * 10) / (digits * 10);
@@ -267,8 +359,12 @@ export default {
         });
         this.deviceIsConnected = Myo.connected;
     },
-        getMyoData: function() {
+    getMyoData: function() {
+
+      if(!this.interfaceStarted) return;
+
       Myo.on("imu", (data, timestamp) => {
+        //Just display data
         this.$data.myoOrientation = {
           x:data.orientation.x,
           y:data.orientation.y,
@@ -285,6 +381,34 @@ export default {
           y:data.accelerometer.y,
           z:data.accelerometer.z
         };
+
+        //Client data
+        this.$data.clientMyoData.orientation = {
+           x:data.orientation.x,
+          y:data.orientation.y,
+          z:data.orientation.z,
+          w:data.orientation.w
+        };
+        this.$data.clientMyoData.gyroscope = {
+          x:data.gyroscope .x,
+          y:data.gyroscope .y,
+          z:data.gyroscope .z
+        };
+        this.$data.clientMyoData.accelerometer = {
+          x:data.accelerometer.x,
+          y:data.accelerometer.y,
+          z:data.accelerometer.z
+        };
+
+        //Publish
+        UbiiClientService.client.publish(
+          this.$data.ubiiDevice.name,
+          this.$data.inputClientMyoData.topic,
+          'myoData',
+          this.$data.clientMyoData
+      );
+
+
       });
       Myo.on("emg", (data,timestep) => {
         this.$data.myoEmg = {
@@ -296,7 +420,28 @@ export default {
           v5:data[5],
           v6:data[6],
           v7:data[7]
+          },
+
+          emg = {
+            v0:data[0],
+            v1:data[1],
+            v2:data[2],
+            v3:data[3],
+            v4:data[4],
+            v5:data[5],
+            v6:data[6],
+            v7:data[7]
           }
+
+          this.$data.clientMyoData.emg = emg;
+
+          //publish client emg data
+          UbiiClientService.client.publish(
+            this.$data.ubiiDevice.name,
+            this.$data.inputClientMyoData.topic,
+            'myo_event',
+            this.$data.clientMyoData
+          );
       });
       Myo.on("pose", (data,timestep) => {
         this.$data.myoGesture = data;
@@ -310,17 +455,41 @@ export default {
 </script>
 
 <style scoped lang="stylus">
-.touch-area {
+.grid {
+  display: grid;
+  grid-gap: 15px;
+  grid-template-columns: 1fr 5fr;
   height: 100%;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
 }
 
-.notification {
-  color: red;
+.options {
+  margin: 25px;
+}
+
+.mouse-pointer-area {
+  margin: 25px;
+  border: 3px solid black;
+  height: 300px;
+}
+
+.hideCursor {
+  cursor: none;
+}
+
+.server-mouse-position-indicator {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  background-color: red;
+}
+
+.start-example {
+  text-align: center;
+  margin-top: 25px;
+}
+
+.start-example-button {
+  width: 50px;
+  height: 50px;
 }
 </style>
