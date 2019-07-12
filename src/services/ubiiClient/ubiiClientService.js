@@ -13,21 +13,23 @@ class UbiiClientService {
     this.client = undefined;
     this.connected = undefined;
     this.connecting = false;
+
+    this.onDisconnectCallbacks = [];
   }
 
-  connect() {
+  async connect() {
     if (this.connected || this.connecting) {
       return this.isConnected();
     }
     this.connecting = true;
 
-    console.info("connecting to backend " + this.serverIP + ":" + this.serverPort);
+    console.info('connecting to backend ' + this.serverIP + ':' + this.serverPort);
 
-    this.client = new ClientNodeWeb("web frontend", this.serverIP, this.serverPort);
+    this.client = new ClientNodeWeb('web frontend', this.serverIP, this.serverPort);
     return this.client.initialize().then(
       () => {
         if (this.client.isInitialized()) {
-          console.info("UbiiClientService - client connected with ID:\n" +
+          console.info('UbiiClientService - client connected with ID:\n' +
             this.client.clientSpecification.id);
           this.connected = true;
           this.connecting = false;
@@ -36,25 +38,33 @@ class UbiiClientService {
         }
       },
       (error) => {
-        console.info("UbiiClientService.client.initialize() failed:\n" + error);
+        console.info('UbiiClientService.client.initialize() failed:\n' + error);
       });
   }
 
-  disconnect() {
+  async disconnect() {
     if (!this.connected) {
-      console.warn("Client tried to disconnect without beeing connected.")
+      console.warn('Client tried to disconnect without beeing connected.')
       return;
     }
 
     let id = this.client.clientSpecification.id;
 
     UbiiEventBus.$emit(UbiiEventBus.DISCONNECT_EVENT);
+    this.onDisconnectCallbacks.forEach((callback) => {
+      callback();
+    });
 
-    this.connected = false;
-    this.connecting = false;
-    this.client = undefined;
+    return this.client.deinitialize().then(() => {
+      this.connected = false;
+      this.connecting = false;
+      this.client = undefined;
+      console.info('client disconnected with ID: ' + id);
+    });
+  }
 
-    console.info("client disconnected with ID: " + id);
+  async reconnect() {
+    await this.connect();
   }
 
   isConnected() {
@@ -81,6 +91,10 @@ class UbiiClientService {
     });
   }
 
+  onDisconnect(callback) {
+    this.onDisconnectCallbacks.push(callback);
+  }
+
   getClientID() {
     if (this.client && this.client.isInitialized()) {
       return this.client.clientSpecification.id;
@@ -88,7 +102,6 @@ class UbiiClientService {
       return undefined;
     }
   }
-
 
   /**
    * Register the specified device at the UBII server.

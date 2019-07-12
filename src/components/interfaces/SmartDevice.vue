@@ -93,8 +93,12 @@ export default {
 
     this.deviceData = {};
     this.registerEventListeners();
+    this.createUbiiSpecs();
     UbiiClientService.isConnected().then(() => {
       this.registerUbiiSpecs();
+    });
+    UbiiClientService.onDisconnect(async () => {
+      await this.stopExample();
     });
   },
   beforeDestroy: function() {
@@ -187,7 +191,6 @@ export default {
 
       // register the mouse pointer device
       UbiiClientService.isConnected().then(() => {
-        this.createUbiiSpecs();
         UbiiClientService.registerDevice(this.$data.ubiiDevice)
           .then(device => {
             if (device.id) {

@@ -26,11 +26,13 @@ export default {
     });
 
     UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.startExample);
-    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopExample);
 
     this.createUbiiSpecs();
     UbiiClientService.isConnected().then(() => {
       this.startExample();
+    });
+    UbiiClientService.onDisconnect(async () => {
+      await this.stopExample();
     });
   },
   beforeDestroy: function() {
@@ -44,15 +46,17 @@ export default {
   },
   methods: {
     startExample: function() {
+      if (this.running) return;
+
+      this.running = true;
       this.pollSmartDevices = true;
+
       UbiiClientService.isConnected().then(() => {
         this.updateSmartDevices();
 
         /* we register our device needed to publish the vibration distance threshold */
         UbiiClientService.registerDevice(this.device)
           .then(response => {
-            console.info('startExample: ');
-            console.info(response);
             if (response.id) {
               this.device = response;
               return response;
@@ -86,9 +90,10 @@ export default {
     },
     stopExample: function() {
       this.pollSmartDevices = false;
+      this.running = false;
 
       if (this.session) {
-        UbiiClientService.client.callService({
+        return UbiiClientService.client.callService({
           topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
           session: this.session
         });
@@ -311,6 +316,10 @@ export default {
             client.touchPosition.y.toString() + 'px';
         }
       );
+    },
+    removeClient(clientID) {
+      let indicatorElement = this.$data.clients[clientID].touchPosIndicator;
+      indicatorElement.parentNode.removeChild(indicatorElement);
     }
   }
 };

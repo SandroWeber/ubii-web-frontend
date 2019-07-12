@@ -54,6 +54,15 @@ class ClientNodeWeb {
     });
   }
 
+  async deinitialize() {
+    return this.callService({
+      topic: DEFAULT_TOPICS.SERVICES.CLIENT_DEREGISTRATION,
+      client: this.clientSpecification
+    }).then((reply) => {
+      console.info(reply);
+    });
+  }
+
   initializeTopicDataClient(serverSpecification) {
     this.topicDataClient = new WebsocketClient(
       this.clientSpecification.id,
@@ -105,10 +114,8 @@ class ClientNodeWeb {
       topic: DEFAULT_TOPICS.SERVICES.CLIENT_REGISTRATION
     };
     if (this.clientSpecification.id) {
-      console.info('### registerClient() ###\n reconnecting with existing ID !!!');
       message.client = this.clientSpecification;
     } else {
-      console.info('### registerClient() ###\n new client !!!');
       message.client = {
         name: this.name
       }
@@ -143,9 +150,13 @@ class ClientNodeWeb {
 
           return reply.device;
         }
+
+        if (reply.error) {
+          return reply.error;
+        }
       },
       (error) => {
-        console.error(error);
+        return error;
       }
     );
   }

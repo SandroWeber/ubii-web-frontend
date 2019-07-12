@@ -32,6 +32,9 @@ export default {
   },
   beforeMount: function() {
     UbiiClientService.connect();
+    window.addEventListener('beforeunload', () => {
+      UbiiClientService.disconnect();
+    });
   },
   beforeDestroy: function() {
     UbiiClientService.disconnect();
@@ -63,8 +66,9 @@ export default {
 
       this.ubiiClientService.isConnected().then(connected => {
         if (connected) {
-          this.ubiiClientService.disconnect();
-          this.ubiiClientService.connect();
+          this.ubiiClientService.disconnect().then(() => {
+            this.ubiiClientService.connect();
+          });
         } else {
           this.ubiiClientService.connect();
         }
