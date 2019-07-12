@@ -1,114 +1,170 @@
-
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
-    <div ref="top-div">
-        <span v-show="clientId">Client ID: {{clientId}}</span>
-        <br>
-          <button v-on:click="connectMyo()">Connect Myo</button>
-          <br>
-          <button v-on:click="getMyoData()">Get Myo Data</button>
-          <br>
-          <span>Gesture: {{myoGesture}}</span>
-          <br>
-          <span>EMG:</span>
-          <span>
-            {{this.round(myoEmg.v0, 1)}}
-            {{this.round(myoEmg.v1, 1)}}
-            {{this.round(myoEmg.v2, 1)}}
-            {{this.round(myoEmg.v3, 1)}}
-            {{this.round(myoEmg.v4, 1)}}
-            {{this.round(myoEmg.v5, 1)}}
-            {{this.round(myoEmg.v6, 1)}}
-            {{this.round(myoEmg.v7, 1)}}
-          </span>
-          <br>
-          <span>Orientation:</span>
-          <span>
-            {{this.round(myoOrientation.x, 1)}}
-            {{this.round(myoOrientation.y, 1)}}
-            {{this.round(myoOrientation.z, 1)}}
-            {{this.round(myoOrientation.w, 1)}}
-          </span>
-          <br>
-          <span>Gyroscope:</span>
-          <span>
-            {{this.round(myoRotation.x, 1)}}
-            {{this.round(myoRotation.y, 1)}}
-            {{this.round(myoRotation.z, 1)}}
-          </span>
-          <br>
-          <span>Accelerometer:</span>
-          <span>
-            {{this.round(myoAcceleration.x, 1)}}
-            {{this.round(myoAcceleration.y, 1)}}
-            {{this.round(myoAcceleration.z, 1)}}            
-          </span>
-          <br>
-          <span>Server-Gesture: {{serverMyoData.gesture}}</span>
-          <br>
-          <span>Server-EMG:</span>
-          <span>
-            {{this.round(serverMyoData.emg.v0, 1)}}
-            {{this.round(serverMyoData.emg.v1, 1)}}
-            {{this.round(serverMyoData.emg.v2, 1)}}
-            {{this.round(serverMyoData.emg.v3, 1)}}
-            {{this.round(serverMyoData.emg.v4, 1)}}
-            {{this.round(serverMyoData.emg.v5, 1)}}
-            {{this.round(serverMyoData.emg.v6, 1)}}
-            {{this.round(serverMyoData.emg.v7, 1)}}
-          </span>
-          <br>
-          <span>Server-Orientation:</span>
-          <span>
-            {{this.round(serverMyoData.orientation.x, 1)}}
-            {{this.round(serverMyoData.orientation.y, 1)}}
-            {{this.round(serverMyoData.orientation.z, 1)}}
-            {{this.round(serverMyoData.orientation.w, 1)}}
-          </span>
-          <br>
-          <span>Server-Gyroscope:</span>
-          <span>
-            {{this.round(serverMyoData.gyroscope.x, 1)}}
-            {{this.round(serverMyoData.gyroscope.y, 1)}}
-            {{this.round(serverMyoData.gyroscope.z, 1)}}
-          </span>
-          <br>
-          <span>Server-Accelerometer:</span>
-          <span>
-            {{this.round(serverMyoData.accelerometer.x, 1)}}
-            {{this.round(serverMyoData.accelerometer.y, 1)}}
-            {{this.round(serverMyoData.accelerometer.z, 1)}}            
-          </span>
+    <div class="grid">
+      <div class="options">
+        <!-- a checkbox to toggle showing the client side pointer -->
+        <input id="checkboxClientPointer" type="checkbox" v-model="showClientPointer">
+        <label for="checkboxClientPointer">Show Client Pointer</label>
 
-        </div>
+        <br>
+
+        <!-- a checkbox to toggle showing the server side pointer -->
+        <input id="checkboxServerPointer" type="checkbox" v-model="showServerPointer">
+        <label for="checkboxServerPointer">Show Server Pointer</label>
+
+        <br>
+
+        <!-- a checkbox to toggle inverting the pointer position at the server before sending it back to client -->
+        <input id="checkboxMirrorPointer" type="checkbox" v-model="mirrorPointer">
+        <label for="checkboxMirrorPointer">Mirror Pointer</label>
+        
+        <br>
+        <span> ServerMouse Position: </span>
+          <br>
+          <span>
+            {{this.round(serverMousePosition.x, 1)}}
+            {{this.round(serverMousePosition.y ,1)}}
+          </span>
+        <br>
+        <br>
+        
+        <!-- Myo related stuff -->
+        <button v-on:click="publishMyoData()">Publish Myo Data</button>
+        <br>
+        <span>EMG:</span>
+        <br>
+        <span>
+          {{this.round(clientMyoData.emg.v0, 1)}}
+          {{this.round(clientMyoData.emg.v1, 1)}}
+          {{this.round(clientMyoData.emg.v2, 1)}}
+          {{this.round(clientMyoData.emg.v3, 1)}}
+          {{this.round(clientMyoData.emg.v4, 1)}}
+          {{this.round(clientMyoData.emg.v5, 1)}}
+          {{this.round(clientMyoData.emg.v6, 1)}}
+          {{this.round(clientMyoData.emg.v7, 1)}}
+        </span>
+        <br>
+        <span>Orientation:</span>
+        <br>
+        <span>
+          {{this.round(clientMyoData.orientation.x, 1)}}
+          {{this.round(clientMyoData.orientation.y, 1)}}
+          {{this.round(clientMyoData.orientation.z, 1)}}
+          {{this.round(clientMyoData.orientation.w, 1)}}
+        </span>
+        <br>
+        <span>Gyroscope:</span>
+        <br>
+        <span>
+          {{this.round(clientMyoData.gyroscope.x, 1)}}
+          {{this.round(clientMyoData.gyroscope.y, 1)}}
+          {{this.round(clientMyoData.gyroscope.z, 1)}}
+        </span>
+        <br>
+        <span>Accelerometer:</span>
+        <br>
+        <span>
+          {{this.round(clientMyoData.accelerometer.x, 1)}}
+          {{this.round(clientMyoData.accelerometer.y, 1)}}
+          {{this.round(clientMyoData.accelerometer.z, 1)}}            
+        </span>
+        <span>Accelerometer:{{clientMyoData.g}}</span>
+        <br>
+        <br>
+        <span>Gesture: {{clientMyoData.gesture}}</span>
+        <br>
+        <span>Server-EMG:</span>
+        <span>
+          {{this.round(serverMyoData.emg.v0, 1)}}
+          {{this.round(serverMyoData.emg.v1, 1)}}
+          {{this.round(serverMyoData.emg.v2, 1)}}
+          {{this.round(serverMyoData.emg.v3, 1)}}
+          {{this.round(serverMyoData.emg.v4, 1)}}
+          {{this.round(serverMyoData.emg.v5, 1)}}
+          {{this.round(serverMyoData.emg.v6, 1)}}
+          {{this.round(serverMyoData.emg.v7, 1)}}
+        </span>
+        <br>
+        <span>Server-Orientation:</span>
+        <span>
+          {{this.round(serverMyoData.orientation.x, 1)}}
+          {{this.round(serverMyoData.orientation.y, 1)}}
+          {{this.round(serverMyoData.orientation.z, 1)}}
+          {{this.round(serverMyoData.orientation.w, 1)}}
+        </span>
+        <br>
+        <span>Server-Gyroscope:</span>
+        <span>
+          {{this.round(serverMyoData.gyroscope.x, 1)}}
+          {{this.round(serverMyoData.gyroscope.y, 1)}}
+          {{this.round(serverMyoData.gyroscope.z, 1)}}
+        </span>
+        <br>
+        <span>Server-Accelerometer:</span>
+        <span>
+          {{this.round(serverMyoData.accelerometer.x, 1)}}
+          {{this.round(serverMyoData.accelerometer.y, 1)}}
+          {{this.round(serverMyoData.accelerometer.z, 1)}}            
+        </span>
+        <span>Server-Gesture: {{serverMyoData.gesture}}</span>
+      </div>
+
+      <!-- the interaction area.
+      if our pointer is inside, its position is sent to the server and back to us, then displayed as a red square-->
+      <div
+        id="mouse-pointer-area"
+        class="mouse-pointer-area"
+        v-bind:class="{ hideCursor: !showClientPointer }"
+        v-on:mousemove="onMouseMove($event)"
+        v-on:mouseenter="clientPointerInside = true;"
+        v-on:mouseleave="clientPointerInside = false;"
+        v-on:touchstart="onTouchStart($event)"
+        v-on:touchend="clientPointerInside = false;"
+        v-on:touchmove="onTouchMove($event)"
+      >
+        <div
+          class="server-mouse-position-indicator"
+          :style="{top: serverMousePosition.y + 'px', left: serverMousePosition.x + 'px' }"
+          v-show="showServerPointer && clientPointerInside"
+        ></div>
+      </div>
+    </div>
   </UbiiClientContent>
 </template>
 
 <script>
 import Myo from "myo";
 
-import UbiiClientContent from "../applications/sharedModules/UbiiClientContent";
-import UbiiEventBus from "../../services/ubiiClient/ubiiEventBus";
+import UbiiClientContent from '../applications/sharedModules/UbiiClientContent';
+import UbiiEventBus from '../../services/ubiiClient/ubiiEventBus';
 
 import uuidv4 from 'uuid/v4';
-import UbiiClientService from "../../services/ubiiClient/ubiiClientService.js";
-import ProtobufLibrary from "@tum-far/ubii-msg-formats/dist/js/protobuf";
+import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
+
+import { mapActions } from 'vuex';
+
+/* fontawesome */
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faPlay } from '@fortawesome/free-solid-svg-icons';
+
+library.add(faPlay);
 
 /* eslint-disable no-console */
 
 export default {
-  name: "Interface-Myo",
+  name: 'Interface-Myo',
   components: { UbiiClientContent },
   mounted: function() {
     // unsubscribe before page is unloaded
-    window.addEventListener("beforeunload", () => {
+    window.addEventListener('beforeunload', () => {
       this.stopInterface();
     });
 
     UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
-      this.startInterface();
       this.stopInterface();
+      this.startInterface();
     });
     UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopInterface);
 
@@ -119,22 +175,20 @@ export default {
   },
   data: () => {
     return {
+      showClientPointer: true,
+      showServerPointer: true,
+      mirrorPointer: false,
       ubiiClientService: UbiiClientService,
-      deviceIsConnected: false,
-      myoEmg: {v0:0,v1:0,v2:0,v3:0,v4:0,v5:0,v6:0,v7:0},
-      myoOrientation: {x:0,y:0,z:0,w:0},
-      myoRotation: {x:0,y:0,z:0},
-      myoAcceleration: {x:0,y:0,z:0},
-      myoGesture: "",
-      interfaceStarted: false,
-      serverMyoEmg: {v0:0,v1:0,v2:0,v3:0,v4:0,v5:0,v6:0,v7:0},
+      exampleStarted: false,
+      serverMousePosition: { x: 0, y: 0 },
+      clientPointerInside: false,
 
       serverMyoData: {
         emg: {v0:0,v1:0,v2:0,v3:0,v4:0,v5:0,v6:0,v7:0},
         orientation: {x:0,y:0,z:0,w:0},
         gyroscope: {x:0,y:0,z:0},
         accelerometer: {x:0,y:0,z:0},
-        gesture: ""
+        gesture: 0
       },
 
       clientMyoData: {
@@ -142,26 +196,51 @@ export default {
         orientation: {x:0,y:0,z:0,w:0},
         gyroscope: {x:0,y:0,z:0},
         accelerometer: {x:0,y:0,z:0},
-        gesture: ""
+        gesture: 0
       }
     };
   },
-  computed:{
-  },
-  watch:{
-    //something something publish on change?
+  watch: {
+    mirrorPointer: function(value) {
+      if (
+        !UbiiClientService.isConnected ||
+        !this.$data.ubiiDevice.name ||
+        !this.$data.inputMirror.topic
+      ) {
+        return;
+      }
+
+      // if the checkbox is changed, we publish this info on the related topic
+      UbiiClientService.client.publish(
+        this.$data.ubiiDevice.name,
+        this.$data.inputMirror.topic,
+        this.$data.inputMirror.messageFormat,
+        value
+      );
+    }
   },
   methods: {
-
-    //ubii methods
     createUbiiSpecs: function() {
-      //create specifications for the protobuff messages
+      // create specifications for the protobuf messages
 
-      //helper definitions that we can reference later
-      let deviceName = "web-interface-myo";
-      this.clientId = UbiiClientService.getClientID();
-      let topicPrefix = this.clientId + "/" + deviceName;
-
+      // helper definitions that we can reference later
+      let deviceName = 'web-interface-myo';
+      let topicPrefix = UbiiClientService.getClientID() + '/' + deviceName;
+      let inputClientPointer = {
+        internalName: 'clientPointer',
+        messageFormat: 'ubii.dataStructure.Vector2',
+        topic: topicPrefix + '/' + 'mouse_client_position'
+      };
+      let inputMirror = {
+        internalName: 'mirrorPointer',
+        messageFormat: 'bool',
+        topic: topicPrefix + '/' + 'mirror_mouse'
+      };
+      let outputServerPointer = {
+        internalName: 'serverPointer',
+        messageFormat: 'ubii.dataStructure.Vector2',
+        topic: topicPrefix + '/' + 'mouse_server_position'
+      };
       let inputClientMyoData = {
         internalName: 'clientMyoData',
         messageFormat: 'ubii.dataStructure.MyoEvent',
@@ -172,7 +251,7 @@ export default {
         messageFormat: 'ubii.dataStructure.MyoEvent',
         topic: topicPrefix + '/' + 'myo_server_data'
       };
-    
+
       // specification of a ubii.devices.Device
       // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/devices/device.proto
       let ubiiDevice = {
@@ -180,11 +259,26 @@ export default {
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
         components: [
           {
+            topic: inputClientPointer.topic,
+            messageFormat: inputClientPointer.messageFormat,
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+          },
+          {
+            topic: inputMirror.topic,
+            messageFormat: inputMirror.messageFormat,
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+          },
+          {
+            topic: outputServerPointer.topic,
+            messageFormat: outputServerPointer.messageFormat,
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+          },
+          {
             topic: inputClientMyoData.topic,
             messageFormat: inputClientMyoData.messageFormat,
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
           },
-          {
+            {
             topic: outputServerMyoData.topic,
             messageFormat: outputServerMyoData.messageFormat,
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
@@ -195,17 +289,51 @@ export default {
       // specification of a ubii.interactions.Interaction
       // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/interactions/interaction.proto
       let processingCallback = (input, output) => {
-        if (!input.clientMyoData) {
-          return;
+        if (input.clientPointer) {
+          if (input.mirrorPointer === true) {
+            output.serverPointer = {
+              x: 1 - input.clientPointer.x,
+              y: 1 - input.clientPointer.y
+            };
+          } else {
+             output.serverPointer = {
+             x: input.clientPointer.x,
+             y: input.clientPointer.y
+            };
+          } 
+        } else if(input.clientMyoData){
+          console.log("processingCallbackMyo");
+          output.serverMyoData = {
+            emg : {
+              v0: input.clientMyoData.emg.v0,
+              v1: input.clientMyoData.emg.v1,
+              v2: input.clientMyoData.emg.v2,
+              v3: input.clientMyoData.emg.v3,
+              v4: input.clientMyoData.emg.v4,
+              v5: input.clientMyoData.emg.v5,
+              v6: input.clientMyoData.emg.v6,
+              v7: input.clientMyoData.emg.v7
+            },
+            orientation : {
+              x: 1,
+              y: 1,
+              z: 1,
+              w: 1
+            },
+            gyroscope : {
+              x: 2,
+              y: 2,
+              z: 2
+            },
+            accelerometer : {
+              x: 3,
+              y: 3,
+              z: 3
+            },
+            gesture : 0
+          }; 
         }
-        output.serverMyoData = {
-          emg:          input.clientMyoData.emg,
-          orientation:  input.clientMyoData.orientation,
-          gyroscope:    input.clientMyoData.gyroscope,
-          accelerometer:input.clientMyoData.accelerometer,
-          gesture:      input.clientMyoData.gesture 
-        };  
-      };      
+      };
 
       let ubiiInteraction = {
         id: uuidv4(),
@@ -213,17 +341,30 @@ export default {
         processingCallback: processingCallback.toString(),
         inputFormats: [
           {
+            internalName: inputClientPointer.internalName,
+            messageFormat: inputClientPointer.messageFormat
+          },
+          {
+            internalName: inputMirror.internalName,
+            messageFormat: inputMirror.messageFormat
+          },
+          {
             internalName: inputClientMyoData.internalName,
             messageFormat: inputClientMyoData.messageFormat
           }
         ],
         outputFormats: [
           {
+            internalName: outputServerPointer.internalName,
+            messageFormat: outputServerPointer.messageFormat
+          },
+          {
             internalName: outputServerMyoData.internalName,
             messageFormat: outputServerMyoData.messageFormat
           }
         ]
       };
+
       // specification of a ubii.sessions.Session
       // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/sessions/session.proto
       let ubiiSession = {
@@ -231,6 +372,22 @@ export default {
         name: 'myo-session',
         interactions: [ubiiInteraction],
         ioMappings: [
+          {
+            interactionId: ubiiInteraction.id,
+            interactionInput: {
+              internalName: inputClientPointer.internalName,
+              messageFormat: inputClientPointer.messageFormat
+            },
+            topic: inputClientPointer.topic
+          },
+          {
+            interactionId: ubiiInteraction.id,
+            interactionInput: {
+              internalName: inputMirror.internalName,
+              messageFormat: inputMirror.messageFormat
+            },
+            topic: inputMirror.topic
+          },
           {
             interactionId: ubiiInteraction.id,
             interactionInput: {
@@ -242,6 +399,14 @@ export default {
           {
             interactionId: ubiiInteraction.id,
             interactionOutput: {
+              internalName: outputServerPointer.internalName,
+              messageFormat: outputServerPointer.messageFormat
+            },
+            topic: outputServerPointer.topic
+          },
+          {
+            interactionId: ubiiInteraction.id,
+            interactionOutput: {
               internalName: outputServerMyoData.internalName,
               messageFormat: outputServerMyoData.messageFormat
             },
@@ -249,75 +414,80 @@ export default {
           }
         ]
       };
-      //assign to local state for future reference
+
+      // assign to local state for future reference
       this.$data.deviceName = deviceName;
+      this.$data.inputClientPointer = inputClientPointer;
+      this.$data.inputMirror = inputMirror;
+      this.$data.outputServerPointer = outputServerPointer;
       this.$data.ubiiDevice = ubiiDevice;
-      this.$data.ubiiSession = ubiiSession;
       this.$data.ubiiInteraction = ubiiInteraction;
+
       this.$data.inputClientMyoData = inputClientMyoData;
       this.$data.outputServerMyoData = outputServerMyoData;
 
+      this.$data.ubiiSession = ubiiSession;
     },
     startInterface: function() {
+      UbiiClientService.isConnected().then(() => {
+        // create all the specifications we need to define our example application
+        // these are protobuf messages to be sent to the server (saved in this.$data)
+        this.createUbiiSpecs();
+/* 
       Myo.connect('com.ubii.myoInterface');
       console.log("connected");
 
       Myo.on("connected", function(data, timestamp) {
       console.log("Myo successfully connected. Data: " + JSON.stringify(data) + ". Timestamp: " + timestamp + ".");
-      });
-      
-      UbiiClientService.isConnected().then(() => {
+      }); */
+      this.connectMyo();
+      this.getMyoData();
 
-
-        // create all the specifications we need to define our example application
-        // these are protobuf messages to be sent to the server (saved in this.$data)
-        this.createUbiiSpecs();
-
-        // register the device
-        UbiiClientService.registerDevice(this.$data.ubiiDevice).then(device => {
-          // on success, the response will be the (possibly extended) device specification we just sent
-          // we accept any additions the server might have made, like an ID that was left blank so the backend
-          // would automatically assign one, to our local state
-          this.$data.ubiiDevice = device;
-          return device;
-        })
-        .then(() => {
+        // register the mouse pointer device
+        UbiiClientService.registerDevice(this.$data.ubiiDevice)
+          .then(device => {
+            // on success, the response will be the (possibly extended) device specification we just sent
+            // we accept any additions the server might have made, like an ID that was left blank so the backend
+            // would automatically assign one, to our local state
+            this.$data.ubiiDevice = device;
+            return device;
+          })
+          .then(() => {
             // subscribe to the device topics so we are notified when new data arrives on the topic
             UbiiClientService.client.subscribe(
-              this.$data.outputServerMyoData.topic,
-
-              myoData => {
-
-                this.$data.serverMyoData = 
-                  emg = {
-                    v0: myoData.emg.v0,
-                    v1: myoData.emg.v1,
-                    v2: myoData.emg.v2,
-                    v3: myoData.emg.v3,
-                    v4: myoData.emg.v4,
-                    v5: myoData.emg.v5,
-                    v6: myoData.emg.v6,
-                    v7: myoData.emg.v7
-                  },
-                  orientation = {
-                    x:0,
-                    y:0,
-                    z:0,
-                    w:0
-                  },
-                  gyroscope = {
-                    x:0,
-                    y:0,
-                    z:0
-                  },
-                  accelerometer = {
-                    x:0,
-                    y:0,
-                    z:0
-                  },
-                  gesture = ""
+              this.$data.outputServerPointer.topic,
+              // a callback to be called when new data on this topic arrives
+              mousePointer => {
+                // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
+                // interaction area and set our red square indicator
+                let boundingRect = document
+                  .getElementById('mouse-pointer-area')
+                  .getBoundingClientRect();
+                this.$data.serverMousePosition = {
+                  x: mousePointer.x * boundingRect.width,
+                  y: mousePointer.y * boundingRect.height
+                };
+                //console.log(mousePointer)
               }
             );
+             // subscribe to the device topics so we are notified when new data arrives on the topic
+            UbiiClientService.client.subscribe(
+              this.$data.outputServerMyoData.topic,
+              // a callback to be called when new data on this topic arrives
+/*               myoData => {
+                // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
+                // interaction area and set our red square indicator
+
+                this.$data.serverMyoData.orientation = {
+                  x: myoData.orientation.x,
+                  y: myoData.orientation.y,
+                  z: myoData.orientation.z,
+                  w: myoData.orientation.w
+                }; */
+                 mousePointer => {
+                console.log("subscribe Myo recieved");
+                }
+            ); 
 
             // start our session (registering not necessary as we do not want to save it permanently)
             UbiiClientService.client
@@ -326,19 +496,24 @@ export default {
                 session: this.$data.ubiiSession
               })
               .then(() => {
-                this.$data.interfaceStarted = true;
+                this.$data.exampleStarted = true;
               });
-        });
+          });
       });
     },
     stopInterface: function() {
-      if(!this.interfaceStarted) return;
-      this.interfaceStarted = false;
+      if (!this.exampleStarted) return;
+
+      this.exampleStarted = false;
 
       //disconnect Myo
       Myo.disconnect();
       
-      //unsubscribe and stop session
+
+      // unsubscribe and stop session
+      UbiiClientService.client.unsubscribe(
+        this.$data.outputServerPointer.topic
+      );
       UbiiClientService.client.unsubscribe(
         this.$data.outputServerMyoData.topic
       );
@@ -347,71 +522,120 @@ export default {
         session: this.$data.ubiiSession
       });
     },
+    onMouseMove: function(event) {
+      if (!this.exampleStarted) {
+        return;
+      }
+
+      // calculate the current mouse position, normalized to the bounds of the interactive area ([0;1], [0;1])
+      let boundingRect = event.currentTarget.getBoundingClientRect();
+      let relativeMousePosition = {
+        x: event.offsetX / boundingRect.width,
+        y: event.offsetY / boundingRect.height
+      };
+
+      this.$data.clientMousePosition = relativeMousePosition;
+      // publish our normalized client mouse position
+      UbiiClientService.client.publish(
+        this.$data.ubiiDevice.name,
+        this.$data.inputClientPointer.topic,
+        'vector2',
+        this.$data.clientMousePosition
+      );
+    },
+    publishMyoData: function(){
+      UbiiClientService.client.publish(
+        this.$data.ubiiDevice.name,
+        this.$data.inputClientMyoData.topic,
+        'myoEvent',
+        this.$data.clientMyoData
+      );
+      console.log('Published Myo Data');
+    },
+    onTouchStart: function(event) {
+      this.$data.clientPointerInside = true;
+      this.onTouchMove(event);
+    },
+    onTouchMove: function(event) {
+      if (!this.exampleStarted) {
+        return;
+      }
+
+      // calculate the current touch position, normalized to the bounds of the interactive area ([0;1], [0;1])
+      let relativeMousePosition = {
+        x:
+          (event.touches[0].clientX - event.target.offsetLeft) /
+          event.target.offsetWidth,
+        y:
+          (event.touches[0].clientY - event.target.offsetTop) /
+          event.target.offsetHeight
+      };
+
+      if (
+        relativeMousePosition.x < 0 ||
+        relativeMousePosition.x > 1 ||
+        relativeMousePosition.y < 0 ||
+        relativeMousePosition.y > 1
+      ) {
+        this.$data.clientPointerInside = false;
+        return;
+      }
+
+      this.$data.clientMousePosition = relativeMousePosition;
+      // publish our normalized client touch position
+      UbiiClientService.client.publish(
+        this.$data.ubiiDevice.name,
+        this.$data.inputClientPointer.topic,
+        'vector2',
+        this.$data.clientMousePosition
+      );
+    },
+    ...mapActions('interactions', {
+      addInteraction: 'add'
+    }),
     round: function(value, digits) {
       return Math.round(value * digits * 10) / (digits * 10);
     },
     connectMyo: function() {
-        Myo.connect('com.ubii.myoInterface');
+      Myo.connect('com.ubii.myoInterface');
 
-        Myo.on("connected", function(data, timestamp) {
-        this.streamEMG(true);
-        console.log("Myo successfully connected. Data: " + JSON.stringify(data) + ". Timestamp: " + timestamp + ".");
-        });
-        this.deviceIsConnected = Myo.connected;
+      Myo.on("connected", function(data, timestamp) {
+      this.streamEMG(true);
+      console.log("Myo successfully connected. Data: " + JSON.stringify(data) + ". Timestamp: " + timestamp + ".");
+      });
     },
+    disconnectMyo: function() {
+      Myo.off('emg');
+      Myo.streamEMG(false);
+      Myo.off('imu');
+      Myo.off('pose');
+      Myo.off('pose_off')
+      Myo.disconnect();
+    },
+
     getMyoData: function() {
-
-      if(!this.interfaceStarted) return;
-
-      Myo.on("imu", (data, timestamp) => {
-        //Just display data
-        this.$data.myoOrientation = {
+      Myo.on('imu', (data) => {
+        //Client data
+        this.$data.clientMyoData.orientation = {
           x:data.orientation.x,
           y:data.orientation.y,
           z:data.orientation.z,
           w:data.orientation.w
         };
-        this.$data.myoRotation = {
-          x:data.gyroscope .x,
-          y:data.gyroscope .y,
-          z:data.gyroscope .z
-        };
-        this.$data.myoAcceleration = {
-          x:data.accelerometer.x,
-          y:data.accelerometer.y,
-          z:data.accelerometer.z
-        };
-
-        //Client data
-        this.$data.clientMyoData.orientation = {
-           x:data.orientation.x,
-          y:data.orientation.y,
-          z:data.orientation.z,
-          w:data.orientation.w
-        };
         this.$data.clientMyoData.gyroscope = {
-          x:data.gyroscope .x,
-          y:data.gyroscope .y,
-          z:data.gyroscope .z
+          x:data.gyroscope.x,
+          y:data.gyroscope.y,
+          z:data.gyroscope.z
         };
         this.$data.clientMyoData.accelerometer = {
           x:data.accelerometer.x,
           y:data.accelerometer.y,
           z:data.accelerometer.z
         };
-
-        //Publish
-        UbiiClientService.client.publish(
-          this.$data.ubiiDevice.name,
-          this.$data.inputClientMyoData.topic,
-          'myoData',
-          this.$data.clientMyoData
-      );
-
-
       });
-      Myo.on("emg", (data,timestep) => {
-        this.$data.myoEmg = {
+
+      Myo.on('emg', (data) => {
+        this.$data.clientMyoData.emg = {
           v0:data[0],
           v1:data[1],
           v2:data[2],
@@ -420,35 +644,23 @@ export default {
           v5:data[5],
           v6:data[6],
           v7:data[7]
-          },
-
-          emg = {
-            v0:data[0],
-            v1:data[1],
-            v2:data[2],
-            v3:data[3],
-            v4:data[4],
-            v5:data[5],
-            v6:data[6],
-            v7:data[7]
-          }
-
-          this.$data.clientMyoData.emg = emg;
-
-          //publish client emg data
-          UbiiClientService.client.publish(
-            this.$data.ubiiDevice.name,
-            this.$data.inputClientMyoData.topic,
-            'myo_event',
-            this.$data.clientMyoData
-          );
+          };
       });
-      Myo.on("pose", (data,timestep) => {
-        this.$data.myoGesture = data;
+      Myo.on('pose', (data) => {
+        var e;
+        switch(data){
+          case 'fingers_spread':  e = 1; break;
+          case 'wave_in':         e = 2; break;
+          case 'wave_out':        e = 3; break;
+          case 'fist':            e = 4; break;
+          case 'double_tap':      e = 5; break;
+          default:                e = 0;
+        }
+        this.$data.myoGesture = e;
       });
-      Myo.on("pose_off", (data,timestemp) => {
-        this.$data.myoGesture = "";
-      })
+      Myo.on('pose_off', () => {
+        this.$data.myoGesture = 0;
+      });
     }
   }
 };
