@@ -11,7 +11,7 @@ class UbiiClientService {
     this.serverIP = window.location.hostname;
     this.serverPort = "8102";
     this.client = undefined;
-    this.connected = false;
+    this.connected = undefined;
     this.connecting = false;
   }
 
@@ -65,7 +65,7 @@ class UbiiClientService {
       let checkConnection = () => {
         retry += 1;
         if (this.connected) {
-          resolve();
+          resolve(this.connected);
           return;
         } else {
           if (retry > maxRetries) {
@@ -95,10 +95,8 @@ class UbiiClientService {
    * @param {object} device Object specifying device according to protobuf format ubii.devices.Device
    */
   async registerDevice(device) {
-    if (this.client && this.client.isInitialized()) {
-      device.clientId = this.client.clientSpecification.id;
-      return this.client.registerDevice(device);
-    }
+    device.clientId = this.client.clientSpecification.id;
+    return this.client.registerDevice(device);
   }
 
   async registerSession(session) {

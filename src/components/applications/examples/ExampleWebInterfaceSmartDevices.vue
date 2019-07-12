@@ -51,6 +51,8 @@ export default {
         /* we register our device needed to publish the vibration distance threshold */
         UbiiClientService.registerDevice(this.device)
           .then(response => {
+            console.info('startExample: ');
+            console.info(response);
             if (response.id) {
               this.device = response;
               return response;
@@ -109,11 +111,13 @@ export default {
           ) {
             let pos1 = current.data;
             let pos2 = positionRecords[compareIndex].data;
-            let distance = Math.sqrt(
-              Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2)
-            );
-            if (distance < threshold) {
-              closeIndices.push(compareIndex);
+            if (pos1 && pos2) {
+              let distance = Math.sqrt(
+                Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2)
+              );
+              if (distance < threshold) {
+                closeIndices.push(compareIndex);
+              }
             }
           }
 

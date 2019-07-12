@@ -2,13 +2,13 @@
 
 import RESTClient from "./restClient";
 import WebsocketClient from "./websocketClient";
-import {ProtobufTranslator, MSG_TYPES, DEFAULT_TOPICS} from "@tum-far/ubii-msg-formats";
+import { ProtobufTranslator, MSG_TYPES, DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
 
 
 class ClientNodeWeb {
   constructor(name,
-              serverHost,
-              servicePort) {
+    serverHost,
+    servicePort) {
     // Properties:
     this.name = name;
     this.serverHost = serverHost;
@@ -39,10 +39,10 @@ class ClientNodeWeb {
         // STEP 3: (service call) register yourself as a client
         this.registerClient()
           .then(() => {
-              // STEP 4: open the asynchronous connection for topic data communication
-              this.initializeTopicDataClient(this.serverSpecification);
-              return resolve();
-            },
+            // STEP 4: open the asynchronous connection for topic data communication
+            this.initializeTopicDataClient(this.serverSpecification);
+            return resolve();
+          },
             (error) => {
               console.warn(error);
             })
@@ -102,11 +102,17 @@ class ClientNodeWeb {
    */
   async registerClient() {
     let message = {
-      topic: DEFAULT_TOPICS.SERVICES.CLIENT_REGISTRATION,
-      client: {
+      topic: DEFAULT_TOPICS.SERVICES.CLIENT_REGISTRATION
+    };
+    if (this.clientSpecification.id) {
+      console.info('### registerClient() ###\n reconnecting with existing ID !!!');
+      message.client = this.clientSpecification;
+    } else {
+      console.info('### registerClient() ###\n new client !!!');
+      message.client = {
         name: this.name
       }
-    };
+    }
 
     return this.callService(message).then(
       (reply) => {
@@ -244,7 +250,7 @@ class ClientNodeWeb {
       this.serviceClient.send('/services', message).then(
         (reply) => {
           let message = this.translatorServiceReply.createMessageFromPayload(reply);
-          
+
           return resolve(message);
         },
         (error) => {
