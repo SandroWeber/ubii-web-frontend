@@ -3,8 +3,15 @@
     <div class="grid">
       <router-link to="/interfaces/smart-device" class="interface-link" tag="div">
         <app-tile class="layer-three background round shadow orange-accent">
-          <font-awesome-icon icon="mobile-alt" class="interface-icon"/>
+          <font-awesome-icon icon="mobile-alt" class="interface-icon" />
           <p>Smart Device</p>
+        </app-tile>
+      </router-link>
+
+      <router-link to="/interfaces/camera" class="interface-link" tag="div">
+        <app-tile class="layer-three background round shadow orange-accent">
+          <font-awesome-icon icon="camera" class="interface-icon" />
+          <p>Camera</p>
         </app-tile>
       </router-link>
     </div>
@@ -12,15 +19,15 @@
 </template>
 
 <script>
-import { AppTile } from "./appComponents/appComponents.js";
+import { AppTile } from './appComponents/appComponents.js';
 
 // Fontawesome.
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faMobileAlt } from "@fortawesome/free-solid-svg-icons";
-library.add(faMobileAlt);
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faMobileAlt, faCamera } from '@fortawesome/free-solid-svg-icons';
+library.add(faMobileAlt, faCamera);
 
 export default {
-  name: "Interfaces",
+  name: 'Interfaces',
   components: {
     AppTile
   }
