@@ -1,15 +1,15 @@
 <template>
-  <app-layer class="layer-one background topic-list-grid">
-    <div class="topic-list service-list" v-show="serviceList">
-      <div class="category-header orange-accent">Services</div>
-      <div v-for="topic in serviceList" :key="topic">{{topic}}</div>
+  <div class="topic-list-grid">
+    <div class="category-header header-services orange-accent">Services</div>
+    <div class="category-header header-topicdata orange-accent">Topic Data</div>
+    <div class="category-content content-services" v-show="serviceList">
+      <div class="topic-list-element" v-for="topic in serviceList" :key="topic">{{topic}}</div>
     </div>
 
-    <div class="topic-list topicdata-list" v-show="topicList">
-      <div class="category-header orange-accent">Topic Data</div>
-      <div v-for="topic in topicList" :key="topic">{{topic}}</div>
+    <div class="category-content content-topicdata" v-show="topicList">
+      <div class="topic-list-element" v-for="topic in topicList" :key="topic">{{topic}}</div>
     </div>
-  </app-layer>
+  </div>
 </template>
 
 <script>
@@ -55,29 +55,35 @@ export default {
 };
 </script>
 
-<style scoped lang="stylus">
+<style scoped>
 .topic-list-grid {
   display: grid;
+  grid-template-rows: auto 1fr;
   grid-template-columns: 1fr 1fr;
   grid-gap: 15px;
-  margin: 25px;
-  grid-template-areas: 'grid-services grid-topicdata';
+  padding: 10px;
+  grid-template-areas: 'header-services header-topicdata' 'content-services content-topicdata';
 }
-
 .category-header {
   border-bottom: 2px solid;
-  margin-bottom: 10px;
+}
+.header-services {
+  grid-area: header-services;
+}
+.header-topicdata {
+  grid-area: header-topicdata;
+}
+.content-services {
+  grid-area: content-services;
+}
+.content-topicdata {
+  grid-area: content-topicdata;
 }
 
-.topic-list {
+.category-content {
   overflow: auto;
 }
-
-.service-list {
-  grid-area: grid-services;
-}
-
-.topicdata-list {
-  grid-area: grid-topicdata;
+.topic-list-element {
+  padding-bottom: 3px;
 }
 </style>
