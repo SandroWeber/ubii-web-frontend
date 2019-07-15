@@ -6,8 +6,10 @@
       <div class="topic-list-element" v-for="topic in serviceList" :key="topic">{{topic}}</div>
     </div>
 
-    <div class="category-content content-topicdata" v-show="topicList">
-      <div class="topic-list-element" v-for="topic in topicList" :key="topic">{{topic}}</div>
+    <div class="category-content content-device-topicdata" v-show="deviceTopicList">
+      <div class="topic-list-element" v-for="topic in deviceTopicList" :key="topic">
+        <topic-viewer :topic="topic" />
+      </div>
     </div>
   </div>
 </template>
@@ -16,12 +18,18 @@
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
-import { AppLayer } from '../../components/appComponents/appComponents.js';
+/* fontawesome */
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
+library.add(faChevronRight);
+
+//import { TopicViewer } from './TopicViewer.vue';
+import TopicViewer from './TopicViewer.vue';
 
 export default {
   name: 'TopicInspector',
   components: {
-    AppLayer
+    TopicViewer
   },
   mounted: function() {
     UbiiClientService.connect().then(() => {
@@ -32,7 +40,7 @@ export default {
     return {
       ubiiClientService: UbiiClientService,
       serviceList: undefined,
-      topicList: undefined
+      deviceTopicList: undefined
     };
   },
   methods: {
@@ -46,10 +54,13 @@ export default {
           this.$data.serviceList = topics.filter(topic => {
             return topic.indexOf('/services/') === 0;
           });
-          this.$data.topicList = topics.filter(topic => {
+          this.$data.deviceTopicList = topics.filter(topic => {
             return topic.indexOf('/services/') === -1;
           });
         });
+    },
+    openTopicDataDisplay(key) {
+      console.info('openTopicDataDisplay ' + key);
     }
   }
 };
@@ -76,7 +87,7 @@ export default {
 .content-services {
   grid-area: content-services;
 }
-.content-topicdata {
+.content-device-topicdata {
   grid-area: content-topicdata;
 }
 
