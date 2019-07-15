@@ -8,13 +8,13 @@
         style="overflow: hidden;"
       >
         <span v-show="clientId">Client ID: {{clientId}}</span>
-        <br>
+        <br />
 
         <button class="button-fullscreen" @click="toggleFullScreen()">
-          <font-awesome-icon icon="compress" class="interface-icon" v-show="fullscreen"/>
-          <font-awesome-icon icon="expand" class="interface-icon" v-show="!fullscreen"/>
+          <font-awesome-icon icon="compress" class="interface-icon" v-show="fullscreen" />
+          <font-awesome-icon icon="expand" class="interface-icon" v-show="!fullscreen" />
         </button>
-        <br>
+        <br />
         <button v-show="!fullscreen" @click="calibrate()">Calibrate</button>
 
         <div
@@ -93,8 +93,12 @@ export default {
 
     this.deviceData = {};
     this.registerEventListeners();
+    this.createUbiiSpecs();
     UbiiClientService.isConnected().then(() => {
       this.registerUbiiSpecs();
+    });
+    UbiiClientService.onDisconnect(async () => {
+      await this.stopExample();
     });
   },
   beforeDestroy: function() {
@@ -107,7 +111,7 @@ export default {
       hasRegisteredUbiiDevice: false,
       clientId: undefined,
       publishFrequency: 0.01,
-      fullscreen: false,
+      fullscreen: false
     };
   },
   methods: {
@@ -153,6 +157,21 @@ export default {
           }
         ]
       };
+      // add vibration component if available
+      navigator.vibrate =
+        navigator.vibrate ||
+        navigator.webkitVibrate ||
+        navigator.mozVibrate ||
+        navigator.msVibrate;
+      if (navigator.vibrate) {
+        ubiiDevice.components.push({
+          topic: topicPrefix + '/vibration_pattern',
+          messageFormat: 'double',
+          ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+        });
+        this.tNextVibrate = Date.now();
+        navigator.vibrate(100);
+      }
 
       this.$data.deviceName = deviceName;
       this.$data.ubiiDevice = ubiiDevice;
@@ -172,16 +191,34 @@ export default {
 
       // register the mouse pointer device
       UbiiClientService.isConnected().then(() => {
-        this.createUbiiSpecs();
-        UbiiClientService.registerDevice(this.$data.ubiiDevice).then(device => {
-          if (device.id) {
-            this.$data.ubiiDevice = device;
-            this.hasRegisteredUbiiDevice = true;
-            this.initializing = false;
-            this.publishContinuousDeviceData();
-          }
-          return device;
-        });
+        UbiiClientService.registerDevice(this.$data.ubiiDevice)
+          .then(device => {
+            if (device.id) {
+              this.$data.ubiiDevice = device;
+              this.hasRegisteredUbiiDevice = true;
+              this.initializing = false;
+              this.publishContinuousDeviceData();
+            }
+            return device;
+          })
+          .then(() => {
+            let vibrationComponent = this.$data.ubiiDevice.components.find(
+              element => {
+                return element.topic.indexOf('/vibration_pattern') !== -1;
+              }
+            );
+            if (vibrationComponent) {
+              UbiiClientService.client.subscribe(
+                vibrationComponent.topic,
+                vibrationPattern => {
+                  if (Date.now() >= this.tNextVibrate) {
+                    navigator.vibrate(vibrationPattern);
+                    this.tNextVibrate = Date.now() + 2 * vibrationPattern;
+                  }
+                }
+              );
+            }
+          });
       });
     },
     unregisterUbiiSpecs: function() {
@@ -249,7 +286,11 @@ export default {
         y: this.round(orientation.y, 2),
         z: this.round(orientation.z, 2)
       });
-      let calibrated = this.deviceData.calibratedOrientation || { x: 0, y: 0, z: 0 };
+      let calibrated = this.deviceData.calibratedOrientation || {
+        x: 0,
+        y: 0,
+        z: 0
+      };
 
       let fixed = {
         x: current.x - calibrated.x,
@@ -316,7 +357,11 @@ export default {
     },
     onDeviceOrientation: function(event) {
       // https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent
-      this.deviceData.currentOrientation = {x: event.alpha, y: event.beta, z: event.gamma};
+      this.deviceData.currentOrientation = {
+        x: event.alpha,
+        y: event.beta,
+        z: event.gamma
+      };
     },
     onDeviceMotion: function(event) {
       // https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent
@@ -356,11 +401,21 @@ export default {
     /* interface methods */
     getTouch0X: function() {
       //console.info(this.deviceData);
-      return this.deviceData && this.deviceData.touches && this.deviceData.touches[0] && this.deviceData.touches[0].clientX;
+      return (
+        this.deviceData &&
+        this.deviceData.touches &&
+        this.deviceData.touches[0] &&
+        this.deviceData.touches[0].clientX
+      );
     },
-    
+
     getTouch0Y: function() {
-      return this.deviceData && this.deviceData.touches && this.deviceData.touches[0] && this.deviceData.touches[0].clientY;
+      return (
+        this.deviceData &&
+        this.deviceData.touches &&
+        this.deviceData.touches[0] &&
+        this.deviceData.touches[0].clientY
+      );
     }
   }
 };

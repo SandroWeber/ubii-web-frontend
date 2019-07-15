@@ -2,28 +2,30 @@
   <div>
     <div class="grid">
       <router-link to="/tools/topic-inspector" class="interface-link" tag="div">
-        <app-tile class="layer-three background round shadow orange-accent"> 
-          <font-awesome-icon
-            icon="eye"
-            class="interface-icon"
-          />
-          <p>
-            Topic Inspector
-          </p>
+        <app-tile class="layer-three background round shadow orange-accent">
+          <font-awesome-icon icon="eye" class="interface-icon" />
+          <p>Topic Inspector</p>
         </app-tile>
       </router-link>
 
       <router-link to="/tools/performance_tests" class="interface-link" tag="div">
         <app-tile class="layer-three background round shadow orange-accent">
-          <font-awesome-icon icon="stopwatch" class="interface-icon"/>
+          <font-awesome-icon icon="stopwatch" class="interface-icon" />
           <p>Performance Tests</p>
         </app-tile>
       </router-link>
 
       <router-link to="/tools/qrcode_display" class="interface-link" tag="div">
         <app-tile class="layer-three background round shadow orange-accent">
-          <font-awesome-icon icon="qrcode" class="interface-icon"/>
+          <font-awesome-icon icon="qrcode" class="interface-icon" />
           <p>QRCode Display</p>
+        </app-tile>
+      </router-link>
+
+      <router-link to="/tools/3d_pose_visualizer" class="interface-link" tag="div">
+        <app-tile class="layer-three background round shadow orange-accent">
+          <font-awesome-icon icon="cubes" class="interface-icon" />
+          <p>3D Pose Visualizer</p>
         </app-tile>
       </router-link>
     </div>
@@ -31,35 +33,41 @@
 </template>
 
 <script>
-  import { AppTile } from './appComponents/appComponents.js';
+import { AppTile } from './appComponents/appComponents.js';
 
-  // Fontawesome.
-  import { library } from '@fortawesome/fontawesome-svg-core'
-  import { faEye, faStopwatch, faQrcode } from '@fortawesome/free-solid-svg-icons'
-  library.add(faEye);
-  library.add(faStopwatch);
-  library.add(faQrcode);
+// Fontawesome.
+import { library } from '@fortawesome/fontawesome-svg-core';
+import {
+  faEye,
+  faStopwatch,
+  faQrcode,
+  faCubes
+} from '@fortawesome/free-solid-svg-icons';
+library.add(faEye, faStopwatch, faQrcode, faCubes);
 
-  export default {
-    name: 'Tools',
-    components: {
-      AppTile,
-    }
+export default {
+  name: 'Tools',
+  components: {
+    AppTile
   }
+};
 </script>
 
 <style scoped lang="stylus">
-  .grid
-    display: grid
-    grid-gap: 15px
-    grid-template-columns: 1fr 1fr 1fr 1fr
-    margin: 25px
+.grid {
+  display: grid;
+  grid-gap: 15px;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  margin: 25px;
+}
 
-  .interface-link
-    text-align: center
-    cursor:pointer
+.interface-link {
+  text-align: center;
+  cursor: pointer;
+}
 
-  .interface-icon
-    width: 50px
-    height: 50px
+.interface-icon {
+  width: 50px;
+  height: 50px;
+}
 </style>

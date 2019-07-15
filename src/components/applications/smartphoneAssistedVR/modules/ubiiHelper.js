@@ -20,23 +20,15 @@ function createUbiiSpecs(name, inputs, outputs, callback) {
 
   const createMappingInp = function(x) {
     return {
-      interactionId: interaction.id,
-      interactionInput: {
-        internalName: x.internalName,
-        messageFormat: x.messageFormat
-      },
-      topic: x.topic
+      name: x.internalName,
+      topicSource: x.topic
     };
-  };
+  }
 
   const createMappingOut = function(x) {
     return {
-      interactionId: interaction.id,
-      interactionOutput: {
-        internalName: x.internalName,
-        messageFormat: x.messageFormat
-      },
-      topic: x.topic
+      name: x.internalName,
+      topicDestination: x.topic
     };
   };
 
@@ -44,9 +36,13 @@ function createUbiiSpecs(name, inputs, outputs, callback) {
     id: uuidv4(),
     name: name,
     interactions: [interaction],
-    ioMappings: inputs
-      .map(createMappingInp)
-      .concat(outputs.map(createMappingOut))
+    ioMappings: [
+      {
+        interactionId: interaction.id,
+        inputMappings: inputs.map(createMappingInp),
+        outputMappings: outputs.map(createMappingOut)
+      }
+    ]
   };
 
   return {
