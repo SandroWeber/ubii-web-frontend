@@ -16,13 +16,8 @@
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
-import { AppLayer } from '../../components/appComponents/appComponents.js';
-
 export default {
   name: 'TopicInspector',
-  components: {
-    AppLayer
-  },
   mounted: function() {
     UbiiClientService.connect().then(() => {
       this.getTopicList();
