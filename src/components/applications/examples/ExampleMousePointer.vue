@@ -33,7 +33,7 @@
         v-on:touchmove="onTouchMove($event)"
       >
         <!-- this is the red square indicator of the pointer position sent back to us by the server
-        you can see its position via style - top/left being linked to the data variable "serverMousePosition" -->
+        you can see its position via style - top/left being linked to the data variable "serverMousePosition"-->
         <div
           class="server-mouse-position-indicator"
           :style="{top: serverMousePosition.y + 'px', left: serverMousePosition.x + 'px' }"
@@ -66,7 +66,7 @@ library.add(faPlay);
 export default {
   name: 'ExampleMousePointer',
   components: { UbiiClientContent },
-  /* mounted() is our vue component entry point, start here! */
+  /* STEP 1: mounted() is our vue component entry point, start here! */
   mounted: function() {
     // unsubscribe before page is suddenly closed
     window.addEventListener('beforeunload', () => {
@@ -124,7 +124,8 @@ export default {
 
       // helper definitions that we can reference later
       let deviceName = 'web-example-mouse-pointer';
-      let topicPrefix = '/' + UbiiClientService.getClientID() + '/' + deviceName;
+      let topicPrefix =
+        '/' + UbiiClientService.getClientID() + '/' + deviceName;
       let inputClientPointer = {
         internalName: 'clientPointer',
         messageFormat: 'ubii.dataStructure.Vector2',
@@ -246,7 +247,9 @@ export default {
 
       this.$data.ubiiSession = ubiiSession;
     },
+    /* STEP 2: making all calls related to ubi-interact backend */
     startExample: function() {
+      // make sure we're connected, then continue
       UbiiClientService.isConnected().then(() => {
         // create all the specifications we need to define our example application
         // these are protobuf messages to be sent to the server (saved in this.$data)
@@ -256,11 +259,18 @@ export default {
         UbiiClientService.registerDevice(this.$data.ubiiDevice)
           .then(response => {
             console.info(response);
-            // on success, the response will be the (possibly extended) device specification we just sent
-            // we accept any additions the server might have made, like an ID that was left blank so the backend
-            // would automatically assign one, to our local state
-            this.$data.ubiiDevice = response;
-            return this.$data.ubiiDevice;
+            // the device specs we send to backend intentionally left out the device ID
+            // if the backend accepts the device registration, it will send back our specs
+            // plus any necessary info (like the ID) filled in by the backend
+            // that way we make sure the ID is created by the backend and valid
+            if (response.id) {
+              // success, we accept the device specs sent back to us as the final specs
+              this.$data.ubiiDevice = response;
+              return this.$data.ubiiDevice;
+            } else {
+              // something went wrong, print to console
+              return undefined;
+            }
           })
           .then(() => {
             // subscribe to the device topics so we are notified when new data arrives on the topic
@@ -288,7 +298,9 @@ export default {
               })
               .then(response => {
                 console.info(response);
-                this.$data.exampleStarted = true;
+                if (response.success) {
+                  this.$data.exampleStarted = true;
+                }
               });
           });
       });
@@ -308,22 +320,18 @@ export default {
       });
     },
     onMouseMove: function(event) {
-      if (!this.exampleStarted || event.offsetX === 0 || event.offsetY === 0 || !event.currentTarget) {
+      if (!this.exampleStarted) {
         return;
       }
 
       // calculate the current mouse position, normalized to the bounds of the interactive area ([0;1], [0;1])
-      let boundingRect = event.currentTarget.getBoundingClientRect();
+      let boundingRect = document
+        .getElementById('mouse-pointer-area')
+        .getBoundingClientRect();
       let relativeMousePosition = {
-        x: event.offsetX / boundingRect.width,
-        y: event.offsetY / boundingRect.height
+        x: (event.clientX - boundingRect.left) / boundingRect.width,
+        y: (event.clientY - boundingRect.top) / boundingRect.height
       };
-      
-
-      if (relativeMousePosition.x < 0.1 || relativeMousePosition.y < 0.1) {
-        console.info(event);
-        console.info(boundingRect);
-      }
 
       this.$data.clientMousePosition = relativeMousePosition;
       // publish our normalized client mouse position
