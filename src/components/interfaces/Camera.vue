@@ -6,12 +6,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
-
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
-import UbiiEventBus from '../../services/ubiiClient/ubiiEventBus';
-
 /* eslint-disable no-console */
 
 export default {
