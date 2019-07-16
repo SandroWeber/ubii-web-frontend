@@ -4,6 +4,8 @@ import ClientNodeWeb from "./clientNodeWeb";
 import UbiiEventBus from "./ubiiEventBus";
 
 
+const uuidv4Regex = '[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}';
+
 class UbiiClientService {
   constructor() {
     this.serverIP = window.location.hostname;
@@ -104,6 +106,11 @@ class UbiiClientService {
       return this.client.registerSession(session);
     }
   }
+
+  getUUIDv4Regex() {
+    return uuidv4Regex;
+  }
+
 }
 
 export default new UbiiClientService();

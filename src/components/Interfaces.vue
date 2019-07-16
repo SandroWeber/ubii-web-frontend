@@ -7,6 +7,12 @@
           <p>Smart Device</p>
         </app-tile>
       </router-link>
+      <router-link to="/interfaces/ubii-controller" class="interface-link" tag="div">
+        <app-tile class="layer-three background round shadow orange-accent">
+          <font-awesome-icon icon="gamepad" class="interface-icon"/>
+          <p>Ubii Controller</p>
+        </app-tile>
+      </router-link>
     </div>
   </div>
 </template>
@@ -17,7 +23,8 @@ import { AppTile } from "./appComponents/appComponents.js";
 // Fontawesome.
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faMobileAlt } from "@fortawesome/free-solid-svg-icons";
-library.add(faMobileAlt);
+import { faGamepad } from "@fortawesome/free-solid-svg-icons";
+library.add(faMobileAlt, faGamepad);
 
 export default {
   name: "Interfaces",

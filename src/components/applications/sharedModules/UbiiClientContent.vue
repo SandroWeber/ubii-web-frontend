@@ -12,7 +12,7 @@
 
 <script>
 export default {
-  name: "UbiiClientContent",
+  name: 'UbiiClientContent',
   props: {
     ubiiClientService: Object
   }

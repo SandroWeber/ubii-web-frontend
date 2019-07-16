@@ -4,8 +4,7 @@ import Router from 'vue-router'
 Vue.use(Router);
 
 export default new Router({
-  routes: [
-    {
+  routes: [{
       path: '/',
       name: 'home',
       component: () => import('./components/EntryPage.vue')
@@ -25,6 +24,11 @@ export default new Router({
       path: '/interfaces/smart-device',
       name: 'Interface - Smart Device',
       component: () => import('./components/interfaces/SmartDevice.vue')
+    },
+    {
+      path: '/interfaces/ubii-controller',
+      name: 'Interface - Ubii Controller',
+      component: () => import('./components/interfaces/UbiiController.vue')
     },
     /* editors */
     {
@@ -85,9 +89,18 @@ export default new Router({
       component: () => import('./components/applications/examples/ExampleWebInterfaceSmartDevices.vue')
     },
     {
-          path: '/applications/examples/ubii-con',
-          name: 'Example - Ubii Con',
-          component: () => import('./components/applications/examples/ExampleUbiiCon.vue')
+      path: '/applications/smartphone-assisted-vr/savr-model-inspector',
+      name: 'VR Model Inspector - Inspect 3D Models',
+      component: () => import('./components/applications/smartphoneAssistedVR/SAVRModelInspector.vue')
     },
+    {
+      path: '/applications/smartphone-assisted-vr/savr-laser-pointer',
+      name: 'VR Laser Pointer - Select elements by pointing at them',
+      component: () => import('./components/applications/smartphoneAssistedVR/SAVRLaserPointer.vue')
+    }, {
+      path: '/applications/smartphone-assisted-vr/savr-keyboard',
+      name: 'VR Keyboard - A virtual keyboard',
+      component: () => import('./components/applications/smartphoneAssistedVR/SAVRKeyboard.vue')
+    }
   ]
 })

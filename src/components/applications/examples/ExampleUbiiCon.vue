@@ -12,22 +12,6 @@
 
 
         </div>
-
-        <!-- the interaction area.
-        if our pointer is inside, its position is sent to the server and back to us, then displayed as a red square-->
-        <!--<div id="mouse-pointer-area"
-             class="mouse-pointer-area"
-             v-bind:class="{ hideCursor: !showClientPointer }"
-             v-on:mousemove="onMouseMove($event)"
-             v-on:mouseenter="clientPointerInside = true;"
-             v-on:mouseleave="clientPointerInside = false;"
-             v-on:touchstart="onTouchStart($event)"
-             v-on:touchend="clientPointerInside = false;"
-             v-on:touchmove="onTouchMove($event)">
-            <div class="server-mouse-position-indicator"
-                 :style="{top: serverMousePosition.y + 'px', left: serverMousePosition.x + 'px' }"
-                 v-show="showServerPointer && clientPointerInside"></div>
-        </div>-->
     </UbiiClientContent>
 </template>
 
@@ -51,9 +35,7 @@
                 // Quit
             },
             registerController: function(){
-                UbiiClientService.isConnected().then(() => {
                     // Publish(UbiiParser.UnityToProto("registerNewClient", GetID()));
-                });
             },
             clickedActionButton: function(buttonID){
                 return buttonID;
@@ -87,6 +69,13 @@
         width: 30%;
         position: center;
         border: groove;
+    }
+
+    .virtual-joystick{
+        background: #808080;
+        color: aquamarine;
+        border: none;
+        padding: 20px 20px;
     }
 
     .action-button {
