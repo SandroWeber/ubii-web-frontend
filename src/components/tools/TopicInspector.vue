@@ -6,8 +6,10 @@
       <div class="topic-list-element" v-for="topic in serviceList" :key="topic">{{topic}}</div>
     </div>
 
-    <div class="category-content content-topicdata" v-show="topicList">
-      <div class="topic-list-element" v-for="topic in topicList" :key="topic">{{topic}}</div>
+    <div class="category-content content-device-topicdata" v-show="deviceTopicList">
+      <div class="topic-list-element" v-for="topic in deviceTopicList" :key="topic">
+        <topic-viewer :topic="topic" />
+      </div>
     </div>
   </div>
 </template>
@@ -16,18 +18,28 @@
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
+import TopicViewer from './TopicViewer.vue';
+import { setTimeout } from 'timers';
+
 export default {
   name: 'TopicInspector',
+  components: {
+    TopicViewer
+  },
   mounted: function() {
-    UbiiClientService.connect().then(() => {
+    UbiiClientService.isConnected().then(() => {
       this.getTopicList();
     });
+    this.open = true;
+  },
+  beforeDestroy: function() {
+    this.open = false;
   },
   data: () => {
     return {
       ubiiClientService: UbiiClientService,
       serviceList: undefined,
-      topicList: undefined
+      deviceTopicList: undefined
     };
   },
   methods: {
@@ -41,10 +53,14 @@ export default {
           this.$data.serviceList = topics.filter(topic => {
             return topic.indexOf('/services/') === 0;
           });
-          this.$data.topicList = topics.filter(topic => {
+          this.$data.deviceTopicList = topics.filter(topic => {
             return topic.indexOf('/services/') === -1;
           });
         });
+
+      if (this.open) {
+        setTimeout(this.getTopicList, 1000);
+      }
     }
   }
 };
@@ -71,7 +87,7 @@ export default {
 .content-services {
   grid-area: content-services;
 }
-.content-topicdata {
+.content-device-topicdata {
   grid-area: content-topicdata;
 }
 
