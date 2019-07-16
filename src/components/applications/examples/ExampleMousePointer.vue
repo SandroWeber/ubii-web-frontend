@@ -32,6 +32,8 @@
         v-on:touchend="clientPointerInside = false;"
         v-on:touchmove="onTouchMove($event)"
       >
+        <!-- this is the red square indicator of the pointer position sent back to us by the server
+        you can see its position via style - top/left being linked to the data variable "serverMousePosition" -->
         <div
           class="server-mouse-position-indicator"
           :style="{top: serverMousePosition.y + 'px', left: serverMousePosition.x + 'px' }"
@@ -64,19 +66,24 @@ library.add(faPlay);
 export default {
   name: 'ExampleMousePointer',
   components: { UbiiClientContent },
+  /* mounted() is our vue component entry point, start here! */
   mounted: function() {
-    // unsubscribe before page is unloaded
+    // unsubscribe before page is suddenly closed
     window.addEventListener('beforeunload', () => {
       this.stopExample();
     });
 
+    // some event hooks to restart/stop the experiment if necessary
     UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
       this.stopExample();
       this.startExample();
     });
     UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopExample);
 
-    if (UbiiClientService.isConnected) this.startExample();
+    // make sure we're connected, then start the example
+    UbiiClientService.isConnected().then(() => {
+      this.startExample();
+    });
   },
   beforeDestroy: function() {
     this.stopExample();
@@ -117,7 +124,7 @@ export default {
 
       // helper definitions that we can reference later
       let deviceName = 'web-example-mouse-pointer';
-      let topicPrefix = UbiiClientService.getClientID() + '/' + deviceName;
+      let topicPrefix = '/' + UbiiClientService.getClientID() + '/' + deviceName;
       let inputClientPointer = {
         internalName: 'clientPointer',
         messageFormat: 'ubii.dataStructure.Vector2',
@@ -247,12 +254,13 @@ export default {
 
         // register the mouse pointer device
         UbiiClientService.registerDevice(this.$data.ubiiDevice)
-          .then(device => {
+          .then(response => {
+            console.info(response);
             // on success, the response will be the (possibly extended) device specification we just sent
             // we accept any additions the server might have made, like an ID that was left blank so the backend
             // would automatically assign one, to our local state
-            this.$data.ubiiDevice = device;
-            return device;
+            this.$data.ubiiDevice = response;
+            return this.$data.ubiiDevice;
           })
           .then(() => {
             // subscribe to the device topics so we are notified when new data arrives on the topic
@@ -300,7 +308,7 @@ export default {
       });
     },
     onMouseMove: function(event) {
-      if (!this.exampleStarted) {
+      if (!this.exampleStarted || event.offsetX === 0 || event.offsetY === 0 || !event.currentTarget) {
         return;
       }
 
@@ -310,6 +318,12 @@ export default {
         x: event.offsetX / boundingRect.width,
         y: event.offsetY / boundingRect.height
       };
+      
+
+      if (relativeMousePosition.x < 0.1 || relativeMousePosition.y < 0.1) {
+        console.info(event);
+        console.info(boundingRect);
+      }
 
       this.$data.clientMousePosition = relativeMousePosition;
       // publish our normalized client mouse position
