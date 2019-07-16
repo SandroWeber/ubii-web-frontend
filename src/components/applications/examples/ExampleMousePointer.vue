@@ -1,6 +1,10 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
     <div class="grid">
+      <div class="seperator header-demo">
+        <span class="separator-label">Demo</span>
+      </div>
+
       <div class="options">
         <!-- a checkbox to toggle showing the client side pointer -->
         <input id="checkboxClientPointer" type="checkbox" v-model="showClientPointer" />
@@ -39,6 +43,32 @@
           :style="{top: serverMousePosition.y + 'px', left: serverMousePosition.x + 'px' }"
           v-show="showServerPointer && clientPointerInside"
         ></div>
+      </div>
+
+      <div class="seperator header-description">
+        <span class="separator-label">Description</span>
+      </div>
+
+      <div class="description-general">
+        Placing your mouse inside the above area will show your mouse indicator (arrow) as well as a red square.
+        The basic idea of this demo is to send the mouse position to the Ubi-Interact backend, which will send
+        it back to us so we can display it (red square).
+        <br />Reading the code of this example will show your how to register a device with Ubi-Interact defining the topics for data communication.
+        It also shows you how to publish (send) and subcribe (receive) to topics.
+        A small session+interaction is also specified and communicated to Ubi-Interact that can manipulate the communicated mouse position.
+        You can see in the code how to specify this interaction on the client side, link it to the topics of our device and start it.
+      </div>
+
+      <div class="description-options">
+        You can toggle whether the client/server side mouse indicator should be shown.
+        "Mirror Pointer" will tell the interaction to invert your client mouse position in X and Y.
+      </div>
+
+      <div class="description-mouse-area">
+        Moving your mouse inside this area will publish its current position normalized to ([0;1] , [0;1]) on the topic ".../mouse_client_position".
+        An interaction in the backend will read this client position. If the flag "mirror pointer" is set, the interaction
+        will invert the client position. The interaction will then write the new position to the topic ".../mouse_server_position", which we subscribe to.
+        Once we receive data on the ".../mouse_server_position" topic, the position of the server pointer indicator (red square) will be updated.
       </div>
     </div>
   </UbiiClientContent>
@@ -387,22 +417,30 @@ export default {
 };
 </script>
 
-<style scoped lang="stylus">
+<style scoped>
 .grid {
   display: grid;
   grid-gap: 15px;
-  grid-template-columns: 1fr 5fr;
+  grid-template-columns: 2fr 6fr;
+  grid-template-rows: 30px 300px 30px auto auto;
+  grid-template-areas:
+    'header-demo header-demo'
+    'demo-options demo-mouse-area'
+    'header-description header-description'
+    'description-general description-general'
+    'description-options description-mouse-area';
   height: 100%;
 }
 
 .options {
+  grid-area: demo-options;
   margin: 25px;
 }
 
 .mouse-pointer-area {
-  margin: 25px;
-  border: 3px solid black;
-  height: 300px;
+  grid-area: demo-mouse-area;
+  margin: 10px;
+  border: 3px solid white;
 }
 
 .hideCursor {
@@ -424,5 +462,45 @@ export default {
 .start-example-button {
   width: 50px;
   height: 50px;
+}
+
+.description-general {
+  grid-area: description-general;
+  padding: 20px;
+}
+
+.description-options {
+  grid-area: description-options;
+  padding: 20px;
+}
+
+.description-mouse-area {
+  grid-area: description-mouse-area;
+  padding: 20px;
+}
+
+.header-demo {
+  grid-area: header-demo;
+  margin: 10px;
+}
+
+.header-description {
+  grid-area: header-description;
+  margin: 10px;
+}
+
+.seperator {
+  border-bottom: solid 1px orange;
+  height: 10px;
+  line-height: 20px;
+  text-align: left;
+}
+
+.separator-label {
+  display: inline;
+  padding-left: 15px;
+  padding-right: 20px;
+  color: orange;
+  background-color: black;
 }
 </style>
