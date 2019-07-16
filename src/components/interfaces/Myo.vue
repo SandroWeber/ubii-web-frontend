@@ -302,8 +302,9 @@ export default {
              y: input.clientPointer.y
             };
           } 
-        } else if(input.clientMyoData){
-          console.info(input.topicDestinationclientMyoData);
+        } 
+        if(input.clientMyoData){
+          console.info(input.toString());
           console.log("processingCallbackMyo");
           output.serverMyoData = {
             emg : {
@@ -489,7 +490,7 @@ export default {
                 console.log("subscribe Myo recieved");
               }
             ); 
-
+            this.publishMyoData();
             // start our session (registering not necessary as we do not want to save it permanently)
             UbiiClientService.client
               .callService({
