@@ -32,7 +32,6 @@ import { AppTile } from './appComponents/appComponents.js';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faMobileAlt, faCamera, faRing } from '@fortawesome/free-solid-svg-icons';
 library.add(faMobileAlt, faCamera, faRing);
-library.add(faRing);
 
 export default {
   name: 'Interfaces',

@@ -82,18 +82,8 @@
       <div class="seperator">
         <span class="label">Misc</span>
       </div>
-      <div class="grid">
-        <router-link
-          to="/applications/smartphone-assisted-vr/savr-laser-pointer"
-          class="interface-link"
-          tag="div"
-        >
-          <app-tile class="layer-three background round shadow orange-accent">
-            <font-awesome-icon icon="hand-scissors" class="interface-icon"/>
-            <p>Scissor Paper Rock</p>
-          </app-tile>
-        </router-link>
-      </div>
+
+      <div class="grid"></div>
     </div>
   </div>
 </template>
@@ -111,8 +101,7 @@ import {
   faMobileAlt,
   faTabletAlt,
   faKeyboard,
-  faHandPointer,
-  faHandScissors
+  faHandPointer
 } from '@fortawesome/free-solid-svg-icons';
 library.add(faMousePointer);
 library.add(faCube);
@@ -122,7 +111,6 @@ library.add(faMobileAlt);
 library.add(faTabletAlt);
 library.add(faKeyboard);
 library.add(faHandPointer);
-library.add(faHandScissors);
 
 export default {
   name: 'Applications',

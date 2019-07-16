@@ -290,6 +290,7 @@ export default {
       // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/interactions/interaction.proto
       let processingCallback = (input, output) => {
         if (input.clientPointer) {
+          //console.log("processingCallbackMouse");
           if (input.mirrorPointer === true) {
             output.serverPointer = {
               x: 1 - input.clientPointer.x,
@@ -302,6 +303,7 @@ export default {
             };
           } 
         } else if(input.clientMyoData){
+          console.info(input.topicDestinationclientMyoData);
           console.log("processingCallbackMyo");
           output.serverMyoData = {
             emg : {
@@ -315,26 +317,25 @@ export default {
               v7: input.clientMyoData.emg.v7
             },
             orientation : {
-              x: 1,
-              y: 1,
-              z: 1,
-              w: 1
+              x: input.clientMyoData.orientation.x,
+              y: input.clientMyoData.orientation.y,
+              z: input.clientMyoData.orientation.z,
+              w: input.clientMyoData.orientation.w
             },
             gyroscope : {
-              x: 2,
-              y: 2,
-              z: 2
+              x: input.clientMyoData.gyroscope.x,
+              y: input.clientMyoData.gyroscope.y,
+              z: input.clientMyoData.gyroscope.z
             },
             accelerometer : {
-              x: 3,
-              y: 3,
-              z: 3
+              x: input.clientMyoData.accelerometer.x,
+              y: input.clientMyoData.accelerometer.y,
+              z: input.clientMyoData.accelerometer.z
             },
-            gesture : 0
+            gesture : input.clientMyoData.gesture
           }; 
         }
       };
-
       let ubiiInteraction = {
         id: uuidv4(),
         name: 'myo-interaction',
@@ -374,43 +375,30 @@ export default {
         ioMappings: [
           {
             interactionId: ubiiInteraction.id,
-            interactionInput: {
-              internalName: inputClientPointer.internalName,
-              messageFormat: inputClientPointer.messageFormat
-            },
-            topic: inputClientPointer.topic
-          },
-          {
-            interactionId: ubiiInteraction.id,
-            interactionInput: {
-              internalName: inputMirror.internalName,
-              messageFormat: inputMirror.messageFormat
-            },
-            topic: inputMirror.topic
-          },
-          {
-            interactionId: ubiiInteraction.id,
-            interactionInput: {
-              internalName: inputClientMyoData.internalName,
-              messageFormat: inputClientMyoData.messageFormat
-            },
-            topic: inputClientMyoData.topic
-          },
-          {
-            interactionId: ubiiInteraction.id,
-            interactionOutput: {
-              internalName: outputServerPointer.internalName,
-              messageFormat: outputServerPointer.messageFormat
-            },
-            topic: outputServerPointer.topic
-          },
-          {
-            interactionId: ubiiInteraction.id,
-            interactionOutput: {
-              internalName: outputServerMyoData.internalName,
-              messageFormat: outputServerMyoData.messageFormat
-            },
-            topic: outputServerMyoData.topic
+            inputMappings: [
+              {
+                name: inputClientPointer.internalName,
+                topicSource: inputClientPointer.topic
+              },
+              {
+                name: inputMirror.internalName,
+                topicSource: inputMirror.topic
+              },
+              {
+                name: inputClientMyoData.internalName,
+                topicSource: inputClientMyoData.topic
+              }
+            ],
+            outputMappings: [
+              {
+                name: outputServerPointer.internalName,
+                topicDestination: outputServerPointer.topic
+              },
+              {
+                name: outputServerMyoData.internalName,
+                topicDestination: outputServerMyoData.topic
+              }
+            ]
           }
         ]
       };
@@ -433,15 +421,9 @@ export default {
         // create all the specifications we need to define our example application
         // these are protobuf messages to be sent to the server (saved in this.$data)
         this.createUbiiSpecs();
-/* 
-      Myo.connect('com.ubii.myoInterface');
-      console.log("connected");
 
-      Myo.on("connected", function(data, timestamp) {
-      console.log("Myo successfully connected. Data: " + JSON.stringify(data) + ". Timestamp: " + timestamp + ".");
-      }); */
-      this.connectMyo();
-      this.getMyoData();
+        this.connectMyo();
+        this.getMyoData();
 
         // register the mouse pointer device
         UbiiClientService.registerDevice(this.$data.ubiiDevice)
@@ -457,36 +439,55 @@ export default {
             UbiiClientService.client.subscribe(
               this.$data.outputServerPointer.topic,
               // a callback to be called when new data on this topic arrives
-              mousePointer => {
+              mousePosition => {
                 // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
                 // interaction area and set our red square indicator
                 let boundingRect = document
                   .getElementById('mouse-pointer-area')
                   .getBoundingClientRect();
                 this.$data.serverMousePosition = {
-                  x: mousePointer.x * boundingRect.width,
-                  y: mousePointer.y * boundingRect.height
+                  x: mousePosition.x * boundingRect.width,
+                  y: mousePosition.y * boundingRect.height
                 };
-                //console.log(mousePointer)
               }
             );
-             // subscribe to the device topics so we are notified when new data arrives on the topic
+
+            // subscribe to the device topics so we are notified when new data arrives on the topic
             UbiiClientService.client.subscribe(
               this.$data.outputServerMyoData.topic,
               // a callback to be called when new data on this topic arrives
-/*               myoData => {
-                // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
-                // interaction area and set our red square indicator
-
-                this.$data.serverMyoData.orientation = {
-                  x: myoData.orientation.x,
-                  y: myoData.orientation.y,
-                  z: myoData.orientation.z,
-                  w: myoData.orientation.w
-                }; */
-                 mousePointer => {
+              myoData => {
+                this.$data.serverMyoData = {
+                  emg : {
+                    v0: myoData.emg.v0,
+                    v1: myoData.emg.v1,
+                    v2: myoData.emg.v2,
+                    v3: myoData.emg.v3,
+                    v4: myoData.emg.v4,
+                    v5: myoData.emg.v5,
+                    v6: myoData.emg.v6,
+                    v7: myoData.emg.v7
+                  },
+                  orientation : {
+                    x: myoData.orientation.x,
+                    y: myoData.orientation.y,
+                    z: myoData.orientation.z,
+                    w: myoData.orientation.w
+                  },
+                  gyroscope : {
+                    x: myoData.gyroscope.x,
+                    y: myoData.gyroscope.y,
+                    z: myoData.gyroscope.z
+                  },
+                  accelerometer : {
+                    x: myoData.accelerometer.x,
+                    y: myoData.accelerometer.y,
+                    z: myoData.accelerometer.z
+                  },
+                  gesture : myoData.gesture
+                };
                 console.log("subscribe Myo recieved");
-                }
+              }
             ); 
 
             // start our session (registering not necessary as we do not want to save it permanently)
@@ -495,7 +496,8 @@ export default {
                 topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
                 session: this.$data.ubiiSession
               })
-              .then(() => {
+              .then(response => {
+                console.info(response);
                 this.$data.exampleStarted = true;
               });
           });
@@ -508,7 +510,6 @@ export default {
 
       //disconnect Myo
       Myo.disconnect();
-      
 
       // unsubscribe and stop session
       UbiiClientService.client.unsubscribe(
@@ -542,15 +543,6 @@ export default {
         'vector2',
         this.$data.clientMousePosition
       );
-    },
-    publishMyoData: function(){
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.inputClientMyoData.topic,
-        'myoEvent',
-        this.$data.clientMyoData
-      );
-      console.log('Published Myo Data');
     },
     onTouchStart: function(event) {
       this.$data.clientPointerInside = true;
@@ -603,6 +595,15 @@ export default {
       this.streamEMG(true);
       console.log("Myo successfully connected. Data: " + JSON.stringify(data) + ". Timestamp: " + timestamp + ".");
       });
+    },
+    publishMyoData: function(){
+      UbiiClientService.client.publish(
+        this.$data.ubiiDevice.name,
+        this.$data.inputClientMyoData.topic,
+        'myoEvent',
+        this.$data.clientMyoData
+      );
+      console.log('Published Myo Data');
     },
     disconnectMyo: function() {
       Myo.off('emg');
