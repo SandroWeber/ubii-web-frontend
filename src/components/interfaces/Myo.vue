@@ -2,32 +2,6 @@
   <UbiiClientContent :ubiiClientService="ubiiClientService">
     <div class="grid">
       <div class="options">
-        <!-- a checkbox to toggle showing the client side pointer -->
-        <input id="checkboxClientPointer" type="checkbox" v-model="showClientPointer">
-        <label for="checkboxClientPointer">Show Client Pointer</label>
-
-        <br>
-
-        <!-- a checkbox to toggle showing the server side pointer -->
-        <input id="checkboxServerPointer" type="checkbox" v-model="showServerPointer">
-        <label for="checkboxServerPointer">Show Server Pointer</label>
-
-        <br>
-
-        <!-- a checkbox to toggle inverting the pointer position at the server before sending it back to client -->
-        <input id="checkboxMirrorPointer" type="checkbox" v-model="mirrorPointer">
-        <label for="checkboxMirrorPointer">Mirror Pointer</label>
-        
-        <br>
-        <span> ServerMouse Position: </span>
-          <br>
-          <span>
-            {{this.round(serverMousePosition.x, 1)}}
-            {{this.round(serverMousePosition.y ,1)}}
-          </span>
-        <br>
-        <br>
-        
         <!-- Myo related stuff -->
         <button v-on:click="publishMyoData()">Publish Myo Data</button>
         <br>
@@ -108,26 +82,6 @@
         </span>
         <span>Server-Gesture: {{serverMyoData.gesture}}</span>
       </div>
-
-      <!-- the interaction area.
-      if our pointer is inside, its position is sent to the server and back to us, then displayed as a red square-->
-      <div
-        id="mouse-pointer-area"
-        class="mouse-pointer-area"
-        v-bind:class="{ hideCursor: !showClientPointer }"
-        v-on:mousemove="onMouseMove($event)"
-        v-on:mouseenter="clientPointerInside = true;"
-        v-on:mouseleave="clientPointerInside = false;"
-        v-on:touchstart="onTouchStart($event)"
-        v-on:touchend="clientPointerInside = false;"
-        v-on:touchmove="onTouchMove($event)"
-      >
-        <div
-          class="server-mouse-position-indicator"
-          :style="{top: serverMousePosition.y + 'px', left: serverMousePosition.x + 'px' }"
-          v-show="showServerPointer && clientPointerInside"
-        ></div>
-      </div>
     </div>
   </UbiiClientContent>
 </template>
@@ -142,8 +96,6 @@ import uuidv4 from 'uuid/v4';
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
-
-import { mapActions } from 'vuex';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -226,21 +178,6 @@ export default {
       // helper definitions that we can reference later
       let deviceName = 'web-interface-myo';
       let topicPrefix = UbiiClientService.getClientID() + '/' + deviceName;
-      let inputClientPointer = {
-        internalName: 'clientPointer',
-        messageFormat: 'ubii.dataStructure.Vector2',
-        topic: topicPrefix + '/' + 'mouse_client_position'
-      };
-      let inputMirror = {
-        internalName: 'mirrorPointer',
-        messageFormat: 'bool',
-        topic: topicPrefix + '/' + 'mirror_mouse'
-      };
-      let outputServerPointer = {
-        internalName: 'serverPointer',
-        messageFormat: 'ubii.dataStructure.Vector2',
-        topic: topicPrefix + '/' + 'mouse_server_position'
-      };
       let inputClientMyoData = {
         internalName: 'clientMyoData',
         messageFormat: 'ubii.dataStructure.MyoEvent',
@@ -259,21 +196,6 @@ export default {
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
         components: [
           {
-            topic: inputClientPointer.topic,
-            messageFormat: inputClientPointer.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
-          },
-          {
-            topic: inputMirror.topic,
-            messageFormat: inputMirror.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
-          },
-          {
-            topic: outputServerPointer.topic,
-            messageFormat: outputServerPointer.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
-          },
-          {
             topic: inputClientMyoData.topic,
             messageFormat: inputClientMyoData.messageFormat,
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
@@ -289,23 +211,7 @@ export default {
       // specification of a ubii.interactions.Interaction
       // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/interactions/interaction.proto
       let processingCallback = (input, output) => {
-        if (input.clientPointer) {
-          //console.log("processingCallbackMouse");
-          if (input.mirrorPointer === true) {
-            output.serverPointer = {
-              x: 1 - input.clientPointer.x,
-              y: 1 - input.clientPointer.y
-            };
-          } else {
-             output.serverPointer = {
-             x: input.clientPointer.x,
-             y: input.clientPointer.y
-            };
-          } 
-        } 
         if(input.clientMyoData){
-          console.info(input.toString());
-          console.log("processingCallbackMyo");
           output.serverMyoData = {
             emg : {
               v0: input.clientMyoData.emg.v0,
@@ -343,23 +249,11 @@ export default {
         processingCallback: processingCallback.toString(),
         inputFormats: [
           {
-            internalName: inputClientPointer.internalName,
-            messageFormat: inputClientPointer.messageFormat
-          },
-          {
-            internalName: inputMirror.internalName,
-            messageFormat: inputMirror.messageFormat
-          },
-          {
             internalName: inputClientMyoData.internalName,
             messageFormat: inputClientMyoData.messageFormat
           }
         ],
         outputFormats: [
-          {
-            internalName: outputServerPointer.internalName,
-            messageFormat: outputServerPointer.messageFormat
-          },
           {
             internalName: outputServerMyoData.internalName,
             messageFormat: outputServerMyoData.messageFormat
@@ -378,23 +272,11 @@ export default {
             interactionId: ubiiInteraction.id,
             inputMappings: [
               {
-                name: inputClientPointer.internalName,
-                topicSource: inputClientPointer.topic
-              },
-              {
-                name: inputMirror.internalName,
-                topicSource: inputMirror.topic
-              },
-              {
                 name: inputClientMyoData.internalName,
                 topicSource: inputClientMyoData.topic
               }
             ],
             outputMappings: [
-              {
-                name: outputServerPointer.internalName,
-                topicDestination: outputServerPointer.topic
-              },
               {
                 name: outputServerMyoData.internalName,
                 topicDestination: outputServerMyoData.topic
@@ -406,9 +288,6 @@ export default {
 
       // assign to local state for future reference
       this.$data.deviceName = deviceName;
-      this.$data.inputClientPointer = inputClientPointer;
-      this.$data.inputMirror = inputMirror;
-      this.$data.outputServerPointer = outputServerPointer;
       this.$data.ubiiDevice = ubiiDevice;
       this.$data.ubiiInteraction = ubiiInteraction;
 
@@ -436,22 +315,6 @@ export default {
             return device;
           })
           .then(() => {
-            // subscribe to the device topics so we are notified when new data arrives on the topic
-            UbiiClientService.client.subscribe(
-              this.$data.outputServerPointer.topic,
-              // a callback to be called when new data on this topic arrives
-              mousePosition => {
-                // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
-                // interaction area and set our red square indicator
-                let boundingRect = document
-                  .getElementById('mouse-pointer-area')
-                  .getBoundingClientRect();
-                this.$data.serverMousePosition = {
-                  x: mousePosition.x * boundingRect.width,
-                  y: mousePosition.y * boundingRect.height
-                };
-              }
-            );
 
             // subscribe to the device topics so we are notified when new data arrives on the topic
             UbiiClientService.client.subscribe(
@@ -487,7 +350,6 @@ export default {
                   },
                   gesture : myoData.gesture
                 };
-                console.log("subscribe Myo recieved");
               }
             ); 
             this.publishMyoData();
@@ -514,9 +376,6 @@ export default {
 
       // unsubscribe and stop session
       UbiiClientService.client.unsubscribe(
-        this.$data.outputServerPointer.topic
-      );
-      UbiiClientService.client.unsubscribe(
         this.$data.outputServerMyoData.topic
       );
       UbiiClientService.client.callService({
@@ -524,68 +383,6 @@ export default {
         session: this.$data.ubiiSession
       });
     },
-    onMouseMove: function(event) {
-      if (!this.exampleStarted) {
-        return;
-      }
-
-      // calculate the current mouse position, normalized to the bounds of the interactive area ([0;1], [0;1])
-      let boundingRect = event.currentTarget.getBoundingClientRect();
-      let relativeMousePosition = {
-        x: event.offsetX / boundingRect.width,
-        y: event.offsetY / boundingRect.height
-      };
-
-      this.$data.clientMousePosition = relativeMousePosition;
-      // publish our normalized client mouse position
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.inputClientPointer.topic,
-        'vector2',
-        this.$data.clientMousePosition
-      );
-    },
-    onTouchStart: function(event) {
-      this.$data.clientPointerInside = true;
-      this.onTouchMove(event);
-    },
-    onTouchMove: function(event) {
-      if (!this.exampleStarted) {
-        return;
-      }
-
-      // calculate the current touch position, normalized to the bounds of the interactive area ([0;1], [0;1])
-      let relativeMousePosition = {
-        x:
-          (event.touches[0].clientX - event.target.offsetLeft) /
-          event.target.offsetWidth,
-        y:
-          (event.touches[0].clientY - event.target.offsetTop) /
-          event.target.offsetHeight
-      };
-
-      if (
-        relativeMousePosition.x < 0 ||
-        relativeMousePosition.x > 1 ||
-        relativeMousePosition.y < 0 ||
-        relativeMousePosition.y > 1
-      ) {
-        this.$data.clientPointerInside = false;
-        return;
-      }
-
-      this.$data.clientMousePosition = relativeMousePosition;
-      // publish our normalized client touch position
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.inputClientPointer.topic,
-        'vector2',
-        this.$data.clientMousePosition
-      );
-    },
-    ...mapActions('interactions', {
-      addInteraction: 'add'
-    }),
     round: function(value, digits) {
       return Math.round(value * digits * 10) / (digits * 10);
     },
