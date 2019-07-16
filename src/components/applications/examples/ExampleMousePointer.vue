@@ -348,6 +348,10 @@ export default {
         topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
         session: this.$data.ubiiSession
       });
+      UbiiClientService.client.callService({
+        topic: DEFAULT_TOPICS.SERVICES.DEVICE_DEREGISTRATION,
+        device: this.$data.ubiiDevice
+      });
     },
     onMouseMove: function(event) {
       if (!this.exampleStarted) {

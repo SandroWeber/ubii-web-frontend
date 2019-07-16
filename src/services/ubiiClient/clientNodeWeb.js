@@ -41,7 +41,7 @@ class ClientNodeWeb {
           this.registerClient()
             .then(() => {
               // STEP 4: open the asynchronous connection for topic data communication
-              this.initializeTopicDataClient(this.serverSpecification);
+              this.initializeTopicDataClient();
               return resolve();
             },
               (error) => {
@@ -52,7 +52,7 @@ class ClientNodeWeb {
               return reject();
             });
         } else {
-          this.initializeTopicDataClient(this.serverSpecification);
+          this.initializeTopicDataClient();
         }
       });
     });
@@ -68,11 +68,16 @@ class ClientNodeWeb {
     });
   }
 
-  initializeTopicDataClient(serverSpecification) {
+  async reinitialize() {
+    this.serviceClient = new RESTClient(this.serverHost, this.servicePort);
+    this.initializeTopicDataClient();
+  }
+
+  initializeTopicDataClient() {
     this.topicDataClient = new WebsocketClient(
       this.clientSpecification.id,
       this.serverHost,
-      parseInt(serverSpecification.portTopicDataWs)
+      parseInt(this.serverSpecification.portTopicDataWs)
     );
     this.topicDataClient.onMessageReceived((messageBuffer) => {
       try {

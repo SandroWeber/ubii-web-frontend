@@ -121,6 +121,7 @@ export default {
       this.registerUbiiSpecs();
     },
     stopInterface: function() {
+      this.running = false;
       this.unregisterEventListeners();
       this.unregisterUbiiSpecs();
     },
@@ -200,6 +201,7 @@ export default {
                 this.$data.ubiiDevice = device;
                 this.hasRegisteredUbiiDevice = true;
                 this.initializing = false;
+                this.running = true;
                 this.publishContinuousDeviceData();
               }
               return device;
@@ -247,14 +249,16 @@ export default {
           UbiiClientService.client.unsubscribe(component.topic);
         });
 
-        UbiiClientService.deregisterDevice(this.$data.ubiiDevice);
+        UbiiClientService.deregisterDevice(this.$data.ubiiDevice).then(() => {
+          this.hasRegisteredUbiiDevice = false;
+        });
       }
-
-      this.hasRegisteredUbiiDevice = false;
-
-      // TODO: unregister device
     },
     publishContinuousDeviceData: function() {
+      if (!this.running) {
+        return;
+      }
+
       this.deviceData.touchPosition &&
         this.publishTouchPosition(this.deviceData.touchPosition);
 
@@ -265,12 +269,10 @@ export default {
         this.publishDeviceMotion(this.deviceData.acceleration);
 
       // call loop
-      if (this.hasRegisteredUbiiDevice) {
-        setTimeout(
-          this.publishContinuousDeviceData,
-          this.publishFrequency * 1000
-        );
-      }
+      setTimeout(
+        this.publishContinuousDeviceData,
+        this.publishFrequency * 1000
+      );
     },
     publishTouchPosition: function(position) {
       if (this.hasRegisteredUbiiDevice) {
