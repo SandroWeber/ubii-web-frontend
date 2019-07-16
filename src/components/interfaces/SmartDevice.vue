@@ -126,15 +126,6 @@ export default {
     },
     /* ubii methods */
     createUbiiSpecs: function() {
-      /*if (this.clientId === UbiiClientService.getClientID()) {
-        console.warn(
-          'tried to create ubii specs, but client ID did not change'
-        );
-        document.getElementById('debug-out').innerHTML =
-          'createUbiiSpecs(), client ID unchanged';
-        return;
-      }*/
-
       let deviceName = 'web-interface-smart-device';
 
       this.clientId = UbiiClientService.getClientID();
@@ -255,6 +246,8 @@ export default {
 
           UbiiClientService.client.unsubscribe(component.topic);
         });
+
+        UbiiClientService.deregisterDevice(this.$data.ubiiDevice);
       }
 
       this.hasRegisteredUbiiDevice = false;

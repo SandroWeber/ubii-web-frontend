@@ -57,13 +57,6 @@ export default {
   },
   methods: {
     connect: function() {
-      /*if (!this.ubiiClientService.connected) {
-        this.ubiiClientService.connect();
-      } else {
-        this.ubiiClientService.disconnect();
-        this.ubiiClientService.connect();
-      }*/
-
       this.ubiiClientService.isConnected().then(connected => {
         if (connected) {
           this.ubiiClientService.disconnect().then(() => {
