@@ -239,6 +239,11 @@ export default {
             topic: this.topicVibrationDistanceThreshold,
             messageFormat: 'double',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+          },
+          {
+            topic: this.topicVibrationDistanceThreshold,
+            messageFormat: 'double',
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
           }
         ]
       };
@@ -253,21 +258,29 @@ export default {
         .then(reply => {
           this.$data.topicList = reply.stringList.list;
 
+          let clientIDs = [];
           this.$data.topicList.forEach(topic => {
             let smart_device_touch_topic_index = topic.indexOf(
               '/web-interface-smart-device/touch_position'
             );
             if (smart_device_touch_topic_index !== -1) {
               let clientID = topic.substring(0, smart_device_touch_topic_index);
+              clientIDs.push(clientID);
 
               if (!this.$data.clients.has(clientID)) {
                 this.addClient(clientID, topic);
               }
             }
           });
+
+          this.$data.clients.forEach((topic, id) => {
+            if (!clientIDs.some(clientID => { return id === clientID;})) {
+              this.removeClient(id);
+            }
+          });
         });
 
-      setTimeout(this.updateSmartDevices, 1000);
+      setTimeout(() => {this.updateSmartDevices();}, 1000);
     },
     getRandomColor: function() {
       let letters = '0123456789ABCDEF';
@@ -317,9 +330,14 @@ export default {
         }
       );
     },
-    removeClient(clientID) {
-      let indicatorElement = this.$data.clients[clientID].touchPosIndicator;
+    removeClient(id) {
+      if (!this.$data.clients.has(id)) {
+        return;
+      }
+
+      let indicatorElement = this.$data.clients.get(id).touchPosIndicator;
       indicatorElement.parentNode.removeChild(indicatorElement);
+      this.$data.clients.delete(id);
     }
   }
 };

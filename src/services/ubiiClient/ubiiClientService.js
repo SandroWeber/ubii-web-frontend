@@ -18,6 +18,7 @@ class UbiiClientService {
   }
 
   async connect() {
+    console.info('### connect');
     if (this.connected || this.connecting) {
       return this.isConnected();
     }
@@ -25,7 +26,10 @@ class UbiiClientService {
 
     console.info('connecting to backend ' + this.serverIP + ':' + this.serverPort);
 
-    this.client = new ClientNodeWeb('web frontend', this.serverIP, this.serverPort);
+    if (!this.client) {
+      this.client = new ClientNodeWeb('web frontend', this.serverIP, this.serverPort);
+    }
+
     return this.client.initialize().then(
       () => {
         if (this.client.isInitialized()) {
@@ -43,6 +47,7 @@ class UbiiClientService {
   }
 
   async disconnect() {
+    console.info('### disconnect');
     if (!this.connected) {
       console.warn('Client tried to disconnect without beeing connected.')
       return;
@@ -64,7 +69,8 @@ class UbiiClientService {
   }
 
   async reconnect() {
-    await this.connect();
+    console.info('### reconnect');
+    await this.client.reinitialize();
   }
 
   isConnected() {
@@ -74,8 +80,8 @@ class UbiiClientService {
 
       let checkConnection = () => {
         retry += 1;
-        if (this.connected) {
-          resolve(this.connected);
+        if (this.client && this.client.isConnected()) {
+          resolve(this.client.isConnected());
           return;
         } else {
           if (retry > maxRetries) {
@@ -107,9 +113,17 @@ class UbiiClientService {
    * Register the specified device at the UBII server.
    * @param {object} device Object specifying device according to protobuf format ubii.devices.Device
    */
-  async registerDevice(device) {
-    device.clientId = this.client.clientSpecification.id;
-    return this.client.registerDevice(device);
+  async registerDevice(deviceSpecs) {
+    deviceSpecs.clientId = this.client.clientSpecification.id;
+    return this.client.registerDevice(deviceSpecs);
+  }
+
+  /**
+   * Deregister the specified device at the UBII server.
+   * @param {object} device Object specifying device according to protobuf format ubii.devices.Device
+   */
+  async deregisterDevice(specs) {
+    return this.client.deregisterDevice(specs);
   }
 
   async registerSession(session) {

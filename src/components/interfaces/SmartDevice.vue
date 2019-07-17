@@ -17,6 +17,8 @@
         <br />
         <button v-show="!fullscreen" @click="calibrate()">Calibrate</button>
 
+        <div id="debug-out">debug out ...</div>
+
         <div
           id="touch-area"
           class="touch-area"
@@ -88,17 +90,16 @@ export default {
       this.stopInterface();
     });
 
-    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.registerUbiiSpecs);
-    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.unregisterUbiiSpecs);
-
     this.deviceData = {};
     this.registerEventListeners();
-    this.createUbiiSpecs();
     UbiiClientService.isConnected().then(() => {
-      this.registerUbiiSpecs();
+      this.startInterface();
+    });
+    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
+      this.startInterface();
     });
     UbiiClientService.onDisconnect(async () => {
-      await this.stopExample();
+      await this.stopInterface();
     });
   },
   beforeDestroy: function() {
@@ -115,17 +116,17 @@ export default {
     };
   },
   methods: {
+    startInterface: function() {
+      this.createUbiiSpecs();
+      this.registerUbiiSpecs();
+    },
     stopInterface: function() {
+      this.running = false;
       this.unregisterEventListeners();
       this.unregisterUbiiSpecs();
     },
     /* ubii methods */
     createUbiiSpecs: function() {
-      if (this.clientId) {
-        console.warn('tried to create ubii specs, but are already present');
-        return;
-      }
-
       let deviceName = 'web-interface-smart-device';
 
       this.clientId = UbiiClientService.getClientID();
@@ -181,51 +182,62 @@ export default {
       this.$data.componentTouchEvents = ubiiDevice.components[3];
     },
     registerUbiiSpecs: function() {
-      if (this.initializing || this.hasRegisteredUbiiDevice) {
+      if (this.$data.ubiiDevice.id) {
         console.warn(
           'Tried to register ubii device, but is already registered'
         );
+        document.getElementById('debug-out').innerHTML =
+          'registerUbiiSpecs(), already registered';
         return;
       }
       this.initializing = true;
 
       // register the mouse pointer device
-      UbiiClientService.isConnected().then(() => {
-        UbiiClientService.registerDevice(this.$data.ubiiDevice)
-          .then(device => {
-            if (device.id) {
-              this.$data.ubiiDevice = device;
-              this.hasRegisteredUbiiDevice = true;
-              this.initializing = false;
-              this.publishContinuousDeviceData();
-            }
-            return device;
-          })
-          .then(() => {
-            let vibrationComponent = this.$data.ubiiDevice.components.find(
-              element => {
-                return element.topic.indexOf('/vibration_pattern') !== -1;
+      UbiiClientService.isConnected().then(
+        () => {
+          UbiiClientService.registerDevice(this.$data.ubiiDevice)
+            .then(device => {
+              if (device.id) {
+                this.$data.ubiiDevice = device;
+                this.hasRegisteredUbiiDevice = true;
+                this.initializing = false;
+                this.running = true;
+                this.publishContinuousDeviceData();
               }
-            );
-            if (vibrationComponent) {
-              UbiiClientService.client.subscribe(
-                vibrationComponent.topic,
-                vibrationPattern => {
-                  if (Date.now() >= this.tNextVibrate) {
-                    navigator.vibrate(vibrationPattern);
-                    this.tNextVibrate = Date.now() + 2 * vibrationPattern;
-                  }
+              return device;
+            })
+            .then(() => {
+              let vibrationComponent = this.$data.ubiiDevice.components.find(
+                element => {
+                  return element.topic.indexOf('/vibration_pattern') !== -1;
                 }
               );
-            }
-          });
-      });
+              if (vibrationComponent) {
+                UbiiClientService.client.subscribe(
+                  vibrationComponent.topic,
+                  vibrationPattern => {
+                    if (Date.now() >= this.tNextVibrate) {
+                      navigator.vibrate(vibrationPattern);
+                      this.tNextVibrate = Date.now() + 2 * vibrationPattern;
+                    }
+                  }
+                );
+              }
+            });
+        },
+        // reject
+        () => {
+          this.initializing = false;
+        }
+      );
     },
     unregisterUbiiSpecs: function() {
       if (!this.hasRegisteredUbiiDevice) {
         console.warn(
           'Tried to unregister ubii specs, but they are not registered.'
         );
+        document.getElementById('debug-out').innerHTML =
+          'unregister(), not registered';
         return;
       }
 
@@ -236,13 +248,17 @@ export default {
 
           UbiiClientService.client.unsubscribe(component.topic);
         });
+
+        UbiiClientService.deregisterDevice(this.$data.ubiiDevice).then(() => {
+          this.hasRegisteredUbiiDevice = false;
+        });
       }
-
-      this.hasRegisteredUbiiDevice = null;
-
-      // TODO: unregister device
     },
     publishContinuousDeviceData: function() {
+      if (!this.running) {
+        return;
+      }
+
       this.deviceData.touchPosition &&
         this.publishTouchPosition(this.deviceData.touchPosition);
 
@@ -253,12 +269,10 @@ export default {
         this.publishDeviceMotion(this.deviceData.acceleration);
 
       // call loop
-      if (this.hasRegisteredUbiiDevice) {
-        setTimeout(
-          this.publishContinuousDeviceData,
-          this.publishFrequency * 1000
-        );
-      }
+      setTimeout(
+        this.publishContinuousDeviceData,
+        this.publishFrequency * 1000
+      );
     },
     publishTouchPosition: function(position) {
       if (this.hasRegisteredUbiiDevice) {
