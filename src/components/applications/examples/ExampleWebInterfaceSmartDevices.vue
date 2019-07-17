@@ -26,11 +26,13 @@ export default {
     });
 
     UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.startExample);
-    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopExample);
 
     this.createUbiiSpecs();
     UbiiClientService.isConnected().then(() => {
       this.startExample();
+    });
+    UbiiClientService.onDisconnect(async () => {
+      await this.stopExample();
     });
   },
   beforeDestroy: function() {
@@ -44,7 +46,11 @@ export default {
   },
   methods: {
     startExample: function() {
+      if (this.running) return;
+
+      this.running = true;
       this.pollSmartDevices = true;
+
       UbiiClientService.isConnected().then(() => {
         this.updateSmartDevices();
 
@@ -84,9 +90,10 @@ export default {
     },
     stopExample: function() {
       this.pollSmartDevices = false;
+      this.running = false;
 
       if (this.session) {
-        UbiiClientService.client.callService({
+        return UbiiClientService.client.callService({
           topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
           session: this.session
         });
@@ -109,11 +116,13 @@ export default {
           ) {
             let pos1 = current.data;
             let pos2 = positionRecords[compareIndex].data;
-            let distance = Math.sqrt(
-              Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2)
-            );
-            if (distance < threshold) {
-              closeIndices.push(compareIndex);
+            if (pos1 && pos2) {
+              let distance = Math.sqrt(
+                Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2)
+              );
+              if (distance < threshold) {
+                closeIndices.push(compareIndex);
+              }
             }
           }
 
@@ -307,6 +316,10 @@ export default {
             client.touchPosition.y.toString() + 'px';
         }
       );
+    },
+    removeClient(clientID) {
+      let indicatorElement = this.$data.clients[clientID].touchPosIndicator;
+      indicatorElement.parentNode.removeChild(indicatorElement);
     }
   }
 };

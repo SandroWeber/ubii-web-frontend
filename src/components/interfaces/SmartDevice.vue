@@ -93,9 +93,19 @@ export default {
 
     this.deviceData = {};
     this.registerEventListeners();
+<<<<<<< HEAD
     UbiiClientService.isConnected().then(() => {
       this.registerUbiiSpecs();
     });
+=======
+    this.createUbiiSpecs();
+    UbiiClientService.isConnected().then(() => {
+      this.registerUbiiSpecs();
+    });
+    UbiiClientService.onDisconnect(async () => {
+      await this.stopExample();
+    });
+>>>>>>> develop
   },
   beforeDestroy: function() {
     this.stopInterface();
@@ -187,7 +197,10 @@ export default {
 
       // register the mouse pointer device
       UbiiClientService.isConnected().then(() => {
+<<<<<<< HEAD
         this.createUbiiSpecs();
+=======
+>>>>>>> develop
         UbiiClientService.registerDevice(this.$data.ubiiDevice)
           .then(device => {
             if (device.id) {
@@ -245,15 +258,23 @@ export default {
 
       this.deviceData.currentOrientation &&
         this.publishDeviceOrientation(this.deviceData.currentOrientation);
+<<<<<<< HEAD
 
       this.deviceData.acceleration &&
         this.publishDeviceMotion(this.deviceData.acceleration);
 
+=======
+
+      this.deviceData.acceleration &&
+        this.publishDeviceMotion(this.deviceData.acceleration);
+
+>>>>>>> develop
       // call loop
       if (this.hasRegisteredUbiiDevice) {
         setTimeout(
           this.publishContinuousDeviceData,
           this.publishFrequency * 1000
+<<<<<<< HEAD
         );
       }
     },
@@ -277,6 +298,31 @@ export default {
         );
       }
     },
+=======
+        );
+      }
+    },
+    publishTouchPosition: function(position) {
+      if (this.hasRegisteredUbiiDevice) {
+        UbiiClientService.client.publish(
+          this.$data.ubiiDevice.name,
+          this.$data.componentTouchPosition.topic,
+          'vector2',
+          position
+        );
+      }
+    },
+    publishTouchEvent: function(type, position) {
+      if (this.hasRegisteredUbiiDevice) {
+        UbiiClientService.client.publish(
+          this.$data.ubiiDevice.name,
+          this.$data.componentTouchEvents.topic,
+          'touchEvent',
+          { type: type, position: position }
+        );
+      }
+    },
+>>>>>>> develop
     publishDeviceOrientation: function(orientation) {
       let current = (this.deviceData.currentOrientation = {
         x: this.round(orientation.x, 2),
