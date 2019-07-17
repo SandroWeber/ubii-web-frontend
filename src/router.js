@@ -62,16 +62,17 @@ export default new Router({
     name: 'Tool - QR Code Display',
     component: () => import('./components/tools/QRCodeDisplay.vue')
   },
-  {
-    path: '/tools/3d_pose_visualizer',
-    name: 'Tool - 3D Pose Visualizer',
-    component: () => import('./components/tools/3DPoseVisualizer.vue')
-  },
   /* applications */
   {
     path: '/applications',
     name: 'Applications',
     component: () => import('./components/Applications.vue')
+  },
+  /* applications - visualization */
+  {
+    path: '/applications/visualization/3d_pose_visualizer',
+    name: 'Application - 3D Pose Visualizer',
+    component: () => import('./components/applications/visualization/3DPoseVisualizer.vue')
   },
   /* applications - examples */
   {

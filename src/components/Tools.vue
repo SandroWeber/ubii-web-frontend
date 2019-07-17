@@ -21,13 +21,6 @@
           <p>QRCode Display</p>
         </app-tile>
       </router-link>
-
-      <router-link to="/tools/3d_pose_visualizer" class="interface-link" tag="div">
-        <app-tile class="layer-three background round shadow orange-accent">
-          <font-awesome-icon icon="cubes" class="interface-icon" />
-          <p>3D Pose Visualizer</p>
-        </app-tile>
-      </router-link>
     </div>
   </div>
 </template>
@@ -40,10 +33,9 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import {
   faEye,
   faStopwatch,
-  faQrcode,
-  faCubes
+  faQrcode
 } from '@fortawesome/free-solid-svg-icons';
-library.add(faEye, faStopwatch, faQrcode, faCubes);
+library.add(faEye, faStopwatch, faQrcode);
 
 export default {
   name: 'Tools',

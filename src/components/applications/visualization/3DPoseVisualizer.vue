@@ -13,8 +13,8 @@ import uuidv4 from 'uuid/v4';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
-import WebVR from '../applications/sharedModules/WebVR';
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import WebVR from '../sharedModules/WebVR';
+import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
 
 export default {
   name: 'Pose3DVisualizer',
