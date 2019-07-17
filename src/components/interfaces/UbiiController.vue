@@ -475,7 +475,7 @@ export default {
 
 .analog-left {
   grid-area: analog-left;
-  background-color: aqua;
+  //background-color: aqua;
   position: relative;
   width: 200px;
   height: 200px;
@@ -483,16 +483,17 @@ export default {
 
 .analog-right {
   grid-area: analog-right;
-  background-color: aqua;
+  //background-color: aqua;
   width: 200px;
   height: 200px;
 }
 
 .analog-ring {
-  background-color: rebeccapurple;
+  //background-color: rebeccapurple;
   width: 100%;
   height: 100%;
   border-radius: 50%;
+  background: radial-gradient(grey, black);
 }
 
 .analog-stick {
@@ -501,6 +502,8 @@ export default {
   height: 100px;
   border-radius: 50%;
   position: relative;
+  box-shadow: 10px 10px black;
+  background: radial-gradient(white, grey);
 }
 
 .start-select {
