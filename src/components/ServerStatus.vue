@@ -56,13 +56,17 @@ export default {
   },
   methods: {
     onButtonConnect: function() {
-      this.ubiiClientService.isConnected().then(connected => {
+      UbiiClientService.isConnected().then(connected => {
         if (connected) {
-          this.ubiiClientService.disconnect().then(() => {
-            this.ubiiClientService.connect();
+          UbiiClientService.disconnect().then(() => {
+            UbiiClientService.connect();
           });
         } else {
-          this.ubiiClientService.connect();
+          if (UbiiClientService.client.clientSpecification) {
+            UbiiClientService.reconnect();
+          } else {
+            UbiiClientService.connect();
+          }
         }
       });
     }
