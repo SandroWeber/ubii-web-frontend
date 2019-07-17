@@ -16,27 +16,27 @@
         style="overflow: hidden;"
       >
         <div id="analog-left" class="analog-left">
-          <div
-            class="analog-ring"
-            v-on:touchstart="onTouchStart($event)"
-            v-on:touchmove="onTouchMove($event)"
-            v-on:touchend="onTouchEnd($event)"
-          >
+          <div class="analog-ring">
             <div
               id="analog-stick-left"
               class="analog-stick"
-              :style="{top: pointerPosition.y + '%', left: pointerPosition.x + '%' }"
+              v-on:touchstart="onTouchStart($event)"
+              v-on:touchmove="onTouchMove($event)"
+              v-on:touchend="onTouchEnd($event)"
+              :style="{top: stickPosition['analog-stick-left'].y + '%', left: stickPosition['analog-stick-left'].x + '%' }"
             ></div>
           </div>
         </div>
         <div id="analog-right" class="analog-right">
-          <div
-            class="analog-ring"
-            v-on:touchstart="onTouchStart($event)"
-            v-on:touchmove="onTouchMove($event)"
-            v-on:touchend="onTouchEnd($event)"
-          >
-            <div id="analog-stick-right" class="analog-stick"></div>
+          <div class="analog-ring">
+            <div
+              id="analog-stick-right"
+              class="analog-stick"
+              v-on:touchstart="onTouchStart($event)"
+              v-on:touchmove="onTouchMove($event)"
+              v-on:touchend="onTouchEnd($event)"
+              :style="{top: stickPosition['analog-stick-right'].y + '%', left: stickPosition['analog-stick-right'].x + '%' }"
+            ></div>
           </div>
         </div>
         <div id="buttons" class="buttons">
@@ -91,6 +91,10 @@ export default {
     this.stopInterface();
   },
   data: () => {
+    let stickPos = {};
+    stickPos['analog-stick-left'] = { x: 25, y: 25 };
+    stickPos['analog-stick-right'] = { x: 25, y: 25 };
+
     return {
       ubiiClientService: UbiiClientService,
       initializing: false,
@@ -98,7 +102,7 @@ export default {
       clientId: undefined,
       publishFrequency: 0.01,
       fullscreen: false,
-      pointerPosition: { x: 0, y: 25 }
+      stickPosition: stickPos
     };
   },
   methods: {
@@ -351,33 +355,26 @@ export default {
         event,
         0
       );
-      this.$data.pointerPosition.x =
-        25 * (this.deviceData[event.target.id].x + 1) + 25; //event.touches[0].clientX - event.target.offsetLeft;
-      this.$data.pointerPosition.y =
-        -25 * (this.deviceData[event.target.id].y + 1) - 25; //event.touches[0].clientY - event.target.offsetUp;
+      this.$data.stickPosition[event.target.id].x =
+        (this.deviceData[event.target.id].x + 1) * 25;
+      this.$data.stickPosition[event.target.id].y =
+        (-this.deviceData[event.target.id].y + 1) * 25;
     },
     onTouchMove: function(event) {
       this.deviceData.touches = event.touches;
-
-      this.deviceData.touchPosition = this.normalizeAnalogStickCoordinates(
-        event,
-        0
-      );
       this.deviceData[event.target.id] = this.normalizeAnalogStickCoordinates(
         event,
         0
       );
-      // console.info('Y:' + this.deviceData[event.target.id].y);
-      // console.info('X:' + this.deviceData[event.target.id].x);
-      this.$data.pointerPosition.x =
-        25 * this.deviceData[event.target.id].x + 25; //event.touches[0].clientX - event.target.offsetLeft;
-      this.$data.pointerPosition.y =
-        -25 * this.deviceData[event.target.id].y + 25; //event.touches[0].clientY - event.target.offsetUp;
+      this.$data.stickPosition[event.target.id].x =
+        (this.deviceData[event.target.id].x + 1) * 25;
+      this.$data.stickPosition[event.target.id].y =
+        (-this.deviceData[event.target.id].y + 1) * 25;
     },
     onTouchEnd: function(event) {
       this.deviceData.touches = event.touches;
       this.deviceData.touchPosition = { x: 0, y: 0 };
-      this.$data.pointerPosition = { x: 25, y: 25 };
+      this.$data.stickPosition[event.target.id] = { x: 25, y: 25 };
     },
     onDeviceOrientation: function(event) {
       // https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent
@@ -397,21 +394,29 @@ export default {
       return Math.round(value * digits * 10) / (digits * 10);
     },
     normalizeAnalogStickCoordinates: function(event, touchIndex) {
-      let target = event.target;
+      let analogRing = event.target.parentElement;
+      let ringBounds = analogRing.getBoundingClientRect();
 
       let touchPosition = {
         x: event.touches[touchIndex].clientX,
         y: event.touches[touchIndex].clientY
       };
 
+      // normalize to X=[-1;1] (left-right) Y=[-1;1] (top-bottom)
       let normalizedX =
-        2 * ((touchPosition.x - target.offsetLeft) / target.offsetWidth - 0.5);
+        2 * ((touchPosition.x - ringBounds.left) / ringBounds.width - 0.5);
       let normalizedY =
-        (touchPosition.y - target.offsetTop) / target.offsetHeight - 2.66;
+        2 * ((touchPosition.y - ringBounds.top) / ringBounds.height - 0.5);
 
-      normalizedX = Math.min(Math.max(normalizedX, -1), 1);
-      normalizedY = Math.min(Math.max(normalizedY, -1), 1);
-
+      // normalize if longer than 1
+      let vec2Length = Math.sqrt(
+        Math.pow(normalizedX, 2) + Math.pow(normalizedY, 2)
+      );
+      if (vec2Length > 1) {
+        normalizedX = normalizedX / vec2Length;
+        normalizedY = normalizedY / vec2Length;
+      }
+      // invert Y for standard controller analog stick axes alignments
       normalizedY *= -1;
 
       return { x: normalizedX, y: normalizedY };
