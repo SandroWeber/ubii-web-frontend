@@ -73,6 +73,10 @@ export default {
               0.03
             );
 
+            UbiiClientService.client.subscribe(this.topicTouchObjects, (object2D) => {
+              //TODO
+            });
+
             /* we start the session with the specs created in createUbiiSpecs() */
             UbiiClientService.client
               .callService({
@@ -88,18 +92,48 @@ export default {
           });
       });
     },
-    stopExample: function() {
+    stopExample: async function() {
       this.pollSmartDevices = false;
       this.running = false;
 
       if (this.session) {
-        return UbiiClientService.client.callService({
+        await UbiiClientService.client.callService({
           topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
           session: this.session
         });
       }
+
+      if (this.device) {
+        await UbiiClientService.deregisterDevice(this.device);
+      }
     },
     createUbiiSpecs: function() {
+      this.topicVibrationDistanceThreshold =
+        '/' +
+        UbiiClientService.getClientID() +
+        '/smart_device_gatherer_example/vibration_distance_threshold';
+      this.topicTouchObjects =
+        '/' +
+        UbiiClientService.getClientID() +
+        '/smart_device_gatherer_example/touch_objects';
+
+      this.device = {
+        name: 'SmartDeviceGathererExample - Device',
+        deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
+        components: [
+          {
+            topic: this.topicVibrationDistanceThreshold,
+            messageFormat: 'double',
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+          },
+          {
+            topic: this.topicTouchObjects,
+            messageFormat: 'object2D',
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+          }
+        ]
+      };
+
       /* this is the processing callback that compares touch positions and lets devices vibrate whose positions are close */
       let processCB = (inputs, outputs) => {
         /* compare touch positions of all smart devices, let those who are close (distance below threshold) vibrate */
@@ -175,6 +209,10 @@ export default {
           {
             internalName: 'demuxVibration',
             messageFormat: 'double'
+          },
+          {
+            internalName: 'touchObjects',
+            messageFormat: 'object2D'
           }
         ]
       };
@@ -198,11 +236,6 @@ export default {
         outputTopicFormat: '%s/web-interface-smart-device/vibration_pattern'
       };
 
-      this.topicVibrationDistanceThreshold =
-        '/' +
-        UbiiClientService.getClientID() +
-        '/smart_device_gatherer_example/vibration_distance_threshold';
-
       /* our session that contains the interaction and the mapping between "muxer -> interaction input" and "interaction output -> demuxer" */
       this.session = {
         id: uuidv4(),
@@ -225,20 +258,12 @@ export default {
               {
                 name: this.interaction.outputFormats[0].internalName,
                 topicDestination: this.demuxerVibrations
+              },
+              {
+                name: this.interaction.outputFormats[1].internalName,
+                topicDestination: this.topicTouchObjects
               }
             ]
-          }
-        ]
-      };
-
-      this.device = {
-        name: 'SmartDeviceGathererExample - Device',
-        deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
-        components: [
-          {
-            topic: this.topicVibrationDistanceThreshold,
-            messageFormat: 'double',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
           }
         ]
       };
