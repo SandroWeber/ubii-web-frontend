@@ -14,6 +14,9 @@ class ClientNodeWeb {
     this.serverHost = serverHost;
     this.servicePort = servicePort;
 
+    this.serviceClient = undefined;
+    this.topicDataClient = undefined;
+
     // Translators:
     this.translatorServiceReply = new ProtobufTranslator(MSG_TYPES.SERVICE_REPLY);
     this.translatorServiceRequest = new ProtobufTranslator(MSG_TYPES.SERVICE_REQUEST);
@@ -39,11 +42,12 @@ class ClientNodeWeb {
         // STEP 3: (service call) register yourself as a client
         if (!this.clientSpecification) {
           this.registerClient()
-            .then(() => {
-              // STEP 4: open the asynchronous connection for topic data communication
-              this.initializeTopicDataClient();
-              return resolve();
-            },
+            .then(
+              () => {
+                // STEP 4: open the asynchronous connection for topic data communication (needs valid client ID from registration)
+                this.initializeTopicDataClient();
+                return resolve();
+              },
               (error) => {
                 console.warn(error);
               })
@@ -96,6 +100,10 @@ class ClientNodeWeb {
    */
   isInitialized() {
     return (this.serviceClient !== undefined && this.topicDataClient !== undefined);
+  }
+
+  async isConnected() {
+    return this.serviceClient && this.topicDataClient && this.topicDataClient.websocket && this.topicDataClient.websocket.readyState === WebSocket.OPEN;
   }
 
   async getServerConfig() {
