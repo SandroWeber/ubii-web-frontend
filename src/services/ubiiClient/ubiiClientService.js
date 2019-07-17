@@ -18,7 +18,6 @@ class UbiiClientService {
   }
 
   async connect() {
-    console.info('### connect');
     if (this.connected || this.connecting) {
       return this.isConnected();
     }
@@ -47,7 +46,6 @@ class UbiiClientService {
   }
 
   async disconnect() {
-    console.info('### disconnect');
     if (!this.connected) {
       console.warn('Client tried to disconnect without beeing connected.')
       return;
@@ -69,7 +67,6 @@ class UbiiClientService {
   }
 
   async reconnect() {
-    console.info('### reconnect');
     await this.client.reinitialize();
   }
 
