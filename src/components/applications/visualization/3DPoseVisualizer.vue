@@ -97,7 +97,7 @@ export default {
             state.objects.push({
               id: (currentNumberOfObjects + i).toString(),
               pose: {
-                vector3: { x: 0, y: 0, z: 0 },
+                position: { x: 0, y: 0, z: 0 },
                 quaternion: { x: 0, y: 0, z: 0, w: 0 }
               }
             });
@@ -133,12 +133,12 @@ export default {
         };
 
         let generateRandomMovement = (pose, tDelta) => {
-          pose.vector3.x =
-            pose.vector3.x + (Math.random() - 0.5) * tDelta * 0.001;
-          pose.vector3.y =
-            pose.vector3.y + (Math.random() - 0.5) * tDelta * 0.001;
-          pose.vector3.z =
-            pose.vector3.z + (Math.random() - 0.5) * tDelta * 0.001;
+          pose.position.x =
+            pose.position.x + (Math.random() - 0.5) * tDelta * 0.001;
+          pose.position.y =
+            pose.position.y + (Math.random() - 0.5) * tDelta * 0.001;
+          pose.position.z =
+            pose.position.z + (Math.random() - 0.5) * tDelta * 0.001;
 
           pose.quaternion.x =
             pose.quaternion.x + (Math.random() - 0.5) * tDelta * 0.001;
@@ -149,8 +149,8 @@ export default {
           pose.quaternion.w =
             pose.quaternion.w + (Math.random() - 0.5) * tDelta * 0.001;
 
-          if (!isWithinBoundingBox(pose.vector3)) {
-            pose.vector3 = { x: 1, y: 1, z: 1 };
+          if (!isWithinBoundingBox(pose.position)) {
+            pose.position = { x: 1, y: 1, z: 1 };
           }
         };
 
@@ -256,9 +256,9 @@ export default {
             if (found) return;
             if (sceneObject.name === topicObject.id) {
               sceneObject.position.set(
-                topicObject.pose.vector3.x,
-                topicObject.pose.vector3.y,
-                topicObject.pose.vector3.z
+                topicObject.pose.position.x,
+                topicObject.pose.position.y,
+                topicObject.pose.position.z
               );
               sceneObject.quaternion.set(
                 topicObject.pose.quaternion.x,

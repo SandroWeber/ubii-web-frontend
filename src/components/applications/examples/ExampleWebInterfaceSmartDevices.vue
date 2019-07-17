@@ -239,11 +239,6 @@ export default {
             topic: this.topicVibrationDistanceThreshold,
             messageFormat: 'double',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
-          },
-          {
-            topic: this.topicVibrationDistanceThreshold,
-            messageFormat: 'double',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
           }
         ]
       };
