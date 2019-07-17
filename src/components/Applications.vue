@@ -26,6 +26,13 @@
           </app-tile>
         </router-link>
 
+        <router-link to="/applications/examples/aframe" class="interface-link" tag="div">
+          <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="vr-cardboard" class="interface-icon" />
+            <p>A-Frame</p>
+          </app-tile>
+        </router-link>
+
         <router-link
           to="/applications/examples/gatherer-web-interface-smart-devices"
           class="interface-link"

@@ -73,6 +73,7 @@ export default new Router({
     name: 'Applications',
     component: () => import('./components/Applications.vue')
   },
+  /* applications - examples */
   {
     path: '/applications/examples/mouse-pointer',
     name: 'Example - Mouse Pointer',
@@ -89,10 +90,16 @@ export default new Router({
     component: () => import('./components/applications/examples/ExampleThreejsWebVR.vue')
   },
   {
+    path: '/applications/examples/aframe',
+    name: 'Example - A-Frame',
+    component: () => import('./components/applications/examples/ExampleAframe.vue')
+  },
+  {
     path: '/applications/examples/gatherer-web-interface-smart-devices',
     name: 'Example - Gathering from Smart Devices connected via Web Interface',
     component: () => import('./components/applications/examples/ExampleWebInterfaceSmartDevices.vue')
   },
+  /* applications - smartphone VR */
   {
     path: '/applications/smartphone-assisted-vr/savr-model-inspector',
     name: 'VR Model Inspector - Inspect 3D Models',
