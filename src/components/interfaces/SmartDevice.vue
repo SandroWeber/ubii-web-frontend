@@ -86,8 +86,8 @@ export default {
   components: { UbiiClientContent },
   mounted: function() {
     // unsubscribe before page is unloaded
-    window.addEventListener('beforeunload', () => {
-      this.stopInterface();
+    window.addEventListener('beforeunload', async () => {
+      await this.stopInterface();
     });
 
     this.deviceData = {};
@@ -120,10 +120,10 @@ export default {
       this.createUbiiSpecs();
       this.registerUbiiSpecs();
     },
-    stopInterface: function() {
+    stopInterface: async function() {
       this.running = false;
       this.unregisterEventListeners();
-      this.unregisterUbiiSpecs();
+      await this.unregisterUbiiSpecs();
     },
     /* ubii methods */
     createUbiiSpecs: function() {
@@ -249,9 +249,11 @@ export default {
           UbiiClientService.client.unsubscribe(component.topic);
         });
 
-        UbiiClientService.deregisterDevice(this.$data.ubiiDevice).then(() => {
-          this.hasRegisteredUbiiDevice = false;
-        });
+        return UbiiClientService.deregisterDevice(this.$data.ubiiDevice).then(
+          () => {
+            this.hasRegisteredUbiiDevice = false;
+          }
+        );
       }
     },
     publishContinuousDeviceData: function() {
