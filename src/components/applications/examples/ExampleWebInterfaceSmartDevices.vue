@@ -52,7 +52,7 @@ export default {
       this.pollSmartDevices = true;
 
       UbiiClientService.isConnected().then(() => {
-        this.updateSmartDevices();
+        //this.updateSmartDevices();
 
         /* we register our device needed to publish the vibration distance threshold */
         UbiiClientService.registerDevice(this.device)
@@ -73,9 +73,10 @@ export default {
               0.03
             );
 
-            UbiiClientService.client.subscribe(this.topicTouchObjects, (object2D) => {
+            /*UbiiClientService.client.subscribe(this.topicTouchObjects, (msg) => {
               //TODO
-            });
+              console.info(msg);
+            });*/
 
             /* we start the session with the specs created in createUbiiSpecs() */
             UbiiClientService.client
@@ -128,7 +129,7 @@ export default {
           },
           {
             topic: this.topicTouchObjects,
-            messageFormat: 'object2D',
+            messageFormat: 'ubii.dataStructure.Object2D',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
           }
         ]
@@ -188,6 +189,17 @@ export default {
           };
         });
         outputs.demuxVibration = vibrationDemuxOutput;
+
+        /* publish all current touch positions as objects */
+        positionRecords.forEach(obj => {
+          console.info(obj);
+          /*outputs.touchObjects = {
+            id: obj.identity, 
+            pose: {
+              position: positionRecords.data
+            }
+          }*/
+        });
       };
 
       /* our interaction with the I/O specifications fitting the processCB */
@@ -198,7 +210,7 @@ export default {
         inputFormats: [
           {
             internalName: 'muxTouchPositions',
-            messageFormat: 'vector2'
+            messageFormat: 'ubii.dataStructure.Vector2'
           },
           {
             internalName: 'vibrationDistanceThreshold',
@@ -212,7 +224,7 @@ export default {
           },
           {
             internalName: 'touchObjects',
-            messageFormat: 'object2D'
+            messageFormat: 'ubii.dataStructure.Object2D'
           }
         ]
       };

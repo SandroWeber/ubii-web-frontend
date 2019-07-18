@@ -40,6 +40,7 @@ class WebsocketClient {
        this.send(PONG_MESSAGE);
        return;
        }*/
+      console.info(message);
 
       if (!this.processMessage) {
         console.warn('[' + new Date() + '] WebsocketClient.onMessageReceived() has not been set!' +
