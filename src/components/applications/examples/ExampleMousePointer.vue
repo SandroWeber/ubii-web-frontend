@@ -108,12 +108,13 @@ export default {
       this.stopExample();
       this.startExample();
     });
-    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopExample);
 
     // make sure we're connected, then start the example
     UbiiClientService.isConnected().then(() => {
       this.startExample();
     });
+
+    UbiiClientService.onDisconnect(() => { this.stopExample(); });
   },
   beforeDestroy: function() {
     this.stopExample();
@@ -335,7 +336,7 @@ export default {
           });
       });
     },
-    stopExample: function() {
+    stopExample: async function() {
       if (!this.exampleStarted) return;
 
       this.exampleStarted = false;
@@ -348,10 +349,10 @@ export default {
         topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
         session: this.$data.ubiiSession
       });
-      UbiiClientService.client.callService({
-        topic: DEFAULT_TOPICS.SERVICES.DEVICE_DEREGISTRATION,
-        device: this.$data.ubiiDevice
-      });
+
+      if (this.$data.ubiiDevice) {
+        await UbiiClientService.deregisterDevice(this.$data.ubiiDevice);
+      }
     },
     onMouseMove: function(event) {
       if (!this.exampleStarted) {

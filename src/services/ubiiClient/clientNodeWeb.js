@@ -102,7 +102,7 @@ class ClientNodeWeb {
     return (this.serviceClient !== undefined && this.topicDataClient !== undefined);
   }
 
-  async isConnected() {
+  isConnected() {
     return this.serviceClient && this.topicDataClient && this.topicDataClient.websocket && this.topicDataClient.websocket.readyState === WebSocket.OPEN;
   }
 
