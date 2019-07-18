@@ -73,10 +73,16 @@ export default {
               0.03
             );
 
-            /*UbiiClientService.client.subscribe(this.topicTouchObjects, (msg) => {
-              //TODO
-              console.info(msg);
-            });*/
+            UbiiClientService.client.subscribe(this.topicTouchObjects, (object2D) => {
+              if (!this.$data.clients.has(object2D.id)) {
+                this.addClient(object2D.id, topic);
+              }
+              this.$data.clients.forEach((topic, id) => {
+                if (!clientIDs.some(clientID => { return id === clientID;})) {
+                  this.removeClient(id);
+                }
+              });
+            });
 
             /* we start the session with the specs created in createUbiiSpecs() */
             UbiiClientService.client
@@ -192,13 +198,14 @@ export default {
 
         /* publish all current touch positions as objects */
         positionRecords.forEach(obj => {
-          console.info(obj);
-          /*outputs.touchObjects = {
-            id: obj.identity, 
-            pose: {
-              position: positionRecords.data
-            }
-          }*/
+          outputs.touchObjects = {
+            //object2D: {
+              id: obj.identity, 
+              pose: {
+                position: obj.data
+              }
+            //}
+          }
         });
       };
 
