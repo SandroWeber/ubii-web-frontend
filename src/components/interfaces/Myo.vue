@@ -1,87 +1,91 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
-    <div class="grid">
-      <div class="options">
-        <!-- Myo related stuff -->
-        <button v-on:click="publishMyoData()">Publish Myo Data</button>
-        <br>
-        <span>EMG:</span>
-        <br>
-        <span>
-          {{this.round(clientMyoData.emg.v0, 1)}}
-          {{this.round(clientMyoData.emg.v1, 1)}}
-          {{this.round(clientMyoData.emg.v2, 1)}}
-          {{this.round(clientMyoData.emg.v3, 1)}}
-          {{this.round(clientMyoData.emg.v4, 1)}}
-          {{this.round(clientMyoData.emg.v5, 1)}}
-          {{this.round(clientMyoData.emg.v6, 1)}}
-          {{this.round(clientMyoData.emg.v7, 1)}}
-        </span>
-        <br>
-        <span>Orientation:</span>
-        <br>
-        <span>
-          {{this.round(clientMyoData.orientation.x, 1)}}
-          {{this.round(clientMyoData.orientation.y, 1)}}
-          {{this.round(clientMyoData.orientation.z, 1)}}
-          {{this.round(clientMyoData.orientation.w, 1)}}
-        </span>
-        <br>
-        <span>Gyroscope:</span>
-        <br>
-        <span>
-          {{this.round(clientMyoData.gyroscope.x, 1)}}
-          {{this.round(clientMyoData.gyroscope.y, 1)}}
-          {{this.round(clientMyoData.gyroscope.z, 1)}}
-        </span>
-        <br>
-        <span>Accelerometer:</span>
-        <br>
-        <span>
-          {{this.round(clientMyoData.accelerometer.x, 1)}}
-          {{this.round(clientMyoData.accelerometer.y, 1)}}
-          {{this.round(clientMyoData.accelerometer.z, 1)}}            
-        </span>
-        <span>Accelerometer:{{clientMyoData.g}}</span>
-        <br>
-        <br>
-        <span>Gesture: {{clientMyoData.gesture}}</span>
-        <br>
-        <span>Server-EMG:</span>
-        <span>
-          {{this.round(serverMyoData.emg.v0, 1)}}
-          {{this.round(serverMyoData.emg.v1, 1)}}
-          {{this.round(serverMyoData.emg.v2, 1)}}
-          {{this.round(serverMyoData.emg.v3, 1)}}
-          {{this.round(serverMyoData.emg.v4, 1)}}
-          {{this.round(serverMyoData.emg.v5, 1)}}
-          {{this.round(serverMyoData.emg.v6, 1)}}
-          {{this.round(serverMyoData.emg.v7, 1)}}
-        </span>
-        <br>
-        <span>Server-Orientation:</span>
-        <span>
-          {{this.round(serverMyoData.orientation.x, 1)}}
-          {{this.round(serverMyoData.orientation.y, 1)}}
-          {{this.round(serverMyoData.orientation.z, 1)}}
-          {{this.round(serverMyoData.orientation.w, 1)}}
-        </span>
-        <br>
-        <span>Server-Gyroscope:</span>
-        <span>
-          {{this.round(serverMyoData.gyroscope.x, 1)}}
-          {{this.round(serverMyoData.gyroscope.y, 1)}}
-          {{this.round(serverMyoData.gyroscope.z, 1)}}
-        </span>
-        <br>
-        <span>Server-Accelerometer:</span>
-        <span>
-          {{this.round(serverMyoData.accelerometer.x, 1)}}
-          {{this.round(serverMyoData.accelerometer.y, 1)}}
-          {{this.round(serverMyoData.accelerometer.z, 1)}}            
-        </span>
-        <span>Server-Gesture: {{serverMyoData.gesture}}</span>
-      </div>
+    <div ref="top-div">
+      <br>
+      <div class="c">Myo Status:</div>
+      <div class="c">{{getMyoConnected()}}</div>
+      <br>
+      <table class="sturdy">
+        <tr>
+          <th>Datatype</th>
+          <th colspan="8">Client-Data</th> 
+        </tr>
+        <tr>
+          <th>EMG</th>
+          <td>{{this.round(clientMyoData.emg.v0, 1)}}</td>
+          <td>{{this.round(clientMyoData.emg.v1, 1)}}</td>
+          <td>{{this.round(clientMyoData.emg.v2, 1)}}</td>
+          <td>{{this.round(clientMyoData.emg.v3, 1)}}</td>
+          <td>{{this.round(clientMyoData.emg.v4, 1)}}</td>
+          <td>{{this.round(clientMyoData.emg.v5, 1)}}</td>
+          <td>{{this.round(clientMyoData.emg.v6, 1)}}</td>
+          <td>{{this.round(clientMyoData.emg.v7, 1)}}</td>      
+        </tr>
+        <tr>
+          <th>Orientation</th>
+          <td colspan=2>{{this.round(clientMyoData.orientation.x, 1)}}</td>
+          <td colspan=2>{{this.round(clientMyoData.orientation.y, 1)}}</td>
+          <td colspan=2>{{this.round(clientMyoData.orientation.z, 1)}}</td>
+          <td colspan=2>{{this.round(clientMyoData.orientation.w, 1)}}</td>
+        </tr>
+        <tr>
+          <th>Gyroscope</th>
+          <td colspan=3>{{this.round(clientMyoData.gyroscope.x, 1)}}</td>
+          <td colspan=3>{{this.round(clientMyoData.gyroscope.y, 1)}}</td>
+          <td colspan=2>{{this.round(clientMyoData.gyroscope.z, 1)}}</td>
+        </tr>
+        <tr>
+          <th>Accelerometer</th>
+          <td colspan=3>{{this.round(clientMyoData.accelerometer.x, 1)}}</td>
+          <td colspan=3>{{this.round(clientMyoData.accelerometer.y, 1)}}</td>
+          <td colspan=2>{{this.round(clientMyoData.accelerometer.z, 1)}}</td>            
+        </tr>
+        <tr>
+          <th>Gesture</th>
+          <td colspan=8>{{gestureToString(clientMyoData.gesture)}}</td>
+        </tr>
+      </table>
+      <br>
+      <table class="sturdy">
+        <tr>
+          <th>Datatype</th>
+          <th colspan="8">Server-Data</th>
+        </tr>
+        <tr>
+          <th>EMG</th>
+          <td>{{this.round(serverMyoData.emg.v0, 1)}}</td>
+          <td>{{this.round(serverMyoData.emg.v1, 1)}}</td>
+          <td>{{this.round(serverMyoData.emg.v2, 1)}}</td>
+          <td>{{this.round(serverMyoData.emg.v3, 1)}}</td>
+          <td>{{this.round(serverMyoData.emg.v4, 1)}}</td>
+          <td>{{this.round(serverMyoData.emg.v5, 1)}}</td>
+          <td>{{this.round(serverMyoData.emg.v6, 1)}}</td>
+          <td>{{this.round(serverMyoData.emg.v7, 1)}}</td>        
+        </tr>
+        <tr>
+          <th>Orientation</th>
+          <td colspan=2>{{this.round(serverMyoData.orientation.x, 1)}}</td>
+          <td colspan=2>{{this.round(serverMyoData.orientation.y, 1)}}</td>
+          <td colspan=2>{{this.round(serverMyoData.orientation.z, 1)}}</td>
+          <td colspan=2>{{this.round(serverMyoData.orientation.w, 1)}}</td>
+        </tr>
+        <tr>
+          <th>Gyroscope</th>
+          <td colspan=3>{{this.round(serverMyoData.gyroscope.x, 1)}}</td>
+          <td colspan=3>{{this.round(serverMyoData.gyroscope.y, 1)}}</td>
+          <td colspan=2>{{this.round(serverMyoData.gyroscope.z, 1)}}</td>
+        </tr>
+        <tr>
+          <th>Accelerometer</th>
+          <td colspan=3>{{this.round(serverMyoData.accelerometer.x, 1)}}</td>
+          <td colspan=3>{{this.round(serverMyoData.accelerometer.y, 1)}}</td>
+          <td colspan=2>{{this.round(serverMyoData.accelerometer.z, 1)}}</td>            
+        </tr>
+        <tr>
+          <th>Gesture</th>
+          <td colspan=8>{{gestureToString(serverMyoData.gesture)}}</td>
+        </tr>
+      </table>
     </div>
   </UbiiClientContent>
 </template>
@@ -97,13 +101,7 @@ import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
-/* fontawesome */
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faPlay } from '@fortawesome/free-solid-svg-icons';
-
-library.add(faPlay);
-
-/* eslint-disable no-console */
+import { clearInterval } from 'timers';
 
 export default {
   name: 'Interface-Myo',
@@ -127,13 +125,11 @@ export default {
   },
   data: () => {
     return {
-      showClientPointer: true,
-      showServerPointer: true,
-      mirrorPointer: false,
       ubiiClientService: UbiiClientService,
-      exampleStarted: false,
-      serverMousePosition: { x: 0, y: 0 },
-      clientPointerInside: false,
+      interfaceStarted: false,
+
+      pollingInterval: null,
+      myoConnected: false,
 
       serverMyoData: {
         emg: {v0:0,v1:0,v2:0,v3:0,v4:0,v5:0,v6:0,v7:0},
@@ -302,8 +298,10 @@ export default {
         // these are protobuf messages to be sent to the server (saved in this.$data)
         this.createUbiiSpecs();
 
+        //Myo setup
         this.connectMyo();
         this.getMyoData();
+        this.setPublishInterval();
 
         // register the mouse pointer device
         UbiiClientService.registerDevice(this.$data.ubiiDevice)
@@ -359,20 +357,21 @@ export default {
                 topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
                 session: this.$data.ubiiSession
               })
-              .then(response => {
-                console.info(response);
-                this.$data.exampleStarted = true;
+              .then(() => {
+                this.$data.interfaceStarted = true;
               });
           });
       });
     },
     stopInterface: function() {
-      if (!this.exampleStarted) return;
+      if (!this.interfaceStarted) return;
 
-      this.exampleStarted = false;
+      this.interfaceStarted = false;
 
       //disconnect Myo
       Myo.disconnect();
+      this.$data.myoConnected = false;
+      clearInterval(this.pollingInterval);
 
       // unsubscribe and stop session
       UbiiClientService.client.unsubscribe(
@@ -389,32 +388,40 @@ export default {
     connectMyo: function() {
       Myo.connect('com.ubii.myoInterface');
 
-      Myo.on("connected", function(data, timestamp) {
+      Myo.on("connected", function() {
       this.streamEMG(true);
-      console.log("Myo successfully connected. Data: " + JSON.stringify(data) + ". Timestamp: " + timestamp + ".");
+      //console.log("Myo successfully connected. Data: " + JSON.stringify(data) + ". Timestamp: " + timestamp + ".");
       });
     },
+    setPublishInterval: function() {
+      this.pollingInterval = setInterval(() => this.publishMyoData(), 100);
+    },
     publishMyoData: function(){
+      if(!this.$data.myoConnected)
+        return;
+
       UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
         this.$data.inputClientMyoData.topic,
         'myoEvent',
         this.$data.clientMyoData
       );
-      console.log('Published Myo Data');
     },
+    //Disable all event listeners and disconnect
     disconnectMyo: function() {
       Myo.off('emg');
       Myo.streamEMG(false);
       Myo.off('imu');
       Myo.off('pose');
-      Myo.off('pose_off')
+      Myo.off('pose_off');
+      this.$data.myoConnected = false;
       Myo.disconnect();
     },
-
+    //Set up all the event listeners
     getMyoData: function() {
       Myo.on('imu', (data) => {
-        //Client data
+        this.$data.myoConnected = true;
+
         this.$data.clientMyoData.orientation = {
           x:data.orientation.x,
           y:data.orientation.y,
@@ -434,6 +441,7 @@ export default {
       });
 
       Myo.on('emg', (data) => {
+        this.$data.myoConnected = true;
         this.$data.clientMyoData.emg = {
           v0:data[0],
           v1:data[1],
@@ -446,6 +454,7 @@ export default {
           };
       });
       Myo.on('pose', (data) => {
+        this.$data.myoConnected = true;
         var e;
         switch(data){
           case 'fingers_spread':  e = 1; break;
@@ -455,52 +464,77 @@ export default {
           case 'double_tap':      e = 5; break;
           default:                e = 0;
         }
-        this.$data.myoGesture = e;
+        this.$data.clientMyoData.gesture = e;
       });
       Myo.on('pose_off', () => {
-        this.$data.myoGesture = 0;
+        this.$data.clientMyoData.gesture = 0;
       });
+      Myo.on('connected', () => {
+        this.$data.myoConnected = true;
+      });
+      Myo.on('disconnected', () => {
+        this.$data.myoConnected = false;
+      });
+    },
+    gestureToString: function(g) {
+      switch(g){
+        case 1:   return 'fingers spread';
+        case 2:   return 'wave in';       
+        case 3:   return 'wave out';      
+        case 4:   return 'fist';          
+        case 5:   return 'double tap';
+        default:  return 'rest';
+      }
+    },
+    getMyoConnected: function() {
+        return this.$data.myoConnected ? "connected" : "disconnected";
     }
   }
 };
 </script>
 
 <style scoped lang="stylus">
-.grid {
-  display: grid;
-  grid-gap: 15px;
-  grid-template-columns: 1fr 5fr;
-  height: 100%;
-}
-
-.options {
-  margin: 25px;
-}
-
-.mouse-pointer-area {
-  margin: 25px;
-  border: 3px solid black;
-  height: 300px;
-}
-
-.hideCursor {
-  cursor: none;
-}
-
-.server-mouse-position-indicator {
-  position: relative;
-  width: 10px;
-  height: 10px;
-  background-color: red;
-}
-
-.start-example {
+div.c {
   text-align: center;
-  margin-top: 25px;
 }
-
-.start-example-button {
-  width: 50px;
-  height: 50px;
+table {
+  margin: 15px 0;
+  border: 1px solid black;
+  table-layout: fixed;
+  width: 400px; 
+  margin-left:auto; 
+  margin-right:auto;
+}
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  padding: 5px;
+}
+td{
+  text-align: right;
+}
+th{
+  text-align: left;
+}
+.sturdy th:nth-child(1){
+  width: 32%;
+}
+.sturdy td:nth-child(2),
+.sturdy td:nth-child(3),
+.sturdy td:nth-child(4),
+.sturdy td:nth-child(5),
+.sturdy td:nth-child(6),
+.sturdy td:nth-child(7),
+.sturdy td:nth-child(8),
+.sturdy td:nth-child(9),
+.sturdy td:nth-child(10),
+.sturdy td:nth-child(11),
+.sturdy td:nth-child(12),
+.sturdy td:nth-child(13),
+.sturdy td:nth-child(14),
+.sturdy td:nth-child(15),
+.sturdy td:nth-child(16),
+.sturdy td:nth-child(17) {
+  width: 5%;
 }
 </style>
