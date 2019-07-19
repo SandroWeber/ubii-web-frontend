@@ -101,8 +101,6 @@ import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
-import { clearInterval } from 'timers';
-
 export default {
   name: 'Interface-Myo',
   components: { UbiiClientContent },
@@ -369,9 +367,10 @@ export default {
       this.interfaceStarted = false;
 
       //disconnect Myo
-      Myo.disconnect();
+      clearInterval(this.$data.pollingInterval);
+      this.disconnectMyo();
+      //Myo.disconnect();
       this.$data.myoConnected = false;
-      clearInterval(this.pollingInterval);
 
       // unsubscribe and stop session
       UbiiClientService.client.unsubscribe(
@@ -410,7 +409,6 @@ export default {
     //Disable all event listeners and disconnect
     disconnectMyo: function() {
       Myo.off('emg');
-      Myo.streamEMG(false);
       Myo.off('imu');
       Myo.off('pose');
       Myo.off('pose_off');
