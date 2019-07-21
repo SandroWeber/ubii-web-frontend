@@ -27,7 +27,7 @@
             ></div>
           </div>
         </div>
-        <div id="analog-right" class="analog-right">
+        <!--<div id="analog-right" class="analog-right">
           <div class="analog-ring">
             <div
               id="analog-stick-right"
@@ -38,10 +38,14 @@
               :style="{top: stickPosition['analog-stick-right'].y + '%', left: stickPosition['analog-stick-right'].x + '%' }"
             ></div>
           </div>
+        </div>-->
+        <div id="a-button" class="a-button">
+          <button @click="publishPressedActionButton(1)" class="action-button">A</button>
         </div>
-        <div id="buttons" class="buttons">
-          <button @click="publishPressedActionButton(1)" class="action-button">Button A</button>
-          <button @click="publishPressedActionButton(2)" class="action-button">Button B</button>
+        <div id="b-button" class="b-button">
+          <button @click="publishPressedActionButton(2)" class="action-button">B</button>
+        </div>
+        <div id="start-button" class="start-select">
           <button @click="publishPlayerRegistration()" class="start-button">Start</button>
         </div>
       </fullscreen>
@@ -236,7 +240,10 @@ export default {
     },
     publishContinuousDeviceData: function() {
       this.deviceData.touchPosition &&
-        this.publishAnalogStickPosition(this.deviceData.touchPosition);
+        this.publishTouchPosition(this.deviceData.touchPosition);
+
+      this.deviceData['analog-stick-left'] &&
+        this.publishAnalogStickPosition(this.deviceData['analog-stick-left']);
 
       this.deviceData.currentOrientation &&
         this.publishDeviceOrientation(this.deviceData.currentOrientation);
@@ -351,6 +358,11 @@ export default {
     onTouchStart: function(event) {
       this.deviceData.touches = event.touches;
 
+      this.deviceData.touchPosition = this.normalizeAnalogStickCoordinates(
+        event,
+        0
+      );
+
       this.deviceData[event.target.id] = this.normalizeAnalogStickCoordinates(
         event,
         0
@@ -362,6 +374,12 @@ export default {
     },
     onTouchMove: function(event) {
       this.deviceData.touches = event.touches;
+
+      this.deviceData.touchPosition = this.normalizeAnalogStickCoordinates(
+        event,
+        0
+      );
+
       this.deviceData[event.target.id] = this.normalizeAnalogStickCoordinates(
         event,
         0
@@ -374,6 +392,7 @@ export default {
     onTouchEnd: function(event) {
       this.deviceData.touches = event.touches;
       this.deviceData.touchPosition = { x: 0, y: 0 };
+      this.deviceData['analog-stick-left'] = { x: 0, y: 0 };
       this.$data.stickPosition[event.target.id] = { x: 25, y: 25 };
     },
     onDeviceOrientation: function(event) {
@@ -459,10 +478,13 @@ export default {
 .controller {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: 0.5fr 0.5fr;
   grid-template-areas:
-    'analog-left touch-area buttons'
-    'd-pad start-select analog-right';
+    'analog-left start-select a-button'
+    'whitespace start-select b-button';
+  /*grid-template-areas:
+    'analog-left buttons'
+    'buttons buttons';*/
 
   height: 100%;
   -webkit-touch-callout: none;
@@ -473,42 +495,48 @@ export default {
   user-select: none;
 }
 
+.whitespace {
+  width: 100px;
+  height: 100px;
+}
+
 .analog-left {
   grid-area: analog-left;
-  //background-color: aqua;
   position: relative;
   width: 200px;
   height: 200px;
+  margin-left: 10%;
+  margin-top: 40%;
 }
 
 .analog-right {
   grid-area: analog-right;
-  //background-color: aqua;
   width: 200px;
   height: 200px;
 }
 
 .analog-ring {
-  //background-color: rebeccapurple;
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: radial-gradient(grey, black);
+  background: radial-gradient(white, black);
 }
 
 .analog-stick {
-  background: #f00;
   width: 100px;
   height: 100px;
   border-radius: 50%;
   position: relative;
   box-shadow: 10px 10px black;
-  background: radial-gradient(white, grey);
+  /* background: radial-gradient(white, grey); */
+  background: radial-gradient(yellow, red, green, blue);
 }
 
 .start-select {
   grid-area: start-select;
-  background-color: darkolivegreen;
+  height: 200px;
+  width: 200px;
+  margin-top: 50%;
 }
 
 .d-pad {
@@ -518,7 +546,6 @@ export default {
 
 .touch-area {
   grid-area: touch-area;
-  background-color: red;
   height: 100%;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -530,7 +557,52 @@ export default {
 
 .buttons {
   grid-area: buttons;
-  background-color: yellow;
+  border-radius: 50%;
+  width: 400px;
+  height: 400px;
+}
+
+.action-button {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(white, grey);
+  font-size: xx-large;
+  font-weight: bold;
+}
+
+.a-button {
+  grid-area: a-button;
+  background: radial-gradient(green, green, white);
+  box-shadow: 2px 2px grey;
+  border-radius: 50%;
+  width: 150px;
+  height: 150px;
+  margin-top: 10%;
+  position: relative;
+  font-size: xx-large;
+  font-weight: bold;
+}
+
+.b-button {
+  grid-area: b-button;
+  background: radial-gradient(red, red, white);
+  box-shadow: 2px 2px grey;
+  border-radius: 50%;
+  width: 150px;
+  height: 150px;
+  position: relative;
+  margin-top: -50%;
+  font-size: xx-large;
+  font-weight: bold;
+}
+
+.start-button {
+  background: radial-gradient(white, grey);
+  width: 100px;
+  height: 50px;
+  font-size: xx-large;
+  margin-left: 25%;
 }
 
 .notification {
@@ -538,7 +610,7 @@ export default {
 }
 
 .button-fullscreen {
-  width: 20px;
-  height: 20px;
+  width: 50px;
+  height: 50px;
 }
 </style>
