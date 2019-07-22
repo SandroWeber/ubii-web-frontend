@@ -38,9 +38,10 @@
             class="action-button"
           >B</button>
         </div>
-        <div id="start-button" class="start-select">
+        <div id="start-select-area" class="start-select-area">
           <button @touchstart="publishPlayerRegistration()" class="start-button">Start</button>
         </div>
+        <div id="ubii-controller-touch-area" class="touch-area"></div>
       </fullscreen>
     </div>
   </UbiiClientContent>
@@ -101,7 +102,7 @@ export default {
       publishFrequency: 0.01,
       fullscreen: false,
       stickPosition: stickPos,
-      debugLog: '...'
+      debugLog: 'have fun :)'
     };
   },
   methods: {
@@ -116,13 +117,13 @@ export default {
         return;
       }
 
-      let deviceName = 'web-interface-ubii-controller';
+      this.deviceName = 'web-interface-ubii-controller';
 
       this.clientId = UbiiClientService.getClientID();
-      let topicPrefix = '/' + this.clientId + '/' + deviceName;
+      let topicPrefix = '/' + this.clientId + '/' + this.deviceName;
 
-      let ubiiDevice = {
-        name: deviceName,
+      this.ubiiDevice = {
+        name: this.deviceName,
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
         components: [
           {
@@ -169,19 +170,17 @@ export default {
           messageFormat: 'double',
           ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
         };
-        ubiiDevice.components.push(this.componentVibration);
+        this.ubiiDevice.components.push(this.componentVibration);
         this.tNextVibrate = Date.now();
         navigator.vibrate(100);
       }
 
-      this.$data.deviceName = deviceName;
-      this.$data.ubiiDevice = ubiiDevice;
-      this.$data.componentOrientation = ubiiDevice.components[0];
-      this.$data.componentLinearAcceleration = ubiiDevice.components[1];
-      this.$data.componentAnalogstickLeft = ubiiDevice.components[2];
-      this.$data.componentButtonA = ubiiDevice.components[3];
-      this.$data.componentButtonB = ubiiDevice.components[4];
-      this.$data.componentSetColor = ubiiDevice.components[5];
+      this.componentOrientation = this.ubiiDevice.components[0];
+      this.componentLinearAcceleration = this.ubiiDevice.components[1];
+      this.componentAnalogstickLeft = this.ubiiDevice.components[2];
+      this.componentButtonA = this.ubiiDevice.components[3];
+      this.componentButtonB = this.ubiiDevice.components[4];
+      this.componentSetColor = this.ubiiDevice.components[5];
     },
     registerUbiiSpecs: function() {
       if (this.initializing || this.hasRegisteredUbiiDevice) {
@@ -194,10 +193,10 @@ export default {
 
       // register the mouse pointer device
       UbiiClientService.isConnected().then(() => {
-        UbiiClientService.registerDevice(this.$data.ubiiDevice)
+        UbiiClientService.registerDevice(this.ubiiDevice)
           .then(device => {
             if (device.id) {
-              this.$data.ubiiDevice = device;
+              this.ubiiDevice = device;
               this.hasRegisteredUbiiDevice = true;
               this.initializing = false;
               this.publishContinuousDeviceData();
@@ -205,18 +204,21 @@ export default {
             return device;
           })
           .then(() => {
-            /*UbiiClientService.client.subscribe(
+            UbiiClientService.client.subscribe(
               this.componentSetColor.topic,
               color => {
-                //TODO
+                let colorString =
+                  'rgba(' +
+                  [color.r * 255, color.g * 255, color.b * 255, color.a].join(
+                    ','
+                  ) +
+                  ')';
+                document.getElementById(
+                  'ubii-controller-touch-area'
+                ).style.backgroundColor = colorString;
               }
-            );*/
+            );
 
-            /*let vibrationComponent = this.$data.ubiiDevice.components.find(
-              element => {
-                return element.topic.indexOf('/vibration_pattern') !== -1;
-              }
-            );*/
             if (this.componentVibration) {
               UbiiClientService.client.subscribe(
                 this.componentVibration.topic,
@@ -239,8 +241,8 @@ export default {
         return;
       }
 
-      if (this.$data.ubiiDevice && this.$data.ubiiDevice.components) {
-        this.$data.ubiiDevice.components.forEach(component => {
+      if (this.ubiiDevice && this.ubiiDevice.components) {
+        this.ubiiDevice.components.forEach(component => {
           // eslint-disable-next-line no-console
           console.log('unsubscribed to ' + component.topic);
 
@@ -251,8 +253,7 @@ export default {
       this.hasRegisteredUbiiDevice = null;
 
       // TODO: unregister device
-      this.$data.ubiiDevice &&
-        UbiiClientService.deregisterDevice(this.$data.ubiiDevice);
+      this.ubiiDevice && UbiiClientService.deregisterDevice(this.ubiiDevice);
     },
     publishContinuousDeviceData: function() {
       this.deviceData['analog-stick-left'] &&
@@ -293,16 +294,16 @@ export default {
       this.deviceData.fixedCalibratedOrientation = fixed;
 
       UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.componentOrientation.topic,
+        this.ubiiDevice.name,
+        this.componentOrientation.topic,
         'vector3',
         fixed
       );
     },
     publishDeviceMotion: function(acceleration) {
       UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.componentLinearAcceleration.topic,
+        this.ubiiDevice.name,
+        this.componentLinearAcceleration.topic,
         'vector3',
         {
           x: this.round(acceleration.x, 2),
@@ -314,7 +315,7 @@ export default {
     publishPlayerRegistration: function() {
       console.info('registerNewClient');
       UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
+        this.ubiiDevice.name,
         'registerNewClient',
         'string',
         UbiiClientService.getClientID()
@@ -324,12 +325,12 @@ export default {
       console.info('button ' + buttonID);
       let topic = '';
       if (buttonID === 1) {
-        topic = this.$data.componentButtonA.topic;
+        topic = this.componentButtonA.topic;
       } else if (buttonID === 2) {
-        topic = this.$data.componentButtonB.topic;
+        topic = this.componentButtonB.topic;
       }
       UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
+        this.ubiiDevice.name,
         topic,
         'keyEvent',
         {
@@ -342,12 +343,12 @@ export default {
       console.info('button ' + buttonID);
       let topic = '';
       if (buttonID === 1) {
-        topic = this.$data.componentButtonA.topic;
+        topic = this.componentButtonA.topic;
       } else if (buttonID === 2) {
-        topic = this.$data.componentButtonB.topic;
+        topic = this.componentButtonB.topic;
       }
       UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
+        this.ubiiDevice.name,
         topic,
         'keyEvent',
         {
@@ -358,8 +359,8 @@ export default {
     },
     publishAnalogStickPosition: function(stickPosition) {
       UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.componentAnalogstickLeft.topic,
+        this.ubiiDevice.name,
+        this.componentAnalogstickLeft.topic,
         'vector2',
         stickPosition
       );
@@ -473,7 +474,7 @@ export default {
   grid-template-rows: 30px repeat(2, 1fr);
   grid-template-areas:
     'debug-log debug-log debug-log debug-log debug-log button-fullscreen'
-    'analog-left analog-left controls controls a-button a-button'
+    'analog-left analog-left touch-area touch-area a-button a-button'
     'analog-left analog-left start-select start-select b-button b-button';
 
   height: 100%;
@@ -497,9 +498,6 @@ export default {
   grid-area: analog-left;
   width: 200px;
   height: 200px;
-  /*position: relative;
-  margin-left: 10%;
-  margin-top: 40%;*/
 }
 
 .analog-right {
@@ -522,14 +520,21 @@ export default {
   position: relative;
   box-shadow: 10px 10px black;
   background: radial-gradient(grey, black);
-  /*background: radial-gradient(yellow, red, green, blue);*/
 }
 
-.start-select {
+.start-select-area {
   grid-area: start-select;
-  height: 200px;
-  width: 200px;
-  /*margin-top: 50%;*/
+  height: 100%;
+  width: 100%;
+  text-align: center;
+}
+
+.start-button {
+  background: radial-gradient(white, grey);
+  width: 100px;
+  height: 50px;
+  font-size: xx-large;
+  margin-top: 5%;
 }
 
 .d-pad {
@@ -539,6 +544,7 @@ export default {
 
 .touch-area {
   grid-area: touch-area;
+  width: 100%;
   height: 100%;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -583,18 +589,8 @@ export default {
   border-radius: 50%;
   width: 100px;
   height: 100px;
-  /*position: relative;
-  margin-top: -50%;*/
   font-size: xx-large;
   font-weight: bold;
-}
-
-.start-button {
-  background: radial-gradient(white, grey);
-  width: 100px;
-  height: 50px;
-  font-size: xx-large;
-  margin-left: 25%;
 }
 
 .notification {
