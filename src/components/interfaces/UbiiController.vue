@@ -27,24 +27,19 @@
             ></div>
           </div>
         </div>
-        <!--<div id="analog-right" class="analog-right">
-          <div class="analog-ring">
-            <div
-              id="analog-stick-right"
-              class="analog-stick"
-              v-on:touchstart="onTouchStart($event)"
-              v-on:touchmove="onTouchMove($event)"
-              v-on:touchend="onTouchEnd($event)"
-              :style="{top: stickPosition['analog-stick-right'].y + '%', left: stickPosition['analog-stick-right'].x + '%' }"
-            ></div>
-          </div>
-        </div>-->
-        <!-- @click="publishPressedActionButton(1)" -->
         <div id="a-button" class="a-button">
-          <button @touchstart="publishPressedActionButton(1)" @touchend="publishReleasedActionButton(1)" class="action-button">A</button>
+          <button
+            @touchstart="publishPressedActionButton(1)"
+            @touchend="publishReleasedActionButton(1)"
+            class="action-button"
+          >A</button>
         </div>
         <div id="b-button" class="b-button">
-          <button @touchstart="publishPressedActionButton(2)" @touchend="publishReleasedActionButton(2)" class="action-button">B</button>
+          <button
+            @touchstart="publishPressedActionButton(2)"
+            @touchend="publishReleasedActionButton(2)"
+            class="action-button"
+          >B</button>
         </div>
         <div id="start-button" class="start-select">
           <button @touchstart="publishPlayerRegistration()" class="start-button">Start</button>
@@ -92,9 +87,6 @@ export default {
       this.createUbiiSpecs();
       this.registerUbiiSpecs();
     });
-
-    console.info(ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP);
-    console.info(ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN);
   },
   beforeDestroy: function() {
     this.stopInterface();
@@ -159,17 +151,12 @@ export default {
             topic: topicPrefix + '/button_b',
             messageFormat: 'ubii.dataStructure.KeyEvent',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
-          }
-          /*{
-            topic: topicPrefix + '/touch_position',
-            messageFormat: 'ubii.dataStructure.Vector2',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
           },
           {
-            topic: topicPrefix + '/touch_events',
-            messageFormat: 'ubii.dataStructure.TouchEvent',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
-          }*/
+            topic: topicPrefix + '/set_color',
+            messageFormat: 'ubii.dataStructure.Color',
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+          }
         ]
       };
       // add vibration component if available
@@ -195,8 +182,7 @@ export default {
       this.$data.componentAnalogstickLeft = ubiiDevice.components[2];
       this.$data.componentButtonA = ubiiDevice.components[3];
       this.$data.componentButtonB = ubiiDevice.components[4];
-      //this.$data.componentTouchPosition = ubiiDevice.components[0];
-      //this.$data.componentTouchEvents = ubiiDevice.components[3];
+      this.$data.componentSetColor = ubiiDevice.components[5];
     },
     registerUbiiSpecs: function() {
       if (this.initializing || this.hasRegisteredUbiiDevice) {
@@ -220,6 +206,16 @@ export default {
             return device;
           })
           .then(() => {
+            UbiiClientService.client.subscribe(
+              componentSetColor.topic,
+              color => {
+                if (Date.now() >= this.tNextVibrate) {
+                  navigator.vibrate(vibrationPattern);
+                  this.tNextVibrate = Date.now() + 2 * vibrationPattern;
+                }
+              }
+            );
+
             let vibrationComponent = this.$data.ubiiDevice.components.find(
               element => {
                 return element.topic.indexOf('/vibration_pattern') !== -1;
@@ -259,12 +255,10 @@ export default {
       this.hasRegisteredUbiiDevice = null;
 
       // TODO: unregister device
-      this.$data.ubiiDevice && UbiiClientService.deregisterDevice(this.$data.ubiiDevice);
+      this.$data.ubiiDevice &&
+        UbiiClientService.deregisterDevice(this.$data.ubiiDevice);
     },
     publishContinuousDeviceData: function() {
-      /*this.deviceData.touchPosition &&
-        this.publishTouchPosition(this.deviceData.touchPosition);*/
-
       this.deviceData['analog-stick-left'] &&
         this.publishAnalogStickPosition(this.deviceData['analog-stick-left']);
 
@@ -279,26 +273,6 @@ export default {
         setTimeout(
           this.publishContinuousDeviceData,
           this.publishFrequency * 1000
-        );
-      }
-    },
-    publishTouchPosition: function(position) {
-      if (this.hasRegisteredUbiiDevice) {
-        UbiiClientService.client.publish(
-          this.$data.ubiiDevice.name,
-          this.$data.componentTouchPosition.topic,
-          'vector2',
-          position
-        );
-      }
-    },
-    publishTouchEvent: function(type, position) {
-      if (this.hasRegisteredUbiiDevice) {
-        UbiiClientService.client.publish(
-          this.$data.ubiiDevice.name,
-          this.$data.componentTouchEvents.topic,
-          'touchEvent',
-          { type: type, position: position }
         );
       }
     },
@@ -360,9 +334,12 @@ export default {
       }
       UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
-        topic, //'playerInput' + UbiiClientService.getClientID(),
+        topic,
         'keyEvent',
-        {type: ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN, key: buttonID.toString()}
+        {
+          type: ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN,
+          key: buttonID.toString()
+        }
       );
     },
     publishReleasedActionButton: function(buttonID) {
@@ -375,16 +352,18 @@ export default {
       }
       UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
-        topic, //'playerInput' + UbiiClientService.getClientID(),
+        topic,
         'keyEvent',
-        {type: ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP, key: buttonID.toString()}
+        {
+          type: ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP,
+          key: buttonID.toString()
+        }
       );
     },
     publishAnalogStickPosition: function(stickPosition) {
-      console.info('analog stick ' + stickPosition);
       UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
-        this.$data.componentAnalogstickLeft.topic, //'playerInput' + UbiiClientService.getClientID()
+        this.$data.componentAnalogstickLeft.topic,
         'vector2',
         stickPosition
       );
@@ -405,11 +384,6 @@ export default {
     onTouchStart: function(event) {
       this.deviceData.touches = event.touches;
 
-      this.deviceData.touchPosition = this.normalizeAnalogStickCoordinates(
-        event,
-        0
-      );
-
       this.deviceData[event.target.id] = this.normalizeAnalogStickCoordinates(
         event,
         0
@@ -422,11 +396,6 @@ export default {
     onTouchMove: function(event) {
       this.deviceData.touches = event.touches;
 
-      this.deviceData.touchPosition = this.normalizeAnalogStickCoordinates(
-        event,
-        0
-      );
-
       this.deviceData[event.target.id] = this.normalizeAnalogStickCoordinates(
         event,
         0
@@ -438,7 +407,6 @@ export default {
     },
     onTouchEnd: function(event) {
       this.deviceData.touches = event.touches;
-      this.deviceData.touchPosition = { x: 0, y: 0 };
       this.deviceData['analog-stick-left'] = { x: 0, y: 0 };
       this.$data.stickPosition[event.target.id] = { x: 25, y: 25 };
     },
@@ -510,9 +478,6 @@ export default {
   grid-template-areas:
     'analog-left start-select a-button'
     'whitespace start-select b-button';
-  /*grid-template-areas:
-    'analog-left buttons'
-    'buttons buttons';*/
 
   height: 100%;
   -webkit-touch-callout: none;
