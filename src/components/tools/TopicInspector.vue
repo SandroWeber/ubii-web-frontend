@@ -18,12 +18,6 @@
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
-/* fontawesome */
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
-library.add(faChevronRight);
-
-//import { TopicViewer } from './TopicViewer.vue';
 import TopicViewer from './TopicViewer.vue';
 import { setTimeout } from 'timers';
 

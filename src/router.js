@@ -67,17 +67,19 @@ export default new Router({
     name: 'Tool - QR Code Display',
     component: () => import('./components/tools/QRCodeDisplay.vue')
   },
-  {
-    path: '/tools/3d_pose_visualizer',
-    name: 'Tool - 3D Pose Visualizer',
-    component: () => import('./components/tools/3DPoseVisualizer.vue')
-  },
   /* applications */
   {
     path: '/applications',
     name: 'Applications',
     component: () => import('./components/Applications.vue')
   },
+  /* applications - visualization */
+  {
+    path: '/applications/visualization/3d_pose_visualizer',
+    name: 'Application - 3D Pose Visualizer',
+    component: () => import('./components/applications/visualization/3DPoseVisualizer.vue')
+  },
+  /* applications - examples */
   {
     path: '/applications/examples/mouse-pointer',
     name: 'Example - Mouse Pointer',
@@ -94,10 +96,16 @@ export default new Router({
     component: () => import('./components/applications/examples/ExampleThreejsWebVR.vue')
   },
   {
+    path: '/applications/examples/aframe',
+    name: 'Example - A-Frame',
+    component: () => import('./components/applications/examples/ExampleAframe.vue')
+  },
+  {
     path: '/applications/examples/gatherer-web-interface-smart-devices',
     name: 'Example - Gathering from Smart Devices connected via Web Interface',
     component: () => import('./components/applications/examples/ExampleWebInterfaceSmartDevices.vue')
   },
+  /* applications - smartphone VR */
   {
     path: '/applications/smartphone-assisted-vr/savr-model-inspector',
     name: 'VR Model Inspector - Inspect 3D Models',

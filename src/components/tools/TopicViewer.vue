@@ -13,7 +13,8 @@
       @click="toggleTopicDataDisplay(topic)"
     />
     {{topic}}
-    <div class="topic-data green-accent" v-show="expanded">{{data}}</div>
+    <div class="topic-data green-accent" v-show="expanded && data">{{data}}</div>
+    <div class="topic-data red-accent" v-show="expanded && !data">received empty data</div>
   </div>
 </template>
 
@@ -60,7 +61,6 @@ export default {
 }
 
 .topic-data {
-  color: ;
   padding-left: 30px;
 }
 </style>

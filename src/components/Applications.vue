@@ -2,8 +2,21 @@
   <div>
     <div class="category">
       <div class="seperator">
+        <span class="label">Visualization</span>
+      </div>
+      <div class="grid">
+        <router-link to="/applications/visualization/3d_pose_visualizer" class="interface-link" tag="div">
+           <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="cubes" class="interface-icon" />
+            <p>3D Pose Visualizer</p>
+          </app-tile>
+         </router-link>
+      </div>
+
+      <div class="seperator">
         <span class="label">Tutorials, Learning Examples</span>
       </div>
+
       <div class="grid">
         <router-link to="/applications/examples/mouse-pointer" class="interface-link" tag="div">
           <app-tile class="layer-three background round shadow orange-accent">
@@ -23,6 +36,13 @@
           <app-tile class="layer-three background round shadow orange-accent">
             <font-awesome-icon icon="vr-cardboard" class="interface-icon" />
             <p>Three.js WebVR Rendering</p>
+          </app-tile>
+        </router-link>
+
+        <router-link to="/applications/examples/aframe" class="interface-link" tag="div">
+          <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="vr-cardboard" class="interface-icon" />
+            <p>A-Frame</p>
           </app-tile>
         </router-link>
 
