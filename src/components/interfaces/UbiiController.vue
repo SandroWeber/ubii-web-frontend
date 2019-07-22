@@ -1,20 +1,17 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
     <div ref="top-div">
-      <div id="header" class="header">Ubii Controller</div>
-      <span v-show="clientId">Client ID: {{clientId}}</span>
-      <br />
-
-      <button class="button-fullscreen" @click="toggleFullScreen()">
-        <font-awesome-icon icon="compress" class="interface-icon" v-show="fullscreen" />
-        <font-awesome-icon icon="expand" class="interface-icon" v-show="!fullscreen" />
-      </button>
       <fullscreen
         ref="fullscreen"
         class="controller"
         @change="onFullScreenChange"
         style="overflow: hidden;"
       >
+        <div class="debug-log">{{debugLog}}</div>
+        <button class="button-fullscreen" @click="toggleFullScreen()">
+          <font-awesome-icon icon="compress" class="interface-icon" v-show="fullscreen" />
+          <font-awesome-icon icon="expand" class="interface-icon" v-show="!fullscreen" />
+        </button>
         <div id="analog-left" class="analog-left">
           <div class="analog-ring">
             <div
@@ -103,7 +100,8 @@ export default {
       clientId: undefined,
       publishFrequency: 0.01,
       fullscreen: false,
-      stickPosition: stickPos
+      stickPosition: stickPos,
+      debugLog: '...'
     };
   },
   methods: {
@@ -166,11 +164,12 @@ export default {
         navigator.mozVibrate ||
         navigator.msVibrate;
       if (navigator.vibrate) {
-        ubiiDevice.components.push({
+        this.componentVibration = {
           topic: topicPrefix + '/vibration_pattern',
           messageFormat: 'double',
           ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
-        });
+        };
+        ubiiDevice.components.push(this.componentVibration);
         this.tNextVibrate = Date.now();
         navigator.vibrate(100);
       }
@@ -206,24 +205,21 @@ export default {
             return device;
           })
           .then(() => {
-            UbiiClientService.client.subscribe(
-              componentSetColor.topic,
+            /*UbiiClientService.client.subscribe(
+              this.componentSetColor.topic,
               color => {
-                if (Date.now() >= this.tNextVibrate) {
-                  navigator.vibrate(vibrationPattern);
-                  this.tNextVibrate = Date.now() + 2 * vibrationPattern;
-                }
+                //TODO
               }
-            );
+            );*/
 
-            let vibrationComponent = this.$data.ubiiDevice.components.find(
+            /*let vibrationComponent = this.$data.ubiiDevice.components.find(
               element => {
                 return element.topic.indexOf('/vibration_pattern') !== -1;
               }
-            );
-            if (vibrationComponent) {
+            );*/
+            if (this.componentVibration) {
               UbiiClientService.client.subscribe(
-                vibrationComponent.topic,
+                this.componentVibration.topic,
                 vibrationPattern => {
                   if (Date.now() >= this.tNextVibrate) {
                     navigator.vibrate(vibrationPattern);
@@ -473,11 +469,12 @@ export default {
 <style scoped>
 .controller {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 0.5fr 0.5fr;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: 30px repeat(2, 1fr);
   grid-template-areas:
-    'analog-left start-select a-button'
-    'whitespace start-select b-button';
+    'debug-log debug-log debug-log debug-log debug-log button-fullscreen'
+    'analog-left analog-left controls controls a-button a-button'
+    'analog-left analog-left start-select start-select b-button b-button';
 
   height: 100%;
   -webkit-touch-callout: none;
@@ -486,6 +483,9 @@ export default {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+
+  justify-items: center;
+  align-items: center;
 }
 
 .whitespace {
@@ -495,11 +495,11 @@ export default {
 
 .analog-left {
   grid-area: analog-left;
-  position: relative;
   width: 200px;
   height: 200px;
+  /*position: relative;
   margin-left: 10%;
-  margin-top: 40%;
+  margin-top: 40%;*/
 }
 
 .analog-right {
@@ -512,7 +512,7 @@ export default {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: radial-gradient(white, black);
+  background: radial-gradient(grey, grey);
 }
 
 .analog-stick {
@@ -521,15 +521,15 @@ export default {
   border-radius: 50%;
   position: relative;
   box-shadow: 10px 10px black;
-  /* background: radial-gradient(white, grey); */
-  background: radial-gradient(yellow, red, green, blue);
+  background: radial-gradient(grey, black);
+  /*background: radial-gradient(yellow, red, green, blue);*/
 }
 
 .start-select {
   grid-area: start-select;
   height: 200px;
   width: 200px;
-  margin-top: 50%;
+  /*margin-top: 50%;*/
 }
 
 .d-pad {
@@ -569,9 +569,8 @@ export default {
   background: radial-gradient(green, green, white);
   box-shadow: 2px 2px grey;
   border-radius: 50%;
-  width: 150px;
-  height: 150px;
-  margin-top: 10%;
+  width: 100px;
+  height: 100px;
   position: relative;
   font-size: xx-large;
   font-weight: bold;
@@ -582,10 +581,10 @@ export default {
   background: radial-gradient(red, red, white);
   box-shadow: 2px 2px grey;
   border-radius: 50%;
-  width: 150px;
-  height: 150px;
-  position: relative;
-  margin-top: -50%;
+  width: 100px;
+  height: 100px;
+  /*position: relative;
+  margin-top: -50%;*/
   font-size: xx-large;
   font-weight: bold;
 }
@@ -603,7 +602,12 @@ export default {
 }
 
 .button-fullscreen {
-  width: 50px;
-  height: 50px;
+  grid-area: button-fullscreen;
+  width: 30px;
+  height: 30px;
+}
+
+.debug-log {
+  grid-area: debug-log;
 }
 </style>
