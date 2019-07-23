@@ -252,6 +252,9 @@ export default {
 
       this.hasRegisteredUbiiDevice = null;
 
+      //TODO: this should not happen here, move to interaction
+      UbiiClientService.client.publish(this.ubiiDevice.name, 'removeClient', 'string', UbiiClientService.getClientID());
+
       // TODO: unregister device
       this.ubiiDevice && UbiiClientService.deregisterDevice(this.ubiiDevice);
     },
