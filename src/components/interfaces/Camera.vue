@@ -7,6 +7,10 @@
 
 <script>
 /* eslint-disable no-console */
+/* eslint-disable no-unused-vars */
+
+import uuidv4 from 'uuid/v4';
+
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 
@@ -32,14 +36,28 @@ export default {
     return {};
   },
   methods: {
+    start: function() {
+      UbiiClientService.isConnected().then(() => {
+        this.createUbiiSpecs();
+
+        UbiiClientService.registerDevice(this.ubiiDevice).then(deviceSpecs => {
+          this.ubiiDevice = deviceSpecs;
+        });
+
+        //TODO
+      });
+    },
+    stop: function() {
+      //TODO
+    },
     /* ubii methods */
     createUbiiSpecs: function() {
       this.ubiiDeviceName = 'CameraWebInterface';
       let topicPrefix =
-        '/' + UbiiClientService.getClientID() + '/' + ubiiDeviceName;
+        '/' + UbiiClientService.getClientID() + '/' + this.ubiiDeviceName;
 
       this.ubiiDevice = {
-        name: ubiiDeviceName,
+        name: this.ubiiDeviceName,
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
         clientId: UbiiClientService.getClientID(),
         components: [
@@ -52,6 +70,62 @@ export default {
             topic: topicPrefix + '/objects',
             messageFormat: 'ubii.dataStructure.Object2DList',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+          }
+        ]
+      };
+
+      let interactionCoCoSSD = {
+        name: 'CameraWebInterface - Interaction CoCoSSD'
+      };
+
+      this.ubiiInteractionCoCoSSD = {
+        id: uuidv4(),
+        name: 'CameraWebInterface - Interaction CoCoSSD',
+        inputFormats: [
+          {
+            internalName: 'image',
+            messageFormat: 'ubii.dataStructure.Image2D'
+          }
+        ],
+        outputFormats: [
+          {
+            internalName: 'predictions',
+            messageFormat: 'ubii.dataStructure.Object2DList'
+          }
+        ],
+        onCreated: (async state => {
+          state.model = await state.modules.cocoSsd.load();
+          state.timestampLastImage = 0;
+        }).toString(),
+        processingCallback: (async (inputs, outputs, state) => {
+          if (
+            inputs.image /*&&
+            inputs.image.timestamp.millis > state.timestampLastImage*/
+          ) {
+            //let predictions = await state.model.detect(inputs.image);
+            console.info(inputs.image);
+          }
+        }).toString()
+      };
+
+      this.ubiiSessionCoCoSSD = {
+        name: 'CameraWebInterface - Session CoCoSSD',
+        interactions: [this.ubiiInteractionCoCoSSD],
+        ioMappings: [
+          {
+            interactionId: this.ubiiInteractionCoCoSSD.id,
+            inputMappings: [
+              {
+                name: this.ubiiInteractionCoCoSSD.inputFormats[0].internalName,
+                topicSource: this.ubiiDevice.components[0].topic
+              }
+            ],
+            outputMappings: [
+              {
+                name: this.ubiiInteractionCoCoSSD.outputFormats[0].internalName,
+                topicDestination: this.ubiiDevice.components[1].topic
+              }
+            ]
           }
         ]
       };
