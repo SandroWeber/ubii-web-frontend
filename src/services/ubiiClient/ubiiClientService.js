@@ -106,6 +106,10 @@ class UbiiClientService {
     }
   }
 
+  async callService(serviceRequest) {
+    return this.client.callService(serviceRequest);
+  }
+
   /**
    * Register the specified device at the UBII server.
    * @param {object} device Object specifying device according to protobuf format ubii.devices.Device
@@ -145,12 +149,12 @@ class UbiiClientService {
     });
   }
 
-  subscribe(topic, callback) {
-    this.client && this.client.subscribe(topic, callback);
+  async subscribe(topic, callback) {
+    return this.client && this.client.subscribe(topic, callback);
   }
 
-  unsubscribe(topic) {
-    this.client && this.client.unsubscribe(topic);
+  async unsubscribe(topic) {
+    return this.client && this.client.unsubscribe(topic);
   }
 
   getUUIDv4Regex() {

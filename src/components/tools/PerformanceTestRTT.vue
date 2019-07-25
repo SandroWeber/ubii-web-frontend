@@ -95,40 +95,34 @@ export default {
       let counter = 0;
       let maxMessages = parseInt(this.$data.testRTT.messageCount);
 
-      UbiiClientService.client
-        .subscribe(this.$data.testRTT.topic, () => {
-          this.$data.testRTT.timings.push(
-            Date.now() - this.$data.testRTT.tSent
-          );
-          counter++;
-          if (counter < maxMessages) {
-            this.rttSendPackage();
-          } else {
-            let sum = this.$data.testRTT.timings.reduce(
-              (partial_sum, a) => partial_sum + a
-            );
-            this.$data.testRTT.avgRTT = sum / this.$data.testRTT.timings.length;
-            this.stopTestRTT();
-          }
-        })
-        .then(() => {
+      UbiiClientService.subscribe(this.$data.testRTT.topic, () => {
+        this.$data.testRTT.timings.push(Date.now() - this.$data.testRTT.tSent);
+        counter++;
+        if (counter < maxMessages) {
           this.rttSendPackage();
-        });
+        } else {
+          let sum = this.$data.testRTT.timings.reduce(
+            (partial_sum, a) => partial_sum + a
+          );
+          this.$data.testRTT.avgRTT = sum / this.$data.testRTT.timings.length;
+          this.stopTestRTT();
+        }
+      }).then(() => {
+        this.rttSendPackage();
+      });
     },
     stopTestRTT: function() {
       if (this.$data.testRTT && this.$data.testRTT.avgRTT) {
         this.$data.testRTT.status = this.$data.testRTT.avgRTT.toString() + 'ms';
-        UbiiClientService.client.unsubscribe(this.$data.testRTT.topic);
+        UbiiClientService.unsubscribe(this.$data.testRTT.topic);
       }
     },
     rttSendPackage: function() {
       this.$data.testRTT.tSent = Date.now();
-      UbiiClientService.client.publish(
-        this.$data.testRTT.device.name,
-        this.$data.testRTT.topic,
-        'number',
-        1
-      );
+      UbiiClientService.publishRecord({
+        topic: this.$data.testRTT.topic,
+        double: 1
+      });
     }
   }
 };
