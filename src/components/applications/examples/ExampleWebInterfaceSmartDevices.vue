@@ -66,14 +66,12 @@ export default {
           })
           .then(() => {
             /* we publish the vibration distance threshold */
-            UbiiClientService.client.publish(
-              this.device.name,
-              this.topicVibrationDistanceThreshold,
-              'double',
-              0.03
-            );
+            UbiiClientService.publishRecord({
+              topic: this.topicVibrationDistanceThreshold,
+              double: 0.03
+            });
 
-            UbiiClientService.client.subscribe(
+            UbiiClientService.subscribe(
               this.topicTouchObjects,
               object2DList => {
                 if (object2DList.elements) {
@@ -342,33 +340,11 @@ export default {
 
       // create client object with necessary info
       let client = {
-        //topicTouchPosition: topic,
         touchPosition: { x: undefined, y: undefined },
         color: touchPosElement.style.backgroundColor,
         touchPosIndicator: touchPosElement
       };
       this.$data.clients.set(clientID, client);
-
-      /*UbiiClientService.client.subscribe(
-        client.topicTouchPosition,
-        touchPosition => {
-          let boundingRect = document
-            .getElementById('example-web-smart-devices-touch-positions')
-            .getBoundingClientRect();
-
-          client.touchPosition.x = Math.floor(
-            touchPosition.x * boundingRect.width
-          );
-          client.touchPosition.y = Math.floor(
-            touchPosition.y * boundingRect.height
-          );
-
-          client.touchPosIndicator.style.left =
-            client.touchPosition.x.toString() + 'px';
-          client.touchPosIndicator.style.top =
-            client.touchPosition.y.toString() + 'px';
-        }
-      );*/
     },
     removeClient(id) {
       if (!this.$data.clients.has(id)) {
