@@ -151,21 +151,17 @@ export default {
 
       // start our session (registering not necessary as we do not want to save it permanently)
       client.subscribe = (createModel = false) =>
-        UbiiClientService.client
-          .callService({
-            topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
-            session: client.session
-          })
-          .then(() => {
-            // subscribe the topic
-            UbiiClientService.client
-              .subscribe(specs.topic, orientation => {
-                client.orientation = orientation;
-              })
-              .then(() => {
-                if (createModel) checkForPrefab();
-              });
+        UbiiClientService.callService({
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+          session: client.session
+        }).then(() => {
+          // subscribe the topic
+          UbiiClientService.subscribe(specs.topic, orientation => {
+            client.orientation = orientation;
+          }).then(() => {
+            if (createModel) checkForPrefab();
           });
+        });
       client.subscribe(true);
 
       // create the client
@@ -206,9 +202,9 @@ export default {
     onDisconnectToUbii: function() {
       // unsubscribe and stop all sessions
       this.clients.forEach((v, k) => {
-        UbiiClientService.client.unsubscribe(v.topic);
+        UbiiClientService.unsubscribe(v.topic);
 
-        UbiiClientService.client.callService({
+        UbiiClientService.callService({
           topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
           session: v.session
         });

@@ -114,7 +114,9 @@ export default {
       this.startExample();
     });
 
-    UbiiClientService.onDisconnect(() => { this.stopExample(); });
+    UbiiClientService.onDisconnect(() => {
+      this.stopExample();
+    });
   },
   beforeDestroy: function() {
     this.stopExample();
@@ -141,12 +143,10 @@ export default {
       }
 
       // if the checkbox is changed, we publish this info on the related topic
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.inputMirror.topic,
-        this.$data.inputMirror.messageFormat,
-        value
-      );
+      UbiiClientService.publishRecord({
+        topic: this.$data.inputMirror.topic,
+        bool: value
+      });
     }
   },
   methods: {
@@ -305,7 +305,7 @@ export default {
           })
           .then(() => {
             // subscribe to the device topics so we are notified when new data arrives on the topic
-            UbiiClientService.client.subscribe(
+            UbiiClientService.subscribe(
               this.$data.outputServerPointer.topic,
               // a callback to be called when new data on this topic arrives
               mousePosition => {
@@ -342,9 +342,7 @@ export default {
       this.exampleStarted = false;
 
       // unsubscribe and stop session
-      UbiiClientService.client.unsubscribe(
-        this.$data.outputServerPointer.topic
-      );
+      UbiiClientService.unsubscribe(this.$data.outputServerPointer.topic);
       UbiiClientService.client.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
         session: this.$data.ubiiSession
@@ -370,12 +368,10 @@ export default {
 
       this.$data.clientMousePosition = relativeMousePosition;
       // publish our normalized client mouse position
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.inputClientPointer.topic,
-        'vector2',
-        this.$data.clientMousePosition
-      );
+      UbiiClientService.publishRecord({
+        topic: this.$data.inputClientPointer.topic,
+        vector2: this.$data.clientMousePosition
+      });
     },
     onTouchStart: function(event) {
       this.$data.clientPointerInside = true;
@@ -408,12 +404,10 @@ export default {
 
       this.$data.clientMousePosition = relativeMousePosition;
       // publish our normalized client touch position
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.inputClientPointer.topic,
-        'vector2',
-        this.$data.clientMousePosition
-      );
+      UbiiClientService.publishRecord({
+        topic: this.$data.inputClientPointer.topic,
+        vector2: this.$data.clientMousePosition
+      });
     },
     ...mapActions('interactions', {
       addInteraction: 'add'

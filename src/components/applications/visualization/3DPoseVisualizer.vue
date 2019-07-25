@@ -113,15 +113,6 @@ export default {
         }
 
         let isWithinBoundingBox = position => {
-          /*return (
-            position.x > -(state.boundingBoxSize.x / 2) &&
-            position.x < state.boundingBoxSize.x / 2 &&
-            position.y > -(state.boundingBoxSize.y / 2) &&
-            position.y < state.boundingBoxSize.y / 2 &&
-            position.z > -(state.boundingBoxSize.z / 2) &&
-            position.z < state.boundingBoxSize.z / 2
-          );*/
-
           return (
             position.x > 0 &&
             position.x < state.boundingBoxSize.x &&
@@ -250,7 +241,7 @@ export default {
       UbiiClientService.isConnected().then(() => {
         this.createUbiiSpecs();
 
-        UbiiClientService.client.subscribe(this.topicObjects, topicObject => {
+        UbiiClientService.subscribe(this.topicObjects, topicObject => {
           let found = false;
           this.scene.traverseVisible(sceneObject => {
             if (found) return;
@@ -284,19 +275,15 @@ export default {
           // device registration successful
           this.ubiiDevice = response;
 
-          UbiiClientService.client.publish(
-            this.ubiiDevice.name,
-            this.topicBoundingBox,
-            'vector3',
-            { x: 2, y: 2, z: 2 }
-          );
+          UbiiClientService.publishRecord({
+            topic: this.topicBoundingBox,
+            vector3: { x: 2, y: 2, z: 2 }
+          });
 
-          UbiiClientService.client.publish(
-            this.ubiiDevice.name,
-            this.topicGenerateNumberOfObjects,
-            'double',
-            3
-          );
+          UbiiClientService.publishRecord({
+            topic: this.topicGenerateNumberOfObjects,
+            double: 3
+          });
 
           //this.toggleTestData();
         });

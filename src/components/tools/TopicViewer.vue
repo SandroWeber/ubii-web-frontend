@@ -43,11 +43,11 @@ export default {
       this.expanded = !this.expanded;
       if (this.expanded) {
         this.data = '... no data received yet ...';
-        UbiiClientService.client.subscribe(this.topic, data => {
+        UbiiClientService.subscribe(this.topic, data => {
           this.data = data;
         });
       } else {
-        UbiiClientService.client.unsubscribe(this.topic);
+        UbiiClientService.unsubscribe(this.topic);
       }
     }
   }

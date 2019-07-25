@@ -3,7 +3,7 @@ import UbiiClientService from '../../../../services/ubiiClient/ubiiClientService
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 function createUbiiSpecs(name, inputs, outputs, callback) {
-  const filterTopics = function(x) {
+  const filterTopics = function (x) {
     return {
       internalName: x.internalName,
       messageFormat: x.messageFormat
@@ -18,14 +18,14 @@ function createUbiiSpecs(name, inputs, outputs, callback) {
     outputFormats: outputs.map(filterTopics)
   };
 
-  const createMappingInp = function(x) {
+  const createMappingInp = function (x) {
     return {
       name: x.internalName,
       topicSource: x.topic
     };
   }
 
-  const createMappingOut = function(x) {
+  const createMappingOut = function (x) {
     return {
       name: x.internalName,
       topicDestination: x.topic
@@ -56,14 +56,14 @@ function subscribeSpecs(specs, callback) {
   console.log('subscribed to ' + specs.topic);
 
   // start our session (registering not necessary as we do not want to save it permanently)
-  UbiiClientService.client
+  UbiiClientService
     .callService({
       topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
       session: specs.session
     })
     .then(() => {
       // subscribe the topic
-      UbiiClientService.client.subscribe(specs.topic, callback);
+      UbiiClientService.subscribe(specs.topic, callback);
     });
 }
 
@@ -71,9 +71,9 @@ function unsubscribeSpecs(specs) {
   // eslint-disable-next-line no-console
   console.log('unsubscribed to ' + specs.topic);
 
-  UbiiClientService.client.unsubscribe(specs.topic);
+  UbiiClientService.unsubscribe(specs.topic);
 
-  UbiiClientService.client.callService({
+  UbiiClientService.callService({
     topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
     session: specs.session
   });
@@ -84,7 +84,7 @@ function subscribe(topic, callback) {
   console.log('subscribed to ' + topic);
 
   // subscribe the topic
-  UbiiClientService.client.subscribe(topic, callback);
+  UbiiClientService.subscribe(topic, callback);
 }
 
 function unsubscribe(topics, sessions) {
@@ -92,10 +92,10 @@ function unsubscribe(topics, sessions) {
     // eslint-disable-next-line no-console
     console.log('unsubscribed to ' + topic);
 
-    UbiiClientService.client.unsubscribe(topic);
+    UbiiClientService.unsubscribe(topic);
   });
   sessions.forEach(session => {
-    UbiiClientService.client.callService({
+    UbiiClientService.callService({
       topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
       session: session
     });
