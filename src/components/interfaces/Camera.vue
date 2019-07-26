@@ -13,6 +13,7 @@ import uuidv4 from 'uuid/v4';
 
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
+import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 export default {
   name: 'Interface-Camera',
@@ -30,8 +31,12 @@ export default {
           video.play();
         });
     }
+
+    this.start();
   },
-  beforeDestroy: function() {},
+  beforeDestroy: function() {
+    this.stop();
+  },
   data: () => {
     return {};
   },
@@ -40,15 +45,29 @@ export default {
       UbiiClientService.isConnected().then(() => {
         this.createUbiiSpecs();
 
-        UbiiClientService.registerDevice(this.ubiiDevice).then(deviceSpecs => {
-          this.ubiiDevice = deviceSpecs;
+        UbiiClientService.registerDevice(this.ubiiDevice).then(device => {
+          if (device) {
+            this.ubiiDevice = device;
+          }
         });
 
-        //TODO
+        UbiiClientService.callService({
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+          session: this.ubiiSessionCoCoSSD
+        }).then(response => {
+          if (response.error) {
+            console.warn(response.error);
+          }
+        });
       });
     },
     stop: function() {
-      //TODO
+      this.ubiiDevice && UbiiClientService.deregisterDevice(this.ubiiDevice);
+      this.ubiiSessionCoCoSSD &&
+        UbiiClientService.callService({
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+          session: this.ubiiSessionCoCoSSD
+        });
     },
     /* ubii methods */
     createUbiiSpecs: function() {
@@ -74,9 +93,30 @@ export default {
         ]
       };
 
-      let interactionCoCoSSD = {
-        name: 'CameraWebInterface - Interaction CoCoSSD'
-      };
+      let interactionCoCoSSDOnCreatedCB =
+        'state => {' +
+        'let prepareModel = async () => {' +
+        'state.model = await state.modules.cocoSsd.load();' +
+        'state.timestampLastImage = 0;' +
+        '};' +
+        'prepareModel();' +
+        '};';
+
+      let interactionCoCoSSDProcessCB =
+        '(inputs, outputs, state) => {' +
+        'if (inputs.image) {' +
+        'let predict = () => {' +
+        'let img = new ImageData(' +
+        'inputs.image.data,' +
+        'inputs.image.width,' +
+        'inputs.image.height' +
+        ');' +
+        'console.info(img);' +
+        //let predictions = await state.model.detect(inputs.image);
+        '};' +
+        'predict();' +
+        '}' +
+        '};';
 
       this.ubiiInteractionCoCoSSD = {
         id: uuidv4(),
@@ -93,22 +133,12 @@ export default {
             messageFormat: 'ubii.dataStructure.Object2DList'
           }
         ],
-        onCreated: (async state => {
-          state.model = await state.modules.cocoSsd.load();
-          state.timestampLastImage = 0;
-        }).toString(),
-        processingCallback: (async (inputs, outputs, state) => {
-          if (
-            inputs.image /*&&
-            inputs.image.timestamp.millis > state.timestampLastImage*/
-          ) {
-            //let predictions = await state.model.detect(inputs.image);
-            console.info(inputs.image);
-          }
-        }).toString()
+        onCreated: interactionCoCoSSDOnCreatedCB,
+        processingCallback: interactionCoCoSSDProcessCB.toString()
       };
 
       this.ubiiSessionCoCoSSD = {
+        id: uuidv4(),
         name: 'CameraWebInterface - Session CoCoSSD',
         interactions: [this.ubiiInteractionCoCoSSD],
         ioMappings: [
@@ -133,7 +163,23 @@ export default {
     /* interface methods */
     onButtonCoCoSSD: function() {
       let img = this.captureImage();
-      console.info(img);
+
+      let tSeconds = Date.now() / 1000;
+      let seconds = Math.floor(tSeconds);
+      let nanos = Math.floor((tSeconds - seconds) * 1000000000);
+      UbiiClientService.publishRecord({
+        topic: this.ubiiDevice.components[0].topic,
+        timestamp: {
+          seconds: seconds,
+          nanos: nanos
+        },
+        image2D: {
+          width: img.width,
+          height: img.height,
+          data: img.data,
+          dataFormat: 'RGBA8'
+        }
+      });
     },
     captureImage: function() {
       var canvas = document.createElement('canvas');
