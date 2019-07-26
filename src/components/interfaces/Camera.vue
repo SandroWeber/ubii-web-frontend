@@ -51,6 +51,13 @@ export default {
           }
         });
 
+        UbiiClientService.subscribe(
+          this.ubiiDevice.components[1].topic,
+          predictedObjects => {
+            console.info(predictedObjects);
+          }
+        );
+
         UbiiClientService.callService({
           topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
           session: this.ubiiSessionCoCoSSD
@@ -102,19 +109,28 @@ export default {
         'prepareModel();' +
         '};';
 
+      // we really need a functional interaction editor for this (async parts and class constructors aren't handled ver well by .toString())
       let interactionCoCoSSDProcessCB =
         '(inputs, outputs, state) => {' +
-        'if (inputs.image) {' +
-        'let predict = () => {' +
-        'let img = new ImageData(' +
-        'inputs.image.data,' +
-        'inputs.image.width,' +
-        'inputs.image.height' +
-        ');' +
-        'console.info(img);' +
-        //let predictions = await state.model.detect(inputs.image);
+        'if (inputs.image && state.model) {' +
+        // prediction function
+        'let predict = async () => {' +
+        'let imgTensor = state.modules.tf.tensor3d(inputs.image.data, [inputs.image.height, inputs.image.width, 3], "int32");' +
+        'let predictions = await state.model.detect(imgTensor);' +
+        'return predictions;' +
         '};' +
-        'predict();' +
+        // make predictions
+        'predict().then(predictions => {' +
+        //'console.info(predictions);' +
+        // generate output list
+        'let outputList = [];' +
+        'predictions.forEach(prediction => {' +
+        'let pos = {x: prediction.bbox[0] / inputs.image.width, y: prediction.bbox[1] / inputs.image.height};' +
+        'outputList.push( { id: prediction.class, pose: { position: pos } } );' +
+        '});' +
+        // write output
+        'outputs.predictions = { elements: outputList };' +
+        '});' +
         '}' +
         '};';
 
@@ -163,6 +179,10 @@ export default {
     /* interface methods */
     onButtonCoCoSSD: function() {
       let img = this.captureImage();
+      // reduce from RGBA8 to RGB8, fitting tensorflow model
+      let data = img.data.filter((element, index, array) => {
+        return (index + 1) % 4 !== 0;
+      });
 
       let tSeconds = Date.now() / 1000;
       let seconds = Math.floor(tSeconds);
@@ -176,8 +196,8 @@ export default {
         image2D: {
           width: img.width,
           height: img.height,
-          data: img.data,
-          dataFormat: 'RGBA8'
+          data: data,
+          dataFormat: 'RGB8'
         }
       });
     },
@@ -189,7 +209,8 @@ export default {
       ctx.drawImage(this.videoElement, 0, 0, canvas.width, canvas.height);
 
       return ctx.getImageData(0, 0, canvas.width, canvas.height);
-    }
+    },
+    drawPredictions: function(predictionsList) {}
   }
 };
 </script>
