@@ -18,21 +18,24 @@ import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 export default {
   name: 'Interface-Camera',
   mounted: function() {
-    this.videoElement = document.getElementById('video');
+    let video = document.getElementById('video');
 
     // Get access to the camera!
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       // Not adding `{ audio: true }` since we only want video now
       navigator.mediaDevices
         .getUserMedia({ video: true })
-        .then(function(stream) {
+        .then((stream) => {
+          console.info('resolved video media');
+          console.info(stream);
           //video.src = window.URL.createObjectURL(stream);
           video.srcObject = stream;
           video.play();
+
+          this.videoElement = video;
+          this.start();
         });
     }
-
-    this.start();
   },
   beforeDestroy: function() {
     this.stop();
@@ -42,6 +45,8 @@ export default {
   },
   methods: {
     start: function() {
+      this.cocoSSDLabels = [];
+
       UbiiClientService.isConnected().then(() => {
         this.createUbiiSpecs();
 
@@ -210,7 +215,25 @@ export default {
 
       return ctx.getImageData(0, 0, canvas.width, canvas.height);
     },
-    drawPredictions: function(predictionsList) {}
+    drawPredictions: function(predictionsList) {
+      while (this.cocoSSDLabels.length < predictionsList.length) {
+        let divElement = document.createElement('div');
+        divElement.style.backgroundColor = 'black';
+        this.videoElement.appendChild(divElement);
+        this.cocoSSDLabels.push(divElement);
+      }
+
+      this.cocoSSDLabels.forEach((div, index) => {
+        if (index < predictionsList.length) {
+          div.innerHTML = predictionsList[index].id;
+          div.style.left = predictionsList[index].pose.position.x * this.videoElement.clientWidth;
+          div.style.top = predictionsList[index].pose.position.y * this.videoElement.clientHeight;
+          div.style.visible = true;
+        } else {
+          div.style.visible = false;
+        }
+      })
+    }
   }
 };
 </script>
