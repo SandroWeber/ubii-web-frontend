@@ -32,8 +32,6 @@ export default {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       // Not adding `{ audio: true }` since we only want video now
       navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-        //console.info('resolved video media');
-        //console.info(stream);
         //video.src = window.URL.createObjectURL(stream);
         video.srcObject = stream;
         video.play();
@@ -131,11 +129,12 @@ export default {
         'if (tNow < state.tLastProcess + 1000) { return; }' +
         'state.tLastProcess = tNow;' +
         //'console.info("interactionCoCoSSDProcessCB");' +
-        'if (inputs.image && state.model) {' +
+        'let image = inputs.image;' +
+        'if (image && state.model) {' +
         // prediction function
         'let predict = async () => {' +
         //'console.info("predicting");' +
-        'let imgTensor = state.modules.tf.tensor3d(inputs.image.data, [inputs.image.height, inputs.image.width, 3], "int32");' +
+        'let imgTensor = state.modules.tf.tensor3d(image.data, [image.height, image.width, 3], "int32");' +
         'let predictions = await state.model.detect(imgTensor);' +
         'return predictions;' +
         '};' +
@@ -145,8 +144,11 @@ export default {
         // generate output list
         'let outputList = [];' +
         'predictions.forEach(prediction => {' +
-        'let pos = {x: prediction.bbox[0] / inputs.image.width, y: prediction.bbox[1] / inputs.image.height};' +
-        'outputList.push( { id: prediction.class, pose: { position: pos } } );' +
+        'let pos = {x: prediction.bbox[0] / image.width, y: prediction.bbox[1] / image.height};' +
+        'outputList.push( { ' +
+        'id: prediction.class, ' +
+        'pose: { position: pos }, ' +
+        'size: {x: prediction.bbox[2] / image.width, y: prediction.bbox[3] / image.height} } );' +
         '});' +
         // write output
         'outputs.predictions = { elements: outputList };' +
@@ -255,8 +257,6 @@ export default {
         this.videoOverlayElement.style.height =
           videoRatio * this.videoOverlayElement.clientWidth + 'px';
       }
-      //console.info(videoRatio);
-      //console.info(displayRatio);
       var ctx = canvas.getContext('2d');
       ctx.drawImage(this.videoElement, 0, 0, canvas.width, canvas.height);
 
@@ -267,42 +267,39 @@ export default {
         return;
       }
 
-      //console.info(predictionsList);
-      //console.info(this.cocoSSDLabels);
       while (this.cocoSSDLabels.length < predictionsList.length) {
         let divElement = document.createElement('div');
         divElement.style.color = 'black';
         divElement.style.textShadow = '0 0 10px yellow, 0 0 20px yellow';
-        //divElement.style.backgroundColor = 'yellow';
+        divElement.style.backgroundColor = 'rgba(255, 255, 0, 0.2)';
         divElement.style.position = 'relative';
-        //divElement.style.width = 'auto';
-        //divElement.style.zIndex = 999;
         this.videoOverlayElement.appendChild(divElement);
-        //divElement.classList.add('object-detection-label');
-        //divElement.className = 'object-detection-label';
         this.cocoSSDLabels.push(divElement);
-        //console.info('added indicator element');
-        //console.info(divElement);
       }
 
+      let overlayBoundings = this.videoOverlayElement.getBoundingClientRect();
       this.cocoSSDLabels.forEach((div, index) => {
         if (index < predictionsList.length) {
           div.innerHTML = predictionsList[index].id;
+          // set position
           div.style.left =
             Math.floor(
-              predictionsList[index].pose.position.x *
-                this.videoOverlayElement.clientWidth
+              predictionsList[index].pose.position.x * overlayBoundings.width
             ) + 'px';
           div.style.top =
             Math.floor(
-              predictionsList[index].pose.position.y *
-                this.videoOverlayElement.clientHeight
+              predictionsList[index].pose.position.y * overlayBoundings.height
             ) + 'px';
-          div.style.visibility = 'visible';
+          // set size
+          div.style.width =
+            Math.floor(predictionsList[index].size.x * overlayBoundings.width) +
+            'px';
+          div.style.height =
+            Math.floor(
+              predictionsList[index].size.y * overlayBoundings.height
+            ) + 'px';
 
-          /*if (predictionsList[index].id === 'person') {
-            console.info(predictionsList[index].pose.position);
-          }*/
+          div.style.visibility = 'visible';
         } else {
           div.style.visibility = 'hidden';
         }
@@ -333,6 +330,7 @@ export default {
 .video-overlay {
   grid-area: camera-image;
   justify-self: center;
+  overflow: hidden;
 }
 
 .object-detection-label {
