@@ -1,7 +1,8 @@
 <template>
   <div class="interface-wrapper">
     <video id="video" class="camera-image" autoplay></video>
-    <button @click="onButtonCoCoSSD">coco-ssd object detection</button>
+    <div id="video-overlay" class="video-overlay"></div>
+    <button @click="onButtonCoCoSSD">toggle coco-ssd object detection</button>
   </div>
 </template>
 
@@ -14,27 +15,30 @@ import uuidv4 from 'uuid/v4';
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
+import { setTimeout } from 'timers';
 
 export default {
   name: 'Interface-Camera',
   mounted: function() {
     let video = document.getElementById('video');
+    this.videoOverlayElement = document.getElementById('video-overlay');
+
+    this.publishImages = false;
+    this.publishFrequency = 500; // ms
 
     // Get access to the camera!
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       // Not adding `{ audio: true }` since we only want video now
-      navigator.mediaDevices
-        .getUserMedia({ video: true })
-        .then((stream) => {
-          console.info('resolved video media');
-          console.info(stream);
-          //video.src = window.URL.createObjectURL(stream);
-          video.srcObject = stream;
-          video.play();
+      navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+        //console.info('resolved video media');
+        //console.info(stream);
+        //video.src = window.URL.createObjectURL(stream);
+        video.srcObject = stream;
+        video.play();
 
-          this.videoElement = video;
-          this.start();
-        });
+        this.videoElement = video;
+        this.start();
+      });
     }
   },
   beforeDestroy: function() {
@@ -58,8 +62,8 @@ export default {
 
         UbiiClientService.subscribe(
           this.ubiiDevice.components[1].topic,
-          predictedObjects => {
-            console.info(predictedObjects);
+          predictedObjectsList => {
+            this.drawPredictions(predictedObjectsList.elements);
           }
         );
 
@@ -74,6 +78,7 @@ export default {
       });
     },
     stop: function() {
+      this.publishImages = false;
       this.ubiiDevice && UbiiClientService.deregisterDevice(this.ubiiDevice);
       this.ubiiSessionCoCoSSD &&
         UbiiClientService.callService({
@@ -110,6 +115,7 @@ export default {
         'let prepareModel = async () => {' +
         'state.model = await state.modules.cocoSsd.load();' +
         'state.timestampLastImage = 0;' +
+        'state.tLastProcess = Date.now();' +
         '};' +
         'prepareModel();' +
         '};';
@@ -117,9 +123,14 @@ export default {
       // we really need a functional interaction editor for this (async parts and class constructors aren't handled ver well by .toString())
       let interactionCoCoSSDProcessCB =
         '(inputs, outputs, state) => {' +
+        'let tNow = Date.now();' +
+        'if (tNow < state.tLastProcess + 1000) { return; }' +
+        'state.tLastProcess = tNow;' +
+        //'console.info("interactionCoCoSSDProcessCB");' +
         'if (inputs.image && state.model) {' +
         // prediction function
         'let predict = async () => {' +
+        //'console.info("predicting");' +
         'let imgTensor = state.modules.tf.tensor3d(inputs.image.data, [inputs.image.height, inputs.image.width, 3], "int32");' +
         'let predictions = await state.model.detect(imgTensor);' +
         'return predictions;' +
@@ -183,6 +194,20 @@ export default {
     },
     /* interface methods */
     onButtonCoCoSSD: function() {
+      this.publishImages = !this.publishImages;
+
+      let continuousPublish = () => {
+        this.publishImage();
+
+        if (this.publishImages) {
+          setTimeout(continuousPublish.bind(this), this.publishFrequency);
+        }
+      };
+      if (this.publishImages) {
+        continuousPublish();
+      }
+    },
+    publishImage: function() {
       let img = this.captureImage();
       // reduce from RGBA8 to RGB8, fitting tensorflow model
       let data = img.data.filter((element, index, array) => {
@@ -210,29 +235,66 @@ export default {
       var canvas = document.createElement('canvas');
       canvas.height = this.videoElement.videoHeight;
       canvas.width = this.videoElement.videoWidth;
+
+      let videoRatio = canvas.width / canvas.height;
+      let displayRatio =
+        this.videoElement.clientWidth / this.videoElement.clientHeight;
+
+      if (displayRatio > videoRatio) {
+        this.videoOverlayElement.style.width =
+          videoRatio * this.videoOverlayElement.clientHeight + 'px';
+      } else if (displayRatio < videoRatio) {
+        this.videoOverlayElement.style.height =
+          videoRatio * this.videoOverlayElement.clientWidth + 'px';
+      }
+      //console.info(videoRatio);
+      //console.info(displayRatio);
       var ctx = canvas.getContext('2d');
       ctx.drawImage(this.videoElement, 0, 0, canvas.width, canvas.height);
 
       return ctx.getImageData(0, 0, canvas.width, canvas.height);
     },
     drawPredictions: function(predictionsList) {
+      //console.info(predictionsList);
+      //console.info(this.cocoSSDLabels);
       while (this.cocoSSDLabels.length < predictionsList.length) {
         let divElement = document.createElement('div');
-        divElement.style.backgroundColor = 'black';
-        this.videoElement.appendChild(divElement);
+        divElement.style.color = 'black';
+        divElement.style.textShadow = '0 0 10px yellow, 0 0 20px yellow';
+        //divElement.style.backgroundColor = 'yellow';
+        divElement.style.position = 'relative';
+        //divElement.style.width = 'auto';
+        //divElement.style.zIndex = 999;
+        this.videoOverlayElement.appendChild(divElement);
+        //divElement.classList.add('object-detection-label');
+        //divElement.className = 'object-detection-label';
         this.cocoSSDLabels.push(divElement);
+        //console.info('added indicator element');
+        //console.info(divElement);
       }
 
       this.cocoSSDLabels.forEach((div, index) => {
         if (index < predictionsList.length) {
           div.innerHTML = predictionsList[index].id;
-          div.style.left = predictionsList[index].pose.position.x * this.videoElement.clientWidth;
-          div.style.top = predictionsList[index].pose.position.y * this.videoElement.clientHeight;
-          div.style.visible = true;
+          div.style.left =
+            Math.floor(
+              predictionsList[index].pose.position.x *
+                this.videoOverlayElement.clientWidth
+            ) + 'px';
+          div.style.top =
+            Math.floor(
+              predictionsList[index].pose.position.y *
+                this.videoOverlayElement.clientHeight
+            ) + 'px';
+          div.style.visibility = 'visible';
+
+          /*if (predictionsList[index].id === 'person') {
+            console.info(predictionsList[index].pose.position);
+          }*/
         } else {
-          div.style.visible = false;
+          div.style.visibility = 'hidden';
         }
-      })
+      });
     }
   }
 };
@@ -254,5 +316,16 @@ export default {
   grid-area: camera-image;
   width: 100%;
   height: 100%;
+}
+
+.video-overlay {
+  grid-area: camera-image;
+  justify-self: center;
+}
+
+.object-detection-label {
+  position: relative;
+  background-color: yellow;
+  color: black;
 }
 </style>
