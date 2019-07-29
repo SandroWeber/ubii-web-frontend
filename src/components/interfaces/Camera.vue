@@ -2,7 +2,10 @@
   <div class="interface-wrapper">
     <video id="video" class="camera-image" autoplay></video>
     <div id="video-overlay" class="video-overlay"></div>
-    <button @click="onButtonCoCoSSD">toggle coco-ssd object detection</button>
+    <button
+      @click="onButtonCoCoSSD"
+      :class="{'toggle-active': cocoSsdActive, 'toggle-inactive': !cocoSsdActive}"
+    >toggle coco-ssd object detection</button>
   </div>
 </template>
 
@@ -23,7 +26,6 @@ export default {
     let video = document.getElementById('video');
     this.videoOverlayElement = document.getElementById('video-overlay');
 
-    this.publishImages = false;
     this.publishFrequency = 500; // ms
 
     // Get access to the camera!
@@ -45,7 +47,9 @@ export default {
     this.stop();
   },
   data: () => {
-    return {};
+    return {
+      cocoSsdActive: false
+    };
   },
   methods: {
     start: function() {
@@ -63,7 +67,7 @@ export default {
         UbiiClientService.subscribe(
           this.ubiiDevice.components[1].topic,
           predictedObjectsList => {
-            this.drawPredictions(predictedObjectsList.elements);
+            this.drawCoCoSSDLabels(predictedObjectsList.elements);
           }
         );
 
@@ -78,7 +82,7 @@ export default {
       });
     },
     stop: function() {
-      this.publishImages = false;
+      this.cocoSsdActive = false;
       this.ubiiDevice && UbiiClientService.deregisterDevice(this.ubiiDevice);
       this.ubiiSessionCoCoSSD &&
         UbiiClientService.callService({
@@ -194,17 +198,21 @@ export default {
     },
     /* interface methods */
     onButtonCoCoSSD: function() {
-      this.publishImages = !this.publishImages;
+      this.cocoSsdActive = !this.cocoSsdActive;
 
       let continuousPublish = () => {
         this.publishImage();
 
-        if (this.publishImages) {
+        if (this.cocoSsdActive) {
           setTimeout(continuousPublish.bind(this), this.publishFrequency);
         }
       };
-      if (this.publishImages) {
+      if (this.cocoSsdActive) {
         continuousPublish();
+      } else {
+        this.cocoSSDLabels.forEach(div => {
+          div.style.visibility = 'hidden';
+        });
       }
     },
     publishImage: function() {
@@ -254,7 +262,11 @@ export default {
 
       return ctx.getImageData(0, 0, canvas.width, canvas.height);
     },
-    drawPredictions: function(predictionsList) {
+    drawCoCoSSDLabels: function(predictionsList) {
+      if (!this.cocoSsdActive) {
+        return;
+      }
+
       //console.info(predictionsList);
       //console.info(this.cocoSSDLabels);
       while (this.cocoSSDLabels.length < predictionsList.length) {
@@ -327,5 +339,13 @@ export default {
   position: relative;
   background-color: yellow;
   color: black;
+}
+
+.toggle-active {
+  background-color: green;
+}
+
+.toggle-inactive {
+  background-color: grey;
 }
 </style>
