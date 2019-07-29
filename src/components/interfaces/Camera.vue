@@ -61,32 +61,12 @@ export default {
             this.ubiiDevice = device;
           }
         });
-
-        UbiiClientService.subscribe(
-          this.ubiiDevice.components[1].topic,
-          predictedObjectsList => {
-            this.drawCoCoSSDLabels(predictedObjectsList.elements);
-          }
-        );
-
-        UbiiClientService.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
-          session: this.ubiiSessionCoCoSSD
-        }).then(response => {
-          if (response.error) {
-            console.warn(response.error);
-          }
-        });
       });
     },
     stop: function() {
       this.cocoSsdActive = false;
       this.ubiiDevice && UbiiClientService.deregisterDevice(this.ubiiDevice);
-      this.ubiiSessionCoCoSSD &&
-        UbiiClientService.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
-          session: this.ubiiSessionCoCoSSD
-        });
+      this.stopCoCoSSDObjectDetection();
     },
     /* ubii methods */
     createUbiiSpecs: function() {
@@ -202,6 +182,29 @@ export default {
     onButtonCoCoSSD: function() {
       this.cocoSsdActive = !this.cocoSsdActive;
 
+      if (this.cocoSsdActive) {
+        this.startCoCoSSDObjectDetection();
+      } else {
+        this.stopCoCoSSDObjectDetection();
+      }
+    },
+    startCoCoSSDObjectDetection: function() {
+      UbiiClientService.subscribe(
+        this.ubiiDevice.components[1].topic,
+        predictedObjectsList => {
+          this.drawCoCoSSDLabels(predictedObjectsList.elements);
+        }
+      );
+
+      UbiiClientService.callService({
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+        session: this.ubiiSessionCoCoSSD
+      }).then(response => {
+        if (response.error) {
+          console.warn(response.error);
+        }
+      });
+
       let continuousPublish = () => {
         this.publishImage();
 
@@ -209,13 +212,20 @@ export default {
           setTimeout(continuousPublish.bind(this), this.publishFrequency);
         }
       };
-      if (this.cocoSsdActive) {
-        continuousPublish();
-      } else {
-        this.cocoSSDLabels.forEach(div => {
-          div.style.visibility = 'hidden';
+      continuousPublish();
+    },
+    stopCoCoSSDObjectDetection: function() {
+      UbiiClientService.unsubscribe(this.ubiiDevice.components[1].topic);
+
+      this.cocoSSDLabels.forEach(div => {
+        div.style.visibility = 'hidden';
+      });
+
+      this.ubiiSessionCoCoSSD &&
+        UbiiClientService.callService({
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+          session: this.ubiiSessionCoCoSSD
         });
-      }
     },
     publishImage: function() {
       let img = this.captureImage();
