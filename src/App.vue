@@ -1,148 +1,108 @@
 <template>
-  <app-layer 
-    id="app"
-    class="layer-one background"
-  >
+  <app-layer id="app" class="layer-one background">
     <div class="server-status-wrapper">
-      <server-status id="server-status"/>
+      <server-status id="server-status" />
     </div>
     <app-layer class="navigation-wrapper layer-one background border shadow">
       <nav class="navigation-bar">
-        <router-link
-          to="/"
-          class="navigation-item"
-        >
-          Home
-        </router-link>
-        |
-        <router-link
-          to="/admin"
-          class="navigation-item"
-        >
-          Administration
-        </router-link>
-        |
-        <router-link
-              to="/interfaces"
-              class="navigation-item"
-        >
-        Interfaces
-        </router-link>
-        |
-        <router-link
-          to="/tools"
-          class="navigation-item"
-        >
-        Tools
-        </router-link>
-        |
-        <router-link
-              to="/applications"
-              class="navigation-item"
-        >
-        Applications
-        </router-link>
-        |
-        <router-link
-          to="/nodeEditor"
-          class="navigation-item"
-        >
-        Node Editor
-        </router-link>
-        |
-        <router-link
-          to="/interactionEditor"
-          class="navigation-item"
-        >
-          Interaction Editor
-        </router-link>
+        <router-link to="/" class="navigation-item">Home</router-link>|
+        <router-link to="/admin" class="navigation-item">Administration</router-link>|
+        <router-link to="/interfaces" class="navigation-item">Interfaces</router-link>|
+        <router-link to="/tools" class="navigation-item">Tools</router-link>|
+        <router-link to="/applications" class="navigation-item">Applications</router-link>|
+        <router-link to="/nodeEditor" class="navigation-item">Node Editor</router-link>|
+        <router-link to="/interactionEditor" class="navigation-item">Interaction Editor</router-link>
       </nav>
     </app-layer>
-    
+
     <div class="router-view-wrapper">
-      <router-view class="router-view"/>
+      <router-view class="router-view" />
     </div>
   </app-layer>
 </template>
 
 <script>
-  import ClientNode from './services/ubiiClient/ubiiClientService';
-  import ServerStatus from './components/ServerStatus.vue'
-  import { AppLayer } from './components/appComponents/appComponents.js';
+import ClientNode from './services/ubiiClient/ubiiClientService';
+import ServerStatus from './components/ServerStatus.vue';
+import { AppLayer } from './components/appComponents/appComponents.js';
 
-  export default {
-    name: 'app',
-    components: {
-      ServerStatus,
-      AppLayer
-    },
-    data: () => {
-      return {
-        ubiiClientService: ClientNode
-      }
-    },
+export default {
+  name: 'app',
+  components: {
+    ServerStatus,
+    AppLayer
+  },
+  data: () => {
+    return {
+      ubiiClientService: ClientNode
+    };
   }
+};
 </script>
 
-<style lang="stylus"> 
-@import "./styles/main/color"
+<style lang="stylus">@import './styles/main/color';
 
-  * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -moz-box-sizing: border-box;
-      -webkit-box-sizing: border-box;
-  }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
 
+html, body {
+  width: 100%;
+  height: 100%;
+}
 
-  html, body {
-    width: 100%;   
-    height: 100%; 
-  } 
- 
-  #app {
-    font-family: 'Avenir', Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    width: 100%;
-    height: 100%;
-    display flex
-    flex-direction column
-    color: maxContrastColor
-    overflow hidden
-  }
+#app {
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: maxContrastColor;
+  overflow: hidden;
+}
 
-  .navigation-bar {
-    padding: 15px;
-    text-align: center;
-  }
+.navigation-bar {
+  padding: 15px;
+  text-align: center;
+}
 
-  .navigation-item {
-    padding: 0px 20px 0px 20px;
-    text-decoration: none
-  }
+.navigation-item {
+  padding: 0px 20px 0px 20px;
+  text-decoration: none;
+}
 
-  #server-status
-    position: relative
+#server-status {
+  position: relative;
+}
 
-  .navigation-wrapper
-    flex-grow: 0
-  
-  .server-status-wrapper
-    flex-grow: 0
-  
-  .router-view-wrapper
-    flex-grow: 1
-    overflow: hidden
+.navigation-wrapper {
+  flex-grow: 0;
+}
 
-  .server-stats {
-    text-align: center;
-  }
+.server-status-wrapper {
+  flex-grow: 0;
+}
 
-  .router-view
-    height: 100%
+.router-view-wrapper {
+  flex-grow: 1;
+  overflow: hidden;
+}
 
-  .svg-inline--fa
-    vertical-align 0
+.server-stats {
+  text-align: center;
+}
+
+.router-view {
+  height: 100%;
+}
+
+.svg-inline--fa {
+  vertical-align: 0;
+}
 </style>

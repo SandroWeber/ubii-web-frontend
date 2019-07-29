@@ -8,9 +8,16 @@
         style="overflow: hidden;"
       >
         <span v-show="clientId">Client ID: {{clientId}}</span>
-        <br>
+        <br />
 
-        <button @click="toggleFullScreen()">Fullscreen Mode</button>
+        <button class="button-fullscreen" @click="toggleFullScreen()">
+          <font-awesome-icon icon="compress" class="interface-icon" v-show="fullscreen" />
+          <font-awesome-icon icon="expand" class="interface-icon" v-show="!fullscreen" />
+        </button>
+        <br />
+        <button v-show="!fullscreen" @click="calibrate()">Calibrate</button>
+
+        <div id="debug-out">debug out ...</div>
 
         <div
           id="touch-area"
@@ -19,29 +26,35 @@
           v-on:touchmove="onTouchMove($event)"
           v-on:touchend="onTouchEnd($event)"
         >
-          <span>Touch0: {{touches && touches[0] && touches[0].clientX}} {{touches && touches[0] && touches[0].clientY}}</span>
+          <!--<span>Touch0: {{getTouch0X()}} {{getTouch0Y()}}</span>
           <br>
           <span>Orientation:</span>
           <span v-if="deviceOrientation">
-            {{deviceOrientation.absolute}}
             {{this.round(deviceOrientation.alpha, 1)}}
             {{this.round(deviceOrientation.beta, 1)}}
             {{this.round(deviceOrientation.gamma, 1)}}
           </span>
           <br>
+          <span>Calibrated Orientation:</span>
+          <span v-if="fixedCalibratedOrientation">
+            {{this.round(fixedCalibratedOrientation.x, 1)}}
+            {{this.round(fixedCalibratedOrientation.y, 1)}}
+            {{this.round(fixedCalibratedOrientation.z, 1)}}
+          </span>
+          <br>
           <span>Acceleration:</span>
-          <span v-if="deviceMotion && deviceMotion.acceleration">
-            {{this.round(deviceMotion.acceleration.x, 1)}}
-            {{this.round(deviceMotion.acceleration.y, 1)}}
-            {{this.round(deviceMotion.acceleration.z, 1)}}
+          <span v-if="deviceData.accelerationTest">
+            {{this.round(deviceData.acceleration.x, 1)}}
+            {{this.round(deviceData.acceleration.y, 1)}}
+            {{this.round(deviceData.acceleration.z, 1)}}
           </span>
           <br>
           <span>Rotation:</span>
-          <span v-if="deviceMotion && deviceMotion.rotationRate">
-            {{this.round(deviceMotion.rotationRate.alpha, 1)}}
-            {{this.round(deviceMotion.rotationRate.beta, 1)}}
-            {{this.round(deviceMotion.rotationRate.gamma, 1)}}
-          </span>
+          <span v-if="deviceData.rotationRate">
+            {{this.round(deviceData.rotationRate.alpha, 1)}}
+            {{this.round(deviceData.rotationRate.beta, 1)}}
+            {{this.round(deviceData.rotationRate.gamma, 1)}}
+          </span>-->
         </div>
       </fullscreen>
     </div>
@@ -59,9 +72,10 @@ import UbiiEventBus from '../../services/ubiiClient/ubiiEventBus';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faPlay } from '@fortawesome/free-solid-svg-icons';
+import { faExpand, faCompress } from '@fortawesome/free-solid-svg-icons';
+import { setTimeout } from 'timers';
 
-library.add(faPlay);
+library.add([faExpand, faCompress]);
 
 Vue.use(Fullscreen);
 
@@ -72,15 +86,21 @@ export default {
   components: { UbiiClientContent },
   mounted: function() {
     // unsubscribe before page is unloaded
-    window.addEventListener('beforeunload', () => {
-      this.stopInterface();
+    window.addEventListener('beforeunload', async () => {
+      await this.stopInterface();
     });
 
-    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.registerUbiiSpecs);
-    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.unregisterUbiiSpecs);
-
+    this.deviceData = {};
     this.registerEventListeners();
-    if (UbiiClientService.isConnected) this.registerUbiiSpecs();
+    UbiiClientService.isConnected().then(() => {
+      this.startInterface();
+    });
+    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
+      this.startInterface();
+    });
+    UbiiClientService.onDisconnect(async () => {
+      await this.stopInterface();
+    });
   },
   beforeDestroy: function() {
     this.stopInterface();
@@ -88,14 +108,24 @@ export default {
   data: () => {
     return {
       ubiiClientService: UbiiClientService,
+      initializing: false,
+      hasRegisteredUbiiDevice: false,
       clientId: undefined,
-      touches: undefined,
-      deviceOrientation: undefined,
-      deviceMotion: undefined,
+      publishFrequency: 0.01,
       fullscreen: false
     };
   },
   methods: {
+    startInterface: function() {
+      this.createUbiiSpecs();
+      this.registerUbiiSpecs();
+    },
+    stopInterface: async function() {
+      this.running = false;
+      this.unregisterEventListeners();
+      await this.unregisterUbiiSpecs();
+    },
+    /* ubii methods */
     createUbiiSpecs: function() {
       let deviceName = 'web-interface-smart-device';
 
@@ -128,6 +158,21 @@ export default {
           }
         ]
       };
+      // add vibration component if available
+      navigator.vibrate =
+        navigator.vibrate ||
+        navigator.webkitVibrate ||
+        navigator.mozVibrate ||
+        navigator.msVibrate;
+      if (navigator.vibrate) {
+        ubiiDevice.components.push({
+          topic: topicPrefix + '/vibration_pattern',
+          messageFormat: 'double',
+          ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+        });
+        this.tNextVibrate = Date.now();
+        navigator.vibrate(100);
+      }
 
       this.$data.deviceName = deviceName;
       this.$data.ubiiDevice = ubiiDevice;
@@ -137,27 +182,160 @@ export default {
       this.$data.componentTouchEvents = ubiiDevice.components[3];
     },
     registerUbiiSpecs: function() {
+      if (this.$data.ubiiDevice.id) {
+        console.warn(
+          'Tried to register ubii device, but is already registered'
+        );
+        document.getElementById('debug-out').innerHTML =
+          'registerUbiiSpecs(), already registered';
+        return;
+      }
+      this.initializing = true;
+
       // register the mouse pointer device
-      UbiiClientService.isConnected().then(() => {
-        this.createUbiiSpecs();
-        UbiiClientService.registerDevice(this.$data.ubiiDevice).then(device => {
-          this.$data.ubiiDevice = device;
-          return device;
-        });
-      });
+      UbiiClientService.isConnected().then(
+        () => {
+          UbiiClientService.registerDevice(this.$data.ubiiDevice)
+            .then(device => {
+              if (device.id) {
+                this.$data.ubiiDevice = device;
+                this.hasRegisteredUbiiDevice = true;
+                this.initializing = false;
+                this.running = true;
+                this.publishContinuousDeviceData();
+              }
+              return device;
+            })
+            .then(() => {
+              let vibrationComponent = this.$data.ubiiDevice.components.find(
+                element => {
+                  return element.topic.indexOf('/vibration_pattern') !== -1;
+                }
+              );
+              if (vibrationComponent) {
+                UbiiClientService.subscribe(
+                  vibrationComponent.topic,
+                  vibrationPattern => {
+                    if (Date.now() >= this.tNextVibrate) {
+                      navigator.vibrate(vibrationPattern);
+                      this.tNextVibrate = Date.now() + 2 * vibrationPattern;
+                    }
+                  }
+                );
+              }
+            });
+        },
+        // reject
+        () => {
+          this.initializing = false;
+        }
+      );
     },
     unregisterUbiiSpecs: function() {
-      if (this.ubiiDevice.components) {
-        this.ubiiDevice.components.forEach(component => {
+      if (!this.hasRegisteredUbiiDevice) {
+        console.warn(
+          'Tried to unregister ubii specs, but they are not registered.'
+        );
+        document.getElementById('debug-out').innerHTML =
+          'unregister(), not registered';
+        return;
+      }
+
+      if (this.$data.ubiiDevice && this.$data.ubiiDevice.components) {
+        this.$data.ubiiDevice.components.forEach(component => {
           // eslint-disable-next-line no-console
           console.log('unsubscribed to ' + component.topic);
 
-          UbiiClientService.client.unsubscribe(component.topic);
+          UbiiClientService.unsubscribe(component.topic);
         });
+
+        return UbiiClientService.deregisterDevice(this.$data.ubiiDevice).then(
+          () => {
+            this.hasRegisteredUbiiDevice = false;
+          }
+        );
+      }
+    },
+    publishContinuousDeviceData: function() {
+      if (!this.running) {
+        return;
       }
 
-      // TODO: unregister device
+      this.deviceData.touchPosition &&
+        this.publishTouchPosition(this.deviceData.touchPosition);
+
+      this.deviceData.currentOrientation &&
+        this.publishDeviceOrientation(this.deviceData.currentOrientation);
+
+      this.deviceData.acceleration &&
+        this.publishDeviceMotion(this.deviceData.acceleration);
+
+      // call loop
+      setTimeout(
+        this.publishContinuousDeviceData,
+        this.publishFrequency * 1000
+      );
     },
+    publishTouchPosition: function(position) {
+      if (this.hasRegisteredUbiiDevice) {
+        UbiiClientService.publish({
+          topicDataRecord: {
+            topic: this.$data.componentTouchPosition.topic,
+            vector2: position
+          }
+        });
+      }
+    },
+    publishTouchEvent: function(type, position) {
+      if (this.hasRegisteredUbiiDevice) {
+        UbiiClientService.publish({
+          topicDataRecord: {
+            topic: this.$data.componentTouchEvents.topic,
+            touchEvent: { type: type, position: position }
+          }
+        });
+      }
+    },
+    publishDeviceOrientation: function(orientation) {
+      let current = (this.deviceData.currentOrientation = {
+        x: this.round(orientation.x, 2),
+        y: this.round(orientation.y, 2),
+        z: this.round(orientation.z, 2)
+      });
+      let calibrated = this.deviceData.calibratedOrientation || {
+        x: 0,
+        y: 0,
+        z: 0
+      };
+
+      let fixed = {
+        x: current.x - calibrated.x,
+        y: current.y - calibrated.y,
+        z: current.z - calibrated.z
+      };
+
+      this.deviceData.fixedCalibratedOrientation = fixed;
+
+      UbiiClientService.publish({
+        topicDataRecord: {
+          topic: this.$data.componentOrientation.topic,
+          vector3: fixed
+        }
+      });
+    },
+    publishDeviceMotion: function(acceleration) {
+      UbiiClientService.publish({
+        topicDataRecord: {
+          topic: this.$data.componentLinearAcceleration.topic,
+          vector3: {
+            x: this.round(acceleration.x, 2),
+            y: this.round(acceleration.y, 2),
+            z: this.round(acceleration.z, 2)
+          }
+        }
+      });
+    },
+    /* event methods */
     registerEventListeners: function() {
       window.addEventListener(
         'deviceorientation',
@@ -170,28 +348,23 @@ export default {
       window.removeEventListener('deviceorientation', this.onDeviceOrientation);
       window.removeEventListener('devicemotion', this.onDeviceMotion);
     },
-    stopInterface: function() {
-      this.unregisterEventListeners();
-      this.unregisterUbiiSpecs();
-    },
     onTouchStart: function(event) {
-      this.$data.touches = event.touches;
+      this.deviceData.touches = event.touches;
 
-      let position = this.normalizeCoordinates(event, 0);
-      this.publishTouchPosition(position);
+      this.deviceData.touchPosition = this.normalizeCoordinates(event, 0);
       this.publishTouchEvent(
         ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN,
-        position
+        this.deviceData.touchPosition
       );
     },
     onTouchMove: function(event) {
-      this.$data.touches = event.touches;
+      this.deviceData.touches = event.touches;
 
-      let position = this.normalizeCoordinates(event, 0);
-      this.publishTouchPosition(position);
+      this.deviceData.touchPosition = this.normalizeCoordinates(event, 0);
     },
     onTouchEnd: function(event) {
-      this.$data.touches = event.touches;
+      this.deviceData.touches = event.touches;
+      this.deviceData.touchPosition = undefined;
 
       this.publishTouchEvent(
         ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP,
@@ -200,34 +373,18 @@ export default {
     },
     onDeviceOrientation: function(event) {
       // https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent
-      this.$data.deviceOrientation = event;
-
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.componentOrientation.topic,
-        'vector3',
-        {
-          x: this.round(event.alpha, 2),
-          y: this.round(event.beta, 2),
-          z: this.round(event.gamma, 2)
-        }
-      );
+      this.deviceData.currentOrientation = {
+        x: event.alpha,
+        y: event.beta,
+        z: event.gamma
+      };
     },
     onDeviceMotion: function(event) {
       // https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent
-      this.$data.deviceMotion = event;
-
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.componentLinearAcceleration.topic,
-        'vector3',
-        {
-          x: this.round(event.acceleration.x, 2),
-          y: this.round(event.acceleration.y, 2),
-          z: this.round(event.acceleration.z, 2)
-        }
-      );
+      this.deviceData.acceleration = event.acceleration;
+      this.deviceData.rotationRate = event.rotationRate;
     },
+    /* helper methods */
     round: function(value, digits) {
       return Math.round(value * digits * 10) / (digits * 10);
     },
@@ -246,27 +403,35 @@ export default {
 
       return { x: normalizedX, y: normalizedY };
     },
-    publishTouchPosition: function(position) {
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.componentTouchPosition.topic,
-        'vector2',
-        position
-      );
-    },
-    publishTouchEvent: function(type, position) {
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.componentTouchEvents.topic,
-        'touchEvent',
-        { type: type, position: position }
-      );
-    },
     toggleFullScreen: function() {
       this.$refs['fullscreen'].toggle();
     },
     onFullScreenChange: function(fullscreen) {
       this.fullscreen = fullscreen;
+    },
+    calibrate: function() {
+      if (this.deviceData.currentOrientation) {
+        this.deviceData.calibratedOrientation = this.deviceData.currentOrientation;
+      }
+    },
+    /* interface methods */
+    getTouch0X: function() {
+      //console.info(this.deviceData);
+      return (
+        this.deviceData &&
+        this.deviceData.touches &&
+        this.deviceData.touches[0] &&
+        this.deviceData.touches[0].clientX
+      );
+    },
+
+    getTouch0Y: function() {
+      return (
+        this.deviceData &&
+        this.deviceData.touches &&
+        this.deviceData.touches[0] &&
+        this.deviceData.touches[0].clientY
+      );
     }
   }
 };
@@ -285,5 +450,10 @@ export default {
 
 .notification {
   color: red;
+}
+
+.button-fullscreen {
+  width: 20px;
+  height: 20px;
 }
 </style>

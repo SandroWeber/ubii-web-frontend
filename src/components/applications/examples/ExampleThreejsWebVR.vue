@@ -8,7 +8,7 @@
 /* eslint-disable no-console */
 
 import * as Three from 'three';
-import WEBVR from '../sharedModules/moduleThreejsWebVR';
+import WebVR from '../sharedModules/WebVR';
 
 export default {
   name: 'ExampleTHREEjsWebVR',
@@ -47,19 +47,15 @@ export default {
       this.renderer.setSize(container.clientWidth, container.clientHeight);
       container.appendChild(this.renderer.domElement);
 
-      container.appendChild(WEBVR.createButton(this.renderer));
+      container.appendChild(WebVR.createButton(this.renderer));
       this.renderer.vr.enabled = true;
     },
     animate: function() {
-      /*requestAnimationFrame(this.animate);
-        this.mesh.rotation.x += 0.01;
-        this.mesh.rotation.y += 0.02;
-        this.renderer.render(this.scene, this.camera);*/
+      const renderer = this.renderer;
+      const scene = this.scene;
+      const camera = this.camera;
+      const mesh = this.mesh;
 
-      let renderer = this.renderer;
-      let scene = this.scene;
-      let camera = this.camera;
-      let mesh = this.mesh;
       this.renderer.setAnimationLoop(function() {
         mesh.rotation.x += 0.01;
         mesh.rotation.y += 0.02;

@@ -1,30 +1,30 @@
 <template>
   <app-layer class="backend-info layer-two background low-contrast horizontal-shadow">
     <label for="server-ip">Server IP</label>
-    <app-input :id="'server-ip'" :type="'text'" v-model="ubiiClientService.serverIP"/>
+    <app-input :id="'server-ip'" :type="'text'" v-model="ubiiClientService.serverIP" />
     <label for="server-port">Server Port</label>
-    <app-input :id="'server-port'" :type="'text'" v-model="ubiiClientService.serverPort"/>
-    <app-button :class="buttonClassObject" @click="connect" :contentSizePercentage="60">
-      <font-awesome-icon icon="sync-alt" class="connect-icon"/>
+    <app-input :id="'server-port'" :type="'text'" v-model="ubiiClientService.serverPort" />
+    <app-button :class="buttonClassObject" @click="onButtonConnect" :contentSizePercentage="60">
+      <font-awesome-icon icon="sync-alt" class="connect-icon" />
     </app-button>
   </app-layer>
 </template>
 
 <script>
-import UbiiClientService from "../services/ubiiClient/ubiiClientService.js";
+import UbiiClientService from '../services/ubiiClient/ubiiClientService.js';
 import {
   AppButton,
   AppLayer,
   AppInput
-} from "./appComponents/appComponents.js";
+} from './appComponents/appComponents.js';
 
 /* fontawesome */
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faSyncAlt } from "@fortawesome/free-solid-svg-icons";
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faSyncAlt } from '@fortawesome/free-solid-svg-icons';
 library.add(faSyncAlt);
 
 export default {
-  name: "ServerStatus",
+  name: 'ServerStatus',
   components: {
     AppButton,
     AppLayer,
@@ -32,34 +32,43 @@ export default {
   },
   beforeMount: function() {
     UbiiClientService.connect();
+    window.addEventListener('beforeunload', () => {
+      UbiiClientService.disconnect();
+    });
   },
   beforeDestroy: function() {
     UbiiClientService.disconnect();
   },
   data: () => {
     return {
-      ubiiClientService: UbiiClientService,
-      test: "hallo"
+      ubiiClientService: UbiiClientService
     };
   },
   computed: {
     buttonClassObject: function() {
       return {
-        "button-connect": true,
+        'button-connect': true,
         round: true,
-        "green-accent": this.ubiiClientService.connected,
-        "red-accent": !this.ubiiClientService.connected
+        'green-accent': this.ubiiClientService.connected,
+        'red-accent': !this.ubiiClientService.connected
       };
     }
   },
   methods: {
-    connect: function() {
-      if (!this.ubiiClientService.connected) {
-        this.ubiiClientService.connect();
-      } else {
-        this.ubiiClientService.disconnect();
-        this.ubiiClientService.connect();
-      }
+    onButtonConnect: function() {
+      UbiiClientService.isConnected().then(connected => {
+        if (connected) {
+          UbiiClientService.disconnect().then(() => {
+            UbiiClientService.connect();
+          });
+        } else {
+          if (UbiiClientService.client.clientSpecification) {
+            UbiiClientService.reconnect();
+          } else {
+            UbiiClientService.connect();
+          }
+        }
+      });
     }
   }
 };
