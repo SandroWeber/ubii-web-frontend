@@ -170,7 +170,8 @@ class ClientNodeWeb {
         }
 
         if (reply.error) {
-          return reply.error;
+          console.warn(reply.error);
+          return undefined;
         }
       },
       (error) => {
