@@ -8,6 +8,13 @@
         </app-tile>
       </router-link>
 
+      <router-link to="/interfaces/ubii-controller" class="interface-link" tag="div">
+        <app-tile class="layer-three background round shadow orange-accent">
+          <font-awesome-icon icon="gamepad" class="interface-icon"/>
+          <p>Ubii Controller</p>
+        </app-tile>
+      </router-link>
+
       <router-link to="/interfaces/camera" class="interface-link" tag="div">
         <app-tile class="layer-three background round shadow orange-accent">
           <font-awesome-icon icon="camera" class="interface-icon" />
@@ -23,8 +30,8 @@ import { AppTile } from './appComponents/appComponents.js';
 
 // Fontawesome.
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faMobileAlt, faCamera } from '@fortawesome/free-solid-svg-icons';
-library.add(faMobileAlt, faCamera);
+import { faMobileAlt, faCamera, faGamepad } from '@fortawesome/free-solid-svg-icons';
+library.add(faMobileAlt, faCamera, faGamepad);
 
 export default {
   name: 'Interfaces',
