@@ -204,23 +204,20 @@ export default {
             return device;
           })
           .then(() => {
-            UbiiClientService.client.subscribe(
-              this.componentSetColor.topic,
-              color => {
-                let colorString =
-                  'rgba(' +
-                  [color.r * 255, color.g * 255, color.b * 255, color.a].join(
-                    ','
-                  ) +
-                  ')';
-                document.getElementById(
-                  'ubii-controller-touch-area'
-                ).style.backgroundColor = colorString;
-              }
-            );
+            UbiiClientService.subscribe(this.componentSetColor.topic, color => {
+              let colorString =
+                'rgba(' +
+                [color.r * 255, color.g * 255, color.b * 255, color.a].join(
+                  ','
+                ) +
+                ')';
+              document.getElementById(
+                'ubii-controller-touch-area'
+              ).style.backgroundColor = colorString;
+            });
 
             if (this.componentVibration) {
-              UbiiClientService.client.subscribe(
+              UbiiClientService.subscribe(
                 this.componentVibration.topic,
                 vibrationPattern => {
                   if (Date.now() >= this.tNextVibrate) {
@@ -246,14 +243,17 @@ export default {
           // eslint-disable-next-line no-console
           console.log('unsubscribed to ' + component.topic);
 
-          UbiiClientService.client.unsubscribe(component.topic);
+          UbiiClientService.unsubscribe(component.topic);
         });
       }
 
       this.hasRegisteredUbiiDevice = null;
 
       //TODO: this should not happen here, move to interaction
-      UbiiClientService.client.publish(this.ubiiDevice.name, 'removeClient', 'string', UbiiClientService.getClientID());
+      UbiiClientService.publishRecord({
+        topic: 'removeClient',
+        string: UbiiClientService.getClientID()
+      });
 
       // TODO: unregister device
       this.ubiiDevice && UbiiClientService.deregisterDevice(this.ubiiDevice);
@@ -296,77 +296,62 @@ export default {
 
       this.deviceData.fixedCalibratedOrientation = fixed;
 
-      UbiiClientService.client.publish(
-        this.ubiiDevice.name,
-        this.componentOrientation.topic,
-        'vector3',
-        fixed
-      );
+      UbiiClientService.publishRecord({
+        topic: this.componentOrientation.topic,
+        vector3: fixed
+      });
     },
     publishDeviceMotion: function(acceleration) {
-      UbiiClientService.client.publish(
-        this.ubiiDevice.name,
-        this.componentLinearAcceleration.topic,
-        'vector3',
-        {
+      UbiiClientService.publishRecord({
+        topic: this.componentLinearAcceleration.topic,
+        vector3: {
           x: this.round(acceleration.x, 2),
           y: this.round(acceleration.y, 2),
           z: this.round(acceleration.z, 2)
         }
-      );
+      });
     },
     publishPlayerRegistration: function() {
-      console.info('registerNewClient');
-      UbiiClientService.client.publish(
-        this.ubiiDevice.name,
-        'registerNewClient',
-        'string',
-        UbiiClientService.getClientID()
-      );
+      UbiiClientService.publishRecord({
+        topic: 'registerNewClient',
+        string: UbiiClientService.getClientID()
+      });
     },
     publishPressedActionButton: function(buttonID) {
-      console.info('button ' + buttonID);
       let topic = '';
       if (buttonID === 1) {
         topic = this.componentButtonA.topic;
       } else if (buttonID === 2) {
         topic = this.componentButtonB.topic;
       }
-      UbiiClientService.client.publish(
-        this.ubiiDevice.name,
-        topic,
-        'keyEvent',
-        {
+      UbiiClientService.publishRecord({
+        topic: topic,
+        keyEvent: {
           type: ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN,
           key: buttonID.toString()
         }
-      );
+      });
     },
     publishReleasedActionButton: function(buttonID) {
-      console.info('button ' + buttonID);
       let topic = '';
       if (buttonID === 1) {
         topic = this.componentButtonA.topic;
       } else if (buttonID === 2) {
         topic = this.componentButtonB.topic;
       }
-      UbiiClientService.client.publish(
-        this.ubiiDevice.name,
-        topic,
-        'keyEvent',
-        {
+      UbiiClientService.publishRecord({
+        topic: topic,
+        keyEvent: {
           type: ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP,
           key: buttonID.toString()
         }
-      );
+      });
     },
     publishAnalogStickPosition: function(stickPosition) {
-      UbiiClientService.client.publish(
-        this.ubiiDevice.name,
-        this.componentAnalogstickLeft.topic,
-        'vector2',
-        stickPosition
-      );
+      UbiiClientService.publishRecord({
+        topic: this.componentAnalogstickLeft.topic,
+        vector2: stickPosition
+      });
     },
     /* event methods */
     registerEventListeners: function() {
