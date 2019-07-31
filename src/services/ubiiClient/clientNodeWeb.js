@@ -310,7 +310,7 @@ class ClientNodeWeb {
           return resolve(message);
         },
         (error) => {
-          console.error(error);
+          console.error(error.toString());
           return reject();
         });
     });

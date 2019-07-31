@@ -18,7 +18,8 @@ class RESTClient {
   }
 
   send(route, message) {
-    let url = 'http://' + this.host + ':' + this.port + route;
+    //let url = 'http://' + this.host + ':' + this.port + route;
+    let url = 'https://' + this.host + ':' + this.port + route;
 
     return new Promise((resolve, reject) => {
       /*axios({
@@ -27,14 +28,17 @@ class RESTClient {
         data: message,
         //config: { headers: {'Content-Type': 'application/octet-stream' }}
       })*/
-      axios.post(url, message)
+      /*axios.post(url, message)
         .then((response) => {
           resolve(response.data);
         })
         .catch((error) => {
           console.warn(error);
           reject(error);
-        });
+        });*/
+
+      const request = new Request(url, {method: 'POST', body: message});
+      fetch()
     });
   }
 }
