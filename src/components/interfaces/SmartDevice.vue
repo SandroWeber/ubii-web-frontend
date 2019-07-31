@@ -213,7 +213,7 @@ export default {
                 }
               );
               if (vibrationComponent) {
-                UbiiClientService.client.subscribe(
+                UbiiClientService.subscribe(
                   vibrationComponent.topic,
                   vibrationPattern => {
                     if (Date.now() >= this.tNextVibrate) {
@@ -246,7 +246,7 @@ export default {
           // eslint-disable-next-line no-console
           console.log('unsubscribed to ' + component.topic);
 
-          UbiiClientService.client.unsubscribe(component.topic);
+          UbiiClientService.unsubscribe(component.topic);
         });
 
         return UbiiClientService.deregisterDevice(this.$data.ubiiDevice).then(
@@ -278,22 +278,22 @@ export default {
     },
     publishTouchPosition: function(position) {
       if (this.hasRegisteredUbiiDevice) {
-        UbiiClientService.client.publish(
-          this.$data.ubiiDevice.name,
-          this.$data.componentTouchPosition.topic,
-          'vector2',
-          position
-        );
+        UbiiClientService.publish({
+          topicDataRecord: {
+            topic: this.$data.componentTouchPosition.topic,
+            vector2: position
+          }
+        });
       }
     },
     publishTouchEvent: function(type, position) {
       if (this.hasRegisteredUbiiDevice) {
-        UbiiClientService.client.publish(
-          this.$data.ubiiDevice.name,
-          this.$data.componentTouchEvents.topic,
-          'touchEvent',
-          { type: type, position: position }
-        );
+        UbiiClientService.publish({
+          topicDataRecord: {
+            topic: this.$data.componentTouchEvents.topic,
+            touchEvent: { type: type, position: position }
+          }
+        });
       }
     },
     publishDeviceOrientation: function(orientation) {
@@ -316,24 +316,24 @@ export default {
 
       this.deviceData.fixedCalibratedOrientation = fixed;
 
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.componentOrientation.topic,
-        'vector3',
-        fixed
-      );
+      UbiiClientService.publish({
+        topicDataRecord: {
+          topic: this.$data.componentOrientation.topic,
+          vector3: fixed
+        }
+      });
     },
     publishDeviceMotion: function(acceleration) {
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.componentLinearAcceleration.topic,
-        'vector3',
-        {
-          x: this.round(acceleration.x, 2),
-          y: this.round(acceleration.y, 2),
-          z: this.round(acceleration.z, 2)
+      UbiiClientService.publish({
+        topicDataRecord: {
+          topic: this.$data.componentLinearAcceleration.topic,
+          vector3: {
+            x: this.round(acceleration.x, 2),
+            y: this.round(acceleration.y, 2),
+            z: this.round(acceleration.z, 2)
+          }
         }
-      );
+      });
     },
     /* event methods */
     registerEventListeners: function() {

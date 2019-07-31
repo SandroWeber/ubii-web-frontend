@@ -170,7 +170,8 @@ class ClientNodeWeb {
         }
 
         if (reply.error) {
-          return reply.error;
+          console.warn(reply.error);
+          return undefined;
         }
       },
       (error) => {
@@ -317,23 +318,10 @@ class ClientNodeWeb {
 
   /**
    * Publish the specified value of the specified type under the specified topic to the master node.
-   * @param {String} deviceName
-   * @param {String} topic
-   * @param {String} type
-   * @param {*} value
+   * @param {ubii.topicData.TopicData} topicData
    */
-  publish(deviceName, topic, type, value) {
-    let payload, buffer;
-
-    payload = {
-      deviceId: this.deviceSpecifications.get(deviceName).id,
-      topicDataRecord: {
-        topic: topic
-      }
-    };
-    payload.topicDataRecord[type] = value;
-
-    buffer = this.translatorTopicData.createBufferFromPayload(payload);
+  publish(topicData) {
+    let buffer = this.translatorTopicData.createBufferFromPayload(topicData);
 
     this.topicDataClient.send(buffer);
   }
