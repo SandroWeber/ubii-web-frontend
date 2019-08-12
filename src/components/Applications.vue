@@ -83,6 +83,20 @@
         <span class="label">Misc</span>
       </div>
 
+      
+      <div class="grid">
+        <router-link
+          to="/applications/misc/rock-paper-scissors"
+          class="interface-link"
+          tag="div"
+        >
+          <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="hand-scissors" class="interface-icon"/>
+            <p>Rock Paper Scissors</p>
+          </app-tile>
+        </router-link>
+    </div>
+
       <div class="grid"></div>
     </div>
   </div>
@@ -101,7 +115,8 @@ import {
   faMobileAlt,
   faTabletAlt,
   faKeyboard,
-  faHandPointer
+  faHandPointer,
+  faHandScissors
 } from '@fortawesome/free-solid-svg-icons';
 library.add(faMousePointer);
 library.add(faCube);
@@ -111,6 +126,7 @@ library.add(faMobileAlt);
 library.add(faTabletAlt);
 library.add(faKeyboard);
 library.add(faHandPointer);
+library.add(faHandScissors);
 
 export default {
   name: 'Applications',

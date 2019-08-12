@@ -111,6 +111,10 @@ export default new Router({
     path: '/applications/smartphone-assisted-vr/savr-keyboard',
     name: 'VR Keyboard - A virtual keyboard',
     component: () => import('./components/applications/smartphoneAssistedVR/SAVRKeyboard.vue')
+  }, {
+    path: '/applications/misc/rock-paper-scissors',
+    name: 'Rock Paper Scissors',
+    component: () => import('./components/applications/misc/RockPaperScissors.vue')
   }
   ]
 })
