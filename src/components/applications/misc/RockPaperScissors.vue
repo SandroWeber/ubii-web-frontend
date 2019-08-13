@@ -24,7 +24,7 @@
                     </div>
                     <br>
                     <br>
-                    <div style="font-size: 1.5rem"><b>{{winLooseMsg}}</b></div>
+                    <div style="font-size: 1.5rem"><b>{{winLoseMsg}}</b></div>
                     <br>
                     <br>
                     <button class="pure-button"  @click="startGame()">Retry</button>
@@ -64,8 +64,6 @@ import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
-import { mapActions } from 'vuex';
-
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
 import {
@@ -87,80 +85,50 @@ export default {
   mounted: function() {
     // unsubscribe before page is unloaded
     window.addEventListener('beforeunload', () => {
-      this.stopExample();
+      this.stop();
     });
 
     UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
-      this.stopExample();
-      this.startExample();
+      this.stop();
+      this.start();
     });
-    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopExample);
+    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stop);
 
-    if (UbiiClientService.isConnected) this.startExample();
+    if (UbiiClientService.isConnected) this.start();
   },
   beforeDestroy: function() {
-    this.stopExample();
+    this.stop();
   },
   data: () => {
     return {
-        playMode: 0,
-        curntInput: undefined,
+        //current inputs
+        currentButtonInput: undefined,  //button
+        gestureInputCollection: [],    //myo
+        pollingInterval: null,
+
+        //final gestures
         playerGesture: 0,
-        opponentGesture: 0,
-        msgText: "temp",
-        winLooseMsg: "win / loose message",
-        myoCOnnected: false,
-
+        opponentGesture: 0, 
         
-        showClientPointer: true,
-        showServerPointer: true,
-        mirrorPointer: false,
-        ubiiClientService: UbiiClientService,
-        exampleStarted: false,
-        serverMousePosition: { x: 0, y: 0 },
-        clientPointerInside: false
-    };
-  },
-  watch: {
-    mirrorPointer: function(value) {
-      if (
-        !UbiiClientService.isConnected ||
-        !this.$data.ubiiDevice.name ||
-        !this.$data.inputMirror.topic
-      ) {
-        return;
-      }
+        //ui related
+        msgText: "temp",
+        winLoseMsg: "win / lose message",
 
-      // if the checkbox is changed, we publish this info on the related topic
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.inputMirror.topic,
-        this.$data.inputMirror.messageFormat,
-        value
-      );
-    }
+
+        ubiiClientService: UbiiClientService,
+    };
   },
   methods: {
     createUbiiSpecs: function() {
       // create specifications for the protobuf messages
 
       // helper definitions that we can reference later
-      let deviceName = 'web-example-mouse-pointer';
+      let deviceName = 'rock-paper-scissors-game-device';
       let topicPrefix = UbiiClientService.getClientID() + '/' + deviceName;
-      let inputClientPointer = {
-        internalName: 'clientPointer',
-        messageFormat: 'ubii.dataStructure.Vector2',
-        topic: topicPrefix + '/' + 'mouse_client_position'
-      };
-      let inputMirror = {
-        internalName: 'mirrorPointer',
-        messageFormat: 'bool',
-        topic: topicPrefix + '/' + 'mirror_mouse'
-      };
       let outputServerPointer = {
-        internalName: 'serverPointer',
-        messageFormat: 'ubii.dataStructure.Vector2',
-        topic: topicPrefix + '/' + 'mouse_server_position'
+        internalName: 'gestureId',
+        messageFormat: 'ubii.dataStructure.float', //TODO: look up propper data structure
+        topic: topicPrefix + '/' + 'gesture_id'
       };
 
       // specification of a ubii.devices.Device
@@ -170,63 +138,29 @@ export default {
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
         components: [
           {
-            topic: inputClientPointer.topic,
-            messageFormat: inputClientPointer.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
-          },
-          {
-            topic: inputMirror.topic,
-            messageFormat: inputMirror.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
-          },
-          {
             topic: outputServerPointer.topic,
             messageFormat: outputServerPointer.messageFormat,
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
           }
         ]
       };
+      //needed topic is like:
+      //let topicName = UbiiClientService.getClientID() + '/web-interface-myo/myo_server_data'
 
-      // specification of a ubii.interactions.Interaction
-      // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/interactions/interaction.proto
-      let processingCallback = (input, output) => {
-        if (!input.clientPointer) {
-          return;
-        }
-
-        if (input.mirrorPointer === true) {
-          output.serverPointer = {
-            x: 1 - input.clientPointer.x,
-            y: 1 - input.clientPointer.y
-          };
-        } else {
-          output.serverPointer = {
-            x: input.clientPointer.x,
-            y: input.clientPointer.y
-          };
-        }
-      };
+      let processCB = () => {var tmp = "processCB-temp"};
+      let onCreatedCB = () => {var tmp = "onCreatedCB-temp"};
 
       let ubiiInteraction = {
         id: uuidv4(),
-        name: 'mirror-mouse-pointer',
-        processingCallback: processingCallback.toString(),
-        inputFormats: [
-          {
-            internalName: inputClientPointer.internalName,
-            messageFormat: inputClientPointer.messageFormat
-          },
-          {
-            internalName: inputMirror.internalName,
-            messageFormat: inputMirror.messageFormat
-          }
-        ],
+        name: 'rock-paper-scissors-game-interaction',
         outputFormats: [
           {
             internalName: outputServerPointer.internalName,
             messageFormat: outputServerPointer.messageFormat
           }
-        ]
+        ],
+        onCreated: onCreatedCB,
+        processingCallback: processCB.toString()
       };
 
       // specification of a ubii.sessions.Session
@@ -237,17 +171,6 @@ export default {
         interactions: [ubiiInteraction],
         ioMappings: [
           {
-            interactionId: ubiiInteraction.id,
-            inputMappings: [
-              {
-                name: inputClientPointer.internalName,
-                topicSource: inputClientPointer.topic
-              },
-              {
-                name: inputMirror.internalName,
-                topicSource: inputMirror.topic
-              }
-            ],
             outputMappings: [
               {
                 name: outputServerPointer.internalName,
@@ -258,30 +181,20 @@ export default {
         ]
       };
 
+
+
       // assign to local state for future reference
       this.$data.deviceName = deviceName;
-      this.$data.inputClientPointer = inputClientPointer;
-      this.$data.inputMirror = inputMirror;
       this.$data.outputServerPointer = outputServerPointer;
       this.$data.ubiiDevice = ubiiDevice;
       this.$data.ubiiInteraction = ubiiInteraction;
 
       this.$data.ubiiSession = ubiiSession;
     },
-    startExample: function() {
+    start: function() {
       UbiiClientService.isConnected().then(() => {
 
-        //prepare ui - xxx
-        
-/*         var player_icon_1 = document.getElementById("player-rock-icon");
-        player_icon_1.style.display = "none";
-        var player_icon_2 = document.getElementById("player-paper-icon");
-        player_icon_2.style.display = "none";
-        var opponent_icon_1 = document.getElementById("opponent-rock-icon");
-        opponent_icon_1.style.display = "none";
-        var opponent_icon_2 = document.getElementById("opponent-paper-icon");
-        opponent_icon_2.style.display = "none"; */
-        
+        //prepare ui - xxx          
         this.switchGameArea("ready-area");
         this.enableInput(false);
         
@@ -300,21 +213,7 @@ export default {
           })
           .then(() => {
             // subscribe to the device topics so we are notified when new data arrives on the topic
-            UbiiClientService.client.subscribe(
-              this.$data.outputServerPointer.topic,
-              // a callback to be called when new data on this topic arrives
-              mousePosition => {
-                // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
-                // interaction area and set our red square indicator
-                let boundingRect = document
-                  .getElementById('box-area')
-                  .getBoundingClientRect();
-                this.$data.serverMousePosition = {
-                  x: mousePosition.x * boundingRect.width,
-                  y: mousePosition.y * boundingRect.height
-                };
-              }
-            );
+            UbiiClientService.client.subscribe();
 
             // start our session (registering not necessary as we do not want to save it permanently)
             UbiiClientService.client
@@ -324,87 +223,47 @@ export default {
               })
               .then(response => {
                 console.info(response);
-                this.$data.exampleStarted = true;
               });
           });
       });
     },
-    stopExample: function() {
-      if (!this.exampleStarted) return;
-
-      this.exampleStarted = false;
+    stop: function() {
 
       // unsubscribe and stop session
-      UbiiClientService.client.unsubscribe(
-        this.$data.outputServerPointer.topic
-      );
+      UbiiClientService.client.unsubscribe();
       UbiiClientService.client.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
         session: this.$data.ubiiSession
       });
     },
-    onMouseMove: function(event) {
-      if (!this.exampleStarted) {
-        return;
-      }
+    updateMyoDevices: function() {
+      UbiiClientService.client
+        .callService({ topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST })
+        .then(reply => {
+          this.$data.topicList = reply.stringList.list;
 
-      // calculate the current mouse position, normalized to the bounds of the interactive area ([0;1], [0;1])
-      let boundingRect = event.currentTarget.getBoundingClientRect();
-      let relativeMousePosition = {
-        x: event.offsetX / boundingRect.width,
-        y: event.offsetY / boundingRect.height
-      };
+          this.$data.topicList.forEach(topic => {
+            const topicIndex = topic.indexOf('/web-interface-myo/');
 
-      this.$data.clientMousePosition = relativeMousePosition;
-      // publish our normalized client mouse position
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.inputClientPointer.topic,
-        'vector2',
-        this.$data.clientMousePosition
-      );
+            if (topicIndex !== -1) {
+              const clientID = topic.substring(0, topicIndex);
+
+              // create new client if we dont have one yet or a new client just connected
+
+              if (!this.$data.client) {
+                this.createClient(clientID);
+              } else {
+                if (!this.$data.oldClients.includes(clientID)) {
+                  this.createClient(clientID);
+                }
+              }
+            }
+          });
+        });
     },
-    onTouchStart: function(event) {
-      this.$data.clientPointerInside = true;
-      this.onTouchMove(event);
-    },
-    onTouchMove: function(event) {
-      if (!this.exampleStarted) {
-        return;
-      }
-
-      // calculate the current touch position, normalized to the bounds of the interactive area ([0;1], [0;1])
-      let relativeMousePosition = {
-        x:
-          (event.touches[0].clientX - event.target.offsetLeft) /
-          event.target.offsetWidth,
-        y:
-          (event.touches[0].clientY - event.target.offsetTop) /
-          event.target.offsetHeight
-      };
-
-      if (
-        relativeMousePosition.x < 0 ||
-        relativeMousePosition.x > 1 ||
-        relativeMousePosition.y < 0 ||
-        relativeMousePosition.y > 1
-      ) {
-        this.$data.clientPointerInside = false;
-        return;
-      }
-
-      this.$data.clientMousePosition = relativeMousePosition;
-      // publish our normalized client touch position
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.inputClientPointer.topic,
-        'vector2',
-        this.$data.clientMousePosition
-      );
-    },
-    ...mapActions('interactions', {
-      addInteraction: 'add'
-    }),
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++ game logic ++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     toggleGame: function() {
         var game_area = document.getElementById("game-area");
         var msg_area = document.getElementById("text-area");
@@ -416,8 +275,6 @@ export default {
             game_area.style.display = "none";
             msg_area.style.display = "block";
         }
-
-        //this.chooseGestureForOpponent();
     },
     switchGameArea: function(id){
         var game_area = document.getElementById("game-area");
@@ -443,8 +300,6 @@ export default {
             default:
                 console.error("Invalid area id: " + id);
         }
-
-        //this.chooseGestureForOpponent();
     },
     changeIcon: function(playerId, iconId) {
         if(playerId == "player"){
@@ -461,8 +316,6 @@ export default {
                 case 3: player_icon_3.style.display = "inline"; break;
                 default: console.error("Invalid iconId: " + iconId);
             }
-            console.log("player, icon: "+ iconId);
-
         } else if(playerId == "opponent"){
             
             var opponent_icon_1 = document.getElementById("opponent-scissors-icon");
@@ -477,8 +330,6 @@ export default {
                 case 3: opponent_icon_3.style.display = "inline"; break;
                 default: console.error("Invalid iconId: " + iconId);
             }
-            console.log("opponent, icon: "+ iconId);
-
         } else {
 
             console.error("Invalid playerId:" + playerId);
@@ -488,7 +339,6 @@ export default {
         var gestureId = Math.round((Math.random() * 2) + 1);
         this.opponentGesture = gestureId;
         this.changeIcon("opponent", this.opponentGesture);
-        //console.log(gestureId);
     },
     startGame: function() {
         
@@ -507,60 +357,74 @@ export default {
                     this.enableInput(true);
                     setTimeout(() => {
 
-                        if(this.curntInput == undefined || this.curntInput == 0){
+                        //no input
+                        if((this.currentButtonInput == undefined || this.currentButtonInput == 0) &&
+                          (this.gestureInputCollection.length == 0)){
                             this.$data.msgText = "No input detected :("
                             btn.style.display = "inline";
                             this.switchGameArea("text-area");
-                        }else{
-                            this.chooseGestureForOpponent();
-                            this.playerGesture = this.curntInput;
-                            this.evaluateGame();
-                            this.switchGameArea("game-area");
                         }
+                        //evaluate game
+                        else{
+                          if(this.gestureInputCollection.length == 0)
+                            this.playerGesture = this.currentButtonInput;
+                          else
+                            this.getBestGesture();
+                          
+                          this.chooseGestureForOpponent();
+                          this.evaluateGame(this.playerGesture);
+                          this.switchGameArea("game-area");
+                        }
+                        //disable input and reset vars
                         this.enableInput(false);
-                        this.playerGesture = this.curntInput = 0;
+                        this.playerGesture = this.currentButtonInput = 0;
+                        this.gestureInputCollection = [];
                     },2000);
                 },1000);
             },1000);
         }, 1000);
     },
-    evaluateGame: function() {
+    evaluateGame: function(gesture) {
         if(
-            (this.playerGesture == 1 && this.opponentGesture == 1) ||
-            (this.playerGesture == 2 && this.opponentGesture == 2) ||
-            (this.playerGesture == 3 && this.opponentGesture == 3)
+            (gesture == 1 && this.opponentGesture == 1) ||
+            (gesture == 2 && this.opponentGesture == 2) ||
+            (gesture == 3 && this.opponentGesture == 3)
         ){
-            console.log("player: " + this.playerGesture + " opponent: " + this.opponentGesture);
-            this.winLooseMsg = "Draw";
+            this.winLoseMsg = "Draw";
         }
         else if(
-            (this.playerGesture == 1 && this.opponentGesture == 3) ||
-            (this.playerGesture == 2 && this.opponentGesture == 1) ||
-            (this.playerGesture == 3 && this.opponentGesture == 2)
+            (gesture == 1 && this.opponentGesture == 3) ||
+            (gesture == 2 && this.opponentGesture == 1) ||
+            (gesture == 3 && this.opponentGesture == 2)
         ){
-            console.log("player: " + this.playerGesture + " opponent: " + this.opponentGesture);
-            this.winLooseMsg = "You win!";
+            this.winLoseMsg = "You win!";
         }
         else if(
-            (this.playerGesture == 1 && this.opponentGesture == 2) ||
-            (this.playerGesture == 2 && this.opponentGesture == 3) ||
-            (this.playerGesture == 3 && this.opponentGesture == 1)
+            (gesture == 1 && this.opponentGesture == 2) ||
+            (gesture == 2 && this.opponentGesture == 3) ||
+            (gesture == 3 && this.opponentGesture == 1)
         ){
-            console.log("player: " + this.playerGesture + " opponent: " + this.opponentGesture);
-            this.winLooseMsg = "You loose!";
+            this.winLoseMsg = "You lose!";
         }
         else{
-             console.error("Invalid gesture id. player: " + this.playerGesture + " opponent: " + this.opponentGesture);
+             console.error("Invalid gesture id. player: " + this.gesture + " opponent: " + this.opponentGesture);
         }
     },
     getButtonInput: function(id) {
-        this.curntInput = id;
+        this.currentButtonInput = id;
         this.changeIcon("player", id);
     },
     enableInput: function(enable) {
         this.lockButtons(enable);
-        //TODO: handle myo input
+
+        //enable/disable gesture input collecting
+        if(enable)
+          this.pollingInterval = setInterval(() => this.getGestureData(), 100);
+        else
+          clearInterval(this.pollingInterval);
+
     },
+    //enables/disables buttons for the game
     lockButtons: function(enable) {
         var scissor_btn = document.getElementById("scissors-btn");
         if(scissor_btn == null) console.error("scissor btn faulty");
@@ -578,7 +442,48 @@ export default {
             rock_btn.className = "pure-button pure-button-disabled";
             paper_btn.className = "pure-button pure-button-disabled";
         }
-    }
+    },
+    //fills array with the id of the currently detected gesture
+    getGestureData: function() {
+      //TODO: get gesture data, this is just a dummy for testing
+
+      /* var gestureId = Math.round((Math.random() * 2) + 1);
+      this.gestureInputCollection.push(gestureId); */
+    },
+    //chooses a gesture from input array
+    getBestGesture: function() {
+      if(this.gestureInputCollection.length == 0)
+        return;
+      else {
+        var cnt_1 = 0;
+        var cnt_2 = 0;
+        var cnt_3 = 0;
+
+        //count gesture ids
+        this.gestureInputCollection.forEach((element) => {
+          switch(element){
+            case 1: cnt_1++; break;
+            case 2: cnt_2++; break;
+            case 3: cnt_3++; break;
+          }
+        });
+
+        if(cnt_1 == 0 && cnt_2 == 0 && cnt_3 == 0)
+          return;
+        
+        //choose most frequent gesture
+        else if(cnt_1 >= cnt_2 && cnt_1 >= cnt_3){
+          this.playerGesture = 1;
+        }
+        else if(cnt_2 >= cnt_1 && cnt_2 >= cnt_3){
+          this.playerGesture = 2;
+        }
+        else if(cnt_3 >= cnt_1 && cnt_3 >= cnt_2){
+          this.playerGesture = 3;
+        }
+        this.changeIcon("player", this.playerGesture);
+      }
+    }   
   }
 };
 </script>
@@ -589,12 +494,12 @@ div.c {
 }
 
 .box-area {
-    padding-top: 30px;
-    padding-bottom: 50px;
-    margin: 50px;
-    border: 3px #B6B5AA;
-    height: 400px;
-    background-color: #403e41;
+  padding-top: 30px;
+  padding-bottom: 50px;
+  margin: 50px;
+  border: 3px #B6B5AA;
+  height: 400px;
+  background-color: #403e41;
 }
 
 .bigger-icon {
@@ -602,13 +507,13 @@ div.c {
 }
 
 .in-the-middle {
-    padding-top: 140px;
+  padding-top: 140px;
 }
 
 .myButton {
-    color: white;
-    border-radius: 4px;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-    background: rgb(223, 117, 20); /* this is an orange */
+  color: white;
+  border-radius: 4px;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  background: rgb(223, 117, 20); /* this is an orange */
 }   
 </style>
