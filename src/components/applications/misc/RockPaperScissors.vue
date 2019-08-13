@@ -4,6 +4,7 @@
     <div class="top-div">
         <br> 
         <div class="c">
+          <div>Debug: {{emgData}}</div>
             <div class="box-area"> <!-- style="font-size: 1.5rem"> -->
                <div id="game-area">
                     <div>Opponent</div>
@@ -85,19 +86,19 @@ export default {
   mounted: function() {
     // unsubscribe before page is unloaded
     window.addEventListener('beforeunload', () => {
-      this.stop();
+      this.stopSession();
     });
 
     UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
-      this.stop();
-      this.start();
+      this.stopSession();
+      this.startSession();
     });
-    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stop);
+    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopSession);
 
-    if (UbiiClientService.isConnected) this.start();
+    if (UbiiClientService.isConnected) this.startSession();
   },
   beforeDestroy: function() {
-    this.stop();
+    this.stopSession();
   },
   data: () => {
     return {
@@ -114,8 +115,13 @@ export default {
         msgText: "temp",
         winLoseMsg: "win / lose message",
 
-
+        //ubi-related
         ubiiClientService: UbiiClientService,
+        client: undefined,
+        oldClients:[],
+
+        //myo
+        emgData: {v0:0,v1:0,v2:0,v3:0,v4:0,v5:0,v6:0,v7:0}
     };
   },
   methods: {
@@ -191,7 +197,7 @@ export default {
 
       this.$data.ubiiSession = ubiiSession;
     },
-    start: function() {
+    startSession: function() {
       UbiiClientService.isConnected().then(() => {
 
         //prepare ui - xxx          
@@ -201,6 +207,9 @@ export default {
         // create all the specifications we need to define our example application
         // these are protobuf messages to be sent to the server (saved in this.$data)
         this.createUbiiSpecs();
+
+        //hanle subscription toZ
+        this.updateMyoDevices();
 
         // register the mouse pointer device
         UbiiClientService.registerDevice(this.$data.ubiiDevice)
@@ -227,7 +236,7 @@ export default {
           });
       });
     },
-    stop: function() {
+    stopSession: function() {
 
       // unsubscribe and stop session
       UbiiClientService.client.unsubscribe();
@@ -249,17 +258,62 @@ export default {
               const clientID = topic.substring(0, topicIndex);
 
               // create new client if we dont have one yet or a new client just connected
-
               if (!this.$data.client) {
-                this.createClient(clientID);
+                this.setClient(clientID);
               } else {
                 if (!this.$data.oldClients.includes(clientID)) {
-                  this.createClient(clientID);
+                  this.setClient(clientID);
                 }
               }
             }
           });
         });
+      setTimeout(this.updateMyoDevices, 1000);
+    },
+    setClient: function(clientID) {
+      
+      //unsubscribe old client
+      if(this.client){
+        this.client.topics.forEach(topic => {
+          // eslint-disable-next-line no-console
+          console.log('unsubscribed to ' + topic);
+
+          UbiiClientService.client.unsubscribe(topic);
+        });
+        this.client.sessions.forEach(session => {
+          UbiiClientService.client.callService({
+            topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+            session: session
+          });
+        });
+      }
+
+      //create sessions and topics
+      const myoEventTopic = clientID + '/web-interface-myo/myo_server_data';
+
+      this.client = {
+        id: clientID,
+        sessions: [],
+        topics: [myoEventTopic]
+      };
+
+      UbiiClientService.client.subscribe(
+        myoEventTopic, 
+        myoData => {
+          this.$data.emgData = {
+            v0: myoData.emg.v0,
+            v1: myoData.emg.v1,
+            v2: myoData.emg.v2,
+            v3: myoData.emg.v3,
+            v4: myoData.emg.v4,
+            v5: myoData.emg.v5,
+            v6: myoData.emg.v6,
+            v7: myoData.emg.v7
+          }
+        }
+      );
+      console.log('subscribed to ' + myoEventTopic);
+      this.oldClients.push(clientID);
     },
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++ game logic ++++++++++++++++++++++++++++++++++++++
