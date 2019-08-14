@@ -23,15 +23,21 @@ export default {
       required: true,
       default: ''
     },
-    collapsed: {
+    initiallyCollapsed: {
       type: Boolean,
       required: false,
       default: false
     }
   },
+  data: () => {
+    return {
+      collapsed: true
+    };
+  },
   mounted: function() {
     this.targetElement = document.getElementById(this.targetID);
     this.targetElementDisplay = this.targetElement.style.display || 'block';
+    this.collapsed = this.initiallyCollapsed;
     this.setTargetElementVisibility();
   },
   methods: {

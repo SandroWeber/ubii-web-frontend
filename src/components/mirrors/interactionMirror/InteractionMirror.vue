@@ -15,44 +15,56 @@
       <app-collapse-button
         :title="'Details'"
         :targetID="'details-content'"
-        :collapsed="true"
+        :initiallyCollapsed="true"
         class="layer-three"
-      ></app-collapse-button>
-      <div id="details-content">
+      />
+      <div id="details-content" class="details-content">
+        <div>Authors (separate via ";"):</div>
+        <app-input
+          class="layer-two round title-input"
+          :id="'interaction-authors'"
+          :type="'type'"
+          v-model="authorsSource"
+          :size="'huge'"
+        />
         <span>details</span>
-        <br />
-        <span>details</span>
-        <br />
         <span>details</span>
       </div>
     </div>
 
     <div class="category">
       <app-collapse-button
-        :title="'onCreated callback'"
+        :title="'Callback: onCreated()'"
         :targetID="'oncreated-content'"
         class="layer-three"
-      ></app-collapse-button>
+      />
       <div id="oncreated-content" class="code-wrapper layer-three border round">
-        <source-code-mirror v-model="processingCallbackSource"></source-code-mirror>
+        <source-code-mirror v-model="onCreatedSource"></source-code-mirror>
       </div>
     </div>
 
-    <h3>process()</h3>
-
-    <interaction-mirror-interface-list
-      v-model="inputFormatSource"
-      :interface-key="'input'"
-      :code="processingCallbackSource"
-    />
-    <div class="code-wrapper layer-three border round">
-      <source-code-mirror v-model="processingCallbackSource"></source-code-mirror>
+    <div class="category">
+      <app-collapse-button
+        :title="'Callback: process()'"
+        :targetID="'process-content'"
+        class="layer-three"
+      />
+      <div id="process-content" class="code-wrapper layer-three border round">
+        <interaction-mirror-interface-list
+          v-model="inputFormatSource"
+          :interface-key="'input'"
+          :code="processingCallbackSource"
+        />
+        <div class="code-wrapper layer-three border round">
+          <source-code-mirror v-model="processingCallbackSource"></source-code-mirror>
+        </div>
+        <interaction-mirror-interface-list
+          v-model="outputFormatSource"
+          :interface-key="'output'"
+          :code="processingCallbackSource"
+        />
+      </div>
     </div>
-    <interaction-mirror-interface-list
-      v-model="outputFormatSource"
-      :interface-key="'output'"
-      :code="processingCallbackSource"
-    />
   </app-layer>
 </template>
 
@@ -111,6 +123,56 @@ export default {
         this.interaction = raw;
       }
     },
+    authorsSource: {
+      get() {
+        return this.interaction.authors.join(';');
+      },
+      set(value) {
+        let raw = this.interaction;
+        raw.authors = value.split(';');
+        this.interaction = raw;
+      }
+    },
+    tagsSource: {
+      get() {
+        return this.interaction.tags;
+      },
+      set(value) {
+        let raw = this.interaction;
+        raw.tags = value;
+        this.interaction = raw;
+      }
+    },
+    descriptionSource: {
+      get() {
+        return this.interaction.description;
+      },
+      set(value) {
+        let raw = this.interaction;
+        raw.description = value;
+        this.interaction = raw;
+      }
+    },
+    onCreatedSource: {
+      get() {
+        return this.interaction.onCreated;
+      },
+      set(value) {
+        let raw = this.interaction;
+        raw.onCreated = value;
+        this.interaction = raw;
+      }
+    },
+    processFrequencySource: {
+      get() {
+        return this.interaction.processFrequency;
+      },
+      set(value) {
+        let raw = this.interaction;
+        raw.processFrequency = value;
+        this.interaction = raw;
+      }
+    },
     processingCallbackSource: {
       get() {
         return this.interaction.processingCallback;
@@ -145,7 +207,7 @@ export default {
 };
 </script>
 
-<style scoped lang="stylus">
+<style scoped>
 .interaction-mirror {
   height: 100%;
   padding: 20px;
@@ -185,6 +247,12 @@ h4 {
 }
 
 .category {
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.details-content {
+  display: grid;
+  grid-gap: 5px;
+  grid-template-columns: 100px auto;
 }
 </style>
