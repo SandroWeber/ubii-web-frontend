@@ -11,7 +11,32 @@
       />
     </div>
 
-    <h3>onCreated()</h3>
+    <div class="category">
+      <app-collapse-button
+        :title="'Details'"
+        :targetID="'details-content'"
+        :collapsed="true"
+        class="layer-three"
+      ></app-collapse-button>
+      <div id="details-content">
+        <span>details</span>
+        <br />
+        <span>details</span>
+        <br />
+        <span>details</span>
+      </div>
+    </div>
+
+    <div class="category">
+      <app-collapse-button
+        :title="'onCreated callback'"
+        :targetID="'oncreated-content'"
+        class="layer-three"
+      ></app-collapse-button>
+      <div id="oncreated-content" class="code-wrapper layer-three border round">
+        <source-code-mirror v-model="processingCallbackSource"></source-code-mirror>
+      </div>
+    </div>
 
     <h3>process()</h3>
 
@@ -34,12 +59,16 @@
 <script>
 import InteractionMirrorInterfaceList from './InteractionMirrorInterfaceList.vue';
 import SourceCodeMirror from './../sourceCodeMirror/SourceCodeMirror.vue';
-import { AppLayer, AppInput } from './../../appComponents/appComponents.js';
+import {
+  AppLayer,
+  AppInput,
+  AppCollapseButton
+} from './../../appComponents/appComponents.js';
 
 // Fontawesome.
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faArrowDown } from '@fortawesome/free-solid-svg-icons';
-library.add(faArrowDown);
+import { faCaretDown, faCaretRight } from '@fortawesome/free-solid-svg-icons';
+library.add(faCaretDown, faCaretRight);
 
 export default {
   name: 'InteractionMirror',
@@ -50,10 +79,13 @@ export default {
     SourceCodeMirror,
     InteractionMirrorInterfaceList,
     AppLayer,
-    AppInput
+    AppInput,
+    AppCollapseButton
   },
   data: () => {
-    return {};
+    return {
+      showDetails: false
+    };
   },
   methods: {
     onCodeChange: function() {
@@ -150,5 +182,9 @@ h4 {
   margin-top: 20px;
   margin-bottom: 10px;
   font-weight: 500;
+}
+
+.category {
+  margin-bottom: 10px;
 }
 </style>
