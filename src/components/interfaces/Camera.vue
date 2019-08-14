@@ -286,9 +286,10 @@ export default {
       while (this.cocoSSDLabels.length < predictionsList.length) {
         let divElement = document.createElement('div');
         divElement.style.color = 'black';
-        divElement.style.textShadow = '0 0 10px yellow, 0 0 20px yellow';
-        divElement.style.backgroundColor = 'rgba(255, 255, 0, 0.2)';
+        divElement.style.border = '5px solid rgba(255, 255, 0, 0.2)';
         divElement.style.position = 'relative';
+        divElement.style.textAlign = 'left';
+        divElement.style.fontWeight = 'bold';
         this.videoOverlayElement.appendChild(divElement);
         this.cocoSSDLabels.push(divElement);
       }
