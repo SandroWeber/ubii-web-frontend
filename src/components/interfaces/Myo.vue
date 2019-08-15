@@ -146,25 +146,6 @@ export default {
       }
     };
   },
-  watch: {
-    mirrorPointer: function(value) {
-      if (
-        !UbiiClientService.isConnected ||
-        !this.$data.ubiiDevice.name ||
-        !this.$data.inputMirror.topic
-      ) {
-        return;
-      }
-
-      // if the checkbox is changed, we publish this info on the related topic
-      UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.inputMirror.topic,
-        this.$data.inputMirror.messageFormat,
-        value
-      );
-    }
-  },
   methods: {
     createUbiiSpecs: function() {
       // create specifications for the protobuf messages
@@ -235,6 +216,8 @@ export default {
             },
             gesture : input.clientMyoData.gesture
           }; 
+          //console.log(Object.keys(input.clientMyoData.emg) + " client");
+          //console.log(output.serverMyoData + "server");
         }
       };
       let ubiiInteraction = {
@@ -393,7 +376,7 @@ export default {
       });
     },
     setPublishInterval: function() {
-      this.pollingInterval = setInterval(() => this.publishMyoData(), 100);
+      this.pollingInterval = setInterval(() => this.publishMyoData(), 25);
     },
     publishMyoData: function(){
       if(!this.$data.myoConnected)

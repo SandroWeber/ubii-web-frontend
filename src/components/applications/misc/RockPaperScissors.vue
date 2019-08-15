@@ -5,6 +5,12 @@
         <br> 
         <div class="c">
           <div>Debug: {{emgData}}</div>
+          <br>
+          <button class="pure-button"  @click="printEmgBuffer()">Print emg buffer</button>
+          <br>
+          <br>
+          <input id="checkboxInput" type="checkbox" v-model="useGestureInput" />
+          <label for="checkboxInput">Myo Gesture Input</label>
             <div class="box-area"> <!-- style="font-size: 1.5rem"> -->
                <div id="game-area">
                     <div>Opponent</div>
@@ -63,7 +69,7 @@ import UbiiEventBus from '../../../services/ubiiClient/ubiiEventBus';
 import uuidv4 from 'uuid/v4';
 import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
-import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
+import { ProtobufTranslator, MSG_TYPES, DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -104,8 +110,7 @@ export default {
     return {
         //current inputs
         currentButtonInput: undefined,  //button
-        gestureInputCollection: [],    //myo
-        pollingInterval: null,
+        gestureInputCollection: [],     //myo
 
         //final gestures
         playerGesture: 0,
@@ -115,13 +120,21 @@ export default {
         msgText: "temp",
         winLoseMsg: "win / lose message",
 
+        //game related
+        useGestureInput: true,
+        collectGestureData: false,
+
         //ubi-related
         ubiiClientService: UbiiClientService,
         client: undefined,
         oldClients:[],
+        publishInterval: null,
+        pollingInterval: null,
 
         //myo
-        emgData: {v0:0,v1:0,v2:0,v3:0,v4:0,v5:0,v6:0,v7:0}
+        emgData: {v0:0,v1:0,v2:0,v3:0,v4:0,v5:0,v6:0,v7:0},
+        emgBuffer: [],
+        emgProtoElements: undefined
     };
   },
   methods: {
@@ -131,9 +144,14 @@ export default {
       // helper definitions that we can reference later
       let deviceName = 'rock-paper-scissors-game-device';
       let topicPrefix = UbiiClientService.getClientID() + '/' + deviceName;
-      let outputServerPointer = {
+      let inputEmgData = {
+        internalName: 'emgData',
+        messageFormat: 'ubii.dataStructure.Int32List',
+        topic: topicPrefix + '/' + 'emg_data'
+      };
+      let outputGestureData = {
         internalName: 'gestureId',
-        messageFormat: 'ubii.dataStructure.float', //TODO: look up propper data structure
+        messageFormat: 'ubii.dataStructure.Int32', 
         topic: topicPrefix + '/' + 'gesture_id'
       };
 
@@ -144,72 +162,127 @@ export default {
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
         components: [
           {
-            topic: outputServerPointer.topic,
-            messageFormat: outputServerPointer.messageFormat,
+            topic: inputEmgData.topic,
+            messageFormat: inputEmgData.messageFormat,
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+          },
+          {
+            topic: outputGestureData.topic,
+            messageFormat: outputGestureData.messageFormat,
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
           }
         ]
       };
-      //needed topic is like:
-      //let topicName = UbiiClientService.getClientID() + '/web-interface-myo/myo_server_data'
+      let processCBDummy = (input, output) => {
+            //if(input.emgData){
+            //}
+            output.gestureId = Math.round((Math.random() * 2) + 1);
+            //console.log(input.emgData.elements);
+            //console.log(Object.keys(input) + " cb in data yay");
+            //console.log(output.gestureId + " cb out data yay");
+        };
 
-      let processCB = () => {var tmp = "processCB-temp"};
-      let onCreatedCB = () => {var tmp = "onCreatedCB-temp"};
+      let onCreatedCBDummy = 
+        () => {
+          console.log("onCreatedCBDummy");
+        };
+
+/*       let processCB = 
+        (input, output, state) => {
+          if(input.emgData){
+            //convert
+            //out_array = [];
+            //input.emgData.foreach((elements) => out_array.push(elements));
+            //check for length
+            //if(out_array.length != 64) break;
+
+            let prediction = state.model.predict(state.modules.tf.tensor2d(
+              //out_array, [64,1]
+              [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [64,1]
+              )).dataSync()[0];
+              output.prediction = prediction;
+          }};
+
+
+      let onCreatedCB =         
+        'state => {' +
+        'let prepareModel = async () => {' +
+        'state.model = await state.modules.tf.loadGraphModel("file:///tfjs-models/myo-rps/model.json");' +
+        '};' +
+        'prepareModel();' +
+        '};'; */
+
+      //let onCreatedCB_1 =         
+      //   'state.model = await state.modules.tf.loadGraphModel("file:///tfjs-models/myo-rps/model.json");';
 
       let ubiiInteraction = {
         id: uuidv4(),
         name: 'rock-paper-scissors-game-interaction',
-        outputFormats: [
+        onCreated: onCreatedCBDummy.toString(),
+        processingCallback: processCBDummy.toString(),
+        inputFormats: [
           {
-            internalName: outputServerPointer.internalName,
-            messageFormat: outputServerPointer.messageFormat
+            internalName: inputEmgData.internalName,
+            messageFormat: inputEmgData.messageFormat
           }
         ],
-        onCreated: onCreatedCB,
-        processingCallback: processCB.toString()
+        outputFormats: [
+          {
+            internalName: outputGestureData.internalName,
+            messageFormat: outputGestureData.messageFormat
+          }
+        ],
+
       };
 
       // specification of a ubii.sessions.Session
       // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/sessions/session.proto
       let ubiiSession = {
         id: uuidv4(),
-        name: 'web-mouse-example-session',
+        name: 'rock-paper-scissors-game-session',
         interactions: [ubiiInteraction],
         ioMappings: [
           {
+            interactionId: ubiiInteraction.id,
+            inputMappings: [
+              {
+                name: inputEmgData.internalName,
+                topicSource: inputEmgData.topic
+              }
+            ],
             outputMappings: [
               {
-                name: outputServerPointer.internalName,
-                topicDestination: outputServerPointer.topic
+                name: outputGestureData.internalName,
+                topicDestination: outputGestureData.topic
               }
             ]
           }
         ]
       };
 
-
-
       // assign to local state for future reference
       this.$data.deviceName = deviceName;
-      this.$data.outputServerPointer = outputServerPointer;
       this.$data.ubiiDevice = ubiiDevice;
       this.$data.ubiiInteraction = ubiiInteraction;
+
+      this.$data.inputEmgData = inputEmgData;
+      this.$data.outputGestureData = outputGestureData;
 
       this.$data.ubiiSession = ubiiSession;
     },
     startSession: function() {
-      UbiiClientService.isConnected().then(() => {
+      //prepare ui for the game - xxx          
+      this.switchGameArea("ready-area");
+      this.enableInput(false);
 
-        //prepare ui - xxx          
-        this.switchGameArea("ready-area");
-        this.enableInput(false);
-        
+      UbiiClientService.isConnected().then(() => {  
         // create all the specifications we need to define our example application
         // these are protobuf messages to be sent to the server (saved in this.$data)
         this.createUbiiSpecs();
 
-        //hanle subscription toZ
+        //handle myo data
         this.updateMyoDevices();
+        this.setPublishInterval(true);
 
         // register the mouse pointer device
         UbiiClientService.registerDevice(this.$data.ubiiDevice)
@@ -220,7 +293,18 @@ export default {
             this.$data.ubiiDevice = device;
             return device;
           })
-          .then(() => {
+          .then(() => { 
+            UbiiClientService.client.subscribe(
+              this.$data.outputGestureData.topic,
+              gestureData => {
+/*                 console.log ("collect data: UbiiClientService.client.subscribe()");
+                if(this.collectGestureData && this.useGestureInput){ */
+
+                  this.pushGestureData(gestureData);
+                }
+            );
+
+            //TODO: necessary?
             // subscribe to the device topics so we are notified when new data arrives on the topic
             UbiiClientService.client.subscribe();
 
@@ -238,8 +322,12 @@ export default {
     },
     stopSession: function() {
 
+      this.setPublishInterval(false);
+
       // unsubscribe and stop session
-      UbiiClientService.client.unsubscribe();
+      UbiiClientService.client.unsubscribe(
+        this.$data.outputGestureData.topic
+      );
       UbiiClientService.client.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
         session: this.$data.ubiiSession
@@ -300,7 +388,7 @@ export default {
       UbiiClientService.client.subscribe(
         myoEventTopic, 
         myoData => {
-          this.$data.emgData = {
+          var emg = {
             v0: myoData.emg.v0,
             v1: myoData.emg.v1,
             v2: myoData.emg.v2,
@@ -309,11 +397,65 @@ export default {
             v5: myoData.emg.v5,
             v6: myoData.emg.v6,
             v7: myoData.emg.v7
-          }
+          };
+          this.$data.emgData = emg;
+          this.addEmgToBuffer(emg);
         }
       );
       console.log('subscribed to ' + myoEventTopic);
       this.oldClients.push(clientID);
+    },
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++ data handling +++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    
+    addEmgToBuffer: function(emg){
+      while(this.emgBuffer.length >= 8){
+        this.emgBuffer.shift();
+      }
+      //console.log(this.emgBuffer);
+      this.emgBuffer.push(emg);
+    },
+    printEmgBuffer: function(){
+      console.log(this.emgBuffer);
+    },
+    setPublishInterval: function(enable) {
+      if(enable)
+        this.publishInterval = setInterval(() => this.publishData(), 25);
+      else{
+        console.log("disble publish interval");
+        clearInterval(this.publishInterval);
+      }
+    },
+    publishData: function(){
+      //console.log("publish gesture data");
+
+      var emgProto = {elements:5};
+      
+      //var intListType = ProtobufLibrary.lookupType("ubii.dataStructure.Int32List");
+      //var out = intListType.create(this.emgBuffer);
+      /* 
+      emgBuffer.forEach((singleEmgArray) => {
+        singleEmgArray.forEach((element) => {
+          out.addElements(element);
+        })
+      }) */
+      var temp = [1,2,3,4,5];
+      var msgObj = {elements: temp};
+      var translatorService = new ProtobufTranslator('ubii.dataStructure.Int32List');
+      var msg = translatorService.createMessageFromPayload(msgObj);
+      
+      //var out = ProtobufLibrary.ubii.dataStructure.Int32List.createMessageFromPayload(temp);
+      var message = new ProtobufLibrary.ubii.dataStructure.Int32List();
+      message.elements.push(temp);
+      //message.setElements(temp);
+
+      UbiiClientService.client.publish(
+        this.$data.ubiiDevice.name,
+        this.$data.inputEmgData.topic,
+        'int32List',
+        this.msg
+      );
     },
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++ game logic ++++++++++++++++++++++++++++++++++++++
@@ -470,12 +612,11 @@ export default {
     },
     enableInput: function(enable) {
         this.lockButtons(enable);
+        this.collectGestureData = enable;
 
         //enable/disable gesture input collecting
-        if(enable)
-          this.pollingInterval = setInterval(() => this.getGestureData(), 100);
-        else
-          clearInterval(this.pollingInterval);
+        //if(this.useGestureInput)
+        //this.setPublishInterval(enable);
 
     },
     //enables/disables buttons for the game
@@ -498,11 +639,11 @@ export default {
         }
     },
     //fills array with the id of the currently detected gesture
-    getGestureData: function() {
+    pushGestureData: function(data) {
       //TODO: get gesture data, this is just a dummy for testing
 
-      /* var gestureId = Math.round((Math.random() * 2) + 1);
-      this.gestureInputCollection.push(gestureId); */
+      if(this.collectGestureData && this.useGestureInput)
+        this.gestureInputCollection.push(data); 
     },
     //chooses a gesture from input array
     getBestGesture: function() {
@@ -521,7 +662,6 @@ export default {
             case 3: cnt_3++; break;
           }
         });
-
         if(cnt_1 == 0 && cnt_2 == 0 && cnt_3 == 0)
           return;
         
@@ -536,6 +676,7 @@ export default {
           this.playerGesture = 3;
         }
         this.changeIcon("player", this.playerGesture);
+        console.log("scissor: "+cnt_1+" rock: "+cnt_2+" paper: "+cnt_3);
       }
     }   
   }
