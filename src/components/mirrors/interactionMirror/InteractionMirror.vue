@@ -68,7 +68,7 @@
       <div id="process-content" class="code-wrapper layer-three border round">
         <interaction-mirror-interface-list
           v-model="inputFormatSource"
-          :interface-key="'input'"
+          :interface-key="'inputs'"
           :code="processingCallbackSource"
         />
         <div class="code-wrapper layer-three border round">
@@ -76,7 +76,7 @@
         </div>
         <interaction-mirror-interface-list
           v-model="outputFormatSource"
-          :interface-key="'output'"
+          :interface-key="'outputs'"
           :code="processingCallbackSource"
         />
       </div>
