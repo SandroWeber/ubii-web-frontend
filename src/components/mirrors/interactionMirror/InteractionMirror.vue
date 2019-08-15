@@ -50,7 +50,7 @@
 
     <div class="category">
       <app-collapse-button
-        :title="'Callback: onCreated()'"
+        :title="'Callback: onCreated(state)'"
         :targetID="'oncreated-content'"
         class="layer-three"
       />
@@ -61,24 +61,36 @@
 
     <div class="category">
       <app-collapse-button
-        :title="'Callback: process()'"
+        :title="'Callback: process(inputs, outputs, state)'"
         :targetID="'process-content'"
         class="layer-three"
       />
-      <div id="process-content" class="code-wrapper layer-three border round">
-        <interaction-mirror-interface-list
-          v-model="inputFormatSource"
-          :interface-key="'inputs'"
-          :code="processingCallbackSource"
-        />
-        <div class="code-wrapper layer-three border round">
-          <source-code-mirror v-model="processingCallbackSource"></source-code-mirror>
+      <div id="process-content">
+        <div class="segment">
+          <div>process frequency:</div>
+          <app-input
+            class="layer-two round title-input"
+            :id="'input-interaction-processFrequency'"
+            :type="'type'"
+            v-model="processFrequencySource"
+          />
         </div>
-        <interaction-mirror-interface-list
-          v-model="outputFormatSource"
-          :interface-key="'outputs'"
-          :code="processingCallbackSource"
-        />
+
+        <div class="code-wrapper layer-three round">
+          <interaction-mirror-interface-list
+            v-model="inputFormatSource"
+            :interface-key="'inputs'"
+            :code="processingCallbackSource"
+          />
+          <div class="code-wrapper layer-three border round">
+            <source-code-mirror v-model="processingCallbackSource"></source-code-mirror>
+          </div>
+          <interaction-mirror-interface-list
+            v-model="outputFormatSource"
+            :interface-key="'outputs'"
+            :code="processingCallbackSource"
+          />
+        </div>
       </div>
     </div>
   </app-layer>
@@ -181,11 +193,11 @@ export default {
     },
     processFrequencySource: {
       get() {
-        return this.interaction.processFrequency;
+        return (this.interaction.processFrequency && this.interaction.processFrequency.toString()) || NaN.toString();
       },
       set(value) {
         let raw = this.interaction;
-        raw.processFrequency = value;
+        raw.processFrequency = parseFloat(value);
         this.interaction = raw;
       }
     },
@@ -273,5 +285,11 @@ h4 {
   grid-template-columns: 200px auto;
   padding: 10px;
   align-items: center;
+}
+
+.segment {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
 }
 </style>
