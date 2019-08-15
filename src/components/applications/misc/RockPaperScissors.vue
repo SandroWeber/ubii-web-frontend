@@ -413,7 +413,6 @@ export default {
       while(this.emgBuffer.length >= 8){
         this.emgBuffer.shift();
       }
-      //console.log(this.emgBuffer);
       this.emgBuffer.push(emg);
     },
     printEmgBuffer: function(){
@@ -428,33 +427,26 @@ export default {
       }
     },
     publishData: function(){
-      //console.log("publish gesture data");
-
-      var emgProto = {elements:5};
       
-      //var intListType = ProtobufLibrary.lookupType("ubii.dataStructure.Int32List");
-      //var out = intListType.create(this.emgBuffer);
-      /* 
-      emgBuffer.forEach((singleEmgArray) => {
-        singleEmgArray.forEach((element) => {
-          out.addElements(element);
-        })
-      }) */
-      var temp = [1,2,3,4,5];
-      var msgObj = {elements: temp};
-      var translatorService = new ProtobufTranslator('ubii.dataStructure.Int32List');
-      var msg = translatorService.createMessageFromPayload(msgObj);
+      //Transform emgBuffer to proto format
+      var msg_obj = {elements: []};
       
-      //var out = ProtobufLibrary.ubii.dataStructure.Int32List.createMessageFromPayload(temp);
-      var message = new ProtobufLibrary.ubii.dataStructure.Int32List();
-      message.elements.push(temp);
-      //message.setElements(temp);
+      this.emgBuffer.forEach((singleEmgArray) => {
+        msg_obj.elements.push(singleEmgArray.v0);
+        msg_obj.elements.push(singleEmgArray.v1);
+        msg_obj.elements.push(singleEmgArray.v2);
+        msg_obj.elements.push(singleEmgArray.v3);
+        msg_obj.elements.push(singleEmgArray.v4);
+        msg_obj.elements.push(singleEmgArray.v5);
+        msg_obj.elements.push(singleEmgArray.v6);
+        msg_obj.elements.push(singleEmgArray.v7);
+      });
 
       UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
         this.$data.inputEmgData.topic,
         'int32List',
-        this.msg
+        msg_obj
       );
     },
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
