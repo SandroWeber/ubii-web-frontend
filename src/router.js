@@ -105,6 +105,11 @@ export default new Router({
     name: 'Example - Gathering from Smart Devices connected via Web Interface',
     component: () => import('./components/applications/examples/ExampleWebInterfaceSmartDevices.vue')
   },
+  {
+    path: '/applications/examples/opencv',
+    name: 'Example - OpenCV',
+    component: () => import('./components/applications/examples/OpenCV.vue')
+  },
   /* applications - smartphone VR */
   {
     path: '/applications/smartphone-assisted-vr/savr-model-inspector',
