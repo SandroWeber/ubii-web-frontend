@@ -56,6 +56,17 @@
             <p>Gatherer - Interface Smart Devices</p>
           </app-tile>
         </router-link>
+
+        <router-link
+          to="/applications/examples/opencv"
+          class="interface-link"
+          tag="div"
+        >
+          <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="eye" class="interface-icon" />
+            <p>OpenCV</p>
+          </app-tile>
+        </router-link>
       </div>
     </div>
     <div class="category">
@@ -121,16 +132,10 @@ import {
   faMobileAlt,
   faTabletAlt,
   faKeyboard,
-  faHandPointer
+  faHandPointer,
+  faEye
 } from '@fortawesome/free-solid-svg-icons';
-library.add(faMousePointer);
-library.add(faCube);
-library.add(faCubes);
-library.add(faVrCardboard);
-library.add(faMobileAlt);
-library.add(faTabletAlt);
-library.add(faKeyboard);
-library.add(faHandPointer);
+library.add(faMousePointer, faCube, faCubes, faVrCardboard, faMobileAlt, faTabletAlt, faKeyboard, faHandPointer, faEye);
 
 export default {
   name: 'Applications',
