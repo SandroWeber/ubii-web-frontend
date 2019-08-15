@@ -18,17 +18,33 @@
         :initiallyCollapsed="true"
         class="layer-three"
       />
-      <div id="details-content" class="details-content">
-        <div>Authors (separate via ";"):</div>
-        <app-input
-          class="layer-two round title-input"
-          :id="'interaction-authors'"
-          :type="'type'"
-          v-model="authorsSource"
-          :size="'huge'"
-        />
-        <span>details</span>
-        <span>details</span>
+      <div id="details-content">
+        <div class="details-content">
+          <!-- authors -->
+          <div>Authors (separate via ";"):</div>
+          <app-input
+            class="layer-two round title-input"
+            :id="'input-interaction-authors'"
+            :type="'type'"
+            v-model="authorsSource"
+          />
+          <!-- tags -->
+          <div>Tags (separate via ";"):</div>
+          <app-input
+            class="layer-two round title-input"
+            :id="'input-interaction-tags'"
+            :type="'type'"
+            v-model="tagsSource"
+          />
+          <!-- description -->
+          <div>Description:</div>
+          <app-input
+            class="layer-two round title-input"
+            :id="'input-interaction-description'"
+            :type="'type'"
+            v-model="descriptionSource"
+          />
+        </div>
       </div>
     </div>
 
@@ -135,11 +151,11 @@ export default {
     },
     tagsSource: {
       get() {
-        return this.interaction.tags;
+        return this.interaction.tags.join(';');
       },
       set(value) {
         let raw = this.interaction;
-        raw.tags = value;
+        raw.tags = value.split(';');
         this.interaction = raw;
       }
     },
@@ -253,6 +269,9 @@ h4 {
 .details-content {
   display: grid;
   grid-gap: 5px;
-  grid-template-columns: 100px auto;
+  grid-template-rows: 30px 30px;
+  grid-template-columns: 200px auto;
+  padding: 10px;
+  align-items: center;
 }
 </style>
