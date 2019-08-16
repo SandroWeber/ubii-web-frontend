@@ -104,6 +104,7 @@ import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 export default {
   name: 'Interface-Myo',
   components: { UbiiClientContent },
+  
   mounted: function() {
     // unsubscribe before page is unloaded
     window.addEventListener('beforeunload', () => {
@@ -118,9 +119,11 @@ export default {
 
     if (UbiiClientService.isConnected) this.startInterface();
   },
+
   beforeDestroy: function() {
     this.stopInterface();
   },
+
   data: () => {
     return {
       ubiiClientService: UbiiClientService,
@@ -146,9 +149,10 @@ export default {
       }
     };
   },
+
   methods: {
+    // create specifications for the protobuf messages
     createUbiiSpecs: function() {
-      // create specifications for the protobuf messages
 
       // helper definitions that we can reference later
       let deviceName = 'web-interface-myo';
@@ -273,6 +277,7 @@ export default {
 
       this.$data.ubiiSession = ubiiSession;
     },
+
     startInterface: function() {
       UbiiClientService.isConnected().then(() => {
         // create all the specifications we need to define our example application
@@ -344,6 +349,7 @@ export default {
           });
       });
     },
+
     stopInterface: function() {
       if (!this.interfaceStarted) return;
 
@@ -364,9 +370,13 @@ export default {
         session: this.$data.ubiiSession
       });
     },
+
+    //round values for better display
     round: function(value, digits) {
       return Math.round(value * digits * 10) / (digits * 10);
     },
+
+    //connect myo and enable emg stream
     connectMyo: function() {
       Myo.connect('com.ubii.myoInterface');
 
@@ -375,20 +385,31 @@ export default {
       //console.log("Myo successfully connected. Data: " + JSON.stringify(data) + ". Timestamp: " + timestamp + ".");
       });
     },
+
+    //publish data every 10ms
     setPublishInterval: function() {
-      this.pollingInterval = setInterval(() => this.publishMyoData(), 25);
+      this.pollingInterval = setInterval(() => this.publishMyoData(), 10);
     },
+
     publishMyoData: function(){
       if(!this.$data.myoConnected)
         return;
+      
+      //depricated
 
-      UbiiClientService.client.publish(
+      /*UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
         this.$data.inputClientMyoData.topic,
         'myoEvent',
         this.$data.clientMyoData
-      );
+      ); */
+
+      UbiiClientService.publishRecord({
+        topic: this.$data.inputClientMyoData.topic,
+        myoEvent: this.$data.clientMyoData
+      });
     },
+
     //Disable all event listeners and disconnect
     disconnectMyo: function() {
       Myo.off('emg');
@@ -398,6 +419,7 @@ export default {
       this.$data.myoConnected = false;
       Myo.disconnect();
     },
+
     //Set up all the event listeners
     getMyoData: function() {
       Myo.on('imu', (data) => {
@@ -434,6 +456,7 @@ export default {
           v7:data[7]
           };
       });
+
       Myo.on('pose', (data) => {
         this.$data.myoConnected = true;
         var e;
@@ -445,18 +468,25 @@ export default {
           case 'double_tap':      e = 5; break;
           default:                e = 0;
         }
+        if(e != 0)
+          console.log(this.gestureToString(e));
+          
         this.$data.clientMyoData.gesture = e;
       });
+
       Myo.on('pose_off', () => {
         this.$data.clientMyoData.gesture = 0;
       });
+
       Myo.on('connected', () => {
         this.$data.myoConnected = true;
       });
+
       Myo.on('disconnected', () => {
         this.$data.myoConnected = false;
       });
     },
+
     gestureToString: function(g) {
       switch(g){
         case 1:   return 'fingers spread';
@@ -467,6 +497,8 @@ export default {
         default:  return 'rest';
       }
     },
+
+    //print conection status
     getMyoConnected: function() {
         return this.$data.myoConnected ? "connected" : "disconnected";
     }

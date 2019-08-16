@@ -194,8 +194,8 @@ export default {
         'state => {' +
         'console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");'+
         'let prepareModel = async () => {' +
-        'state.model = await state.modules.cocoSsd.load();' +
-        //'state.model = await state.modules.tf.loadGraphModel("file:///tfjs-models/myo-rps/model.json");';
+        //'state.model = await state.modules.cocoSsd.load();' +
+        'state.model = await state.modules.tf.loadGraphModel("file:C:/Users/Anas/Desktop/UbiInteract/ubii-nodejs-backend/test/sessions/integration-tests/tfjs-models/myo-rps/model.json");'+
         'console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");'+
         '};' +
         'prepareModel();' +
@@ -429,12 +429,18 @@ export default {
         msg_obj.elements.push(singleEmgArray.v7);
       });
 
-      UbiiClientService.client.publish(
+      //depricated
+
+      /*UbiiClientService.client.publish(
         this.$data.ubiiDevice.name,
         this.$data.inputEmgData.topic,
         'int32List',
         msg_obj
-      );
+      ); */
+        UbiiClientService.publishRecord({
+        topic: this.$data.inputEmgData.topic,
+        int32List: msg_obj
+        });
     },
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++ game logic ++++++++++++++++++++++++++++++++++++++

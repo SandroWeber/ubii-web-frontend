@@ -147,7 +147,7 @@ import {
   faTabletAlt,
   faKeyboard,
   faHandPointer,
-  faHandScissors
+  faHandScissors,
   faEye
 } from '@fortawesome/free-solid-svg-icons';
 library.add(faMousePointer, faCube, faCubes, faVrCardboard, faMobileAlt, faTabletAlt, faKeyboard, faHandPointer, faEye);
