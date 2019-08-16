@@ -10,7 +10,7 @@
 
 <script>
 export default {
-  name: 'AppCollapseButton',
+  name: 'AppCollapseSectionHeader',
   components: {},
   props: {
     title: {

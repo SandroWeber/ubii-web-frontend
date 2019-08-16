@@ -4,7 +4,7 @@ import _AppInput from './AppInput.vue';
 import _AppTile from './AppTile.vue';
 import _AppToken from './AppToken.vue';
 import _AppExplorer from './appExplorer/AppExplorer.vue';
-import _AppCollapseButton from './AppCollapseButton.vue';
+import _AppCollapseSectionHeader from './AppCollapseSectionHeader.vue';
 
 export var AppLayer = _AppLayer;
 export var AppButton = _AppButton;
@@ -12,4 +12,4 @@ export var AppInput = _AppInput;
 export var AppTile = _AppTile;
 export var AppToken = _AppToken;
 export var AppExplorer = _AppExplorer;
-export var AppCollapseButton = _AppCollapseButton;
+export var AppCollapseSectionHeader = _AppCollapseSectionHeader;

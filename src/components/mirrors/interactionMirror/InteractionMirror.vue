@@ -12,7 +12,7 @@
     </div>
 
     <div class="category">
-      <app-collapse-button
+      <app-collapse-section-header
         :title="'Details'"
         :targetID="'details-content'"
         :initiallyCollapsed="true"
@@ -49,7 +49,7 @@
     </div>
 
     <div class="category">
-      <app-collapse-button
+      <app-collapse-section-header
         :title="'Callback: onCreated(state)'"
         :targetID="'oncreated-content'"
         class="layer-three"
@@ -60,14 +60,14 @@
     </div>
 
     <div class="category">
-      <app-collapse-button
+      <app-collapse-section-header
         :title="'Callback: process(inputs, outputs, state)'"
         :targetID="'process-content'"
         class="layer-three"
       />
       <div id="process-content">
         <div class="segment">
-          <div>process frequency:</div>
+          <div>process frequency (every x seconds):</div>
           <app-input
             class="layer-two round title-input"
             :id="'input-interaction-processFrequency'"
@@ -102,7 +102,7 @@ import SourceCodeMirror from './../sourceCodeMirror/SourceCodeMirror.vue';
 import {
   AppLayer,
   AppInput,
-  AppCollapseButton
+  AppCollapseSectionHeader
 } from './../../appComponents/appComponents.js';
 
 // Fontawesome.
@@ -120,7 +120,7 @@ export default {
     InteractionMirrorInterfaceList,
     AppLayer,
     AppInput,
-    AppCollapseButton
+    AppCollapseSectionHeader
   },
   data: () => {
     return {
