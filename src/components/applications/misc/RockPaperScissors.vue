@@ -69,7 +69,7 @@ import UbiiEventBus from '../../../services/ubiiClient/ubiiEventBus';
 import uuidv4 from 'uuid/v4';
 import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
-import { ProtobufTranslator, MSG_TYPES, DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
+import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -173,47 +173,34 @@ export default {
           }
         ]
       };
-      let processCBDummy = (input, output) => {
-            //if(input.emgData){
-            //}
-            output.gestureId = Math.round((Math.random() * 2) + 1);
-            //console.log(input.emgData.elements);
-            //console.log(Object.keys(input) + " cb in data yay");
-            //console.log(output.gestureId + " cb out data yay");
+
+      let processCBDummy = (input, output, state) => {
+            if(input.emgData && input.emgData.elements.length == 64){
+              
+              /* if(state.model){
+                let prediction = async () => {
+                  let p = await state.model.predict(state.modules.tf.tensor2d(
+                  input.emgData.elements, [64,1]));
+                  return p;
+                  }
+              } else {
+                console.log("state.model is not defined");
+              } */
+              output.gestureId = Math.round((Math.random() * 2) + 1);
+            }
         };
 
       let onCreatedCBDummy = 
-        () => {
-          console.log("onCreatedCBDummy");
-        };
-
-/*       let processCB = 
-        (input, output, state) => {
-          if(input.emgData){
-            //convert
-            //out_array = [];
-            //input.emgData.foreach((elements) => out_array.push(elements));
-            //check for length
-            //if(out_array.length != 64) break;
-
-            let prediction = state.model.predict(state.modules.tf.tensor2d(
-              //out_array, [64,1]
-              [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], [64,1]
-              )).dataSync()[0];
-              output.prediction = prediction;
-          }};
-
-
-      let onCreatedCB =         
         'state => {' +
+        'console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");'+
         'let prepareModel = async () => {' +
-        'state.model = await state.modules.tf.loadGraphModel("file:///tfjs-models/myo-rps/model.json");' +
+        'state.model = await state.modules.cocoSsd.load();' +
+        //'state.model = await state.modules.tf.loadGraphModel("file:///tfjs-models/myo-rps/model.json");';
+        'console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");'+
         '};' +
         'prepareModel();' +
-        '};'; */
-
-      //let onCreatedCB_1 =         
-      //   'state.model = await state.modules.tf.loadGraphModel("file:///tfjs-models/myo-rps/model.json");';
+        'console.log("??????????????????????????????????????????????");'+
+        '};';
 
       let ubiiInteraction = {
         id: uuidv4(),
