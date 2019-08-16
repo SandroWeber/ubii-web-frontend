@@ -18,13 +18,8 @@
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
-/* fontawesome */
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
-library.add(faChevronRight);
-
-//import { TopicViewer } from './TopicViewer.vue';
 import TopicViewer from './TopicViewer.vue';
+import { setTimeout } from 'timers';
 
 export default {
   name: 'TopicInspector',
@@ -32,9 +27,13 @@ export default {
     TopicViewer
   },
   mounted: function() {
-    UbiiClientService.connect().then(() => {
+    UbiiClientService.isConnected().then(() => {
       this.getTopicList();
     });
+    this.open = true;
+  },
+  beforeDestroy: function() {
+    this.open = false;
   },
   data: () => {
     return {
@@ -58,9 +57,10 @@ export default {
             return topic.indexOf('/services/') === -1;
           });
         });
-    },
-    openTopicDataDisplay(key) {
-      console.info('openTopicDataDisplay ' + key);
+
+      if (this.open) {
+        setTimeout(this.getTopicList, 1000);
+      }
     }
   }
 };

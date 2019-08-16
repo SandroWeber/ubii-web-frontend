@@ -143,11 +143,18 @@ const actions = {
       interaction: {
         id: uuidv4(),
         name: 'New Interaction',
-        processingCallback: `(input, output, state) => {
+        authors: ['author 1', 'author 2'],
+        tags: ['tag1', 'tag2'],
+        description: 'Enter description here.',
+        onCreated: `(state) => {
+  // Your initialization code here.
+}`,
+        processFrequency: 0.01,
+        processingCallback: `(inputs, outputs, state) => {
 
   // Your code here.
 
-  output.defaultOut = input.defaultIn;
+  outputs.defaultOut = inputs.defaultIn;
 }`,
         inputFormats: [
           {

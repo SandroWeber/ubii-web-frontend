@@ -4,7 +4,7 @@
     <app-input :id="'server-ip'" :type="'text'" v-model="ubiiClientService.serverIP" />
     <label for="server-port">Server Port</label>
     <app-input :id="'server-port'" :type="'text'" v-model="ubiiClientService.serverPort" />
-    <app-button :class="buttonClassObject" @click="connect" :contentSizePercentage="60">
+    <app-button :class="buttonClassObject" @click="onButtonConnect" :contentSizePercentage="60">
       <font-awesome-icon icon="sync-alt" class="connect-icon" />
     </app-button>
   </app-layer>
@@ -41,8 +41,7 @@ export default {
   },
   data: () => {
     return {
-      ubiiClientService: UbiiClientService,
-      test: 'hallo'
+      ubiiClientService: UbiiClientService
     };
   },
   computed: {
@@ -56,21 +55,18 @@ export default {
     }
   },
   methods: {
-    connect: function() {
-      /*if (!this.ubiiClientService.connected) {
-        this.ubiiClientService.connect();
-      } else {
-        this.ubiiClientService.disconnect();
-        this.ubiiClientService.connect();
-      }*/
-
-      this.ubiiClientService.isConnected().then(connected => {
+    onButtonConnect: function() {
+      UbiiClientService.isConnected().then(connected => {
         if (connected) {
-          this.ubiiClientService.disconnect().then(() => {
-            this.ubiiClientService.connect();
+          UbiiClientService.disconnect().then(() => {
+            UbiiClientService.connect();
           });
         } else {
-          this.ubiiClientService.connect();
+          if (UbiiClientService.client.clientSpecification) {
+            UbiiClientService.reconnect();
+          } else {
+            UbiiClientService.connect();
+          }
         }
       });
     }

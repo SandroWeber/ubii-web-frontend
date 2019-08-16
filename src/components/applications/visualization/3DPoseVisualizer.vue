@@ -13,8 +13,8 @@ import uuidv4 from 'uuid/v4';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
-import WebVR from '../applications/sharedModules/WebVR';
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import WebVR from '../sharedModules/WebVR';
+import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
 
 export default {
   name: 'Pose3DVisualizer',
@@ -97,7 +97,7 @@ export default {
             state.objects.push({
               id: (currentNumberOfObjects + i).toString(),
               pose: {
-                vector3: { x: 0, y: 0, z: 0 },
+                position: { x: 0, y: 0, z: 0 },
                 quaternion: { x: 0, y: 0, z: 0, w: 0 }
               }
             });
@@ -113,15 +113,6 @@ export default {
         }
 
         let isWithinBoundingBox = position => {
-          /*return (
-            position.x > -(state.boundingBoxSize.x / 2) &&
-            position.x < state.boundingBoxSize.x / 2 &&
-            position.y > -(state.boundingBoxSize.y / 2) &&
-            position.y < state.boundingBoxSize.y / 2 &&
-            position.z > -(state.boundingBoxSize.z / 2) &&
-            position.z < state.boundingBoxSize.z / 2
-          );*/
-
           return (
             position.x > 0 &&
             position.x < state.boundingBoxSize.x &&
@@ -133,12 +124,12 @@ export default {
         };
 
         let generateRandomMovement = (pose, tDelta) => {
-          pose.vector3.x =
-            pose.vector3.x + (Math.random() - 0.5) * tDelta * 0.001;
-          pose.vector3.y =
-            pose.vector3.y + (Math.random() - 0.5) * tDelta * 0.001;
-          pose.vector3.z =
-            pose.vector3.z + (Math.random() - 0.5) * tDelta * 0.001;
+          pose.position.x =
+            pose.position.x + (Math.random() - 0.5) * tDelta * 0.001;
+          pose.position.y =
+            pose.position.y + (Math.random() - 0.5) * tDelta * 0.001;
+          pose.position.z =
+            pose.position.z + (Math.random() - 0.5) * tDelta * 0.001;
 
           pose.quaternion.x =
             pose.quaternion.x + (Math.random() - 0.5) * tDelta * 0.001;
@@ -149,8 +140,8 @@ export default {
           pose.quaternion.w =
             pose.quaternion.w + (Math.random() - 0.5) * tDelta * 0.001;
 
-          if (!isWithinBoundingBox(pose.vector3)) {
-            pose.vector3 = { x: 1, y: 1, z: 1 };
+          if (!isWithinBoundingBox(pose.position)) {
+            pose.position = { x: 1, y: 1, z: 1 };
           }
         };
 
@@ -250,15 +241,15 @@ export default {
       UbiiClientService.isConnected().then(() => {
         this.createUbiiSpecs();
 
-        UbiiClientService.client.subscribe(this.topicObjects, topicObject => {
+        UbiiClientService.subscribe(this.topicObjects, topicObject => {
           let found = false;
           this.scene.traverseVisible(sceneObject => {
             if (found) return;
             if (sceneObject.name === topicObject.id) {
               sceneObject.position.set(
-                topicObject.pose.vector3.x,
-                topicObject.pose.vector3.y,
-                topicObject.pose.vector3.z
+                topicObject.pose.position.x,
+                topicObject.pose.position.y,
+                topicObject.pose.position.z
               );
               sceneObject.quaternion.set(
                 topicObject.pose.quaternion.x,
@@ -284,19 +275,15 @@ export default {
           // device registration successful
           this.ubiiDevice = response;
 
-          UbiiClientService.client.publish(
-            this.ubiiDevice.name,
-            this.topicBoundingBox,
-            'vector3',
-            { x: 2, y: 2, z: 2 }
-          );
+          UbiiClientService.publishRecord({
+            topic: this.topicBoundingBox,
+            vector3: { x: 2, y: 2, z: 2 }
+          });
 
-          UbiiClientService.client.publish(
-            this.ubiiDevice.name,
-            this.topicGenerateNumberOfObjects,
-            'double',
-            3
-          );
+          UbiiClientService.publishRecord({
+            topic: this.topicGenerateNumberOfObjects,
+            double: 3
+          });
 
           //this.toggleTestData();
         });

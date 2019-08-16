@@ -25,7 +25,10 @@ export default {
       this.stopExample();
     });
 
-    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.startExample);
+    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, async () => {
+      await this.stopExample();
+      await this.startExample();
+    });
 
     this.createUbiiSpecs();
     UbiiClientService.isConnected().then(() => {
@@ -35,8 +38,8 @@ export default {
       await this.stopExample();
     });
   },
-  beforeDestroy: function() {
-    this.stopExample();
+  beforeDestroy: async function() {
+    await this.stopExample();
   },
   data: () => {
     return {
@@ -45,15 +48,12 @@ export default {
     };
   },
   methods: {
-    startExample: function() {
+    startExample: async function() {
       if (this.running) return;
 
       this.running = true;
-      this.pollSmartDevices = true;
 
-      UbiiClientService.isConnected().then(() => {
-        this.updateSmartDevices();
-
+      await UbiiClientService.isConnected().then(() => {
         /* we register our device needed to publish the vibration distance threshold */
         UbiiClientService.registerDevice(this.device)
           .then(response => {
@@ -66,11 +66,54 @@ export default {
           })
           .then(() => {
             /* we publish the vibration distance threshold */
-            UbiiClientService.client.publish(
-              this.device.name,
-              this.topicVibrationDistanceThreshold,
-              'double',
-              0.03
+            UbiiClientService.publishRecord({
+              topic: this.topicVibrationDistanceThreshold,
+              double: 0.03
+            });
+
+            UbiiClientService.subscribe(
+              this.topicTouchObjects,
+              object2DList => {
+                if (object2DList.elements) {
+                  let touchPosAreaBoundingRect = document
+                    .getElementById('example-web-smart-devices-touch-positions')
+                    .getBoundingClientRect();
+
+                  // go through all transmitted objects
+                  object2DList.elements.forEach(obj2D => {
+                    // add if not part of the list
+                    if (!this.$data.clients.has(obj2D.id)) {
+                      this.addClient(obj2D.id);
+                    }
+
+                    let client = this.$data.clients.get(obj2D.id);
+                    // update position
+                    client.touchPosition.x = Math.floor(
+                      obj2D.pose.position.x * touchPosAreaBoundingRect.width
+                    );
+                    client.touchPosition.y = Math.floor(
+                      obj2D.pose.position.y * touchPosAreaBoundingRect.height
+                    );
+
+                    // update indicator
+                    client.touchPosIndicator.style.left =
+                      client.touchPosition.x.toString() + 'px';
+                    client.touchPosIndicator.style.top =
+                      client.touchPosition.y.toString() + 'px';
+                  });
+
+                  // remove all that are gone since last update
+                  this.$data.clients.forEach((client, id) => {
+                    if (
+                      !object2DList.elements.find(obj => {
+                        return obj.id === id;
+                      })
+                    ) {
+                      this.removeClient(id);
+                    }
+                  });
+                }
+              }
             );
 
             /* we start the session with the specs created in createUbiiSpecs() */
@@ -88,18 +131,47 @@ export default {
           });
       });
     },
-    stopExample: function() {
-      this.pollSmartDevices = false;
+    stopExample: async function() {
       this.running = false;
 
       if (this.session) {
-        return UbiiClientService.client.callService({
+        await UbiiClientService.client.callService({
           topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
           session: this.session
         });
       }
+
+      if (this.device) {
+        await UbiiClientService.deregisterDevice(this.device);
+      }
     },
     createUbiiSpecs: function() {
+      this.topicVibrationDistanceThreshold =
+        '/' +
+        UbiiClientService.getClientID() +
+        '/smart_device_gatherer_example/vibration_distance_threshold';
+      this.topicTouchObjects =
+        '/' +
+        UbiiClientService.getClientID() +
+        '/smart_device_gatherer_example/touch_objects';
+
+      this.device = {
+        name: 'SmartDeviceGathererExample - Device',
+        deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
+        components: [
+          {
+            topic: this.topicVibrationDistanceThreshold,
+            messageFormat: 'double',
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+          },
+          {
+            topic: this.topicTouchObjects,
+            messageFormat: 'ubii.dataStructure.Object2DList',
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+          }
+        ]
+      };
+
       /* this is the processing callback that compares touch positions and lets devices vibrate whose positions are close */
       let processCB = (inputs, outputs) => {
         /* compare touch positions of all smart devices, let those who are close (distance below threshold) vibrate */
@@ -154,6 +226,20 @@ export default {
           };
         });
         outputs.demuxVibration = vibrationDemuxOutput;
+
+        /* publish all current touch positions as objects */
+        let touchObjects = [];
+        positionRecords.forEach(obj => {
+          touchObjects.push({
+            id: obj.identity,
+            pose: {
+              position: obj.data
+            }
+          });
+        });
+        outputs.touchObjects = {
+          elements: touchObjects
+        };
       };
 
       /* our interaction with the I/O specifications fitting the processCB */
@@ -164,7 +250,7 @@ export default {
         inputFormats: [
           {
             internalName: 'muxTouchPositions',
-            messageFormat: 'vector2'
+            messageFormat: 'ubii.dataStructure.Vector2'
           },
           {
             internalName: 'vibrationDistanceThreshold',
@@ -175,6 +261,10 @@ export default {
           {
             internalName: 'demuxVibration',
             messageFormat: 'double'
+          },
+          {
+            internalName: 'touchObjects',
+            messageFormat: 'ubii.dataStructure.Object2DList'
           }
         ]
       };
@@ -198,11 +288,6 @@ export default {
         outputTopicFormat: '%s/web-interface-smart-device/vibration_pattern'
       };
 
-      this.topicVibrationDistanceThreshold =
-        '/' +
-        UbiiClientService.getClientID() +
-        '/smart_device_gatherer_example/vibration_distance_threshold';
-
       /* our session that contains the interaction and the mapping between "muxer -> interaction input" and "interaction output -> demuxer" */
       this.session = {
         id: uuidv4(),
@@ -225,49 +310,15 @@ export default {
               {
                 name: this.interaction.outputFormats[0].internalName,
                 topicDestination: this.demuxerVibrations
+              },
+              {
+                name: this.interaction.outputFormats[1].internalName,
+                topicDestination: this.topicTouchObjects
               }
             ]
           }
         ]
       };
-
-      this.device = {
-        name: 'SmartDeviceGathererExample - Device',
-        deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
-        components: [
-          {
-            topic: this.topicVibrationDistanceThreshold,
-            messageFormat: 'double',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
-          }
-        ]
-      };
-    },
-    updateSmartDevices: function() {
-      if (!this.pollSmartDevices) {
-        return;
-      }
-
-      UbiiClientService.client
-        .callService({ topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST })
-        .then(reply => {
-          this.$data.topicList = reply.stringList.list;
-
-          this.$data.topicList.forEach(topic => {
-            let smart_device_touch_topic_index = topic.indexOf(
-              '/web-interface-smart-device/touch_position'
-            );
-            if (smart_device_touch_topic_index !== -1) {
-              let clientID = topic.substring(0, smart_device_touch_topic_index);
-
-              if (!this.$data.clients.has(clientID)) {
-                this.addClient(clientID, topic);
-              }
-            }
-          });
-        });
-
-      setTimeout(this.updateSmartDevices, 1000);
     },
     getRandomColor: function() {
       let letters = '0123456789ABCDEF';
@@ -277,7 +328,7 @@ export default {
       }
       return color;
     },
-    addClient: function(clientID, topic) {
+    addClient: function(clientID /*, topic*/) {
       let touchPosElement = document.createElement('div');
       touchPosElement.style.width = '10px';
       touchPosElement.style.height = '10px';
@@ -289,37 +340,20 @@ export default {
 
       // create client object with necessary info
       let client = {
-        topicTouchPosition: topic,
         touchPosition: { x: undefined, y: undefined },
         color: touchPosElement.style.backgroundColor,
         touchPosIndicator: touchPosElement
       };
       this.$data.clients.set(clientID, client);
-
-      UbiiClientService.client.subscribe(
-        client.topicTouchPosition,
-        touchPosition => {
-          let boundingRect = document
-            .getElementById('example-web-smart-devices-touch-positions')
-            .getBoundingClientRect();
-
-          client.touchPosition.x = Math.floor(
-            touchPosition.x * boundingRect.width
-          );
-          client.touchPosition.y = Math.floor(
-            touchPosition.y * boundingRect.height
-          );
-
-          client.touchPosIndicator.style.left =
-            client.touchPosition.x.toString() + 'px';
-          client.touchPosIndicator.style.top =
-            client.touchPosition.y.toString() + 'px';
-        }
-      );
     },
-    removeClient(clientID) {
-      let indicatorElement = this.$data.clients[clientID].touchPosIndicator;
+    removeClient(id) {
+      if (!this.$data.clients.has(id)) {
+        return;
+      }
+
+      let indicatorElement = this.$data.clients.get(id).touchPosIndicator;
       indicatorElement.parentNode.removeChild(indicatorElement);
+      this.$data.clients.delete(id);
     }
   }
 };

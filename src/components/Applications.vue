@@ -2,27 +2,47 @@
   <div>
     <div class="category">
       <div class="seperator">
-        <span class="label">Examples</span>
+        <span class="label">Visualization</span>
       </div>
+      <div class="grid">
+        <router-link to="/applications/visualization/3d_pose_visualizer" class="interface-link" tag="div">
+           <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="cubes" class="interface-icon" />
+            <p>3D Pose Visualizer</p>
+          </app-tile>
+         </router-link>
+      </div>
+
+      <div class="seperator">
+        <span class="label">Tutorials, Learning Examples</span>
+      </div>
+
       <div class="grid">
         <router-link to="/applications/examples/mouse-pointer" class="interface-link" tag="div">
           <app-tile class="layer-three background round shadow orange-accent">
-            <font-awesome-icon icon="mouse-pointer" class="interface-icon"/>
+            <font-awesome-icon icon="mouse-pointer" class="interface-icon" />
             <p>Mouse Demo</p>
           </app-tile>
         </router-link>
 
         <router-link to="/applications/examples/threejs" class="interface-link" tag="div">
           <app-tile class="layer-three background round shadow orange-accent">
-            <font-awesome-icon icon="cube" class="interface-icon"/>
-            <p>three.js web rendering</p>
+            <font-awesome-icon icon="cube" class="interface-icon" />
+            <p>Three.js Web Rendering</p>
           </app-tile>
         </router-link>
 
         <router-link to="/applications/examples/threejs-webvr" class="interface-link" tag="div">
           <app-tile class="layer-three background round shadow orange-accent">
-            <font-awesome-icon icon="vr-cardboard" class="interface-icon"/>
-            <p>three.js webVR rendering</p>
+            <font-awesome-icon icon="vr-cardboard" class="interface-icon" />
+            <p>Three.js WebVR Rendering</p>
+          </app-tile>
+        </router-link>
+
+        <router-link to="/applications/examples/aframe" class="interface-link" tag="div">
+          <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="vr-cardboard" class="interface-icon" />
+            <p>A-Frame</p>
           </app-tile>
         </router-link>
 
@@ -32,8 +52,19 @@
           tag="div"
         >
           <app-tile class="layer-three background round shadow orange-accent">
-            <font-awesome-icon icon="tablet-alt" class="interface-icon"/>
-            <p>Gatherer - Web Interface, Smart Devices</p>
+            <font-awesome-icon icon="tablet-alt" class="interface-icon" />
+            <p>Gatherer - Interface Smart Devices</p>
+          </app-tile>
+        </router-link>
+
+        <router-link
+          to="/applications/examples/opencv"
+          class="interface-link"
+          tag="div"
+        >
+          <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="eye" class="interface-icon" />
+            <p>OpenCV</p>
           </app-tile>
         </router-link>
       </div>
@@ -50,7 +81,7 @@
           tag="div"
         >
           <app-tile class="layer-three background round shadow orange-accent">
-            <font-awesome-icon icon="cubes" class="interface-icon"/>
+            <font-awesome-icon icon="cubes" class="interface-icon" />
             <p>VR Model Inspector</p>
           </app-tile>
         </router-link>
@@ -61,7 +92,7 @@
           tag="div"
         >
           <app-tile class="layer-three background round shadow orange-accent">
-            <font-awesome-icon icon="hand-pointer" class="interface-icon"/>
+            <font-awesome-icon icon="hand-pointer" class="interface-icon" />
             <p>VR Laser Pointer</p>
           </app-tile>
         </router-link>
@@ -72,7 +103,7 @@
           tag="div"
         >
           <app-tile class="layer-three background round shadow orange-accent">
-            <font-awesome-icon icon="keyboard" class="interface-icon"/>
+            <font-awesome-icon icon="keyboard" class="interface-icon" />
             <p>VR Keyboard</p>
           </app-tile>
         </router-link>
@@ -117,15 +148,9 @@ import {
   faKeyboard,
   faHandPointer,
   faHandScissors
+  faEye
 } from '@fortawesome/free-solid-svg-icons';
-library.add(faMousePointer);
-library.add(faCube);
-library.add(faCubes);
-library.add(faVrCardboard);
-library.add(faMobileAlt);
-library.add(faTabletAlt);
-library.add(faKeyboard);
-library.add(faHandPointer);
+library.add(faMousePointer, faCube, faCubes, faVrCardboard, faMobileAlt, faTabletAlt, faKeyboard, faHandPointer, faEye);
 library.add(faHandScissors);
 
 export default {

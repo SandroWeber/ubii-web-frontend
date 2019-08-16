@@ -13,13 +13,13 @@
       @click="toggleTopicDataDisplay(topic)"
     />
     {{topic}}
-    <div class="topic-data green-accent" v-show="expanded">{{data}}</div>
+    <div class="topic-data green-accent" v-show="expanded && data">{{data}}</div>
+    <div class="topic-data red-accent" v-show="expanded && !data">received empty data</div>
   </div>
 </template>
 
 <script>
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
-import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -43,11 +43,11 @@ export default {
       this.expanded = !this.expanded;
       if (this.expanded) {
         this.data = '... no data received yet ...';
-        UbiiClientService.client.subscribe(this.topic, data => {
+        UbiiClientService.subscribe(this.topic, data => {
           this.data = data;
         });
       } else {
-        UbiiClientService.client.unsubscribe(this.topic);
+        UbiiClientService.unsubscribe(this.topic);
       }
     }
   }
@@ -61,7 +61,6 @@ export default {
 }
 
 .topic-data {
-  color: ;
   padding-left: 30px;
 }
 </style>

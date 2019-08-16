@@ -25,7 +25,10 @@ class UbiiClientService {
 
     console.info('connecting to backend ' + this.serverIP + ':' + this.serverPort);
 
-    this.client = new ClientNodeWeb('web frontend', this.serverIP, this.serverPort);
+    if (!this.client) {
+      this.client = new ClientNodeWeb('web frontend', this.serverIP, this.serverPort);
+    }
+
     return this.client.initialize().then(
       () => {
         if (this.client.isInitialized()) {
@@ -64,7 +67,7 @@ class UbiiClientService {
   }
 
   async reconnect() {
-    await this.connect();
+    await this.client.reinitialize();
   }
 
   isConnected() {
@@ -74,8 +77,8 @@ class UbiiClientService {
 
       let checkConnection = () => {
         retry += 1;
-        if (this.connected) {
-          resolve(this.connected);
+        if (this.client && this.client.isConnected()) {
+          resolve(this.client.isConnected());
           return;
         } else {
           if (retry > maxRetries) {
@@ -103,19 +106,55 @@ class UbiiClientService {
     }
   }
 
+  async callService(serviceRequest) {
+    return this.client.callService(serviceRequest);
+  }
+
   /**
    * Register the specified device at the UBII server.
    * @param {object} device Object specifying device according to protobuf format ubii.devices.Device
    */
-  async registerDevice(device) {
-    device.clientId = this.client.clientSpecification.id;
-    return this.client.registerDevice(device);
+  async registerDevice(deviceSpecs) {
+    deviceSpecs.clientId = this.client.clientSpecification.id;
+    return this.client.registerDevice(deviceSpecs);
   }
 
-  async registerSession(session) {
+  /**
+   * Deregister the specified device at the UBII server.
+   * @param {object} device Object specifying device according to protobuf format ubii.devices.Device
+   */
+  async deregisterDevice(specs) {
+    return this.client.deregisterDevice(specs);
+  }
+
+  async registerSession(sessionSpecs) {
     if (this.client && this.client.isInitialized()) {
-      return this.client.registerSession(session);
+      return this.client.registerSession(sessionSpecs);
     }
+  }
+
+  publish(topicData) {
+    this.client && this.client.publish(topicData);
+  }
+
+  publishRecord(topicDataRecord) {
+    this.client && this.client.publish({
+      topicDataRecord: topicDataRecord
+    });
+  }
+
+  publishRecordList(topicDataRecordList) {
+    this.client && this.client.publish({
+      topicDataRecordList: topicDataRecordList
+    });
+  }
+
+  async subscribe(topic, callback) {
+    return this.client && this.client.subscribe(topic, callback);
+  }
+
+  async unsubscribe(topic) {
+    return this.client && this.client.unsubscribe(topic);
   }
 
   getUUIDv4Regex() {
