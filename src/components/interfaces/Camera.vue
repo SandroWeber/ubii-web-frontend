@@ -75,7 +75,7 @@ export default {
       this.stopCoCoSSDObjectDetection();
     },
     /* ubii methods */
-    createUbiiSpecs: function() {
+    createUbiiSpecs: async function() {
       this.ubiiDeviceName = 'CameraWebInterface';
       let topicPrefix =
         '/' + UbiiClientService.getClientID() + '/' + this.ubiiDeviceName;
@@ -98,85 +98,35 @@ export default {
         ]
       };
 
-      let interactionCoCoSSDOnCreatedCB =
-        'state => {' +
-        'let prepareModel = async () => {' +
-        'state.model = await state.modules.cocoSsd.load();' +
-        'state.timestampLastImage = 0;' +
-        'state.tLastProcess = Date.now();' +
-        '};' +
-        'prepareModel();' +
-        '};';
-
-      // we really need a functional interaction editor for this (async parts and class constructors aren't handled ver well by .toString())
-      let interactionCoCoSSDProcessCB =
-        '(inputs, outputs, state) => {' +
-        'let tNow = Date.now();' +
-        'if (tNow < state.tLastProcess + 1000) { return; }' +
-        'state.tLastProcess = tNow;' +
-        //'console.info("interactionCoCoSSDProcessCB");' +
-        'let image = inputs.image;' +
-        'if (image && state.model) {' +
-        // prediction function
-        'let predict = async () => {' +
-        //'console.info("predicting");' +
-        'let imgTensor = state.modules.tf.tensor3d(image.data, [image.height, image.width, 3], "int32");' +
-        'let predictions = await state.model.detect(imgTensor);' +
-        'return predictions;' +
-        '};' +
-        // make predictions
-        'predict().then(predictions => {' +
-        //'console.info(predictions);' +
-        // generate output list
-        'let outputList = [];' +
-        'predictions.forEach(prediction => {' +
-        'let pos = {x: prediction.bbox[0] / image.width, y: prediction.bbox[1] / image.height};' +
-        'outputList.push( { ' +
-        'id: prediction.class, ' +
-        'pose: { position: pos }, ' +
-        'size: {x: prediction.bbox[2] / image.width, y: prediction.bbox[3] / image.height} } );' +
-        '});' +
-        // write output
-        'outputs.predictions = { elements: outputList };' +
-        '});' +
-        '}' +
-        '};';
-
-      this.ubiiInteractionCoCoSSD = {
-        id: uuidv4(),
-        name: 'CameraWebInterface - Interaction CoCoSSD',
-        inputFormats: [
-          {
-            internalName: 'image',
-            messageFormat: 'ubii.dataStructure.Image2D'
-          }
-        ],
-        outputFormats: [
-          {
-            internalName: 'predictions',
-            messageFormat: 'ubii.dataStructure.Object2DList'
-          }
-        ],
-        onCreated: interactionCoCoSSDOnCreatedCB,
-        processingCallback: interactionCoCoSSDProcessCB.toString()
-      };
+      let interactionCocoSsdID = 'b74761e9-3cd3-400c-8144-23669e951c2c';
+      let getInteractionResponse = await UbiiClientService.callService({
+        topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_GET,
+        interaction: {
+          id: interactionCocoSsdID
+        }
+      });
+      if (getInteractionResponse.error) {
+        console.warn(getInteractionResponse.error);
+      } else {
+        this.interactionCocoSsdSpecs = getInteractionResponse.interaction;
+      }
 
       this.ubiiSessionCoCoSSD = {
-        id: uuidv4(),
+        id: uuidv4(), //TODO: remove and receive from backend
         name: 'CameraWebInterface - Session CoCoSSD',
-        interactions: [this.ubiiInteractionCoCoSSD],
+        interactions: [this.interactionCocoSsdSpecs],
         ioMappings: [
           {
-            interactionId: this.ubiiInteractionCoCoSSD.id,
+            interactionId: this.interactionCocoSsdSpecs.id,
             inputMappings: [
               {
-                name: this.ubiiInteractionCoCoSSD.inputFormats[0].internalName,
+                name: this.interactionCocoSsdSpecs.inputFormats[0].internalName,
                 topicSource: this.ubiiDevice.components[0].topic
               }
             ],
             outputMappings: [
               {
-                name: this.ubiiInteractionCoCoSSD.outputFormats[0].internalName,
+                name: this.interactionCocoSsdSpecs.outputFormats[0].internalName,
                 topicDestination: this.ubiiDevice.components[1].topic
               }
             ]
