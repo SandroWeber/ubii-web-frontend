@@ -468,8 +468,8 @@ export default {
           case 'double_tap':      e = 5; break;
           default:                e = 0;
         }
-        if(e != 0)
-          console.log(this.gestureToString(e));
+        /* if(e != 0)
+          console.log(this.gestureToString(e)); */
           
         this.$data.clientMyoData.gesture = e;
       });

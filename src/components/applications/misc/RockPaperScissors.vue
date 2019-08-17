@@ -176,27 +176,57 @@ export default {
 
       let processCBDummy = (input, output, state) => {
             if(input.emgData && input.emgData.elements.length == 64){
-              
-              /* if(state.model){
-                let prediction = async () => {
-                  let p = await state.model.predict(state.modules.tf.tensor2d(
-                  input.emgData.elements, [64,1]));
-                  return p;
-                  }
+              if(state.model){
+                //let makePrediction = async () => {
+                //  let p = await state.model.predict(state.modules.tf.tensor2d(
+                //  input.emgData.elements, [64,1]));
+                //  return p;
+                //  }
+                //  console.log("model loaded, process callback");
+                //  output.gestureId = 3 //makePrediction();
               } else {
-                console.log("state.model is not defined");
-              } */
+                //console.log("state.model is not defined");
+              }
               output.gestureId = Math.round((Math.random() * 2) + 1);
             }
         };
+      let processCB = 
+      '(input, state) => {'+
+            'if(input.emgData && input.emgData.elements.length == 64){'+
+              'if(state.model){'+
+                'output => {'+
+                  'let makePrediction = async () => {'+
+                    'let p = await state.model.predict(state.modules.tf.tensor2d('+
+                    'input.emgData.elements, [64,1]));'+
+                    'return p;'+
+                  '}'+
+                  'console.log("model loaded, process callback");'+
+                  'output.gestureId = makePrediction();'+
+                '}'+
+              '} else {'+
+                'console.log("state.model is not defined");'+
+              '}'+
+            '}'+
+        '};'
 
+      //Load random model from package:     works
+      //Load random layers model from url:  works
+      //Load random layers model from file: works
+      //Load random graph model from file:  
+      //Load own graph model from file:     works
       let onCreatedCBDummy = 
         'state => {' +
         'console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");'+
         'let prepareModel = async () => {' +
         //'state.model = await state.modules.cocoSsd.load();' +
-        'state.model = await state.modules.tf.loadGraphModel("file:C:/Users/Anas/Desktop/UbiInteract/ubii-nodejs-backend/test/sessions/integration-tests/tfjs-models/myo-rps/model.json");'+
+        'try {'+
+        'state.model = await state.modules.tf.loadGraphModel("file://C:/Users/Anas/Desktop/UbiInteract/ubii-nodejs-backend/test/sessions/integration-tests/tfjs-models/myo-rps/model.json");'+
+        //'state.model = await state.modules.tf.loadLayersModel("https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json");'+
+        //'state.model = await state.modules.tf.loadLayersModel("file://C:/Users/Anas/Desktop/UbiInteract/model.json");'+
         'console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");'+
+        '} catch (err) {'+
+        'throw err;'+
+        '}'+
         '};' +
         'prepareModel();' +
         'console.log("??????????????????????????????????????????????");'+
@@ -281,19 +311,10 @@ export default {
             return device;
           })
           .then(() => { 
-            UbiiClientService.client.subscribe(
-              this.$data.outputGestureData.topic,
-              gestureData => {
-/*                 console.log ("collect data: UbiiClientService.client.subscribe()");
-                if(this.collectGestureData && this.useGestureInput){ */
-
-                  this.pushGestureData(gestureData);
-                }
-            );
-
+            
             //TODO: necessary?
             // subscribe to the device topics so we are notified when new data arrives on the topic
-            UbiiClientService.client.subscribe();
+            //UbiiClientService.client.subscribe();
 
             // start our session (registering not necessary as we do not want to save it permanently)
             UbiiClientService.client
@@ -304,6 +325,16 @@ export default {
               .then(response => {
                 console.info(response);
               });
+
+              UbiiClientService.client.subscribe(
+                this.$data.outputGestureData.topic,
+                gestureData => {
+                  //console.log ("collect data: UbiiClientService.client.subscribe()");
+                  //if(this.collectGestureData && this.useGestureInput){
+                  this.pushGestureData(gestureData);
+                  }
+              );
+
           });
       });
     },
