@@ -4,11 +4,11 @@
     <div class="top-div">
         <br> 
         <div class="c">
-          <div>Debug: {{emgData}}</div>
+<!--           <div>Debug: {{emgData}}</div>
           <br>
           <button class="pure-button"  @click="printEmgBuffer()">Print emg buffer</button>
           <br>
-          <br>
+          <br> -->
           <input id="checkboxInput" type="checkbox" v-model="useGestureInput" />
           <label for="checkboxInput">Myo Gesture Input</label>
             <div class="box-area"> <!-- style="font-size: 1.5rem"> -->
@@ -173,54 +173,161 @@ export default {
           }
         ]
       };
+      //prints received empty data
+      let processCBNull = (input, output, state) => {
+            if(input.emgData && input.emgData.elements.length == 64 && state.model){
+              output.gestureId = 0;
+            }
+        };
 
+      //this works
       let processCBDummy = (input, output, state) => {
-            if(input.emgData && input.emgData.elements.length == 64){
-              if(state.model){
-                //let makePrediction = async () => {
-                //  let p = await state.model.predict(state.modules.tf.tensor2d(
-                //  input.emgData.elements, [64,1]));
-                //  return p;
-                //  }
-                //  console.log("model loaded, process callback");
-                //  output.gestureId = 3 //makePrediction();
-              } else {
-                //console.log("state.model is not defined");
-              }
+            if(input.emgData && input.emgData.elements.length == 64 && state.model){
               output.gestureId = Math.round((Math.random() * 2) + 1);
             }
         };
-      let processCB = 
-      '(input, state) => {'+
-            'if(input.emgData && input.emgData.elements.length == 64){'+
-              'if(state.model){'+
-                'output => {'+
-                  'let makePrediction = async () => {'+
-                    'let p = await state.model.predict(state.modules.tf.tensor2d('+
-                    'input.emgData.elements, [64,1]));'+
-                    'return p;'+
-                  '}'+
-                  'console.log("model loaded, process callback");'+
-                  'output.gestureId = makePrediction();'+
-                '}'+
-              '} else {'+
-                'console.log("state.model is not defined");'+
-              '}'+
-            '}'+
-        '};'
 
+      //this works
+      let processCBMinimal =
+      '(input, output, state) => {'+
+        'if(input.emgData && input.emgData.elements.length == 64 && state.model){'+
+          'output.gestureId = 3'+
+        '};'+
+      '};'
+
+      //this works
+      let processCBAsync =
+      '(input, output, state) => {'+
+        'if(input.emgData && input.emgData.elements.length == 64 && state.model){'+
+          'let predict = async () => {'+
+          'return 1;'+
+          '};'+
+          'predict().then(prediction => {'+
+          'output.gestureId = prediction'+
+          '});'+
+        '};'+
+      '};'
+      
+      //this works
+
+      //output prediction:
+      /* Tensor {
+        kept: false,
+        isDisposedInternal: false,
+        shape: [ 1 ],
+        dtype: 'int32',
+        size: 1,
+        strides: [],
+        dataId: {},
+        id: 2050053,
+        rankType: '1',
+        scopeId: 1369890 } */
+
+      //output prediction.print()
+      /* Tensor
+          [0]     //  value between 0-5
+        undefined */
+      let processCBModel =
+      '(input, output, state) => {'+
+        'if(input.emgData && input.emgData.elements.length == 64 && state.model){'+
+          'let predict = async () => {'+
+          'let tensor = state.modules.tf.tensor2d(input.emgData.elements, [1,64]);'+
+          'let prediction = await state.model.predict(tensor);'+
+          //'console.log(prediction);'+
+          //'console.log(prediction.print());'+
+          //'console.log("--------");'+
+          'return 1;'+
+          '};'+
+          'predict().then(prediction => {'+
+          'output.gestureId = prediction'+
+          '});'+
+        '};'+
+      '};'
+      
+      //this works
+      let processCB =
+      '(input, output, state) => {'+
+        'if(input.emgData && input.emgData.elements.length == 64 && state.model){'+
+          'let predict = async () => {'+
+          'let tensor = state.modules.tf.tensor2d(input.emgData.elements, [1,64]);'+
+          'let prediction = await state.model.predict(tensor);'+
+          'return prediction;'+
+          '};'+
+          'predict().then(prediction => {'+
+            //'console.log("+++++++++++++++++++++++++++++++++++++");'+
+            'let getData = async () => {'+
+                'let data = await prediction.data();'+
+                //'let data = await prediction.asType("int32");'+
+                'dataConv = parseInt(data.toString());'+
+                //'data = parseInt(data);'+
+                //'console.log(typeof data);'+
+                //'console.log(data);'+
+                //'console.log(parseInt(data, 10));'+
+                'if(!dataConv) {'+
+                  'dataConv = 0;'+
+                  //'console.log("empty: "+ data);'+
+                  '}'+
+              	'return dataConv;'+
+            '};'+
+            'getData().then(data => {'+
+              'output.gestureId = data;'+
+            '});'+
+          '});'+
+        '};'+
+      '};'
+      
+      let processCBold = 
+        '(inputs, outputs, state) => {'+
+        'if (input.emgData && input.emgData.elements.length == 64 && state.model) {'+
+        '// prediction function'+
+        'let predict = async () => {'+
+        '//console.info("predicting");'+
+        '//let tensor = state.modules.tf.tensor2d(input.emgData.elements, [64,1]);'+
+        '//let prediction = await state.model.predict(imgTensor);'+
+        'return 3; //prediction;'+
+        '};'+
+        '// make predictions'+
+        'predict().then(prediction => {'+
+        '//console.info(prediction);'+
+        'output.gestureId = prediction;'+
+        '});'+
+        '}'+
+        '};';
+
+      let processCBTest = 
+       (input, output, state) => {
+          if (input.emgData && input.emgData.elements.length == 64 && state.model) {
+          // prediction function
+            let predict = async () => {
+
+            //'console.info("predicting");
+            let tensor = state.modules.tf.tensor2d(input.emgData.elements, [64,1]);
+            
+            let prediction = await state.model.predict(tensor);
+
+            return prediction;
+            };
+            // make predictions
+            predict().then(prediction => {
+              //'console.info(prediction);
+              output.gestureId = prediction;
+            });
+          }
+        };
+        
       //Load random model from package:     works
       //Load random layers model from url:  works
       //Load random layers model from file: works
       //Load random graph model from file:  
       //Load own graph model from file:     works
-      let onCreatedCBDummy = 
+      let onCreatedCB = 
         'state => {' +
         'console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");'+
         'let prepareModel = async () => {' +
         //'state.model = await state.modules.cocoSsd.load();' +
         'try {'+
-        'state.model = await state.modules.tf.loadGraphModel("file://C:/Users/Anas/Desktop/UbiInteract/ubii-nodejs-backend/test/sessions/integration-tests/tfjs-models/myo-rps/model.json");'+
+        'state.model = await state.modules.emgClassifier.load();' +
+        //'state.model = await state.modules.tf.loadGraphModel("file://C:/Users/Anas/Desktop/UbiInteract/ubii-nodejs-backend/test/sessions/integration-tests/tfjs-models/myo-rps/model.json");'+
         //'state.model = await state.modules.tf.loadLayersModel("https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json");'+
         //'state.model = await state.modules.tf.loadLayersModel("file://C:/Users/Anas/Desktop/UbiInteract/model.json");'+
         'console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");'+
@@ -235,8 +342,8 @@ export default {
       let ubiiInteraction = {
         id: uuidv4(),
         name: 'rock-paper-scissors-game-interaction',
-        onCreated: onCreatedCBDummy.toString(),
-        processingCallback: processCBDummy.toString(),
+        onCreated: onCreatedCB.toString(),
+        processingCallback: processCB.toString(),
         inputFormats: [
           {
             internalName: inputEmgData.internalName,
@@ -312,10 +419,6 @@ export default {
           })
           .then(() => { 
             
-            //TODO: necessary?
-            // subscribe to the device topics so we are notified when new data arrives on the topic
-            //UbiiClientService.client.subscribe();
-
             // start our session (registering not necessary as we do not want to save it permanently)
             UbiiClientService.client
               .callService({
@@ -656,8 +759,6 @@ export default {
     },
     //fills array with the id of the currently detected gesture
     pushGestureData: function(data) {
-      //TODO: get gesture data, this is just a dummy for testing
-
       if(this.collectGestureData && this.useGestureInput)
         this.gestureInputCollection.push(data); 
     },
