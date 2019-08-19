@@ -2,9 +2,9 @@
   <UbiiClientContent :ubiiClientService="ubiiClientService">
     <div ref="top-div">
       <br>
-      <div class="c">Myo Status:</div>
-      <div class="c">{{getMyoConnected()}}</div>
-      <br>
+      <div class="c">Myo connected:
+        <font-awesome-icon id="connect-icon" :icon="connectedIcon" class="interface-icon"/>
+        </div>
       <table class="sturdy">
         <tr>
           <th>Datatype</th>
@@ -101,6 +101,16 @@ import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
+/* fontawesome */
+import { library } from '@fortawesome/fontawesome-svg-core';
+import {
+    faCheckCircle,
+    faTimesCircle,
+} from '@fortawesome/free-solid-svg-icons';
+
+library.add(faCheckCircle);
+library.add(faTimesCircle);
+
 export default {
   name: 'Interface-Myo',
   components: { UbiiClientContent },
@@ -126,11 +136,13 @@ export default {
 
   data: () => {
     return {
+      //ubi-related
       ubiiClientService: UbiiClientService,
       interfaceStarted: false,
 
       pollingInterval: null,
       myoConnected: false,
+      connectedIcon: faTimesCircle,
 
       serverMyoData: {
         emg: {v0:0,v1:0,v2:0,v3:0,v4:0,v5:0,v6:0,v7:0},
@@ -150,11 +162,26 @@ export default {
     };
   },
 
+  watch:{
+    myoConnected: function(status){
+
+      var icon = document.getElementById("connect-icon");
+      if(status){
+        icon.style.color = "#A9DC76";
+        this.connectedIcon = faCheckCircle;
+      }
+      else{
+        icon.style.color = "#FF6188";
+        this.connectedIcon = faTimesCircle;
+      }
+    } 
+  },
+
   methods: {
-    // create specifications for the protobuf messages
+    //create specifications for the protobuf messages
     createUbiiSpecs: function() {
 
-      // helper definitions that we can reference later
+      //helper definitions that we can reference later
       let deviceName = 'web-interface-myo';
       let topicPrefix = UbiiClientService.getClientID() + '/' + deviceName;
       let inputClientMyoData = {
@@ -168,8 +195,7 @@ export default {
         topic: topicPrefix + '/' + 'myo_server_data'
       };
 
-      // specification of a ubii.devices.Device
-      // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/devices/device.proto
+      //specification of a ubii.devices.Device
       let ubiiDevice = {
         name: deviceName,
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
@@ -187,8 +213,7 @@ export default {
         ]
       };
 
-      // specification of a ubii.interactions.Interaction
-      // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/interactions/interaction.proto
+      //callback: set input as output
       let processingCallback = (input, output) => {
         if(input.clientMyoData){
           output.serverMyoData = {
@@ -220,10 +245,10 @@ export default {
             },
             gesture : input.clientMyoData.gesture
           }; 
-          //console.log(Object.keys(input.clientMyoData.emg) + " client");
-          //console.log(output.serverMyoData + "server");
         }
       };
+
+      //specification of a ubii.interactions.Interaction
       let ubiiInteraction = {
         id: uuidv4(),
         name: 'myo-interaction',
@@ -280,8 +305,7 @@ export default {
 
     startInterface: function() {
       UbiiClientService.isConnected().then(() => {
-        // create all the specifications we need to define our example application
-        // these are protobuf messages to be sent to the server (saved in this.$data)
+        // create all the specifications
         this.createUbiiSpecs();
 
         //Myo setup
@@ -289,12 +313,9 @@ export default {
         this.getMyoData();
         this.setPublishInterval();
 
-        // register the mouse pointer device
+        // register device
         UbiiClientService.registerDevice(this.$data.ubiiDevice)
           .then(device => {
-            // on success, the response will be the (possibly extended) device specification we just sent
-            // we accept any additions the server might have made, like an ID that was left blank so the backend
-            // would automatically assign one, to our local state
             this.$data.ubiiDevice = device;
             return device;
           })
@@ -352,13 +373,11 @@ export default {
 
     stopInterface: function() {
       if (!this.interfaceStarted) return;
-
       this.interfaceStarted = false;
 
       //disconnect Myo
       clearInterval(this.$data.pollingInterval);
       this.disconnectMyo();
-      //Myo.disconnect();
       this.$data.myoConnected = false;
 
       // unsubscribe and stop session
@@ -382,7 +401,6 @@ export default {
 
       Myo.on("connected", function() {
       this.streamEMG(true);
-      //console.log("Myo successfully connected. Data: " + JSON.stringify(data) + ". Timestamp: " + timestamp + ".");
       });
     },
 
@@ -391,19 +409,11 @@ export default {
       this.pollingInterval = setInterval(() => this.publishMyoData(), 10);
     },
 
+    //publish data
     publishMyoData: function(){
       if(!this.$data.myoConnected)
         return;
       
-      //depricated
-
-      /*UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.inputClientMyoData.topic,
-        'myoEvent',
-        this.$data.clientMyoData
-      ); */
-
       UbiiClientService.publishRecord({
         topic: this.$data.inputClientMyoData.topic,
         myoEvent: this.$data.clientMyoData
@@ -420,7 +430,7 @@ export default {
       Myo.disconnect();
     },
 
-    //Set up all the event listeners
+    //Set up all event listeners
     getMyoData: function() {
       Myo.on('imu', (data) => {
         this.$data.myoConnected = true;
@@ -467,10 +477,7 @@ export default {
           case 'fist':            e = 4; break;
           case 'double_tap':      e = 5; break;
           default:                e = 0;
-        }
-        /* if(e != 0)
-          console.log(this.gestureToString(e)); */
-          
+        } 
         this.$data.clientMyoData.gesture = e;
       });
 
@@ -487,6 +494,7 @@ export default {
       });
     },
 
+    //print gesture name
     gestureToString: function(g) {
       switch(g){
         case 1:   return 'fingers spread';
@@ -497,11 +505,6 @@ export default {
         default:  return 'rest';
       }
     },
-
-    //print conection status
-    getMyoConnected: function() {
-        return this.$data.myoConnected ? "connected" : "disconnected";
-    }
   }
 };
 </script>
@@ -510,25 +513,51 @@ export default {
 div.c {
   text-align: center;
 }
+.interface-icon {
+  vertical-align: text-top;
+  color: redAccentColor;
+}
 table {
   margin: 15px 0;
-  border: 1px solid black;
   table-layout: fixed;
-  width: 400px; 
+  width: 420px; 
   margin-left:auto; 
   margin-right:auto;
 }
 table, th, td {
-  border: 1px solid black;
   border-collapse: collapse;
-  padding: 5px;
+  padding: 8px;
 }
 td{
   text-align: right;
+  background-color: layerTwoSecondaryColor;
+  border-bottom: 1px solid layerOneSecondaryColor;
 }
 th{
   text-align: left;
+  background-color: layerThreeSecondaryColor;
+  border-bottom: 1px solid layerTwoSecondaryColor;
 }
+.sturdy tr:first-child th:first-child
+{
+  border-top-left-radius: 8px;
+  border-right: 1px solid layerTwoSecondaryColor;
+} 
+.sturdy tr:first-child th:last-child
+{
+  border-top-right-radius: 8px;
+} 
+.sturdy tr:first-child{
+  color: orangeAccentColor;
+}
+.sturdy tr:last-child th:first-child
+{
+  border-bottom-left-radius: 8px;
+} 
+.sturdy tr:last-child td:last-child
+{
+  border-bottom-right-radius: 8px;
+} 
 .sturdy th:nth-child(1){
   width: 32%;
 }

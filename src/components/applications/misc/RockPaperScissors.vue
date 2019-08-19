@@ -2,62 +2,87 @@
   <UbiiClientContent :ubiiClientService="ubiiClientService">
     <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
     <div class="top-div">
-        <br> 
-        <div class="c">
-<!--           <div>Debug: {{emgData}}</div>
-          <br>
-          <button class="pure-button"  @click="printEmgBuffer()">Print emg buffer</button>
-          <br>
-          <br> -->
-          <input id="checkboxInput" type="checkbox" v-model="useGestureInput" />
-          <label for="checkboxInput">Myo Gesture Input</label>
-            <div class="box-area"> <!-- style="font-size: 1.5rem"> -->
-               <div id="game-area">
-                    <div>Opponent</div>
-                    <br>
-                    <div class="bigger-icon">
-                        <font-awesome-icon id="opponent-scissors-icon" icon="hand-scissors" class="interface-icon"/>     
-                        <font-awesome-icon id="opponent-rock-icon" icon="hand-rock" class="interface-icon"/>  
-                        <font-awesome-icon id="opponent-paper-icon" icon="hand-paper" class="interface-icon"/>     
-                    </div>
-                    <br>
-                    <br>
-                    <div>Player</div>
-                    <br>
-                    <div class="bigger-icon">
-                        <font-awesome-icon id="player-scissors-icon" icon="hand-scissors" class="interface-icon"/>     
-                        <font-awesome-icon id="player-rock-icon" icon="hand-rock" class="interface-icon"/>     
-                        <font-awesome-icon id="player-paper-icon" icon="hand-paper" class="interface-icon"/>     
-                    </div>
-                    <br>
-                    <br>
-                    <div style="font-size: 1.5rem"><b>{{winLoseMsg}}</b></div>
-                    <br>
-                    <br>
-                    <button class="pure-button"  @click="startGame()">Retry</button>
+      <div class="c">
+        <br>
+        <div class="box-area">
+          <div id="game-area">
+            <table class="sturdy">
+              <tr>
+                <th>Opponent</th>
+              </tr>
+              <tr>
+                <td>
+                <div class="bigger-icon">
+                  <font-awesome-icon id="opponent-scissors-icon" icon="hand-scissors" class="interface-icon"/>     
+                  <font-awesome-icon id="opponent-rock-icon" icon="hand-rock" class="interface-icon"/>  
+                  <font-awesome-icon id="opponent-paper-icon" icon="hand-paper" class="interface-icon"/>     
                 </div>
-                <div class="in-the-middle" id="text-area">
-                    <div id="message-text">{{msgText}}</div>
-                    <br>
-                    <button class="pure-button" id="optional-retry-btn" @click="startGame()">Retry</button>
-                </div>
-                <div class="in-the-middle" id="ready-area">
-                    <button class="pure-button"  @click="startGame()">Ready</button>
-                </div>
-            </div>
+                </td>
+              </tr>       
+            </table>
             <br>
-            <div class="pure-button-group" role="group" aria-label="...">
-                <button class="pure-button" id="rock-btn" @click='getButtonInput(2)'>
-                    <font-awesome-icon icon="hand-rock" class="interface-icon"/>
-                </button>
-                <button class="pure-button" id="paper-btn" @click='getButtonInput(3)'>
-                    <font-awesome-icon icon="hand-paper" class="interface-icon"/>
-                </button>
-                <button class="pure-button" id="scissors-btn" @click='getButtonInput(1)'>
-                    <font-awesome-icon icon="hand-scissors" class="interface-icon"/>
-                </button>
+            <table class="sturdy">
+              <tr>
+                <th>Player</th>
+              </tr>
+              <tr>
+                <td>
+                  <div class="bigger-icon">
+                    <font-awesome-icon id="player-scissors-icon" icon="hand-scissors" class="interface-icon"/>     
+                    <font-awesome-icon id="player-rock-icon" icon="hand-rock" class="interface-icon"/>     
+                    <font-awesome-icon id="player-paper-icon" icon="hand-paper" class="interface-icon"/>  
+                  </div>
+                </td>
+              </tr>       
+            </table>
+            <br>
+            <br>
+            <div class="bottom-line">
+              <button class="pure-button"  @click="startGame()">Retry</button> 
+              <span class="text-field"><b> {{winLoseMsg}}</b></span>
             </div>
+          </div>
+          <div class="in-the-middle" id="text-area">
+            <div id="message-text">{{msgText}}</div>
+            <br>
+            <button class="pure-button" id="optional-retry-btn" @click="startGame()">Retry</button>
+          </div>
+          <div class="in-the-middle" id="ready-area">
+            <button class="pure-button"  @click="startGame()">Ready</button>
+          </div>
         </div>
+        <br>
+        <input id="checkboxInput" type="checkbox" v-model="useGestureInput" />
+        <label for="checkboxInput"> Myo Gesture Input</label>
+        <br>
+        <br>
+        <div class="pure-button-group" role="group" aria-label="...">
+          <button class="pure-button" id="rock-btn" @click='buttonInput(2)'>
+            <font-awesome-icon icon="hand-rock" class="interface-icon"/>
+          </button>
+          <button class="pure-button" id="paper-btn" @click='buttonInput(3)'>
+            <font-awesome-icon icon="hand-paper" class="interface-icon"/>
+          </button>
+          <button class="pure-button" id="scissors-btn" @click='buttonInput(1)'>
+            <font-awesome-icon icon="hand-scissors" class="interface-icon"/>
+          </button>
+        </div>
+        <table class="otherTable">
+              <tr>
+                <td>
+                  <div class="rock-line" id="rock-amount"></div>
+                </td>
+                <td>
+                  <div class="paper-line" id="paper-amount"></div>
+                </td>
+                <td>
+                  <div class="scissors-line" id="scissors-amount"></div>
+                </td>
+              </tr>       
+            </table>
+        <div class="gesture-field"> 
+        </div>
+      </div>
     </div>
   </UbiiClientContent>
 </template>
@@ -89,8 +114,9 @@ library.add(faHandScissors);
 export default {
   name: 'RockPaperScissors',
   components: { UbiiClientContent },
+
   mounted: function() {
-    // unsubscribe before page is unloaded
+  // unsubscribe before page is unloaded
     window.addEventListener('beforeunload', () => {
       this.stopSession();
     });
@@ -103,9 +129,11 @@ export default {
 
     if (UbiiClientService.isConnected) this.startSession();
   },
+
   beforeDestroy: function() {
     this.stopSession();
   },
+
   data: () => {
     return {
         //current inputs
@@ -124,6 +152,11 @@ export default {
         useGestureInput: true,
         collectGestureData: false,
 
+        //stats
+        percentRock: 0,
+        percentPaper: 0,
+        percentScissors: 0,
+
         //ubi-related
         ubiiClientService: UbiiClientService,
         client: undefined,
@@ -138,10 +171,10 @@ export default {
     };
   },
   methods: {
-    createUbiiSpecs: function() {
-      // create specifications for the protobuf messages
 
-      // helper definitions that we can reference later
+    //create specifications for the protobuf messages
+    createUbiiSpecs: function() {
+      //helper definitions that we can reference later
       let deviceName = 'rock-paper-scissors-game-device';
       let topicPrefix = UbiiClientService.getClientID() + '/' + deviceName;
       let inputEmgData = {
@@ -155,8 +188,8 @@ export default {
         topic: topicPrefix + '/' + 'gesture_id'
       };
 
-      // specification of a ubii.devices.Device
-      // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/devices/device.proto
+      //specification of a ubii.devices.Device
+      //https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/devices/device.proto
       let ubiiDevice = {
         name: deviceName,
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
@@ -173,78 +206,8 @@ export default {
           }
         ]
       };
-      //prints received empty data
-      let processCBNull = (input, output, state) => {
-            if(input.emgData && input.emgData.elements.length == 64 && state.model){
-              output.gestureId = 0;
-            }
-        };
-
-      //this works
-      let processCBDummy = (input, output, state) => {
-            if(input.emgData && input.emgData.elements.length == 64 && state.model){
-              output.gestureId = Math.round((Math.random() * 2) + 1);
-            }
-        };
-
-      //this works
-      let processCBMinimal =
-      '(input, output, state) => {'+
-        'if(input.emgData && input.emgData.elements.length == 64 && state.model){'+
-          'output.gestureId = 3'+
-        '};'+
-      '};'
-
-      //this works
-      let processCBAsync =
-      '(input, output, state) => {'+
-        'if(input.emgData && input.emgData.elements.length == 64 && state.model){'+
-          'let predict = async () => {'+
-          'return 1;'+
-          '};'+
-          'predict().then(prediction => {'+
-          'output.gestureId = prediction'+
-          '});'+
-        '};'+
-      '};'
       
-      //this works
-
-      //output prediction:
-      /* Tensor {
-        kept: false,
-        isDisposedInternal: false,
-        shape: [ 1 ],
-        dtype: 'int32',
-        size: 1,
-        strides: [],
-        dataId: {},
-        id: 2050053,
-        rankType: '1',
-        scopeId: 1369890 } */
-
-      //output prediction.print()
-      /* Tensor
-          [0]     //  value between 0-5
-        undefined */
-      let processCBModel =
-      '(input, output, state) => {'+
-        'if(input.emgData && input.emgData.elements.length == 64 && state.model){'+
-          'let predict = async () => {'+
-          'let tensor = state.modules.tf.tensor2d(input.emgData.elements, [1,64]);'+
-          'let prediction = await state.model.predict(tensor);'+
-          //'console.log(prediction);'+
-          //'console.log(prediction.print());'+
-          //'console.log("--------");'+
-          'return 1;'+
-          '};'+
-          'predict().then(prediction => {'+
-          'output.gestureId = prediction'+
-          '});'+
-        '};'+
-      '};'
-      
-      //this works
+      //callback for classifying the emg array and get performed gesture
       let processCB =
       '(input, output, state) => {'+
         'if(input.emgData && input.emgData.elements.length == 64 && state.model){'+
@@ -254,91 +217,38 @@ export default {
           'return prediction;'+
           '};'+
           'predict().then(prediction => {'+
-            //'console.log("+++++++++++++++++++++++++++++++++++++");'+
             'let getData = async () => {'+
                 'let data = await prediction.data();'+
-                //'let data = await prediction.asType("int32");'+
                 'dataConv = parseInt(data.toString());'+
-                //'data = parseInt(data);'+
-                //'console.log(typeof data);'+
-                //'console.log(data);'+
-                //'console.log(parseInt(data, 10));'+
                 'if(!dataConv) {'+
                   'dataConv = 0;'+
-                  //'console.log("empty: "+ data);'+
                   '}'+
-              	'return dataConv;'+
-            '};'+
+                  'return dataConv;'+
+              '};'+
             'getData().then(data => {'+
               'output.gestureId = data;'+
             '});'+
           '});'+
         '};'+
       '};'
-      
-      let processCBold = 
-        '(inputs, outputs, state) => {'+
-        'if (input.emgData && input.emgData.elements.length == 64 && state.model) {'+
-        '// prediction function'+
-        'let predict = async () => {'+
-        '//console.info("predicting");'+
-        '//let tensor = state.modules.tf.tensor2d(input.emgData.elements, [64,1]);'+
-        '//let prediction = await state.model.predict(imgTensor);'+
-        'return 3; //prediction;'+
-        '};'+
-        '// make predictions'+
-        'predict().then(prediction => {'+
-        '//console.info(prediction);'+
-        'output.gestureId = prediction;'+
-        '});'+
-        '}'+
-        '};';
-
-      let processCBTest = 
-       (input, output, state) => {
-          if (input.emgData && input.emgData.elements.length == 64 && state.model) {
-          // prediction function
-            let predict = async () => {
-
-            //'console.info("predicting");
-            let tensor = state.modules.tf.tensor2d(input.emgData.elements, [64,1]);
-            
-            let prediction = await state.model.predict(tensor);
-
-            return prediction;
-            };
-            // make predictions
-            predict().then(prediction => {
-              //'console.info(prediction);
-              output.gestureId = prediction;
-            });
-          }
-        };
         
-      //Load random model from package:     works
-      //Load random layers model from url:  works
-      //Load random layers model from file: works
-      //Load random graph model from file:  
-      //Load own graph model from file:     works
+      //Load emg classifier model and save it in state
       let onCreatedCB = 
         'state => {' +
-        'console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");'+
-        'let prepareModel = async () => {' +
-        //'state.model = await state.modules.cocoSsd.load();' +
-        'try {'+
-        'state.model = await state.modules.emgClassifier.load();' +
-        //'state.model = await state.modules.tf.loadGraphModel("file://C:/Users/Anas/Desktop/UbiInteract/ubii-nodejs-backend/test/sessions/integration-tests/tfjs-models/myo-rps/model.json");'+
-        //'state.model = await state.modules.tf.loadLayersModel("https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json");'+
-        //'state.model = await state.modules.tf.loadLayersModel("file://C:/Users/Anas/Desktop/UbiInteract/model.json");'+
-        'console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");'+
-        '} catch (err) {'+
-        'throw err;'+
-        '}'+
-        '};' +
-        'prepareModel();' +
-        'console.log("??????????????????????????????????????????????");'+
+          //'console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");'+
+          'let prepareModel = async () => {' +
+            'try {'+
+              'state.model = await state.modules.emgClassifier.load();' +
+              //'console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");'+
+            '} catch (err) {'+
+              'throw err;'+
+            '}'+
+          '};' +
+          'prepareModel();' +
+          //'console.log("??????????????????????????????????????????????");'+
         '};';
 
+      //specification of a ubii.interactions.Interaction
       let ubiiInteraction = {
         id: uuidv4(),
         name: 'rock-paper-scissors-game-interaction',
@@ -359,8 +269,8 @@ export default {
 
       };
 
-      // specification of a ubii.sessions.Session
-      // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/sessions/session.proto
+      //specification of a ubii.sessions.Session
+      //https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/sessions/session.proto
       let ubiiSession = {
         id: uuidv4(),
         name: 'rock-paper-scissors-game-session',
@@ -384,7 +294,7 @@ export default {
         ]
       };
 
-      // assign to local state for future reference
+      //assign to local state for future reference
       this.$data.deviceName = deviceName;
       this.$data.ubiiDevice = ubiiDevice;
       this.$data.ubiiInteraction = ubiiInteraction;
@@ -394,26 +304,31 @@ export default {
 
       this.$data.ubiiSession = ubiiSession;
     },
+
     startSession: function() {
-      //prepare ui for the game - xxx          
+
+      //prepare ui          
       this.switchGameArea("ready-area");
       this.enableInput(false);
+      this.updateGraphs();
+      
+      //temp for building ui
+     /*  this.switchGameArea("game-area");
+      this.chooseGestureForOpponent();
+      this.changeIcon("player", 1); */
 
       UbiiClientService.isConnected().then(() => {  
-        // create all the specifications we need to define our example application
-        // these are protobuf messages to be sent to the server (saved in this.$data)
+        
+        // create all specifications
         this.createUbiiSpecs();
 
         //handle myo data
         this.updateMyoDevices();
-        this.setPublishInterval(true);
+        //this.setPublishInterval(true);
 
-        // register the mouse pointer device
+        // register device
         UbiiClientService.registerDevice(this.$data.ubiiDevice)
           .then(device => {
-            // on success, the response will be the (possibly extended) device specification we just sent
-            // we accept any additions the server might have made, like an ID that was left blank so the backend
-            // would automatically assign one, to our local state
             this.$data.ubiiDevice = device;
             return device;
           })
@@ -429,11 +344,10 @@ export default {
                 console.info(response);
               });
 
+              //subscribe to our classied output gesture topic
               UbiiClientService.client.subscribe(
                 this.$data.outputGestureData.topic,
                 gestureData => {
-                  //console.log ("collect data: UbiiClientService.client.subscribe()");
-                  //if(this.collectGestureData && this.useGestureInput){
                   this.pushGestureData(gestureData);
                   }
               );
@@ -441,11 +355,11 @@ export default {
           });
       });
     },
+
+    //clear publish interval, unsubscribe and stop session
     stopSession: function() {
+      //this.setPublishInterval(false);
 
-      this.setPublishInterval(false);
-
-      // unsubscribe and stop session
       UbiiClientService.client.unsubscribe(
         this.$data.outputGestureData.topic
       );
@@ -454,6 +368,8 @@ export default {
         session: this.$data.ubiiSession
       });
     },
+
+    //look for myo interfaces
     updateMyoDevices: function() {
       UbiiClientService.client
         .callService({ topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST })
@@ -479,6 +395,8 @@ export default {
         });
       setTimeout(this.updateMyoDevices, 1000);
     },
+
+    //set client and subsribe to myo topic-data
     setClient: function(clientID) {
       
       //unsubscribe old client
@@ -506,6 +424,7 @@ export default {
         topics: [myoEventTopic]
       };
 
+      //subscribe to myo data and get emg array
       UbiiClientService.client.subscribe(
         myoEventTopic, 
         myoData => {
@@ -521,34 +440,42 @@ export default {
           };
           this.$data.emgData = emg;
           this.addEmgToBuffer(emg);
+          this.publishData();
+          //console.log("got myo data");
         }
       );
       console.log('subscribed to ' + myoEventTopic);
       this.oldClients.push(clientID);
     },
+
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++ data handling +++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     
+    //add myo emg buffer to buffer (8x8)
     addEmgToBuffer: function(emg){
       while(this.emgBuffer.length >= 8){
         this.emgBuffer.shift();
       }
       this.emgBuffer.push(emg);
     },
-    printEmgBuffer: function(){
-      console.log(this.emgBuffer);
-    },
-    setPublishInterval: function(enable) {
+
+    //publish data every 10ms
+/*     setPublishInterval: function(enable) {
       if(enable)
-        this.publishInterval = setInterval(() => this.publishData(), 25);
+        this.publishInterval = setInterval(() => this.publishData(), 10);
       else{
         console.log("disble publish interval");
         clearInterval(this.publishInterval);
       }
-    },
+    }, */
+
+    //publich emg-array
     publishData: function(){
       
+      if(this.emgBuffer.length !=8)
+        return;
+
       //Transform emgBuffer to proto format
       var msg_obj = {elements: []};
       
@@ -563,34 +490,17 @@ export default {
         msg_obj.elements.push(singleEmgArray.v7);
       });
 
-      //depricated
-
-      /*UbiiClientService.client.publish(
-        this.$data.ubiiDevice.name,
-        this.$data.inputEmgData.topic,
-        'int32List',
-        msg_obj
-      ); */
         UbiiClientService.publishRecord({
         topic: this.$data.inputEmgData.topic,
         int32List: msg_obj
         });
     },
+
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++ game logic ++++++++++++++++++++++++++++++++++++++
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    toggleGame: function() {
-        var game_area = document.getElementById("game-area");
-        var msg_area = document.getElementById("text-area");
 
-        if(game_area.style.display == "none"){
-            game_area.style.display = "block";
-            msg_area.style.display = "none";
-        } else {
-            game_area.style.display = "none";
-            msg_area.style.display = "block";
-        }
-    },
+    //manage different screens
     switchGameArea: function(id){
         var game_area = document.getElementById("game-area");
         var txt_area = document.getElementById("text-area");
@@ -616,9 +526,12 @@ export default {
                 console.error("Invalid area id: " + id);
         }
     },
+
+    //display the correct gesture for player or opponent
     changeIcon: function(playerId, iconId) {
         if(playerId == "player"){
 
+            //get all icons enable the correct one
             var player_icon_1 = document.getElementById("player-scissors-icon");
             player_icon_1.style.display = "none";
             var player_icon_2 = document.getElementById("player-rock-icon");
@@ -633,6 +546,7 @@ export default {
             }
         } else if(playerId == "opponent"){
             
+            //get all icons enable the correct one
             var opponent_icon_1 = document.getElementById("opponent-scissors-icon");
             opponent_icon_1.style.display = "none";
             var opponent_icon_2 = document.getElementById("opponent-rock-icon");
@@ -646,23 +560,30 @@ export default {
                 default: console.error("Invalid iconId: " + iconId);
             }
         } else {
-
             console.error("Invalid playerId:" + playerId);
         }
     },
+    
+    //choose random gestre between 1-3 for opponent 
     chooseGestureForOpponent: function() {
         var gestureId = Math.round((Math.random() * 2) + 1);
         this.opponentGesture = gestureId;
         this.changeIcon("opponent", this.opponentGesture);
     },
+
+    //game logic
     startGame: function() {
         
+        //delete previous data
+        this.updateGraphs();
+
         var btn = document.getElementById("optional-retry-btn");
         btn.style.display = "none";
 
         this.$data.msgText = "3";
         this.switchGameArea("text-area");
 
+        //countdown
         setTimeout(() => {
             this.$data.msgText = "2";
             setTimeout(() => {
@@ -672,7 +593,7 @@ export default {
                     this.enableInput(true);
                     setTimeout(() => {
 
-                        //no input
+                        //no input detected
                         if((this.currentButtonInput == undefined || this.currentButtonInput == 0) &&
                           (this.gestureInputCollection.length == 0)){
                             this.$data.msgText = "No input detected :("
@@ -699,13 +620,15 @@ export default {
             },1000);
         }, 1000);
     },
+
+    //figure out who won the game
     evaluateGame: function(gesture) {
         if(
             (gesture == 1 && this.opponentGesture == 1) ||
             (gesture == 2 && this.opponentGesture == 2) ||
             (gesture == 3 && this.opponentGesture == 3)
         ){
-            this.winLoseMsg = "Draw";
+            this.winLoseMsg = "It's a draw";
         }
         else if(
             (gesture == 1 && this.opponentGesture == 3) ||
@@ -725,19 +648,22 @@ export default {
              console.error("Invalid gesture id. player: " + this.gesture + " opponent: " + this.opponentGesture);
         }
     },
-    getButtonInput: function(id) {
+
+    //on-click for ui buttons
+    buttonInput: function(id) {
         this.currentButtonInput = id;
         this.changeIcon("player", id);
     },
+
+    //input is only enabled after the count ended and before the evaluation
     enableInput: function(enable) {
-        this.lockButtons(enable);
+        if(this.useGestureInput)
+          this.lockButtons(false);
+        else  
+          this.lockButtons(enable);
         this.collectGestureData = enable;
-
-        //enable/disable gesture input collecting
-        //if(this.useGestureInput)
-        //this.setPublishInterval(enable);
-
     },
+    
     //enables/disables buttons for the game
     lockButtons: function(enable) {
         var scissor_btn = document.getElementById("scissors-btn");
@@ -757,11 +683,15 @@ export default {
             paper_btn.className = "pure-button pure-button-disabled";
         }
     },
+
     //fills array with the id of the currently detected gesture
     pushGestureData: function(data) {
-      if(this.collectGestureData && this.useGestureInput)
+      if(this.collectGestureData && this.useGestureInput){
         this.gestureInputCollection.push(data); 
+        this.updateGraphs();
+      }
     },
+
     //chooses a gesture from input array
     getBestGesture: function() {
       if(this.gestureInputCollection.length == 0)
@@ -795,8 +725,51 @@ export default {
         this.changeIcon("player", this.playerGesture);
         console.log("scissor: "+cnt_1+" rock: "+cnt_2+" paper: "+cnt_3);
       }
-    }   
-  }
+    },
+  
+    //display graphs according to inputs
+    updateGraphs: function (){
+      var r = document.getElementById("rock-amount");
+      var p = document.getElementById("paper-amount");
+      var s = document.getElementById("scissors-amount");
+      var cnt_1 = 0;
+      var cnt_2 = 0;
+      var cnt_3 = 0;
+
+      //count gesture ids
+      this.gestureInputCollection.forEach((element) => {
+        switch(element){
+          case 1: cnt_1++; break;
+          case 2: cnt_2++; break;
+          case 3: cnt_3++; break;
+        }
+      });
+      if(cnt_1 == 0){
+        this.percentScissors = 0;
+        s.style.height = "0";
+      }
+      else{
+        this.percentScissors = Math.round(((cnt_1/(cnt_1+cnt_2+cnt_3))*100)); 
+        s.style.height = (this.percentScissors).toString()+"%";
+      }
+      if(cnt_2 == 0){
+        this.percentRock = 0;
+        r.style.height = "0";
+      }
+      else {
+        this.percentRock = Math.round(((cnt_2/(cnt_1+cnt_2+cnt_3))*100)); 
+        r.style.height = (this.percentRock).toString()+"%";
+      }
+      if(cnt_3 == 0){
+        this.percentPaper = 0;
+        p.style.height = "0";
+      }
+      else{
+        this.percentPaper = Math.round(((cnt_3/(cnt_1+cnt_2+cnt_3))*100)); 
+        p.style.height = (this.percentPaper).toString()+"%";
+      }
+    }
+  },
 };
 </script>
 
@@ -804,28 +777,113 @@ export default {
 div.c {
   text-align: center;
 }
-
 .box-area {
   padding-top: 30px;
   padding-bottom: 50px;
-  margin: 50px;
+  width: 500px;
+  margin: auto;
   border: 3px #B6B5AA;
   height: 400px;
-  background-color: #403e41;
+  background-color: layerTwoSecondaryColor;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
 }
-
+.bottom-line {
+  padding 10px;
+  text-align: left;
+  background-color: layerFourSecondaryColor;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+.text-field {
+  padding-left: 130px;
+  text-align: center;
+}
+.gesture-field {
+  height: 100%;
+  width: 150px;
+  height: 100px;
+  margin:auto;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
 .bigger-icon {
     font-size: 250%;
 }
-
 .in-the-middle {
   padding-top: 140px;
 }
 
-.myButton {
-  color: white;
-  border-radius: 4px;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-  background: rgb(223, 117, 20); /* this is an orange */
-}   
+table {
+  margin: 15px 0;
+  table-layout: fixed;
+  width: 150px; 
+  margin-left:auto; 
+  margin-right:auto;
+}
+table, th, td {
+  border-collapse: collapse;
+  padding: 8px;
+}
+td{
+  text-align: middle;
+  background-color: layerThreeSecondaryColor;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+th{
+  text-align: middle;
+  background-color: layerFourSecondaryColor;
+  border-bottom: 1px solid layerThreeSecondaryColor;
+  color: orangeAccentColor;
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+}
+.rock-line {
+  width: 32px;
+  height: 60%;
+  background-color: blueAccentColor;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+.paper-line {
+  width: 32px;
+  height: 10%;
+  background-color: blueAccentColor;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+.scissors-line {
+  width: 32px;
+  height: 30%;
+  background-color: blueAccentColor;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+.otherTable {
+  border-collapse: collapse;
+  margin: 0px 0;
+  table-layout: fixed;
+  width: 144px; 
+  height: 100px;
+  margin-left:auto; 
+  margin-right:auto;
+}
+.otherTable td{
+  text-align: center;
+  vertical-align: top;
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
+.otherTable td:last-child{
+  border-bottom-right-radius: 8px;
+}
+.otherTable td:first-child{
+  border-bottom-left-radius: 8px;
+}
+ 
 </style>
