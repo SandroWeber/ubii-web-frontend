@@ -175,7 +175,7 @@ export default {
     //create specifications for the protobuf messages
     createUbiiSpecs: function() {
       //helper definitions that we can reference later
-      let deviceName = 'rock-paper-scissors-game-device';
+      let deviceName = 'rock-paper-scissors-game';
       let topicPrefix = UbiiClientService.getClientID() + '/' + deviceName;
       let inputEmgData = {
         internalName: 'emgData',
@@ -723,7 +723,7 @@ export default {
           this.playerGesture = 3;
         }
         this.changeIcon("player", this.playerGesture);
-        console.log("scissor: "+cnt_1+" rock: "+cnt_2+" paper: "+cnt_3);
+        //console.log("scissor: "+cnt_1+" rock: "+cnt_2+" paper: "+cnt_3);
       }
     },
   
