@@ -1,4 +1,5 @@
-const path = require('path')
+const path = require('path');
+const fs = require('fs');
 
 module.exports = {
   chainWebpack: config => {
@@ -7,14 +8,17 @@ module.exports = {
   },
   devServer: {
     //open: process.platform === 'darwin',
-    host: '127.0.0.1',
+    host: 'localhost',
     //port: 8080, // CHANGE YOUR PORT HERE!
-    https: true,
+    https: {
+      key: fs.readFileSync('./certs/ubii.com+5-key.pem'),
+      cert: fs.readFileSync('./certs/ubii.com+5.pem'),
+    }
     //hotOnly: false,
   },
 }
 
-function addStyleResource (rule) {
+function addStyleResource(rule) {
   rule.use('style-resource')
     .loader('style-resources-loader')
     .options({

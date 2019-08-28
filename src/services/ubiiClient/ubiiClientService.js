@@ -9,7 +9,7 @@ const uuidv4Regex = '[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12
 class UbiiClientService {
   constructor() {
     this.serverIP = window.location.hostname;
-    this.serverPort = "8102";
+    this.serverPort = '41000';
     this.client = undefined;
     this.connected = undefined;
     this.connecting = false;

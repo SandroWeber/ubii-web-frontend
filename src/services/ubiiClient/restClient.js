@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-import axios from 'axios';
+//import axios from 'axios';
 
 
 class RESTClient {
@@ -10,7 +10,7 @@ class RESTClient {
    * @param {*} port Port to connect to.
    */
   constructor(host = 'localhost',
-              port = 5555) {
+    port = 5555) {
     this.host = host;
     this.port = port;
 
@@ -28,6 +28,7 @@ class RESTClient {
         data: message,
         //config: { headers: {'Content-Type': 'application/octet-stream' }}
       })*/
+
       /*axios.post(url, message)
         .then((response) => {
           resolve(response.data);
@@ -37,8 +38,30 @@ class RESTClient {
           reject(error);
         });*/
 
-      const request = new Request(url, {method: 'POST', body: message});
-      fetch()
+      let body = JSON.stringify(message);
+      //console.info(body);
+
+      const request = new Request(
+        url,
+        {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          },
+          body: body
+        }
+      );
+      fetch(request).then(
+        async response => {
+          let responseJson = await response.json();
+          resolve(responseJson);
+        },
+        (error) => {
+          console.error(error);
+          reject(error);
+        });
     });
   }
 }

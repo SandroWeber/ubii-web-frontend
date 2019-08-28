@@ -27,3 +27,18 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+
+## How to create your own https certification
+
+ install mkcert (https://github.com/FiloSottile/mkcert)
+
+ mkcert -install
+
+ mkcert example.com "*.example.com" example.test localhost 127.0.0.1 ::1 ==> 2 .pem files
+ copy .pem files to /certs
+ adjust vue.config.js to read .pem files
+
+ alternatives:
+ - certbot (https://certbot.eff.org/)
+ - greenlock (https://www.npmjs.com/package/greenlock)
