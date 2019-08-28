@@ -26,6 +26,11 @@ export default new Router({
     component: () => import('./components/interfaces/SmartDevice.vue')
   },
   {
+    path: '/interfaces/ubii-controller',
+    name: 'Interface - Ubii Controller',
+    component: () => import('./components/interfaces/UbiiController.vue')
+  },
+  {
     path: '/interfaces/camera',
     name: 'Interface - Camera',
     component: () => import('./components/interfaces/Camera.vue')
@@ -99,6 +104,11 @@ export default new Router({
     path: '/applications/examples/gatherer-web-interface-smart-devices',
     name: 'Example - Gathering from Smart Devices connected via Web Interface',
     component: () => import('./components/applications/examples/ExampleWebInterfaceSmartDevices.vue')
+  },
+  {
+    path: '/applications/examples/opencv',
+    name: 'Example - OpenCV',
+    component: () => import('./components/applications/examples/OpenCV.vue')
   },
   /* applications - smartphone VR */
   {
