@@ -12,78 +12,37 @@
         </tr>
         <tr>
           <th>EMG</th>
-          <td>{{this.round(clientMyoData.emg.v0, 1)}}</td>
-          <td>{{this.round(clientMyoData.emg.v1, 1)}}</td>
-          <td>{{this.round(clientMyoData.emg.v2, 1)}}</td>
-          <td>{{this.round(clientMyoData.emg.v3, 1)}}</td>
-          <td>{{this.round(clientMyoData.emg.v4, 1)}}</td>
-          <td>{{this.round(clientMyoData.emg.v5, 1)}}</td>
-          <td>{{this.round(clientMyoData.emg.v6, 1)}}</td>
-          <td>{{this.round(clientMyoData.emg.v7, 1)}}</td>      
+          <td>{{this.round(myoData.emg.v0, 1)}}</td>
+          <td>{{this.round(myoData.emg.v1, 1)}}</td>
+          <td>{{this.round(myoData.emg.v2, 1)}}</td>
+          <td>{{this.round(myoData.emg.v3, 1)}}</td>
+          <td>{{this.round(myoData.emg.v4, 1)}}</td>
+          <td>{{this.round(myoData.emg.v5, 1)}}</td>
+          <td>{{this.round(myoData.emg.v6, 1)}}</td>
+          <td>{{this.round(myoData.emg.v7, 1)}}</td>      
         </tr>
         <tr>
           <th>Orientation</th>
-          <td colspan=2>{{this.round(clientMyoData.orientation.x, 1)}}</td>
-          <td colspan=2>{{this.round(clientMyoData.orientation.y, 1)}}</td>
-          <td colspan=2>{{this.round(clientMyoData.orientation.z, 1)}}</td>
-          <td colspan=2>{{this.round(clientMyoData.orientation.w, 1)}}</td>
+          <td colspan=2>{{this.round(myoData.orientation.x, 1)}}</td>
+          <td colspan=2>{{this.round(myoData.orientation.y, 1)}}</td>
+          <td colspan=2>{{this.round(myoData.orientation.z, 1)}}</td>
+          <td colspan=2>{{this.round(myoData.orientation.w, 1)}}</td>
         </tr>
         <tr>
           <th>Gyroscope</th>
-          <td colspan=3>{{this.round(clientMyoData.gyroscope.x, 1)}}</td>
-          <td colspan=3>{{this.round(clientMyoData.gyroscope.y, 1)}}</td>
-          <td colspan=2>{{this.round(clientMyoData.gyroscope.z, 1)}}</td>
+          <td colspan=3>{{this.round(myoData.gyroscope.x, 1)}}</td>
+          <td colspan=3>{{this.round(myoData.gyroscope.y, 1)}}</td>
+          <td colspan=2>{{this.round(myoData.gyroscope.z, 1)}}</td>
         </tr>
         <tr>
           <th>Accelerometer</th>
-          <td colspan=3>{{this.round(clientMyoData.accelerometer.x, 1)}}</td>
-          <td colspan=3>{{this.round(clientMyoData.accelerometer.y, 1)}}</td>
-          <td colspan=2>{{this.round(clientMyoData.accelerometer.z, 1)}}</td>            
+          <td colspan=3>{{this.round(myoData.accelerometer.x, 1)}}</td>
+          <td colspan=3>{{this.round(myoData.accelerometer.y, 1)}}</td>
+          <td colspan=2>{{this.round(myoData.accelerometer.z, 1)}}</td>            
         </tr>
         <tr>
           <th>Gesture</th>
-          <td colspan=8>{{gestureToString(clientMyoData.gesture)}}</td>
-        </tr>
-      </table>
-      <br>
-      <table class="sturdy">
-        <tr>
-          <th>Datatype</th>
-          <th colspan="8">Server-Data</th>
-        </tr>
-        <tr>
-          <th>EMG</th>
-          <td>{{this.round(serverMyoData.emg.v0, 1)}}</td>
-          <td>{{this.round(serverMyoData.emg.v1, 1)}}</td>
-          <td>{{this.round(serverMyoData.emg.v2, 1)}}</td>
-          <td>{{this.round(serverMyoData.emg.v3, 1)}}</td>
-          <td>{{this.round(serverMyoData.emg.v4, 1)}}</td>
-          <td>{{this.round(serverMyoData.emg.v5, 1)}}</td>
-          <td>{{this.round(serverMyoData.emg.v6, 1)}}</td>
-          <td>{{this.round(serverMyoData.emg.v7, 1)}}</td>        
-        </tr>
-        <tr>
-          <th>Orientation</th>
-          <td colspan=2>{{this.round(serverMyoData.orientation.x, 1)}}</td>
-          <td colspan=2>{{this.round(serverMyoData.orientation.y, 1)}}</td>
-          <td colspan=2>{{this.round(serverMyoData.orientation.z, 1)}}</td>
-          <td colspan=2>{{this.round(serverMyoData.orientation.w, 1)}}</td>
-        </tr>
-        <tr>
-          <th>Gyroscope</th>
-          <td colspan=3>{{this.round(serverMyoData.gyroscope.x, 1)}}</td>
-          <td colspan=3>{{this.round(serverMyoData.gyroscope.y, 1)}}</td>
-          <td colspan=2>{{this.round(serverMyoData.gyroscope.z, 1)}}</td>
-        </tr>
-        <tr>
-          <th>Accelerometer</th>
-          <td colspan=3>{{this.round(serverMyoData.accelerometer.x, 1)}}</td>
-          <td colspan=3>{{this.round(serverMyoData.accelerometer.y, 1)}}</td>
-          <td colspan=2>{{this.round(serverMyoData.accelerometer.z, 1)}}</td>            
-        </tr>
-        <tr>
-          <th>Gesture</th>
-          <td colspan=8>{{gestureToString(serverMyoData.gesture)}}</td>
+          <td colspan=8>{{gestureToString(myoData.gesture)}}</td>
         </tr>
       </table>
     </div>
@@ -96,10 +55,8 @@ import Myo from "myo";
 import UbiiClientContent from '../applications/sharedModules/UbiiClientContent';
 import UbiiEventBus from '../../services/ubiiClient/ubiiEventBus';
 
-import uuidv4 from 'uuid/v4';
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
-import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -144,21 +101,14 @@ export default {
       myoConnected: false,
       connectedIcon: faTimesCircle,
 
-      serverMyoData: {
+      myoData: {
         emg: {v0:0,v1:0,v2:0,v3:0,v4:0,v5:0,v6:0,v7:0},
         orientation: {x:0,y:0,z:0,w:0},
         gyroscope: {x:0,y:0,z:0},
         accelerometer: {x:0,y:0,z:0},
         gesture: 0
       },
-
-      clientMyoData: {
-        emg: {v0:0,v1:0,v2:0,v3:0,v4:0,v5:0,v6:0,v7:0},
-        orientation: {x:0,y:0,z:0,w:0},
-        gyroscope: {x:0,y:0,z:0},
-        accelerometer: {x:0,y:0,z:0},
-        gesture: 0
-      }
+      rpsGesture: 0
     };
   },
 
@@ -185,14 +135,9 @@ export default {
       let deviceName = 'web-interface-myo';
       let topicPrefix = UbiiClientService.getClientID() + '/' + deviceName;
       let inputClientMyoData = {
-        internalName: 'clientMyoData',
+        internalName: 'myoData',
         messageFormat: 'ubii.dataStructure.MyoEvent',
-        topic: topicPrefix + '/' + 'myo_client_data'
-      };
-      let outputServerMyoData = {
-        internalName: 'serverMyoData',
-        messageFormat: 'ubii.dataStructure.MyoEvent',
-        topic: topicPrefix + '/' + 'myo_server_data'
+        topic: topicPrefix + '/' + 'myo_data'
       };
 
       //specification of a ubii.devices.Device
@@ -204,90 +149,6 @@ export default {
             topic: inputClientMyoData.topic,
             messageFormat: inputClientMyoData.messageFormat,
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
-          },
-            {
-            topic: outputServerMyoData.topic,
-            messageFormat: outputServerMyoData.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
-          }
-        ]
-      };
-
-      //callback: set input as output
-      let processingCallback = (input, output) => {
-        if(input.clientMyoData){
-          output.serverMyoData = {
-            emg : {
-              v0: input.clientMyoData.emg.v0,
-              v1: input.clientMyoData.emg.v1,
-              v2: input.clientMyoData.emg.v2,
-              v3: input.clientMyoData.emg.v3,
-              v4: input.clientMyoData.emg.v4,
-              v5: input.clientMyoData.emg.v5,
-              v6: input.clientMyoData.emg.v6,
-              v7: input.clientMyoData.emg.v7
-            },
-            orientation : {
-              x: input.clientMyoData.orientation.x,
-              y: input.clientMyoData.orientation.y,
-              z: input.clientMyoData.orientation.z,
-              w: input.clientMyoData.orientation.w
-            },
-            gyroscope : {
-              x: input.clientMyoData.gyroscope.x,
-              y: input.clientMyoData.gyroscope.y,
-              z: input.clientMyoData.gyroscope.z
-            },
-            accelerometer : {
-              x: input.clientMyoData.accelerometer.x,
-              y: input.clientMyoData.accelerometer.y,
-              z: input.clientMyoData.accelerometer.z
-            },
-            gesture : input.clientMyoData.gesture
-          }; 
-        }
-      };
-
-      //specification of a ubii.interactions.Interaction
-      let ubiiInteraction = {
-        id: uuidv4(),
-        name: 'myo-interaction',
-        processingCallback: processingCallback.toString(),
-        inputFormats: [
-          {
-            internalName: inputClientMyoData.internalName,
-            messageFormat: inputClientMyoData.messageFormat
-          }
-        ],
-        outputFormats: [
-          {
-            internalName: outputServerMyoData.internalName,
-            messageFormat: outputServerMyoData.messageFormat
-          }
-        ]
-      };
-
-      // specification of a ubii.sessions.Session
-      // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/sessions/session.proto
-      let ubiiSession = {
-        id: uuidv4(),
-        name: 'myo-session',
-        interactions: [ubiiInteraction],
-        ioMappings: [
-          {
-            interactionId: ubiiInteraction.id,
-            inputMappings: [
-              {
-                name: inputClientMyoData.internalName,
-                topicSource: inputClientMyoData.topic
-              }
-            ],
-            outputMappings: [
-              {
-                name: outputServerMyoData.internalName,
-                topicDestination: outputServerMyoData.topic
-              }
-            ]
           }
         ]
       };
@@ -295,12 +156,7 @@ export default {
       // assign to local state for future reference
       this.$data.deviceName = deviceName;
       this.$data.ubiiDevice = ubiiDevice;
-      this.$data.ubiiInteraction = ubiiInteraction;
-
       this.$data.inputClientMyoData = inputClientMyoData;
-      this.$data.outputServerMyoData = outputServerMyoData;
-
-      this.$data.ubiiSession = ubiiSession;
     },
 
     startInterface: function() {
@@ -320,53 +176,7 @@ export default {
             return device;
           })
           .then(() => {
-
-            // subscribe to the device topics so we are notified when new data arrives on the topic
-            UbiiClientService.client.subscribe(
-              this.$data.outputServerMyoData.topic,
-              // a callback to be called when new data on this topic arrives
-              myoData => {
-                this.$data.serverMyoData = {
-                  emg : {
-                    v0: myoData.emg.v0,
-                    v1: myoData.emg.v1,
-                    v2: myoData.emg.v2,
-                    v3: myoData.emg.v3,
-                    v4: myoData.emg.v4,
-                    v5: myoData.emg.v5,
-                    v6: myoData.emg.v6,
-                    v7: myoData.emg.v7
-                  },
-                  orientation : {
-                    x: myoData.orientation.x,
-                    y: myoData.orientation.y,
-                    z: myoData.orientation.z,
-                    w: myoData.orientation.w
-                  },
-                  gyroscope : {
-                    x: myoData.gyroscope.x,
-                    y: myoData.gyroscope.y,
-                    z: myoData.gyroscope.z
-                  },
-                  accelerometer : {
-                    x: myoData.accelerometer.x,
-                    y: myoData.accelerometer.y,
-                    z: myoData.accelerometer.z
-                  },
-                  gesture : myoData.gesture
-                };
-              }
-            ); 
-            this.publishMyoData();
-            // start our session (registering not necessary as we do not want to save it permanently)
-            UbiiClientService.client
-              .callService({
-                topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
-                session: this.$data.ubiiSession
-              })
-              .then(() => {
-                this.$data.interfaceStarted = true;
-              });
+            this.$data.interfaceStarted = true;
           });
       });
     },
@@ -379,15 +189,6 @@ export default {
       clearInterval(this.$data.pollingInterval);
       this.disconnectMyo();
       this.$data.myoConnected = false;
-
-      // unsubscribe and stop session
-      UbiiClientService.client.unsubscribe(
-        this.$data.outputServerMyoData.topic
-      );
-      UbiiClientService.client.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
-        session: this.$data.ubiiSession
-      });
     },
 
     //round values for better display
@@ -416,7 +217,7 @@ export default {
       
       UbiiClientService.publishRecord({
         topic: this.$data.inputClientMyoData.topic,
-        myoEvent: this.$data.clientMyoData
+        myoEvent: this.$data.myoData
       });
     },
 
@@ -435,18 +236,18 @@ export default {
       Myo.on('imu', (data) => {
         this.$data.myoConnected = true;
 
-        this.$data.clientMyoData.orientation = {
+        this.$data.myoData.orientation = {
           x:data.orientation.x,
           y:data.orientation.y,
           z:data.orientation.z,
           w:data.orientation.w
         };
-        this.$data.clientMyoData.gyroscope = {
+        this.$data.myoData.gyroscope = {
           x:data.gyroscope.x,
           y:data.gyroscope.y,
           z:data.gyroscope.z
         };
-        this.$data.clientMyoData.accelerometer = {
+        this.$data.myoData.accelerometer = {
           x:data.accelerometer.x,
           y:data.accelerometer.y,
           z:data.accelerometer.z
@@ -455,7 +256,7 @@ export default {
 
       Myo.on('emg', (data) => {
         this.$data.myoConnected = true;
-        this.$data.clientMyoData.emg = {
+        this.$data.myoData.emg = {
           v0:data[0],
           v1:data[1],
           v2:data[2],
@@ -478,11 +279,11 @@ export default {
           case 'double_tap':      e = 5; break;
           default:                e = 0;
         } 
-        this.$data.clientMyoData.gesture = e;
+        this.$data.myoData.gesture = e;
       });
 
       Myo.on('pose_off', () => {
-        this.$data.clientMyoData.gesture = 0;
+        this.$data.myoData.gesture = 0;
       });
 
       Myo.on('connected', () => {

@@ -96,6 +96,8 @@ import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
+
+
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
 import {
@@ -159,15 +161,7 @@ export default {
 
         //ubi-related
         ubiiClientService: UbiiClientService,
-        client: undefined,
-        oldClients:[],
-        publishInterval: null,
-        pollingInterval: null,
-
-        //myo
-        emgData: {v0:0,v1:0,v2:0,v3:0,v4:0,v5:0,v6:0,v7:0},
-        emgBuffer: [],
-        emgProtoElements: undefined
+        myoDataTopicSource: ""
     };
   },
   methods: {
@@ -177,10 +171,10 @@ export default {
       //helper definitions that we can reference later
       let deviceName = 'rock-paper-scissors-game';
       let topicPrefix = UbiiClientService.getClientID() + '/' + deviceName;
-      let inputEmgData = {
-        internalName: 'emgData',
-        messageFormat: 'ubii.dataStructure.Int32List',
-        topic: topicPrefix + '/' + 'emg_data'
+      let inputMyoData = {
+        internalName: 'myoData',
+        messageFormat: 'ubii.dataStructure.MyoEvent',
+        topic: ""
       };
       let outputGestureData = {
         internalName: 'gestureId',
@@ -195,8 +189,8 @@ export default {
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
         components: [
           {
-            topic: inputEmgData.topic,
-            messageFormat: inputEmgData.messageFormat,
+            topic: this.myoDataTopicSource,
+            messageFormat: inputMyoData.messageFormat,
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
           },
           {
@@ -210,25 +204,40 @@ export default {
       //callback for classifying the emg array and get performed gesture
       let processCB =
       '(input, output, state) => {'+
-        'if(input.emgData && input.emgData.elements.length == 64 && state.model){'+
-          'let predict = async () => {'+
-          'let tensor = state.modules.tf.tensor2d(input.emgData.elements, [1,64]);'+
-          'let prediction = await state.model.predict(tensor);'+
-          'return prediction;'+
-          '};'+
-          'predict().then(prediction => {'+
-            'let getData = async () => {'+
-                'let data = await prediction.data();'+
-                'dataConv = parseInt(data.toString());'+
-                'if(!dataConv) {'+
-                  'dataConv = 0;'+
-                  '}'+
-                  'return dataConv;'+
-              '};'+
-            'getData().then(data => {'+
-              'output.gestureId = data;'+
+        'if(input.myoData && state.model){'+
+          'state.emgBuffer.push(input.myoData.emg.v0);'+
+          'state.emgBuffer.push(input.myoData.emg.v1);'+
+          'state.emgBuffer.push(input.myoData.emg.v2);'+
+          'state.emgBuffer.push(input.myoData.emg.v3);'+
+          'state.emgBuffer.push(input.myoData.emg.v4);'+
+          'state.emgBuffer.push(input.myoData.emg.v5);'+
+          'state.emgBuffer.push(input.myoData.emg.v6);'+
+          'state.emgBuffer.push(input.myoData.emg.v7);'+
+
+          'while(state.emgBuffer.length > 64){'+
+            'state.emgBuffer.shift();'+
+          '}'+
+
+          'if(state.emgBuffer.length == 64){'+
+            'let predict = async () => {'+
+              'let tensor = state.modules.tf.tensor2d(state.emgBuffer, [1,64]);'+
+              'let prediction = await state.model.predict(tensor);'+
+              'return prediction;'+
+            '};'+
+            'predict().then(prediction => {'+
+              'let getData = async () => {'+
+                  'let data = await prediction.data();'+
+                  'dataConv = parseInt(data.toString());'+
+                  'if(!dataConv) {'+
+                    'dataConv = 0;'+
+                    '}'+
+                    'return dataConv;'+
+                '};'+
+              'getData().then(data => {'+
+                'output.gestureId = data;'+
+              '});'+
             '});'+
-          '});'+
+          '}'+
         '};'+
       '};'
         
@@ -245,6 +254,7 @@ export default {
             '}'+
           '};' +
           'prepareModel();' +
+          'state.emgBuffer = [];'+
           //'console.log("??????????????????????????????????????????????");'+
         '};';
 
@@ -256,8 +266,8 @@ export default {
         processingCallback: processCB.toString(),
         inputFormats: [
           {
-            internalName: inputEmgData.internalName,
-            messageFormat: inputEmgData.messageFormat
+            internalName: inputMyoData.internalName,
+            messageFormat: inputMyoData.messageFormat
           }
         ],
         outputFormats: [
@@ -265,8 +275,7 @@ export default {
             internalName: outputGestureData.internalName,
             messageFormat: outputGestureData.messageFormat
           }
-        ],
-
+        ]
       };
 
       //specification of a ubii.sessions.Session
@@ -280,8 +289,8 @@ export default {
             interactionId: ubiiInteraction.id,
             inputMappings: [
               {
-                name: inputEmgData.internalName,
-                topicSource: inputEmgData.topic
+                name: inputMyoData.internalName,
+                topicSource: this.myoDataTopicSource
               }
             ],
             outputMappings: [
@@ -299,7 +308,7 @@ export default {
       this.$data.ubiiDevice = ubiiDevice;
       this.$data.ubiiInteraction = ubiiInteraction;
 
-      this.$data.inputEmgData = inputEmgData;
+      this.$data.inputMyoData = inputMyoData;
       this.$data.outputGestureData = outputGestureData;
 
       this.$data.ubiiSession = ubiiSession;
@@ -318,47 +327,45 @@ export default {
       this.changeIcon("player", 1); */
 
       UbiiClientService.isConnected().then(() => {  
-        
-        // create all specifications
-        this.createUbiiSpecs();
 
-        //handle myo data
-        this.updateMyoDevices();
-        //this.setPublishInterval(true);
+        //find myo topic & set it as input
+        this.findMyoTopic().then(() => {
 
-        // register device
-        UbiiClientService.registerDevice(this.$data.ubiiDevice)
-          .then(device => {
-            this.$data.ubiiDevice = device;
-            return device;
-          })
-          .then(() => { 
-            
-            // start our session (registering not necessary as we do not want to save it permanently)
-            UbiiClientService.client
-              .callService({
-                topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
-                session: this.$data.ubiiSession
-              })
-              .then(response => {
-                console.info(response);
-              });
+          // create all specifications
+          this.createUbiiSpecs();
 
-              //subscribe to our classied output gesture topic
-              UbiiClientService.client.subscribe(
-                this.$data.outputGestureData.topic,
-                gestureData => {
-                  this.pushGestureData(gestureData);
-                  }
-              );
+          // register device
+          UbiiClientService.registerDevice(this.$data.ubiiDevice)
+            .then(device => {
+              this.$data.ubiiDevice = device;
+              return device;
+            })
+            .then(() => { 
 
+              // start our session (registering not necessary as we do not want to save it permanently)
+              UbiiClientService.client
+                .callService({
+                  topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+                  session: this.$data.ubiiSession
+                })
+                .then(response => {
+                  console.info(response);
+                });
+                //subscribe to our classied output gesture topic
+                UbiiClientService.client.subscribe(
+                  this.$data.outputGestureData.topic,
+                  gestureData => {
+                    this.pushGestureData(gestureData);
+                    }
+                );
+
+            });
           });
       });
     },
 
-    //clear publish interval, unsubscribe and stop session
+    //unsubscribe and stop session
     stopSession: function() {
-      //this.setPublishInterval(false);
 
       UbiiClientService.client.unsubscribe(
         this.$data.outputGestureData.topic
@@ -369,131 +376,34 @@ export default {
       });
     },
 
+     resolveAfter2Seconds: function() {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          resolve('resolved');
+        }, 2000);
+      });
+    },
+
     //look for myo interfaces
-    updateMyoDevices: function() {
-      UbiiClientService.client
+    findMyoTopic: async function() {
+      return new Promise(resolve => {
+
+        UbiiClientService.client
         .callService({ topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST })
         .then(reply => {
+          
           this.$data.topicList = reply.stringList.list;
 
           this.$data.topicList.forEach(topic => {
             const topicIndex = topic.indexOf('/web-interface-myo/');
 
             if (topicIndex !== -1) {
-              const clientID = topic.substring(0, topicIndex);
-
-              // create new client if we dont have one yet or a new client just connected
-              if (!this.$data.client) {
-                this.setClient(clientID);
-              } else {
-                if (!this.$data.oldClients.includes(clientID)) {
-                  this.setClient(clientID);
-                }
-              }
+              this.myoDataTopicSource = topic;
+              resolve();
             }
           });
         });
-      setTimeout(this.updateMyoDevices, 1000);
-    },
-
-    //set client and subsribe to myo topic-data
-    setClient: function(clientID) {
-      
-      //unsubscribe old client
-      if(this.client){
-        this.client.topics.forEach(topic => {
-          // eslint-disable-next-line no-console
-          console.log('unsubscribed to ' + topic);
-
-          UbiiClientService.client.unsubscribe(topic);
-        });
-        this.client.sessions.forEach(session => {
-          UbiiClientService.client.callService({
-            topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
-            session: session
-          });
-        });
-      }
-
-      //create sessions and topics
-      const myoEventTopic = clientID + '/web-interface-myo/myo_server_data';
-
-      this.client = {
-        id: clientID,
-        sessions: [],
-        topics: [myoEventTopic]
-      };
-
-      //subscribe to myo data and get emg array
-      UbiiClientService.client.subscribe(
-        myoEventTopic, 
-        myoData => {
-          var emg = {
-            v0: myoData.emg.v0,
-            v1: myoData.emg.v1,
-            v2: myoData.emg.v2,
-            v3: myoData.emg.v3,
-            v4: myoData.emg.v4,
-            v5: myoData.emg.v5,
-            v6: myoData.emg.v6,
-            v7: myoData.emg.v7
-          };
-          this.$data.emgData = emg;
-          this.addEmgToBuffer(emg);
-          this.publishData();
-          //console.log("got myo data");
-        }
-      );
-      console.log('subscribed to ' + myoEventTopic);
-      this.oldClients.push(clientID);
-    },
-
-    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    //++++++++++++++++++++++ data handling +++++++++++++++++++++++++++++++++++
-    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    
-    //add myo emg buffer to buffer (8x8)
-    addEmgToBuffer: function(emg){
-      while(this.emgBuffer.length >= 8){
-        this.emgBuffer.shift();
-      }
-      this.emgBuffer.push(emg);
-    },
-
-    //publish data every 10ms
-/*     setPublishInterval: function(enable) {
-      if(enable)
-        this.publishInterval = setInterval(() => this.publishData(), 10);
-      else{
-        console.log("disble publish interval");
-        clearInterval(this.publishInterval);
-      }
-    }, */
-
-    //publich emg-array
-    publishData: function(){
-      
-      if(this.emgBuffer.length !=8)
-        return;
-
-      //Transform emgBuffer to proto format
-      var msg_obj = {elements: []};
-      
-      this.emgBuffer.forEach((singleEmgArray) => {
-        msg_obj.elements.push(singleEmgArray.v0);
-        msg_obj.elements.push(singleEmgArray.v1);
-        msg_obj.elements.push(singleEmgArray.v2);
-        msg_obj.elements.push(singleEmgArray.v3);
-        msg_obj.elements.push(singleEmgArray.v4);
-        msg_obj.elements.push(singleEmgArray.v5);
-        msg_obj.elements.push(singleEmgArray.v6);
-        msg_obj.elements.push(singleEmgArray.v7);
       });
-
-        UbiiClientService.publishRecord({
-        topic: this.$data.inputEmgData.topic,
-        int32List: msg_obj
-        });
     },
 
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
