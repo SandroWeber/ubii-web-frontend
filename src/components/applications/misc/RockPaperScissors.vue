@@ -189,11 +189,6 @@ export default {
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
         components: [
           {
-            topic: this.myoDataTopicSource,
-            messageFormat: inputMyoData.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
-          },
-          {
             topic: outputGestureData.topic,
             messageFormat: outputGestureData.messageFormat,
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
