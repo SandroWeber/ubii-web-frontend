@@ -161,7 +161,7 @@ export default {
 
         //ubi-related
         ubiiClientService: UbiiClientService,
-        myoDataTopicSource: ""
+        myoDataTopicSource: "",
     };
   },
   methods: {
@@ -217,6 +217,7 @@ export default {
             'let predict = async () => {'+
               'let tensor = state.modules.tf.tensor2d(state.emgBuffer, [1,64]);'+
               'let prediction = await state.model.predict(tensor);'+
+              'state.emgBuffer = [];'+
               'return prediction;'+
             '};'+
             'predict().then(prediction => {'+
@@ -239,18 +240,15 @@ export default {
       //Load emg classifier model and save it in state
       let onCreatedCB = 
         'state => {' +
-          //'console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");'+
           'let prepareModel = async () => {' +
             'try {'+
               'state.model = await state.modules.emgClassifier.load();' +
-              //'console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");'+
             '} catch (err) {'+
               'throw err;'+
             '}'+
           '};' +
           'prepareModel();' +
           'state.emgBuffer = [];'+
-          //'console.log("??????????????????????????????????????????????");'+
         '};';
 
       //specification of a ubii.interactions.Interaction
@@ -316,8 +314,8 @@ export default {
       this.enableInput(false);
       this.updateGraphs();
       
-      //temp for building ui
-     /*  this.switchGameArea("game-area");
+      //for building ui
+      /* this.switchGameArea("game-area");
       this.chooseGestureForOpponent();
       this.changeIcon("player", 1); */
 
@@ -487,6 +485,7 @@ export default {
 
         this.$data.msgText = "3";
         this.switchGameArea("text-area");
+        this.updateGraphs();
 
         //countdown
         setTimeout(() => {
@@ -501,9 +500,7 @@ export default {
                         //no input detected
                         if((this.currentButtonInput == undefined || this.currentButtonInput == 0) &&
                           (this.gestureInputCollection.length == 0)){
-                            this.$data.msgText = "No input detected :("
-                            btn.style.display = "inline";
-                            this.switchGameArea("text-area");
+                            this.noInputMessage(btn);
                         }
                         //evaluate game
                         else{
@@ -524,6 +521,12 @@ export default {
                 },1000);
             },1000);
         }, 1000);
+    },
+
+    noInputMessage: function(btn){
+      this.$data.msgText = "No input detected :("
+      btn.style.display = "inline";
+      this.switchGameArea("text-area");
     },
 
     //figure out who won the game
@@ -614,9 +617,11 @@ export default {
             case 3: cnt_3++; break;
           }
         });
-        if(cnt_1 == 0 && cnt_2 == 0 && cnt_3 == 0)
+
+        if(cnt_1 == 0 && cnt_2 == 0 && cnt_3 == 0){
+          this.noInputMessage(document.getElementById("optional-retry-btn"));
           return;
-        
+        }
         //choose most frequent gesture
         else if(cnt_1 >= cnt_2 && cnt_1 >= cnt_3){
           this.playerGesture = 1;
@@ -629,6 +634,7 @@ export default {
         }
         this.changeIcon("player", this.playerGesture);
         //console.log("scissor: "+cnt_1+" rock: "+cnt_2+" paper: "+cnt_3);
+        console.log("Input collection: "+this.gestureInputCollection);
       }
     },
   
@@ -771,6 +777,7 @@ th{
 }
 .otherTable {
   border-collapse: collapse;
+  background-color: layerThreeSecondaryColor;
   margin: 0px 0;
   table-layout: fixed;
   width: 144px; 
