@@ -21,6 +21,13 @@
           <p>Camera</p>
         </app-tile>
       </router-link>
+
+      <router-link to="/interfaces/myo" class="interface-link" tag="div">
+        <app-tile class="layer-three background round shadow orange-accent">
+          <font-awesome-icon icon="ring" class="interface-icon"/>
+          <p>Myo</p>
+        </app-tile>
+      </router-link>
     </div>
   </div>
 </template>
@@ -30,8 +37,8 @@ import { AppTile } from './appComponents/appComponents.js';
 
 // Fontawesome.
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faMobileAlt, faCamera, faGamepad } from '@fortawesome/free-solid-svg-icons';
-library.add(faMobileAlt, faCamera, faGamepad);
+import { faMobileAlt, faCamera, faRing, faGamepad } from '@fortawesome/free-solid-svg-icons';
+library.add(faMobileAlt, faCamera, faRing, faGamepad);
 
 export default {
   name: 'Interfaces',
