@@ -5,12 +5,16 @@
         <span class="label">Visualization</span>
       </div>
       <div class="grid">
-        <router-link to="/applications/visualization/3d_pose_visualizer" class="interface-link" tag="div">
-           <app-tile class="layer-three background round shadow orange-accent">
+        <router-link
+          to="/applications/visualization/3d_pose_visualizer"
+          class="interface-link"
+          tag="div"
+        >
+          <app-tile class="layer-three background round shadow orange-accent">
             <font-awesome-icon icon="cubes" class="interface-icon" />
             <p>3D Pose Visualizer</p>
           </app-tile>
-         </router-link>
+        </router-link>
       </div>
 
       <div class="seperator">
@@ -57,11 +61,7 @@
           </app-tile>
         </router-link>
 
-        <router-link
-          to="/applications/examples/opencv"
-          class="interface-link"
-          tag="div"
-        >
+        <router-link to="/applications/examples/opencv" class="interface-link" tag="div">
           <app-tile class="layer-three background round shadow orange-accent">
             <font-awesome-icon icon="eye" class="interface-icon" />
             <p>OpenCV</p>
@@ -114,6 +114,15 @@
         <span class="label">Misc</span>
       </div>
 
+      <div class="grid">
+        <router-link to="/applications/misc/rock-paper-scissors" class="interface-link" tag="div">
+          <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="hand-scissors" class="interface-icon" />
+            <p>Rock Paper Scissors</p>
+          </app-tile>
+        </router-link>
+      </div>
+
       <div class="grid"></div>
     </div>
   </div>
@@ -133,9 +142,21 @@ import {
   faTabletAlt,
   faKeyboard,
   faHandPointer,
+  faHandScissors,
   faEye
 } from '@fortawesome/free-solid-svg-icons';
-library.add(faMousePointer, faCube, faCubes, faVrCardboard, faMobileAlt, faTabletAlt, faKeyboard, faHandPointer, faEye);
+library.add(
+  faMousePointer,
+  faCube,
+  faCubes,
+  faVrCardboard,
+  faMobileAlt,
+  faTabletAlt,
+  faKeyboard,
+  faHandPointer,
+  faEye,
+  faHandScissors
+);
 
 export default {
   name: 'Applications',
