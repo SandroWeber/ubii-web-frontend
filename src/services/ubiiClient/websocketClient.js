@@ -36,8 +36,8 @@ class WebsocketClient {
   start() {
     // init
     try {
-      //let url = `wss://${this.host}:${this.port}?clientID=${this.identity}`;
-      let url = `ws://${this.host}:${this.port}?clientID=${this.identity}`;
+      let url = `wss://${this.host}:${this.port}?clientID=${this.identity}`;
+      //let url = `ws://${this.host}:${this.port}?clientID=${this.identity}`;
       console.info(url);
       this.websocket = new WebSocket(url/*, {
         protocolVersion: 8,
