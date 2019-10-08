@@ -5,12 +5,16 @@
         <span class="label">Visualization</span>
       </div>
       <div class="grid">
-        <router-link to="/applications/visualization/3d_pose_visualizer" class="interface-link" tag="div">
-           <app-tile class="layer-three background round shadow orange-accent">
+        <router-link
+          to="/applications/visualization/3d_pose_visualizer"
+          class="interface-link"
+          tag="div"
+        >
+          <app-tile class="layer-three background round shadow orange-accent">
             <font-awesome-icon icon="cubes" class="interface-icon" />
             <p>3D Pose Visualizer</p>
           </app-tile>
-         </router-link>
+        </router-link>
       </div>
 
       <div class="seperator">
@@ -54,6 +58,13 @@
           <app-tile class="layer-three background round shadow orange-accent">
             <font-awesome-icon icon="tablet-alt" class="interface-icon" />
             <p>Gatherer - Interface Smart Devices</p>
+          </app-tile>
+        </router-link>
+
+        <router-link to="/applications/examples/opencv" class="interface-link" tag="div">
+          <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="eye" class="interface-icon" />
+            <p>OpenCV</p>
           </app-tile>
         </router-link>
       </div>
@@ -103,6 +114,15 @@
         <span class="label">Misc</span>
       </div>
 
+      <div class="grid">
+        <router-link to="/applications/misc/rock-paper-scissors" class="interface-link" tag="div">
+          <app-tile class="layer-three background round shadow orange-accent">
+            <font-awesome-icon icon="hand-scissors" class="interface-icon" />
+            <p>Rock Paper Scissors</p>
+          </app-tile>
+        </router-link>
+      </div>
+
       <div class="grid"></div>
     </div>
   </div>
@@ -121,16 +141,22 @@ import {
   faMobileAlt,
   faTabletAlt,
   faKeyboard,
-  faHandPointer
+  faHandPointer,
+  faHandScissors,
+  faEye
 } from '@fortawesome/free-solid-svg-icons';
-library.add(faMousePointer);
-library.add(faCube);
-library.add(faCubes);
-library.add(faVrCardboard);
-library.add(faMobileAlt);
-library.add(faTabletAlt);
-library.add(faKeyboard);
-library.add(faHandPointer);
+library.add(
+  faMousePointer,
+  faCube,
+  faCubes,
+  faVrCardboard,
+  faMobileAlt,
+  faTabletAlt,
+  faKeyboard,
+  faHandPointer,
+  faEye,
+  faHandScissors
+);
 
 export default {
   name: 'Applications',
