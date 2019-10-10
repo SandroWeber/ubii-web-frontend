@@ -27,6 +27,7 @@ class ClientNodeWeb {
     this.deviceSpecifications = new Map();
 
     this.topicDataCallbacks = new Map();
+    this.topicDataRegexCallbacks = new Map();
   }
 
   /**
@@ -225,10 +226,9 @@ class ClientNodeWeb {
   }
 
   /**
-   * Subscribe and unsubscribe to the specified topics.
-   * @param {*} deviceName
-   * @param {*} subscribeTopics
-   * @param {*} unsubscribeTopics
+   * Subscribe to the specified topic.
+   * @param {*} topic
+   * @param {*} callback
    */
   async subscribe(topic, callback) {
     let message = {
@@ -250,6 +250,40 @@ class ClientNodeWeb {
           }
         } else {
           console.error("ClientNodeWeb - subscribe failed (" + topic + ")\n" +
+            reply);
+        }
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
+  }
+
+  /**
+   * Subscribe to the specified regex.
+   * @param {*} regex
+   * @param {*} callback
+   */
+  async subscribeRegex(regex, callback) {
+    let message = {
+      topic: DEFAULT_TOPICS.SERVICES.TOPIC_SUBSCRIPTION,
+      topicSubscription: {
+        clientId: this.clientSpecification.id,
+        subscribeTopicRegexp: regex
+      }
+    };
+
+    return this.callService(message).then(
+      (reply) => {
+        if (reply.success !== undefined && reply.success !== null) {
+          let callbacks = this.topicDataRegexCallbacks.get(regex);
+          if (callbacks && callbacks.length > 0) {
+            callbacks.push(callback);
+          } else {
+            this.topicDataRegexCallbacks.set(regex, [callback]);
+          }
+        } else {
+          console.error("ClientNodeWeb - subscribe failed (" + regex + ")\n" +
             reply);
         }
       },
@@ -330,6 +364,14 @@ class ClientNodeWeb {
     let record = message.topicDataRecord;
     if (record && record.topic) {
       let callbacks = this.topicDataCallbacks.get(record.topic);
+      if (!callbacks) {
+        this.topicDataRegexCallbacks.forEach((value, key) => {
+          let regex = new RegExp(key);
+          if (regex.test(record.topic)) {
+            callbacks = value;
+          }
+        });
+      }
       callbacks && callbacks.forEach((cb) => {
         cb(record[record.type])
       });
