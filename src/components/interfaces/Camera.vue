@@ -42,9 +42,10 @@ export default {
           this.start();
         },
         //rejected
-        (error) => {
+        error => {
           console.warn(error);
-        });
+        }
+      );
     }
   },
   beforeDestroy: function() {
@@ -112,8 +113,11 @@ export default {
       }
 
       this.ubiiSessionCoCoSSD = {
-        id: uuidv4(), //TODO: remove and receive from backend
+        id: uuidv4(),
         name: 'CameraWebInterface - Session CoCoSSD',
+        processMode:
+          ProtobufLibrary.ubii.sessions.Session.ProcessMode
+            .INDIVIDUAL_PROCESS_FREQUENCIES,
         interactions: [this.interactionCocoSsdSpecs],
         ioMappings: [
           {
@@ -126,7 +130,8 @@ export default {
             ],
             outputMappings: [
               {
-                name: this.interactionCocoSsdSpecs.outputFormats[0].internalName,
+                name: this.interactionCocoSsdSpecs.outputFormats[0]
+                  .internalName,
                 topicDestination: this.ubiiDevice.components[1].topic
               }
             ]
@@ -158,6 +163,8 @@ export default {
       }).then(response => {
         if (response.error) {
           console.warn(response.error);
+        } else {
+          console.info(response);
         }
       });
 
@@ -216,6 +223,7 @@ export default {
       let displayRatio =
         this.videoElement.clientWidth / this.videoElement.clientHeight;
 
+      //TODO: causes bugs
       if (displayRatio > videoRatio) {
         this.videoOverlayElement.style.width =
           videoRatio * this.videoOverlayElement.clientHeight + 'px';
@@ -223,6 +231,7 @@ export default {
         this.videoOverlayElement.style.height =
           videoRatio * this.videoOverlayElement.clientWidth + 'px';
       }
+
       var ctx = canvas.getContext('2d');
       ctx.drawImage(this.videoElement, 0, 0, canvas.width, canvas.height);
 
@@ -236,7 +245,7 @@ export default {
       while (this.cocoSSDLabels.length < predictionsList.length) {
         let divElement = document.createElement('div');
         divElement.style.color = 'black';
-        divElement.style.border = '5px solid rgba(255, 255, 0, 0.2)';
+        divElement.style.border = '5px solid rgba(255, 255, 0, 0.4)';
         divElement.style.position = 'relative';
         divElement.style.textAlign = 'left';
         divElement.style.fontWeight = 'bold';
@@ -265,6 +274,7 @@ export default {
             Math.floor(
               predictionsList[index].size.y * overlayBoundings.height
             ) + 'px';
+          div.style.textShadow = '0px 0px 10px yellow';
 
           div.style.visibility = 'visible';
         } else {
@@ -296,6 +306,7 @@ export default {
 
 .video-overlay {
   grid-area: camera-image;
+  width: 100%;
   justify-self: center;
   overflow: hidden;
 }
