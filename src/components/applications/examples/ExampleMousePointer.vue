@@ -221,6 +221,7 @@ export default {
         id: uuidv4(),
         name: 'mirror-mouse-pointer',
         processingCallback: processingCallback.toString(),
+        processFrequency: 60,
         inputFormats: [
           {
             internalName: inputClientPointer.internalName,
