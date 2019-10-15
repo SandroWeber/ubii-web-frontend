@@ -57,15 +57,26 @@ export default {
       const mesh = this.mesh;
 
       this.renderer.setAnimationLoop(function() {
+        console.info('AnimationLoop');
         mesh.rotation.x += 0.01;
         mesh.rotation.y += 0.02;
         renderer.render(scene, camera);
       });
+    },
+    stop: function() {
+      this.renderer.setAnimationLoop(null);
     }
   },
   mounted() {
+    window.addEventListener('beforeunload', () => {
+      this.stop();
+    });
+
     this.init();
     this.animate();
+  },
+  beforeDestroy: function() {
+    this.stop();
   }
 };
 </script>
