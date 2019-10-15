@@ -223,7 +223,6 @@ export default {
       let displayRatio =
         this.videoElement.clientWidth / this.videoElement.clientHeight;
 
-      //TODO: causes bugs
       if (displayRatio > videoRatio) {
         this.videoOverlayElement.style.width =
           videoRatio * this.videoOverlayElement.clientHeight + 'px';
