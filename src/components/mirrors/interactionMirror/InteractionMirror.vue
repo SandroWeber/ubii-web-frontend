@@ -67,9 +67,9 @@
       />
       <div id="process-content">
         <div class="segment">
-          <div>process frequency (every x seconds):</div>
+          <h3>process frequency (Hz):</h3>
           <app-input
-            class="layer-two round title-input"
+            class="process-frequency-input layer-two round title-input"
             :id="'input-interaction-processFrequency'"
             :type="'type'"
             v-model="processFrequencySource"
@@ -193,7 +193,11 @@ export default {
     },
     processFrequencySource: {
       get() {
-        return (this.interaction.processFrequency && this.interaction.processFrequency.toString()) || NaN.toString();
+        return (
+          (this.interaction.processFrequency &&
+            this.interaction.processFrequency.toString()) ||
+          NaN.toString()
+        );
       },
       set(value) {
         let raw = this.interaction;
@@ -238,6 +242,7 @@ export default {
 <style scoped>
 .interaction-mirror {
   height: 100%;
+  overflow: scroll;
   padding: 20px;
   flex-grow: 1;
   display: flex;
@@ -275,7 +280,9 @@ h4 {
 }
 
 .category {
-  margin-bottom: 20px;
+  border-top: 2px solid white;
+  padding-top: 20px;
+  padding-bottom: 20px;
 }
 
 .details-content {
@@ -291,5 +298,9 @@ h4 {
   padding: 10px;
   display: flex;
   flex-direction: row;
+}
+
+.process-frequency-input {
+  margin: 0px 20px 0px 20px;
 }
 </style>

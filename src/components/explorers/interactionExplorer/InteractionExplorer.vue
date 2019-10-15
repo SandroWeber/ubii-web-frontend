@@ -1,6 +1,6 @@
 <template>
   <app-layer class="interaction-explorer layer-two background shadow">
-    <app-explorer 
+    <app-explorer
       :records="interactions"
       :options="options"
       @add="addDefaultInteraction"
@@ -12,59 +12,60 @@
 </template>
 
 <script>
-  import { mapActions } from 'vuex'
-  import { AppLayer, AppExplorer } from './../../appComponents/appComponents.js';
+import { mapActions } from 'vuex';
+import { AppLayer, AppExplorer } from './../../appComponents/appComponents.js';
 
-  export default {
-    name: 'InteractionExplorer',
-    components: {
-      AppLayer,
-      AppExplorer,
+export default {
+  name: 'InteractionExplorer',
+  components: {
+    AppLayer,
+    AppExplorer
+  },
+  props: {
+    interactions: Array
+  },
+  data: function() {
+    return {
+      options: {
+        sort: 'alphabetically',
+        tools: {
+          add: true,
+          remove: true,
+          refresh: true,
+          filter: true
+        },
+        alwaysSelected: true
+      }
+    };
+  },
+  methods: {
+    onSelect: function(payload) {
+      this.$emit('select', payload);
     },
-    props: {
-      interactions: Array,
-    },
-    data: function(){
-      return {
-        options: {
-          sort: 'alphabetically',
-          tools: {
-            add: true,
-            remove: true,
-            refresh: true,
-            filter: true
-          },
-          alwaysSelected: true
-        }
+    removeInteractions: function(payload) {
+      for (let i = 0; i < payload.records.length; i++) {
+        this.deleteInteraction({
+          interaction: payload.records[i]
+        });
       }
     },
-    methods: {
-      onSelect: function(payload){
-        this.$emit('select', payload)
-      },
-      removeInteractions: function(payload){
-        for (let i = 0; i < payload.records.length; i++) {
-          this.deleteInteraction({
-            interaction: payload.records[i],
-          });
-        }
-      },
-      ...mapActions('interactions', {
-        addDefaultInteraction: 'addDefault',
-        deleteInteraction: 'deleteInteraction',
-        pull: 'pull',
-      }),
-    },
+    ...mapActions('interactions', {
+      addDefaultInteraction: 'addDefault',
+      deleteInteraction: 'deleteInteraction',
+      pull: 'pull'
+    })
   }
+};
 </script>
 
 <style scoped lang="stylus">
-.interaction-explorer
-  height: 100%
-  min-width 300px
-  width: 100%
-  overflow: hidden
-  flex-grow: 0
-  display flex
-  flex-direction column
+.interaction-explorer {
+  height: 100%;
+  min-width: 300px;
+  width: 100%;
+  overflow: hidden;
+  flex-grow: 0;
+  display: flex;
+  flex-direction: column;
+}
 </style>
