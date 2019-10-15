@@ -39,9 +39,11 @@
           >B</button>
         </div>
         <div id="start-select-area" class="start-select-area">
-          <button 
-            @touchstart="publishButtonStart(ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN)" 
-            @touchend="publishButtonStart(ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP)" class="start-button">Start</button>
+          <button
+            @touchstart="publishButtonStart(ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN)"
+            @touchend="publishButtonStart(ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP)"
+            class="start-button"
+          >Start</button>
         </div>
         <div id="ubii-controller-touch-area" class="touch-area"></div>
       </fullscreen>
@@ -239,7 +241,7 @@ export default {
           });
       });
     },
-    unregisterUbiiSpecs: function() {
+    unregisterUbiiSpecs: async function() {
       if (!this.hasRegisteredUbiiDevice) {
         console.warn(
           'Tried to unregister ubii specs, but they are not registered.'
@@ -265,7 +267,8 @@ export default {
       });
 
       // TODO: unregister device
-      this.ubiiDevice && UbiiClientService.deregisterDevice(this.ubiiDevice);
+      this.ubiiDevice &&
+        (await UbiiClientService.deregisterDevice(this.ubiiDevice));
     },
     publishContinuousDeviceData: function() {
       this.deviceData['analog-stick-left'] &&
