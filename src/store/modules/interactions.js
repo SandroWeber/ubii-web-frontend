@@ -1,8 +1,9 @@
 import uuidv4 from 'uuid/v4';
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
-import {DEFAULT_TOPICS} from '@tum-far/ubii-msg-formats';
+import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 const SYNCHRONIZATION_SERVICE_INTERVAL_TIME = 1000; // in ms
+const DEFAULT_PROCESS_FREQUENCY = 30; // 30 Hz
 let synchronizationServiceInterval = null;
 let interactionsToSync = new Map();
 
@@ -10,103 +11,103 @@ let interactionsToSync = new Map();
 const backendData = {
   pull: async function (context) {
     return new Promise((resolve, reject) => {
-      try{
+      try {
         // Get the list with all interactions from the server...
         UbiiClientService.client
-        .callService({
-          topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_GET_LIST
-        })
-        .then(async (reply) => {
-          // ... then clear all ...
-          context.commit('clearAll');
-          // ... and get all new ones. 
-          reply.interactionList.forEach(interaction => {
-            // TODO resolve deep interaction structure here
-            context.commit('pushInteractionRecord', {
-              record: {
-                "id": interaction.id,
-                "label": interaction.name,
-                "data": {
-                  interaction: interaction,
+          .callService({
+            topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_GET_LIST
+          })
+          .then(async (reply) => {
+            // ... then clear all ...
+            context.commit('clearAll');
+            // ... and get all new ones. 
+            reply.interactionList.forEach(interaction => {
+              // TODO resolve deep interaction structure here
+              context.commit('pushInteractionRecord', {
+                record: {
+                  "id": interaction.id,
+                  "label": interaction.name,
+                  "data": {
+                    interaction: interaction,
+                  }
                 }
-              }
+              });
             });
-          });
 
-          return resolve();
-        },()=>{
-          return reject();
-        });
-      }catch{
+            return resolve();
+          }, () => {
+            return reject();
+          });
+      } catch{
         return reject();
       }
     });
-    
+
   },
   register: async function (context, interaction) {
-    return await new Promise(async(resolve, reject) => {
-      try{
+    return await new Promise(async (resolve, reject) => {
+      try {
         // register new interaction at the backend
         await UbiiClientService.client
-        .callService({
-          topic: DEFAULT_TOPICS.SERVICES.INTERACTION_REGISTRATION,
-          interaction: interaction
-        })
-        .then((reply) => {
-          if(reply.error){
+          .callService({
+            topic: DEFAULT_TOPICS.SERVICES.INTERACTION_REGISTRATION,
+            interaction: interaction
+          })
+          .then((reply) => {
+            if (reply.error) {
+              return reject();
+            } else {
+              return resolve();
+            }
+          }, () => {
             return reject();
-          }else{
-            return resolve();
-          }
-        },()=>{
-          return reject();
-        });
-      }catch{
+          });
+      } catch{
         return reject();
       }
     });
   },
   delete: async function (context, interaction) {
-    return await new Promise(async(resolve, reject) => {
-      try{
+    return await new Promise(async (resolve, reject) => {
+      try {
         // delete interaction at the backend
         await UbiiClientService.client
-        .callService({
-          topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DELETE,
-          interaction: interaction
-        })
-        .then((reply) => {
-          if(reply.error){
+          .callService({
+            topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DELETE,
+            interaction: interaction
+          })
+          .then((reply) => {
+            if (reply.error) {
+              return reject();
+            } else {
+              return resolve();
+            }
+          }, () => {
             return reject();
-          }else{
-            return resolve();
-          }
-        },()=>{
-          return reject();
-        });
-      }catch{
+          });
+      } catch{
         return reject();
       }
     });
   },
-  update: async function(context, interaction){
+  update: async function (context, interaction) {
     return await new Promise(async (resolve, reject) => {
-      try{
+      try {
         await UbiiClientService.client
-        .callService({
-          topic: DEFAULT_TOPICS.SERVICES.INTERACTION_REPLACE,
-          interaction: interaction
-        })
-        .then((reply) => {
-          if(reply.error){
+          .callService({
+            topic: DEFAULT_TOPICS.SERVICES.INTERACTION_REPLACE,
+            interaction: interaction
+          })
+          .then((reply) => {
+            if (reply.error) {
+              return reject();
+            } else {
+              return resolve();
+            }
+          }, () => {
             return reject();
-          }else{
-            return resolve();
-          }
-        },()=>{
-          return reject();
-        });
-      }catch{
+          });
+      } catch{
         return reject();
       }
     });
@@ -117,28 +118,28 @@ const backendData = {
 const state = {
   recordTree: [],
 }
-  
+
 // getters
 const getters = {
-    all: state => state.recordTree.map((value)=>{
-      // TODO map nested entries
-      return value.data.interaction;
-    }),
-    tree: state => {
-      return state.recordTree;
-    },
+  all: state => state.recordTree.map((value) => {
+    // TODO map nested entries
+    return value.data.interaction;
+  }),
+  tree: state => {
+    return state.recordTree;
+  },
 }
 
 // actions
 const actions = {
-  async add (context, payload) {
+  async add(context, payload) {
     // Register interaction at the backend...
-    await backendData.register(context,payload.interaction)
+    await backendData.register(context, payload.interaction)
 
     // ... then pull.
     await actions.pull(context);
   },
-  addDefault (context) {
+  addDefault(context) {
     actions.add(context, {
       interaction: {
         id: uuidv4(),
@@ -149,7 +150,7 @@ const actions = {
         onCreated: `(state) => {
   // Your initialization code here.
 }`,
-        processFrequency: 0.01,
+        processFrequency: DEFAULT_PROCESS_FREQUENCY,
         processingCallback: `(inputs, outputs, state) => {
 
   // Your code here.
@@ -168,31 +169,32 @@ const actions = {
             "messageFormat": "messageFormat"
           }
         ],
-      }})
+      }
+    })
   },
-  async deleteInteraction (context, payload) {
+  async deleteInteraction(context, payload) {
     // Delete interaction at the backend...
     await backendData.delete(context, payload.interaction);
 
     // ... then pull.
     await actions.pull(context);
   },
-  async update (context, payload) {
+  async update(context, payload) {
     // Update immediately locally ...
     context.commit('setInteraction', payload);
 
     // ... and add it to the toSync list.
     interactionsToSync.set(payload.interaction.id, payload.interaction);
   },
-  async pull (context) {
+  async pull(context) {
     await backendData.pull(context);
   },
-  startSynchronizationService(context){
-    if(synchronizationServiceInterval){
+  startSynchronizationService(context) {
+    if (synchronizationServiceInterval) {
       clearInterval(synchronizationServiceInterval);
     }
 
-    synchronizationServiceInterval = setInterval(async ()=>{
+    synchronizationServiceInterval = setInterval(async () => {
       for (var value of interactionsToSync.values()) {
         await backendData.update(context, value);
       }
@@ -200,8 +202,8 @@ const actions = {
 
     }, SYNCHRONIZATION_SERVICE_INTERVAL_TIME);
   },
-  stopSynchronizationService(){
-    if(synchronizationServiceInterval){
+  stopSynchronizationService() {
+    if (synchronizationServiceInterval) {
       clearInterval(synchronizationServiceInterval);
     }
   },
@@ -212,29 +214,29 @@ const actions = {
 
 // mutations
 const mutations = {
-  pushInteractionRecord (state, payload){
+  pushInteractionRecord(state, payload) {
     state.recordTree.push(payload.record);
   },
-  clearAll (state){
+  clearAll(state) {
     state.recordTree = [];
   },
-  setInteraction (state, payload){
+  setInteraction(state, payload) {
     let id = payload.interaction.id;
-    let index = state.recordTree.findIndex(function(element) {
-        return element.id === id;
+    let index = state.recordTree.findIndex(function (element) {
+      return element.id === id;
     });
-    if(index !== -1){
+    if (index !== -1) {
       state.recordTree[index].interaction = payload.interaction;
       state.recordTree[index].label = payload.interaction.name;
     }
   },
-  removeInteraction (state, payload){
+  removeInteraction(state, payload) {
     let id = payload.currentInteractionId;
     // TODO Add recursive find
-    let index = state.recordTree.findIndex(function(element) {
-        return element.id === id;
+    let index = state.recordTree.findIndex(function (element) {
+      return element.id === id;
     });
-    if(index !== -1){
+    if (index !== -1) {
       state.recordTree.splice(index, 1);
     }
   },
@@ -244,9 +246,9 @@ const mutations = {
 }
 
 export default {
-    namespaced: true,
-    state,
-    getters,
-    actions,
-    mutations
+  namespaced: true,
+  state,
+  getters,
+  actions,
+  mutations
 }

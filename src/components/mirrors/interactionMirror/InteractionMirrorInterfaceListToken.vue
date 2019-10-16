@@ -1,13 +1,14 @@
 <template>
   <div
     class="interaction-mirror-interface-list-token"
+    v-bind:class="{ 'token-collapsed': !editMode }"
     :title="interfaceName+' : '+interfaceMessageFormat"
   >
     <div>
       <app-button
         :class="'edit-button round low-contrast'"
         @click="toggleEditMode"
-        :contentSizePercentage="50"
+        :contentSizePercentage="95"
       >
         <font-awesome-icon icon="pencil-alt" class="tool-icon" />
       </app-button>
@@ -127,6 +128,10 @@ export default {
   cursor: default;
   display: flex;
   flex-direction: row;
+}
+
+.token-collapsed {
+  height: 30px;
 }
 
 .edit-entry-row {

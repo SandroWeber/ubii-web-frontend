@@ -29,7 +29,7 @@
 import { AppTile } from './appComponents/appComponents.js';
 
 // Treeselect.
-import Treeselect from '@riophae/vue-treeselect';
+//import Treeselect from '@riophae/vue-treeselect';
 import '@riophae/vue-treeselect/dist/vue-treeselect.css';
 
 // Fontawesome.
@@ -37,7 +37,7 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faRandom, faMicrochip } from '@fortawesome/free-solid-svg-icons';
 library.add(faRandom, faMicrochip);
 
-let dummyTreeselectOptions = [
+/*let dummyTreeselectOptions = [
   {
     id: 'sessions-parent',
     label: 'Sessions',
@@ -72,21 +72,21 @@ let dummyTreeselectOptions = [
       }
     ]
   }
-];
+];*/
 
 export default {
   name: 'Administration',
   props: {},
   components: {
-    Treeselect,
+    //Treeselect,
     AppTile
   },
   data: () => {
     return {
-      treeSelect: {
+      /*treeSelect: {
         value: [],
         options: dummyTreeselectOptions
-      }
+      }*/
     };
   }
 };

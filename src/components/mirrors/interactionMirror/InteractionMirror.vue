@@ -67,7 +67,7 @@
       />
       <div id="process-content">
         <div class="segment">
-          <h3>process frequency (Hz):</h3>
+          <div>process frequency (Hz):</div>
           <app-input
             class="process-frequency-input layer-two round title-input"
             :id="'input-interaction-processFrequency'"
