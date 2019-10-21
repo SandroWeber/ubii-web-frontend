@@ -238,6 +238,7 @@ export default {
             });
 
             UbiiClientService.subscribe(this.componentSetImage.topic, image => {
+              console.info(image);
                 this.drawImageOpenCV(image);
             });
 
@@ -319,7 +320,7 @@ export default {
         image.width,
         image.height
       );
-      ctx.putImageData(imageData,0,0);
+      ctx.putImageData(imgData,0,0);
     },
     publishContinuousDeviceData: function() {
       this.deviceData['analog-stick-left'] &&
