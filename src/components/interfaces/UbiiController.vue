@@ -68,6 +68,8 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faExpand, faCompress } from '@fortawesome/free-solid-svg-icons';
 import { setTimeout } from 'timers';
 
+const ImageDataFormats = ProtobufLibrary.ubii.dataStructure.Image2D.DataFormat;
+
 library.add([faExpand, faCompress]);
 
 Vue.use(Fullscreen);
@@ -234,12 +236,12 @@ export default {
                 ')';
               document.getElementById(
                 'ubii-controller-touch-area'
-              ).style.backgroundColor = colorString;              
+              ).style.backgroundColor = colorString;
             });
 
             UbiiClientService.subscribe(this.componentSetImage.topic, image => {
               console.info(image);
-                this.drawImageOpenCV(image);
+              this.drawImage(image);
             });
 
             if (this.componentVibration) {
@@ -285,7 +287,7 @@ export default {
       this.ubiiDevice &&
         (await UbiiClientService.deregisterDevice(this.ubiiDevice));
     },
-    drawImageOpenCV: function(image) {
+    drawImage: function(image) {
       const ctx = this.canvasOpenCV.getContext('2d');
 
       // set canvas dimensions
@@ -293,7 +295,7 @@ export default {
       this.canvasOpenCV.height = image.height;
 
       let imageDataRGBA = undefined;
-      if (image.dataFormat === 'GRAY') {
+      if (image.dataFormat === ImageDataFormats.GRAY8) {
         imageDataRGBA = [];
         for (let i = 0; i < image.data.length; i++) {
           imageDataRGBA.push(image.data[i]);
@@ -301,7 +303,7 @@ export default {
           imageDataRGBA.push(image.data[i]);
           imageDataRGBA.push(255);
         }
-      } else if (image.dataFormat === 'RGB8') {
+      } else if (image.dataFormat === ImageDataFormats.RGB8) {
         imageDataRGBA = [];
         for (let i = 0; i < image.data.length; i++) {
           imageDataRGBA.push(image.data[i]);
@@ -309,9 +311,7 @@ export default {
             imageDataRGBA.push(255);
           }
         }
-      } else if (image.dataFormat === 'RGBA8') {
-        imageDataRGBA = image.data;
-      } else if (image.dataFormat === 'RGBA32') {
+      } else if (image.dataFormat === ImageDataFormats.RGBA8) {
         imageDataRGBA = image.data;
       }
 
@@ -320,7 +320,7 @@ export default {
         image.width,
         image.height
       );
-      ctx.putImageData(imgData,0,0);
+      ctx.putImageData(imgData, 0, 0);
     },
     publishContinuousDeviceData: function() {
       this.deviceData['analog-stick-left'] &&

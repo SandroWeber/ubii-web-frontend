@@ -21,6 +21,8 @@ import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 import { setTimeout } from 'timers';
 
+const ImageDataFormats = ProtobufLibrary.ubii.dataStructure.Image2D.DataFormat;
+
 export default {
   name: 'Example-OpenCV',
   mounted: function() {
@@ -124,7 +126,9 @@ export default {
         //'const cvImageHSV = cvImageRBG.cvtColor(cv.COLOR_BGR2HSV);' +
         // output image
         //'console.info(cvImageOutput);' +
-        'outputs.imageOpenCV = {width: cvImageGray.cols, height: cvImageGray.rows, data: cvImageGray.getData(), dataFormat: "GRAY"};' +
+        'outputs.imageOpenCV = {width: cvImageGray.cols, height: cvImageGray.rows, data: cvImageGray.getData(), dataFormat: ' +
+        ImageDataFormats.GRAY8 +
+        '};' +
         '}' +
         '};';
 
@@ -238,7 +242,7 @@ export default {
           width: img.width,
           height: img.height,
           data: data,
-          dataFormat: 'RGBA8'
+          dataFormat: ImageDataFormats.RGBA8
         }
       });
     },
@@ -275,7 +279,7 @@ export default {
       this.canvasOpenCV.height = image.height;
 
       let imageDataRGBA = undefined;
-      if (image.dataFormat === 'GRAY') {
+      if (image.dataFormat === ImageDataFormats.GRAY8) {
         imageDataRGBA = [];
         for (let i = 0; i < image.data.length; i++) {
           imageDataRGBA.push(image.data[i]);
@@ -283,7 +287,7 @@ export default {
           imageDataRGBA.push(image.data[i]);
           imageDataRGBA.push(255);
         }
-      } else if (image.dataFormat === 'RGB8') {
+      } else if (image.dataFormat === ImageDataFormats.RGB8) {
         imageDataRGBA = [];
         for (let i = 0; i < image.data.length; i++) {
           imageDataRGBA.push(image.data[i]);
@@ -291,7 +295,7 @@ export default {
             imageDataRGBA.push(255);
           }
         }
-      } else if (image.dataFormat === 'RGBA8') {
+      } else if (image.dataFormat === ImageDataFormats.RGBA8) {
         imageDataRGBA = image.data;
       }
 
