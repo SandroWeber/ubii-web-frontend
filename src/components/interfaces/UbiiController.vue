@@ -46,6 +46,9 @@
           >Start</button>
         </div>
         <div id="ubii-controller-touch-area" class="touch-area"></div>
+        <div class="touch-area">
+          <canvas id="canvas-opencv" class="canvas-opencv"></canvas>
+        </div>
       </fullscreen>
     </div>
   </UbiiClientContent>
@@ -84,6 +87,7 @@ export default {
     UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.unregisterUbiiSpecs);
 
     this.deviceData = {};
+    this.canvasOpenCV = document.getElementById('canvas-opencv');
     this.registerEventListeners();
     UbiiClientService.isConnected().then(() => {
       this.createUbiiSpecs();
@@ -165,6 +169,11 @@ export default {
             topic: topicPrefix + '/set_color',
             messageFormat: 'ubii.dataStructure.Color',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+          },
+          {
+            topic: topicPrefix + '/set_image',
+            messageFormat: 'ubii.dataStructure.Image2D',
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
           }
         ]
       };
@@ -192,6 +201,7 @@ export default {
       this.componentButtonB = this.ubiiDevice.components[4];
       this.componentButtonStart = this.ubiiDevice.components[5];
       this.componentSetColor = this.ubiiDevice.components[6];
+      this.componentSetImage = this.ubiiDevice.components[7];
     },
     registerUbiiSpecs: function() {
       if (this.initializing || this.hasRegisteredUbiiDevice) {
@@ -224,7 +234,11 @@ export default {
                 ')';
               document.getElementById(
                 'ubii-controller-touch-area'
-              ).style.backgroundColor = colorString;
+              ).style.backgroundColor = colorString;              
+            });
+
+            UbiiClientService.subscribe(this.componentSetImage.topic, image => {
+                this.drawImageOpenCV(image);
             });
 
             if (this.componentVibration) {
@@ -269,6 +283,43 @@ export default {
       // TODO: unregister device
       this.ubiiDevice &&
         (await UbiiClientService.deregisterDevice(this.ubiiDevice));
+    },
+    drawImageOpenCV: function(image) {
+      const ctx = this.canvasOpenCV.getContext('2d');
+
+      // set canvas dimensions
+      this.canvasOpenCV.width = image.width;
+      this.canvasOpenCV.height = image.height;
+
+      let imageDataRGBA = undefined;
+      if (image.dataFormat === 'GRAY') {
+        imageDataRGBA = [];
+        for (let i = 0; i < image.data.length; i++) {
+          imageDataRGBA.push(image.data[i]);
+          imageDataRGBA.push(image.data[i]);
+          imageDataRGBA.push(image.data[i]);
+          imageDataRGBA.push(255);
+        }
+      } else if (image.dataFormat === 'RGB8') {
+        imageDataRGBA = [];
+        for (let i = 0; i < image.data.length; i++) {
+          imageDataRGBA.push(image.data[i]);
+          if ((i + 1) % 3 === 0) {
+            imageDataRGBA.push(255);
+          }
+        }
+      } else if (image.dataFormat === 'RGBA8') {
+        imageDataRGBA = image.data;
+      } else if (image.dataFormat === 'RGBA32') {
+        imageDataRGBA = image.data;
+      }
+
+      const imgData = new ImageData(
+        new Uint8ClampedArray(imageDataRGBA),
+        image.width,
+        image.height
+      );
+      ctx.putImageData(imageData,0,0);
     },
     publishContinuousDeviceData: function() {
       this.deviceData['analog-stick-left'] &&
