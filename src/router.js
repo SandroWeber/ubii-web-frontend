@@ -9,10 +9,22 @@ export default new Router({
     name: 'home',
     component: () => import('./components/EntryPage.vue')
   },
+  /* administration */
   {
-    path: '/admin',
+    path: '/administration',
     name: 'Administration',
     component: () => import('./components/Administration.vue')
+  },
+  /* editors */
+  {
+    path: '/administration/nodeEditor',
+    name: 'Node Editor',
+    component: () => import('./components/editors/nodeEditor/NodeEditor.vue')
+  },
+  {
+    path: '/administration/interactionEditor',
+    name: 'Interaction Editor',
+    component: () => import('./components/editors/interactionEditor/InteractionEditor.vue')
   },
   /* interfaces */
   {
@@ -39,17 +51,6 @@ export default new Router({
     path: '/interfaces/camera',
     name: 'Interface - Camera',
     component: () => import('./components/interfaces/Camera.vue')
-  },
-  /* editors */
-  {
-    path: '/nodeEditor',
-    name: 'Node Editor',
-    component: () => import('./components/editors/nodeEditor/NodeEditor.vue')
-  },
-  {
-    path: '/interactionEditor',
-    name: 'Interaction Editor',
-    component: () => import('./components/editors/interactionEditor/InteractionEditor.vue')
   },
   /* tools */
   {

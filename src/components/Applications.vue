@@ -10,7 +10,7 @@
           class="interface-link"
           tag="div"
         >
-          <app-tile class="layer-three background round shadow orange-accent">
+          <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="cubes" class="interface-icon" />
             <p>3D Pose Visualizer</p>
           </app-tile>
@@ -23,28 +23,28 @@
 
       <div class="grid">
         <router-link to="/applications/examples/mouse-pointer" class="interface-link" tag="div">
-          <app-tile class="layer-three background round shadow orange-accent">
+          <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="mouse-pointer" class="interface-icon" />
             <p>Mouse Demo</p>
           </app-tile>
         </router-link>
 
         <router-link to="/applications/examples/threejs" class="interface-link" tag="div">
-          <app-tile class="layer-three background round shadow orange-accent">
+          <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="cube" class="interface-icon" />
             <p>Three.js Web Rendering</p>
           </app-tile>
         </router-link>
 
         <router-link to="/applications/examples/threejs-webvr" class="interface-link" tag="div">
-          <app-tile class="layer-three background round shadow orange-accent">
+          <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="vr-cardboard" class="interface-icon" />
             <p>Three.js WebVR Rendering</p>
           </app-tile>
         </router-link>
 
         <router-link to="/applications/examples/aframe" class="interface-link" tag="div">
-          <app-tile class="layer-three background round shadow orange-accent">
+          <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="vr-cardboard" class="interface-icon" />
             <p>A-Frame</p>
           </app-tile>
@@ -55,14 +55,14 @@
           class="interface-link"
           tag="div"
         >
-          <app-tile class="layer-three background round shadow orange-accent">
+          <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="tablet-alt" class="interface-icon" />
             <p>Gatherer - Interface Smart Devices</p>
           </app-tile>
         </router-link>
 
         <router-link to="/applications/examples/opencv" class="interface-link" tag="div">
-          <app-tile class="layer-three background round shadow orange-accent">
+          <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="eye" class="interface-icon" />
             <p>OpenCV</p>
           </app-tile>
@@ -80,7 +80,7 @@
           class="interface-link"
           tag="div"
         >
-          <app-tile class="layer-three background round shadow orange-accent">
+          <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="cubes" class="interface-icon" />
             <p>VR Model Inspector</p>
           </app-tile>
@@ -91,7 +91,7 @@
           class="interface-link"
           tag="div"
         >
-          <app-tile class="layer-three background round shadow orange-accent">
+          <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="hand-pointer" class="interface-icon" />
             <p>VR Laser Pointer</p>
           </app-tile>
@@ -102,7 +102,7 @@
           class="interface-link"
           tag="div"
         >
-          <app-tile class="layer-three background round shadow orange-accent">
+          <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="keyboard" class="interface-icon" />
             <p>VR Keyboard</p>
           </app-tile>
@@ -116,7 +116,7 @@
 
       <div class="grid">
         <router-link to="/applications/misc/rock-paper-scissors" class="interface-link" tag="div">
-          <app-tile class="layer-three background round shadow orange-accent">
+          <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="hand-scissors" class="interface-icon" />
             <p>Rock Paper Scissors</p>
           </app-tile>

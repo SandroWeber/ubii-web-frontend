@@ -39,7 +39,11 @@
           >B</button>
         </div>
         <div id="start-select-area" class="start-select-area">
-          <button @touchstart="publishPlayerRegistration()" class="start-button">Start</button>
+          <button
+            @touchstart="publishButtonStart(ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN)"
+            @touchend="publishButtonStart(ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP)"
+            class="start-button"
+          >Start</button>
         </div>
         <div id="ubii-controller-touch-area" class="touch-area"></div>
       </fullscreen>
@@ -96,6 +100,7 @@ export default {
 
     return {
       ubiiClientService: UbiiClientService,
+      ProtobufLibrary: ProtobufLibrary,
       initializing: false,
       hasRegisteredUbiiDevice: false,
       clientId: undefined,
@@ -152,6 +157,11 @@ export default {
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
           },
           {
+            topic: topicPrefix + '/button_start',
+            messageFormat: 'ubii.dataStructure.KeyEvent',
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+          },
+          {
             topic: topicPrefix + '/set_color',
             messageFormat: 'ubii.dataStructure.Color',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
@@ -180,7 +190,8 @@ export default {
       this.componentAnalogstickLeft = this.ubiiDevice.components[2];
       this.componentButtonA = this.ubiiDevice.components[3];
       this.componentButtonB = this.ubiiDevice.components[4];
-      this.componentSetColor = this.ubiiDevice.components[5];
+      this.componentButtonStart = this.ubiiDevice.components[5];
+      this.componentSetColor = this.ubiiDevice.components[6];
     },
     registerUbiiSpecs: function() {
       if (this.initializing || this.hasRegisteredUbiiDevice) {
@@ -230,7 +241,7 @@ export default {
           });
       });
     },
-    unregisterUbiiSpecs: function() {
+    unregisterUbiiSpecs: async function() {
       if (!this.hasRegisteredUbiiDevice) {
         console.warn(
           'Tried to unregister ubii specs, but they are not registered.'
@@ -256,7 +267,8 @@ export default {
       });
 
       // TODO: unregister device
-      this.ubiiDevice && UbiiClientService.deregisterDevice(this.ubiiDevice);
+      this.ubiiDevice &&
+        (await UbiiClientService.deregisterDevice(this.ubiiDevice));
     },
     publishContinuousDeviceData: function() {
       this.deviceData['analog-stick-left'] &&
@@ -311,10 +323,13 @@ export default {
         }
       });
     },
-    publishPlayerRegistration: function() {
+    publishButtonStart: function(keyEventType) {
       UbiiClientService.publishRecord({
-        topic: 'registerNewClient',
-        string: UbiiClientService.getClientID()
+        topic: this.componentButtonStart.topic,
+        keyEvent: {
+          type: keyEventType,
+          key: 'start'
+        }
       });
     },
     publishPressedActionButton: function(buttonID) {
