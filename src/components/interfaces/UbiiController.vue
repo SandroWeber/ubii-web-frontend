@@ -45,9 +45,8 @@
             class="start-button"
           >Start</button>
         </div>
-        <div id="ubii-controller-touch-area" class="touch-area"></div>
-        <div class="touch-area">
-          <canvas id="canvas-opencv" class="canvas-opencv"></canvas>
+        <div id="ubii-controller-touch-display-area" class="touch-area">
+          <canvas id="canvas-display-area" class="canvas-display-area"></canvas>
         </div>
       </fullscreen>
     </div>
@@ -89,7 +88,7 @@ export default {
     UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.unregisterUbiiSpecs);
 
     this.deviceData = {};
-    this.canvasOpenCV = document.getElementById('canvas-opencv');
+    this.canvasDisplayArea = document.getElementById('canvas-display-area');
     this.registerEventListeners();
     UbiiClientService.isConnected().then(() => {
       this.createUbiiSpecs();
@@ -228,19 +227,10 @@ export default {
           })
           .then(() => {
             UbiiClientService.subscribe(this.componentSetColor.topic, color => {
-              let colorString =
-                'rgba(' +
-                [color.r * 255, color.g * 255, color.b * 255, color.a].join(
-                  ','
-                ) +
-                ')';
-              document.getElementById(
-                'ubii-controller-touch-area'
-              ).style.backgroundColor = colorString;
+              this.setColor(color);
             });
 
             UbiiClientService.subscribe(this.componentSetImage.topic, image => {
-              console.info(image);
               this.drawImage(image);
             });
 
@@ -287,12 +277,25 @@ export default {
       this.ubiiDevice &&
         (await UbiiClientService.deregisterDevice(this.ubiiDevice));
     },
+    setColor: function(color) {
+      let colorString =
+        'rgba(' +
+        [color.r * 255, color.g * 255, color.b * 255, color.a].join(',') +
+        ')';
+      document.getElementById(
+        'start-select-area'
+      ).style.backgroundColor = colorString;
+    },
     drawImage: function(image) {
-      const ctx = this.canvasOpenCV.getContext('2d');
+      const ctx = this.canvasDisplayArea.getContext('2d');
 
       // set canvas dimensions
-      this.canvasOpenCV.width = image.width;
-      this.canvasOpenCV.height = image.height;
+      //this.canvasOpenCV.width = image.width;
+      //this.canvasOpenCV.height = image.height;
+      /*let displaySize = [
+        this.canvasDisplayArea.width,
+        this.canvasDisplayArea.height
+      ];*/
 
       let imageDataRGBA = undefined;
       if (image.dataFormat === ImageDataFormats.GRAY8) {
@@ -320,7 +323,8 @@ export default {
         image.width,
         image.height
       );
-      ctx.putImageData(imgData, 0, 0);
+      //ctx.putImageData(imgData, 0, 0);
+      ctx.drawImage(imgData, 0, 0, 100, (100 * imgData.height) / imgData.width);
     },
     publishContinuousDeviceData: function() {
       this.deviceData['analog-stick-left'] &&
@@ -660,5 +664,10 @@ export default {
 
 .debug-log {
   grid-area: debug-log;
+}
+
+.canvas-display-area {
+  width: 100%;
+  height: 100%;
 }
 </style>
