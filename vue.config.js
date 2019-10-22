@@ -11,8 +11,8 @@ module.exports = {
     host: 'localhost',
     //port: 8080, // CHANGE YOUR PORT HERE!
     https: {
-      key: fs.readFileSync('./certs/ubii.com+6-key.pem'),
-      cert: fs.readFileSync('./certs/ubii.com+6.pem')
+      key: fs.readFileSync('./certs/ubii.com+5-key.pem'),
+      cert: fs.readFileSync('./certs/ubii.com+5.pem')
     }
     //hotOnly: false,
   },
