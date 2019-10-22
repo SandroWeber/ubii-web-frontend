@@ -289,13 +289,10 @@ export default {
     drawImage: function(image) {
       const ctx = this.canvasDisplayArea.getContext('2d');
 
-      // set canvas dimensions
-      //this.canvasOpenCV.width = image.width;
-      //this.canvasOpenCV.height = image.height;
-      /*let displaySize = [
+      let displaySize = [
         this.canvasDisplayArea.width,
         this.canvasDisplayArea.height
-      ];*/
+      ];
 
       let imageDataRGBA = undefined;
       if (image.dataFormat === ImageDataFormats.GRAY8) {
@@ -323,8 +320,12 @@ export default {
         image.width,
         image.height
       );
-      //ctx.putImageData(imgData, 0, 0);
-      ctx.drawImage(imgData, 0, 0, 100, (100 * imgData.height) / imgData.width);
+      createImageBitmap(imgData, 0, 0, imgData.width, imgData.height, {
+        resizeWidth: displaySize[0],
+        resizeHeight: imgData.height * (displaySize[0] / imgData.width)
+      }).then(imgBitmap => {
+        ctx.drawImage(imgBitmap, 0, 0);
+      });
     },
     publishContinuousDeviceData: function() {
       this.deviceData['analog-stick-left'] &&
