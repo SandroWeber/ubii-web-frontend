@@ -116,7 +116,7 @@ export default {
         id: uuidv4(),
         name: 'CameraWebInterface - Session CoCoSSD',
         processMode:
-          ProtobufLibrary.ubii.sessions.Session.ProcessMode
+          ProtobufLibrary.ubii.sessions.ProcessMode
             .INDIVIDUAL_PROCESS_FREQUENCIES,
         interactions: [this.interactionCocoSsdSpecs],
         ioMappings: [
@@ -210,7 +210,8 @@ export default {
           width: img.width,
           height: img.height,
           data: data,
-          dataFormat: 'RGB8'
+          dataFormat:
+            ProtobufLibrary.ubii.dataStructure.Image2D.DataFormat.RGBA8
         }
       });
     },
