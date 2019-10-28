@@ -45,7 +45,9 @@
             class="start-button"
           >Start</button>
         </div>
-        <div id="ubii-controller-touch-area" class="touch-area"></div>
+        <div id="ubii-controller-touch-display-area" class="touch-area">
+          <canvas id="canvas-display-area" class="canvas-display-area"></canvas>
+        </div>
       </fullscreen>
     </div>
   </UbiiClientContent>
@@ -64,6 +66,8 @@ import UbiiEventBus from '../../services/ubiiClient/ubiiEventBus';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faExpand, faCompress } from '@fortawesome/free-solid-svg-icons';
 import { setTimeout } from 'timers';
+
+const ImageDataFormats = ProtobufLibrary.ubii.dataStructure.Image2D.DataFormat;
 
 library.add([faExpand, faCompress]);
 
@@ -84,6 +88,7 @@ export default {
     UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.unregisterUbiiSpecs);
 
     this.deviceData = {};
+    this.canvasDisplayArea = document.getElementById('canvas-display-area');
     this.registerEventListeners();
     UbiiClientService.isConnected().then(() => {
       this.createUbiiSpecs();
@@ -165,6 +170,11 @@ export default {
             topic: topicPrefix + '/set_color',
             messageFormat: 'ubii.dataStructure.Color',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+          },
+          {
+            topic: topicPrefix + '/set_image',
+            messageFormat: 'ubii.dataStructure.Image2D',
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
           }
         ]
       };
@@ -192,6 +202,7 @@ export default {
       this.componentButtonB = this.ubiiDevice.components[4];
       this.componentButtonStart = this.ubiiDevice.components[5];
       this.componentSetColor = this.ubiiDevice.components[6];
+      this.componentSetImage = this.ubiiDevice.components[7];
     },
     registerUbiiSpecs: function() {
       if (this.initializing || this.hasRegisteredUbiiDevice) {
@@ -216,15 +227,11 @@ export default {
           })
           .then(() => {
             UbiiClientService.subscribe(this.componentSetColor.topic, color => {
-              let colorString =
-                'rgba(' +
-                [color.r * 255, color.g * 255, color.b * 255, color.a].join(
-                  ','
-                ) +
-                ')';
-              document.getElementById(
-                'ubii-controller-touch-area'
-              ).style.backgroundColor = colorString;
+              this.setColor(color);
+            });
+
+            UbiiClientService.subscribe(this.componentSetImage.topic, image => {
+              this.drawImage(image);
             });
 
             if (this.componentVibration) {
@@ -269,6 +276,56 @@ export default {
       // TODO: unregister device
       this.ubiiDevice &&
         (await UbiiClientService.deregisterDevice(this.ubiiDevice));
+    },
+    setColor: function(color) {
+      let colorString =
+        'rgba(' +
+        [color.r * 255, color.g * 255, color.b * 255, color.a].join(',') +
+        ')';
+      document.getElementById(
+        'start-select-area'
+      ).style.backgroundColor = colorString;
+    },
+    drawImage: function(image) {
+      const ctx = this.canvasDisplayArea.getContext('2d');
+
+      let displaySize = [
+        this.canvasDisplayArea.width,
+        this.canvasDisplayArea.height
+      ];
+
+      let imageDataRGBA = undefined;
+      if (image.dataFormat === ImageDataFormats.GRAY8) {
+        imageDataRGBA = [];
+        for (let i = 0; i < image.data.length; i++) {
+          imageDataRGBA.push(image.data[i]);
+          imageDataRGBA.push(image.data[i]);
+          imageDataRGBA.push(image.data[i]);
+          imageDataRGBA.push(255);
+        }
+      } else if (image.dataFormat === ImageDataFormats.RGB8) {
+        imageDataRGBA = [];
+        for (let i = 0; i < image.data.length; i++) {
+          imageDataRGBA.push(image.data[i]);
+          if ((i + 1) % 3 === 0) {
+            imageDataRGBA.push(255);
+          }
+        }
+      } else if (image.dataFormat === ImageDataFormats.RGBA8) {
+        imageDataRGBA = image.data;
+      }
+
+      const imgData = new ImageData(
+        new Uint8ClampedArray(imageDataRGBA),
+        image.width,
+        image.height
+      );
+      createImageBitmap(imgData, 0, 0, imgData.width, imgData.height, {
+        resizeWidth: displaySize[0],
+        resizeHeight: imgData.height * (displaySize[0] / imgData.width)
+      }).then(imgBitmap => {
+        ctx.drawImage(imgBitmap, 0, 0);
+      });
     },
     publishContinuousDeviceData: function() {
       this.deviceData['analog-stick-left'] &&
@@ -608,5 +665,10 @@ export default {
 
 .debug-log {
   grid-area: debug-log;
+}
+
+.canvas-display-area {
+  width: 100%;
+  height: 100%;
 }
 </style>
