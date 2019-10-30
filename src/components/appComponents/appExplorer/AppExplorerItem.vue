@@ -38,6 +38,10 @@
       selected: {
         type: Boolean,
         required: true,
+      },
+      editable: {
+        type: Boolean,
+        required: false
       }
     },
     methods: {
