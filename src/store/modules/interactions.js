@@ -10,35 +10,49 @@ let interactionsToSync = new Map();
 // Backend data helper:
 const backendData = {
   pull: async function (context) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
-        // Get the list with all interactions from the server...
-        UbiiClientService.client
-          .callService({
-            topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_GET_LIST
-          })
-          .then(async (reply) => {
-            // ... then clear all ...
-            context.commit('clearAll');
-            // ... and get all new ones. 
-            reply.interactionList.forEach(interaction => {
-              // TODO resolve deep interaction structure here
-              context.commit('pushInteractionRecord', {
-                record: {
-                  "id": interaction.id,
-                  "label": interaction.name,
-                  "data": {
-                    interaction: interaction,
-                  }
-                }
-              });
-            });
+        // clear all ...
+        context.commit('clearAll');
 
-            return resolve();
-          }, () => {
-            return reject();
+        // Get the list with all local interactions from the server...
+        let replyLocalDB = await UbiiClientService.client.callService({
+          topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_GET_LIST
+        });
+        replyLocalDB.interactionList.forEach(interaction => {
+          // TODO resolve deep interaction structure here
+          context.commit('pushInteractionRecord', {
+            record: {
+              "id": interaction.id,
+              "label": interaction.name,
+              "editable": true,
+              "data": {
+                interaction: interaction,
+              }
+            }
           });
-      } catch{
+        });
+
+        // Get the list with all online interactions from the server...
+        let replyOnlineDB = await UbiiClientService.client.callService({
+          topic: DEFAULT_TOPICS.SERVICES.INTERACTION_ONLINE_DATABASE_GET_LIST
+        });
+        replyOnlineDB.interactionList.forEach(interaction => {
+          // TODO resolve deep interaction structure here
+          context.commit('pushInteractionRecord', {
+            record: {
+              "id": interaction.id,
+              "label": interaction.name,
+              "editable": false,
+              "data": {
+                interaction: interaction,
+              }
+            }
+          });
+        });
+        
+        return resolve();
+      } catch {
         return reject();
       }
     });
