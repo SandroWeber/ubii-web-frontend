@@ -52,8 +52,8 @@ const backendData = {
         });
         
         return resolve();
-      } catch {
-        return reject();
+      } catch (error) {
+        return reject(error);
       }
     });
 
