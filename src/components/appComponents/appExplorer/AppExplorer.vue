@@ -8,16 +8,32 @@
       @remove="remove()"
       @filter="filter"
     />
-    <app-explorer-item
-      v-for="record in filteredAndSortedRecords"
-      :key="record.id"
-      :id="record.id"
-      :label="record.label"
-      :selected="isSelected(record)"
-      @select="select(record)"
-      @select-ctrl="selectControl(record)"
-      @select-shift="selectShift(record)"
-    />
+    <div>
+      <div class="records-section-header">editable</div>
+      <app-explorer-item
+        v-for="record in filteredAndSortedRecordsEditable"
+        :key="record.id"
+        :id="record.id"
+        :label="record.label"
+        :selected="isSelected(record)"
+        @select="select(record)"
+        @select-ctrl="selectControl(record)"
+        @select-shift="selectShift(record)"
+      />
+    </div>
+    <div>
+      <div class="records-section-header">non-editable</div>
+      <app-explorer-item
+        v-for="record in filteredAndSortedRecordsStatic"
+        :key="record.id"
+        :id="record.id"
+        :label="record.label"
+        :selected="isSelected(record)"
+        @select="select(record)"
+        @select-ctrl="selectControl(record)"
+        @select-shift="selectShift(record)"
+      />
+    </div>
   </app-layer>
 </template>
 
@@ -80,7 +96,7 @@ export default {
      * The records filtered and sorted.
      * @return {Object[]}
      */
-    filteredAndSortedRecords: function() {
+    filteredAndSortedRecordsEditable: function() {
       // Get all relevant records:
       let recordsCopy;
       if (this.filterValue !== '') {
@@ -106,9 +122,37 @@ export default {
         });
       }
 
-      recordsCopy.filter(record => {
-        return record.editable;
-      });
+      recordsCopy = recordsCopy.filter(record => record.editable);
+
+      return recordsCopy;
+    },
+    filteredAndSortedRecordsStatic: function() {
+      // Get all relevant records:
+      let recordsCopy;
+      if (this.filterValue !== '') {
+        // Get the filtered records if the filter value is non-empty...
+        recordsCopy = this.records.filter(record =>
+          record.label.includes(this.filterValue)
+        );
+      } else {
+        // ... or get them all otherwise.
+        recordsCopy = [...this.records];
+      }
+
+      // Sort the records.
+      if (this.options.sort === 'byDate') {
+        // Todo. Currently no date is required in the records data structure -> not possible to sort by date.
+        recordsCopy = recordsCopy.sort((a, b) => {
+          return a.label.localeCompare(b.label);
+        });
+      } else {
+        // Default sort mode is alphabetically.
+        recordsCopy = recordsCopy.sort((a, b) => {
+          return a.label.localeCompare(b.label);
+        });
+      }
+
+      recordsCopy = recordsCopy.filter(record => !record.editable);
 
       return recordsCopy;
     },
@@ -134,10 +178,10 @@ export default {
 
       this.emitSelectEvent();
     },
-    filteredAndSortedRecords: function() {
+    filteredAndSortedRecordsEditable: function() {
       // Clean up selected when records changes.
       this.selected = this.selected.filter(value => {
-        return this.filteredAndSortedRecords.some(
+        return this.filteredAndSortedRecordsEditable.some(
           record => record.id === value.id
         );
       });
@@ -202,7 +246,7 @@ export default {
       // The shift select does only work if there is already an element selected.
       if (this.selected.length > 0) {
         // Get the currently rendered array of records in the correct order.
-        let currentlyRenderedRecords = this.filteredAndSortedRecords;
+        let currentlyRenderedRecords = this.filteredAndSortedRecordsEditable;
 
         // Get the index from the first element of the selected records in the currently rendered list.
         let indexFirst = currentlyRenderedRecords.findIndex(
@@ -246,10 +290,10 @@ export default {
       // Select a record if the alwaysSelected option is set to true.
       if (
         this.selected.length === 0 &&
-        this.filteredAndSortedRecords.length > 0 &&
+        this.filteredAndSortedRecordsEditable.length > 0 &&
         this.options.alwaysSelected
       ) {
-        this.selected.push(this.filteredAndSortedRecords[0]);
+        this.selected.push(this.filteredAndSortedRecordsEditable[0]);
       }
     },
     emitSelectEvent: function() {
@@ -275,5 +319,9 @@ export default {
   flex-direction: column;
   flex-grow: 1;
   overflow-y: auto;
+}
+
+.records-section-header {
+  margin-top: 10px;
 }
 </style>

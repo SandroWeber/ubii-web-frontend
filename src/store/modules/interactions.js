@@ -9,7 +9,7 @@ let interactionsToSync = new Map();
 
 // Backend data helper:
 const backendData = {
-  pull: async function (context) {
+  pull: async function(context) {
     return new Promise(async (resolve, reject) => {
       try {
         // clear all ...
@@ -19,46 +19,47 @@ const backendData = {
         let replyLocalDB = await UbiiClientService.client.callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_GET_LIST
         });
-        replyLocalDB.interactionList.forEach(interaction => {
-          // TODO resolve deep interaction structure here
-          context.commit('pushInteractionRecord', {
-            record: {
-              "id": interaction.id,
-              "label": interaction.name,
-              "editable": true,
-              "data": {
-                interaction: interaction,
+        replyLocalDB.interactionList &&
+          replyLocalDB.interactionList.forEach(interaction => {
+            // TODO resolve deep interaction structure here
+            context.commit('pushInteractionRecord', {
+              record: {
+                id: interaction.id,
+                label: interaction.name,
+                editable: true,
+                data: {
+                  interaction: interaction
+                }
               }
-            }
+            });
           });
-        });
 
         // Get the list with all online interactions from the server...
         let replyOnlineDB = await UbiiClientService.client.callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_ONLINE_DATABASE_GET_LIST
         });
-        replyOnlineDB.interactionList.forEach(interaction => {
-          // TODO resolve deep interaction structure here
-          context.commit('pushInteractionRecord', {
-            record: {
-              "id": interaction.id,
-              "label": interaction.name,
-              "editable": false,
-              "data": {
-                interaction: interaction,
+        replyOnlineDB.interactionList &&
+          replyOnlineDB.interactionList.forEach(interaction => {
+            // TODO resolve deep interaction structure here
+            context.commit('pushInteractionRecord', {
+              record: {
+                id: interaction.id,
+                label: interaction.name,
+                editable: false,
+                data: {
+                  interaction: interaction
+                }
               }
-            }
+            });
           });
-        });
-        
+
         return resolve();
       } catch (error) {
         return reject(error);
       }
     });
-
   },
-  register: async function (context, interaction) {
+  register: async function(context, interaction) {
     return await new Promise(async (resolve, reject) => {
       try {
         // register new interaction at the backend
@@ -67,21 +68,24 @@ const backendData = {
             topic: DEFAULT_TOPICS.SERVICES.INTERACTION_REGISTRATION,
             interaction: interaction
           })
-          .then((reply) => {
-            if (reply.error) {
+          .then(
+            reply => {
+              if (reply.error) {
+                return reject();
+              } else {
+                return resolve();
+              }
+            },
+            () => {
               return reject();
-            } else {
-              return resolve();
             }
-          }, () => {
-            return reject();
-          });
-      } catch{
+          );
+      } catch {
         return reject();
       }
     });
   },
-  delete: async function (context, interaction) {
+  delete: async function(context, interaction) {
     return await new Promise(async (resolve, reject) => {
       try {
         // delete interaction at the backend
@@ -90,21 +94,24 @@ const backendData = {
             topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DELETE,
             interaction: interaction
           })
-          .then((reply) => {
-            if (reply.error) {
+          .then(
+            reply => {
+              if (reply.error) {
+                return reject();
+              } else {
+                return resolve();
+              }
+            },
+            () => {
               return reject();
-            } else {
-              return resolve();
             }
-          }, () => {
-            return reject();
-          });
-      } catch{
+          );
+      } catch {
         return reject();
       }
     });
   },
-  update: async function (context, interaction) {
+  update: async function(context, interaction) {
     return await new Promise(async (resolve, reject) => {
       try {
         await UbiiClientService.client
@@ -112,43 +119,47 @@ const backendData = {
             topic: DEFAULT_TOPICS.SERVICES.INTERACTION_REPLACE,
             interaction: interaction
           })
-          .then((reply) => {
-            if (reply.error) {
+          .then(
+            reply => {
+              if (reply.error) {
+                return reject();
+              } else {
+                return resolve();
+              }
+            },
+            () => {
               return reject();
-            } else {
-              return resolve();
             }
-          }, () => {
-            return reject();
-          });
-      } catch{
+          );
+      } catch {
         return reject();
       }
     });
-  },
+  }
 };
 
 // initial state
 const state = {
-  recordTree: [],
-}
+  recordTree: []
+};
 
 // getters
 const getters = {
-  all: state => state.recordTree.map((value) => {
-    // TODO map nested entries
-    return value.data.interaction;
-  }),
+  all: state =>
+    state.recordTree.map(value => {
+      // TODO map nested entries
+      return value.data.interaction;
+    }),
   tree: state => {
     return state.recordTree;
-  },
-}
+  }
+};
 
 // actions
 const actions = {
   async add(context, payload) {
     // Register interaction at the backend...
-    await backendData.register(context, payload.interaction)
+    await backendData.register(context, payload.interaction);
 
     // ... then pull.
     await actions.pull(context);
@@ -173,18 +184,18 @@ const actions = {
 }`,
         inputFormats: [
           {
-            "internalName": "defaultIn",
-            "messageFormat": "messageFormat"
+            internalName: 'defaultIn',
+            messageFormat: 'messageFormat'
           }
         ],
         outputFormats: [
           {
-            "internalName": "defaultOut",
-            "messageFormat": "messageFormat"
+            internalName: 'defaultOut',
+            messageFormat: 'messageFormat'
           }
-        ],
+        ]
       }
-    })
+    });
   },
   async deleteInteraction(context, payload) {
     // Delete interaction at the backend...
@@ -213,7 +224,6 @@ const actions = {
         await backendData.update(context, value);
       }
       interactionsToSync.clear();
-
     }, SYNCHRONIZATION_SERVICE_INTERVAL_TIME);
   },
   stopSynchronizationService() {
@@ -222,9 +232,9 @@ const actions = {
     }
   },
   updateTree(context, tree) {
-    context.commit('updateRecordTree', tree)
+    context.commit('updateRecordTree', tree);
   }
-}
+};
 
 // mutations
 const mutations = {
@@ -236,7 +246,7 @@ const mutations = {
   },
   setInteraction(state, payload) {
     let id = payload.interaction.id;
-    let index = state.recordTree.findIndex(function (element) {
+    let index = state.recordTree.findIndex(function(element) {
       return element.id === id;
     });
     if (index !== -1) {
@@ -247,7 +257,7 @@ const mutations = {
   removeInteraction(state, payload) {
     let id = payload.currentInteractionId;
     // TODO Add recursive find
-    let index = state.recordTree.findIndex(function (element) {
+    let index = state.recordTree.findIndex(function(element) {
       return element.id === id;
     });
     if (index !== -1) {
@@ -255,9 +265,9 @@ const mutations = {
     }
   },
   updateRecordTree(state, newTree) {
-    state.recordTree = newTree
+    state.recordTree = newTree;
   }
-}
+};
 
 export default {
   namespaced: true,
@@ -265,4 +275,4 @@ export default {
   getters,
   actions,
   mutations
-}
+};
