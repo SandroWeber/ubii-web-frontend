@@ -51,10 +51,10 @@ export default {
         .then(reply => {
           let topics = reply.stringList.list;
           this.$data.serviceList = topics.filter(topic => {
-            return topic.indexOf('/services/') === 0;
+            return topic && topic.indexOf('/services/') === 0;
           });
           this.$data.deviceTopicList = topics.filter(topic => {
-            return topic.indexOf('/services/') === -1;
+            return topic && topic.indexOf('/services/') === -1;
           });
         });
 
