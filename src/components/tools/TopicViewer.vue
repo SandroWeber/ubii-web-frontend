@@ -20,6 +20,7 @@
 
 <script>
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import util from 'util';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -31,9 +32,17 @@ library.add(faChevronRight, faChevronDown);
 
 export default {
   name: 'TopicViewer',
-  mounted: function() {},
   props: {
     topic: { type: String, default: '' }
+  },
+  mounted: function() {
+    this.data = '... no data received yet ...';
+    UbiiClientService.subscribe(this.topic, data => {
+      this.data = util.inspect(data);
+    });
+  },
+  beforeDestroy: function() {
+    UbiiClientService.unsubscribe(this.topic);
   },
   data: () => {
     return { expanded: false, data: undefined };
@@ -41,14 +50,6 @@ export default {
   methods: {
     toggleTopicDataDisplay() {
       this.expanded = !this.expanded;
-      if (this.expanded) {
-        this.data = '... no data received yet ...';
-        UbiiClientService.subscribe(this.topic, data => {
-          this.data = data;
-        });
-      } else {
-        UbiiClientService.unsubscribe(this.topic);
-      }
     }
   }
 };
