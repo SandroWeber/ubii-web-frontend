@@ -2,29 +2,33 @@
   <div class="topic-list-grid">
     <div class="category-header header-services orange-accent">Services</div>
     <div class="category-header header-topicdata orange-accent">Topic Data</div>
-    <div class="category-content content-services" v-show="serviceList">
-      <div class="topic-list-element" v-for="topic in serviceList" :key="topic">{{topic}}</div>
+    <div class="category-content content-services" v-show="serviceTopicList">
+      <div class="topic-list-element" v-for="topic in serviceTopicList" :key="topic">{{topic}}</div>
     </div>
 
-    <div class="category-content content-device-topicdata" v-show="deviceTopicList">
-      <div class="topic-list-element" v-for="topic in deviceTopicList" :key="topic">
-        <topic-viewer :topic="topic" />
+    <div class="category-content content-device-topicdata" v-show="topicData
+    ">
+      <div class="topic-list-element" v-for="(data, topic) in topicData
+      " :key="topic">
+        <topic-data-viewer :topic="topic" :topic-data="data" />
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import util from 'util';
+import Vue from 'vue';
+
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
-import TopicViewer from './TopicViewer.vue';
-import { setTimeout } from 'timers';
+import TopicDataViewer from './TopicDataViewer.vue';
 
 export default {
   name: 'TopicInspector',
   components: {
-    TopicViewer
+    TopicDataViewer
   },
   mounted: function() {
     UbiiClientService.isConnected().then(() => {
@@ -38,29 +42,24 @@ export default {
   data: () => {
     return {
       ubiiClientService: UbiiClientService,
-      serviceList: undefined,
-      deviceTopicList: undefined
+      serviceTopicList: [],
+      topicData: {}
     };
   },
   methods: {
     getTopicList: function() {
-      UbiiClientService.client
-        .callService({
-          topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST
-        })
-        .then(reply => {
-          let topics = reply.stringList.list;
-          this.$data.serviceList = topics.filter(topic => {
-            return topic.indexOf('/services/') === 0;
-          });
-          this.$data.deviceTopicList = topics.filter(topic => {
-            return topic.indexOf('/services/') === -1;
-          });
+      UbiiClientService.callService({
+        topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST
+      }).then(reply => {
+        let topics = reply.stringList.list;
+        this.$data.serviceTopicList = topics.filter(topic => {
+          return topic.indexOf('/services/') === 0;
         });
+      });
 
-      if (this.open) {
-        setTimeout(this.getTopicList, 1000);
-      }
+      UbiiClientService.subscribeRegex('.*', (data, topic) => {
+        Vue.set(this.topicData, topic, util.inspect(data));
+      });
     }
   }
 };

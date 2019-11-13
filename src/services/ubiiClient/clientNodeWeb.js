@@ -33,6 +33,7 @@ class ClientNodeWeb {
 
     this.topicDataCallbacks = new Map();
     this.topicDataRegexCallbacks = new Map();
+    this.topicDataRegexes = new Map();
   }
 
   /**
@@ -278,30 +279,31 @@ class ClientNodeWeb {
 
   /**
    * Subscribe to the specified regex.
-   * @param {*} regex
+   * @param {*} regexString
    * @param {*} callback
    */
-  async subscribeRegex(regex, callback) {
+  async subscribeRegex(regexString, callback) {
     let message = {
       topic: DEFAULT_TOPICS.SERVICES.TOPIC_SUBSCRIPTION,
       topicSubscription: {
         clientId: this.clientSpecification.id,
-        subscribeTopicRegexp: regex
+        subscribeTopicRegexp: regexString
       }
     };
 
     return this.callService(message).then(
       reply => {
         if (reply.success !== undefined && reply.success !== null) {
-          let callbacks = this.topicDataRegexCallbacks.get(regex);
+          let callbacks = this.topicDataRegexCallbacks.get(regexString);
           if (callbacks && callbacks.length > 0) {
             callbacks.push(callback);
           } else {
-            this.topicDataRegexCallbacks.set(regex, [callback]);
+            this.topicDataRegexes.set(regexString, new RegExp(regexString));
+            this.topicDataRegexCallbacks.set(regexString, [callback]);
           }
         } else {
           console.error(
-            'ClientNodeWeb - subscribe failed (' + regex + ')\n' + reply
+            'ClientNodeWeb - subscribe failed (' + regexString + ')\n' + reply
           );
         }
       },
@@ -388,7 +390,7 @@ class ClientNodeWeb {
       let callbacks = this.topicDataCallbacks.get(record.topic);
       if (!callbacks) {
         this.topicDataRegexCallbacks.forEach((value, key) => {
-          let regex = new RegExp(key);
+          let regex = this.topicDataRegexes.get(key);
           if (regex.test(record.topic)) {
             callbacks = value;
           }
@@ -396,7 +398,7 @@ class ClientNodeWeb {
       }
       callbacks &&
         callbacks.forEach(cb => {
-          cb(record[record.type]);
+          cb(record[record.type], record.topic);
         });
     }
   }

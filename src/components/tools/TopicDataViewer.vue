@@ -13,15 +13,12 @@
       @click="toggleTopicDataDisplay(topic)"
     />
     {{topic}}
-    <div class="topic-data green-accent" v-show="expanded && data">{{data}}</div>
-    <div class="topic-data red-accent" v-show="expanded && !data">received empty data</div>
+    <div class="topic-data green-accent" v-show="expanded && topicData">{{topicData}}</div>
+    <div class="topic-data red-accent" v-show="expanded && !topicData">received empty data</div>
   </div>
 </template>
 
 <script>
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
-import util from 'util';
-
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
 import {
@@ -33,19 +30,11 @@ library.add(faChevronRight, faChevronDown);
 export default {
   name: 'TopicViewer',
   props: {
-    topic: { type: String, default: '' }
-  },
-  mounted: function() {
-    this.data = '... no data received yet ...';
-    UbiiClientService.subscribe(this.topic, data => {
-      this.data = util.inspect(data);
-    });
-  },
-  beforeDestroy: function() {
-    UbiiClientService.unsubscribe(this.topic);
+    topic: { type: String, default: '' },
+    topicData: { type: String, default: '... no data received yet ...' }
   },
   data: () => {
-    return { expanded: false, data: undefined };
+    return { expanded: false };
   },
   methods: {
     toggleTopicDataDisplay() {
