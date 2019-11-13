@@ -94,6 +94,8 @@ export default {
       this.createUbiiSpecs();
       this.registerUbiiSpecs();
     });
+
+    this.toggleFullScreen();
   },
   beforeDestroy: function() {
     this.stopInterface();
