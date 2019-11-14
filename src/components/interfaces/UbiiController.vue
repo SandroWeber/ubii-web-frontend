@@ -102,7 +102,6 @@ export default {
     let stickPos = {};
     stickPos['analog-stick-left'] = { x: 25, y: 25 };
     stickPos['analog-stick-right'] = { x: 25, y: 25 };
-
     return {
       ubiiClientService: UbiiClientService,
       ProtobufLibrary: ProtobufLibrary,
@@ -175,6 +174,11 @@ export default {
             topic: topicPrefix + '/set_image',
             messageFormat: 'ubii.dataStructure.Image2D',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+          },
+          {
+            topic: topicPrefix + '/set_text',
+            messageFormat: 'string',
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
           }
         ]
       };
@@ -203,6 +207,7 @@ export default {
       this.componentButtonStart = this.ubiiDevice.components[5];
       this.componentSetColor = this.ubiiDevice.components[6];
       this.componentSetImage = this.ubiiDevice.components[7];
+      this.debugLog = this.ubiiDevice.components[8];
     },
     registerUbiiSpecs: function() {
       if (this.initializing || this.hasRegisteredUbiiDevice) {
@@ -232,6 +237,10 @@ export default {
 
             UbiiClientService.subscribe(this.componentSetImage.topic, image => {
               this.drawImage(image);
+            });
+
+             UbiiClientService.subscribe(this.debugLog.topic, text => {
+              this.debugLog = text;
             });
 
             if (this.componentVibration) {
