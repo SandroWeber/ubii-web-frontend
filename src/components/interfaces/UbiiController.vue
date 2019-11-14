@@ -317,6 +317,15 @@ export default {
         imageDataRGBA = image.data;
       }
 
+      // clear before drawing
+      ctx.clearRect(
+        0,
+        0,
+        this.canvasDisplayArea.width,
+        this.canvasDisplayArea.height
+      );
+
+      // draw image data
       const imgData = new ImageData(
         new Uint8ClampedArray(imageDataRGBA),
         image.width,
