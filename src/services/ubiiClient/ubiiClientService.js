@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
 
-import ClientNodeWeb from "./clientNodeWeb";
-import UbiiEventBus from "./ubiiEventBus";
+import ClientNodeWeb from './clientNodeWeb';
+import UbiiEventBus from './ubiiEventBus';
 
-
-const uuidv4Regex = '[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}';
+const uuidv4Regex =
+  '[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}';
 
 class UbiiClientService {
   constructor() {
@@ -23,38 +23,47 @@ class UbiiClientService {
     }
     this.connecting = true;
 
-    console.info('connecting to backend ' + this.serverIP + ':' + this.serverPort);
+    console.info(
+      'connecting to backend ' + this.serverIP + ':' + this.serverPort
+    );
 
     if (!this.client) {
-      this.client = new ClientNodeWeb('web frontend', this.serverIP, this.serverPort);
+      this.client = new ClientNodeWeb(
+        'web frontend',
+        this.serverIP,
+        this.serverPort
+      );
     }
 
     return this.client.initialize().then(
       () => {
         if (this.client.isInitialized()) {
-          console.info('UbiiClientService - client connected with ID:\n' +
-            this.client.clientSpecification.id);
+          console.info(
+            'UbiiClientService - client connected with ID:\n' +
+              this.client.clientSpecification.id
+          );
           this.connected = true;
           this.connecting = false;
 
           UbiiEventBus.$emit(UbiiEventBus.CONNECT_EVENT);
         }
       },
-      (error) => {
+      error => {
         console.info('UbiiClientService.client.initialize() failed:\n' + error);
-      });
+      }
+    );
   }
 
   async disconnect() {
     if (!this.connected) {
-      console.warn('Client tried to disconnect without beeing connected.')
+      console.warn('Client tried to disconnect without beeing connected.');
       return;
     }
 
     let id = this.client.clientSpecification.id;
 
     UbiiEventBus.$emit(UbiiEventBus.DISCONNECT_EVENT);
-    this.onDisconnectCallbacks.forEach((callback) => {
+    this.onDisconnectCallbacks.forEach(callback => {
       callback();
     });
 
@@ -138,19 +147,25 @@ class UbiiClientService {
   }
 
   publishRecord(topicDataRecord) {
-    this.client && this.client.publish({
-      topicDataRecord: topicDataRecord
-    });
+    this.client &&
+      this.client.publish({
+        topicDataRecord: topicDataRecord
+      });
   }
 
   publishRecordList(topicDataRecordList) {
-    this.client && this.client.publish({
-      topicDataRecordList: topicDataRecordList
-    });
+    this.client &&
+      this.client.publish({
+        topicDataRecordList: topicDataRecordList
+      });
   }
 
   async subscribe(topic, callback) {
     return this.client && this.client.subscribe(topic, callback);
+  }
+
+  subscribeRegex(regex, callback) {
+    return this.client && this.client.subscribeRegex(regex, callback);
   }
 
   async unsubscribe(topic) {
@@ -160,7 +175,6 @@ class UbiiClientService {
   getUUIDv4Regex() {
     return uuidv4Regex;
   }
-
 }
 
 export default new UbiiClientService();
