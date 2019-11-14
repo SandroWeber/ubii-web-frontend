@@ -7,10 +7,18 @@
         @change="onFullScreenChange"
         style="overflow: hidden;"
       >
-        <div class="debug-log">{{debugLog}}</div>
+        <div class="debug-log">{{ textOutput }}</div>
         <button class="button-fullscreen" @click="toggleFullScreen()">
-          <font-awesome-icon icon="compress" class="interface-icon" v-show="fullscreen" />
-          <font-awesome-icon icon="expand" class="interface-icon" v-show="!fullscreen" />
+          <font-awesome-icon
+            icon="compress"
+            class="interface-icon"
+            v-show="fullscreen"
+          />
+          <font-awesome-icon
+            icon="expand"
+            class="interface-icon"
+            v-show="!fullscreen"
+          />
         </button>
         <div id="analog-left" class="analog-left">
           <div class="analog-ring">
@@ -20,7 +28,10 @@
               v-on:touchstart="onTouchStart($event)"
               v-on:touchmove="onTouchMove($event)"
               v-on:touchend="onTouchEnd($event)"
-              :style="{top: stickPosition['analog-stick-left'].y + '%', left: stickPosition['analog-stick-left'].x + '%' }"
+              :style="{
+                top: stickPosition['analog-stick-left'].y + '%',
+                left: stickPosition['analog-stick-left'].x + '%'
+              }"
             ></div>
           </div>
         </div>
@@ -29,21 +40,35 @@
             @touchstart="publishPressedActionButton(1)"
             @touchend="publishReleasedActionButton(1)"
             class="action-button"
-          >A</button>
+          >
+            A
+          </button>
         </div>
         <div id="b-button" class="b-button">
           <button
             @touchstart="publishPressedActionButton(2)"
             @touchend="publishReleasedActionButton(2)"
             class="action-button"
-          >B</button>
+          >
+            B
+          </button>
         </div>
         <div id="start-select-area" class="start-select-area">
           <button
-            @touchstart="publishButtonStart(ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN)"
-            @touchend="publishButtonStart(ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP)"
+            @touchstart="
+              publishButtonStart(
+                ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN
+              )
+            "
+            @touchend="
+              publishButtonStart(
+                ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP
+              )
+            "
             class="start-button"
-          >Start</button>
+          >
+            Start
+          </button>
         </div>
         <div id="ubii-controller-touch-display-area" class="touch-area">
           <canvas id="canvas-display-area" class="canvas-display-area"></canvas>
@@ -111,7 +136,7 @@ export default {
       publishFrequency: 0.01,
       fullscreen: false,
       stickPosition: stickPos,
-      debugLog: 'have fun :)'
+      textOutput: 'have fun :)'
     };
   },
   methods: {
@@ -207,7 +232,7 @@ export default {
       this.componentButtonStart = this.ubiiDevice.components[5];
       this.componentSetColor = this.ubiiDevice.components[6];
       this.componentSetImage = this.ubiiDevice.components[7];
-      this.debugLog = this.ubiiDevice.components[8];
+      this.componentTextOutput = this.ubiiDevice.components[8];
     },
     registerUbiiSpecs: function() {
       if (this.initializing || this.hasRegisteredUbiiDevice) {
@@ -239,9 +264,12 @@ export default {
               this.drawImage(image);
             });
 
-             UbiiClientService.subscribe(this.debugLog.topic, text => {
-              this.debugLog = text;
-            });
+            UbiiClientService.subscribe(
+              this.componentTextOutput.topic,
+              text => {
+                this.textOutput = text;
+              }
+            );
 
             if (this.componentVibration) {
               UbiiClientService.subscribe(
