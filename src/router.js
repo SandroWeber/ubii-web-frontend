@@ -26,6 +26,11 @@ export default new Router({
     name: 'Interaction Editor',
     component: () => import('./components/editors/interactionEditor/InteractionEditor.vue')
   },
+    {
+      path: '/administration/sessionEditor',
+      name: 'Interaction Editor',
+      component: () => import('./components/editors/sessionEditor/SessionEditor.vue')
+    },
   /* interfaces */
   {
     path: '/interfaces',

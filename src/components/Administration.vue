@@ -21,6 +21,13 @@
           <p>Interaction Editor</p>
         </app-tile>
       </router-link>
+
+      <router-link to="/administration/sessionEditor" class="grid-link" tag="div">
+        <app-tile class="layer-three background round shadow green-accent">
+          <font-awesome-icon icon="project-diagram"  class="grid-icon" />
+          <p>Session Editor</p>
+        </app-tile>
+      </router-link>
     </div>
   </div>
 </template>
@@ -34,8 +41,8 @@ import '@riophae/vue-treeselect/dist/vue-treeselect.css';
 
 // Fontawesome.
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faRandom, faMicrochip } from '@fortawesome/free-solid-svg-icons';
-library.add(faRandom, faMicrochip);
+import { faRandom, faMicrochip, faProjectDiagram } from '@fortawesome/free-solid-svg-icons';
+library.add(faRandom, faMicrochip, faProjectDiagram);
 
 /*let dummyTreeselectOptions = [
   {
