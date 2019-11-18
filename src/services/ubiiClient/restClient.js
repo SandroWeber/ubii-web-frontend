@@ -2,15 +2,13 @@
 
 //import axios from 'axios';
 
-
 class RESTClient {
   /**
    * Communication endpoint implementing REST pattern.
    * @param {*} host Host to connect to.
    * @param {*} port Port to connect to.
    */
-  constructor(host = 'localhost',
-    port = 5555) {
+  constructor(host = 'localhost', port = 5555) {
     this.host = host;
     this.port = port;
 
@@ -20,6 +18,7 @@ class RESTClient {
   send(route, message) {
     //let url = 'http://' + this.host + ':' + this.port + route;
     let url = 'https://' + this.host + ':' + this.port + route;
+    console.info('RESTClient.send() - ' + url);
 
     return new Promise((resolve, reject) => {
       /*axios({
@@ -41,27 +40,25 @@ class RESTClient {
       let body = JSON.stringify(message);
       //console.info(body);
 
-      const request = new Request(
-        url,
-        {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-          },
-          body: body
-        }
-      );
+      const request = new Request(url, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
+        body: body
+      });
       fetch(request).then(
         async response => {
           let responseJson = await response.json();
           resolve(responseJson);
         },
-        (error) => {
+        error => {
           console.error(error);
           reject(error);
-        });
+        }
+      );
     });
   }
 }
