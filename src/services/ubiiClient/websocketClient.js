@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
+import Vue from 'vue';
 
 class WebsocketClient {
-
   /**
    * Communication endpoint implementing websocket.
    * @param {*} identity ID string to uniquely identify this object. This id is used to route messages to this socket.
@@ -11,11 +11,7 @@ class WebsocketClient {
    * @param {*} autoconnect Should the socket connect directly after the initialization of the object?
    * If not, the start method must be called manually.
    */
-  constructor(identity,
-    host = 'localhost',
-    port = 5555,
-    autoconnect = true) {
-
+  constructor(identity, host = 'localhost', port = 5555, autoconnect = true) {
     this.identity = identity;
     this.host = host;
     this.port = port;
@@ -23,8 +19,7 @@ class WebsocketClient {
     if (autoconnect) {
       try {
         this.start();
-      }
-      catch (error) {
+      } catch (error) {
         console.error(error);
       }
     }
@@ -36,23 +31,26 @@ class WebsocketClient {
   start() {
     // init
     try {
-      let url = `wss://${this.host}:${this.port}?clientID=${this.identity}`;
+      let url = Vue.config.useHTTPS ? 'wss://' : 'ws://';
+      url += `${this.host}:${this.port}?clientID=${this.identity}`;
+      //let url = `wss://${this.host}:${this.port}?clientID=${this.identity}`;
       //let url = `ws://${this.host}:${this.port}?clientID=${this.identity}`;
       console.info(url);
-      this.websocket = new WebSocket(url/*, {
+      this.websocket = new WebSocket(
+        url /*, {
         protocolVersion: 8,
         origin: 'https://localhost:' + this.port.toString(),
         rejectUnauthorized: false
-      }*/);
-    }
-    catch (error) {
+      }*/
+      );
+    } catch (error) {
       console.error(error);
     }
 
     this.websocket.binaryType = 'arraybuffer';
 
     // add callbacks
-    this.websocket.onmessage = (message) => {
+    this.websocket.onmessage = message => {
       // process pings
       /*if (payload.toString() === PING_MESSAGE) {
        this.send(PONG_MESSAGE);
@@ -60,14 +58,19 @@ class WebsocketClient {
        }*/
 
       if (!this.processMessage) {
-        console.warn('[' + new Date() + '] WebsocketClient.onMessageReceived() has not been set!' +
-          '\nMessage received:\n' + message);
+        console.warn(
+          '[' +
+            new Date() +
+            '] WebsocketClient.onMessageReceived() has not been set!' +
+            '\nMessage received:\n' +
+            message
+        );
       } else {
         this.processMessage(message);
       }
     };
 
-    this.websocket.onerror = (error) => {
+    this.websocket.onerror = error => {
       throw error;
     };
   }

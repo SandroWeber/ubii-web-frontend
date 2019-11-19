@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import Vue from 'vue';
 
 class RESTClient {
   /**
@@ -13,7 +14,9 @@ class RESTClient {
 
   send(route, message) {
     //let url = 'http://' + this.host + ':' + this.port + route;
-    let url = 'https://' + this.host + ':' + this.port + route;
+    //let url = 'https://' + this.host + ':' + this.port + route;
+    let url = Vue.config.useHTTPS ? 'https://' : 'http://';
+    url += this.host + ':' + this.port + route;
 
     return new Promise(async (resolve, reject) => {
       let body = JSON.stringify(message);

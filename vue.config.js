@@ -1,5 +1,4 @@
 const path = require('path');
-//const fs = require('fs');
 
 module.exports = {
   chainWebpack: config => {
@@ -7,17 +6,7 @@ module.exports = {
     types.forEach(type =>
       addStyleResource(config.module.rule('stylus').oneOf(type))
     );
-  } /*,
-  devServer: {
-    //open: process.platform === 'darwin',
-    host: 'localhost',
-    //port: 8080, // CHANGE YOUR PORT HERE!
-    https: {
-      key: fs.readFileSync('./certs/ubii.com+5-key.pem'),
-      cert: fs.readFileSync('./certs/ubii.com+5.pem')
-    }
-    //hotOnly: false,
-  },*/
+  }
 };
 
 function addStyleResource(rule) {
