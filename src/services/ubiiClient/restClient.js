@@ -18,47 +18,29 @@ class RESTClient {
   send(route, message) {
     //let url = 'http://' + this.host + ':' + this.port + route;
     let url = 'https://' + this.host + ':' + this.port + route;
-    console.info('RESTClient.send() - ' + url);
 
-    return new Promise((resolve, reject) => {
-      /*axios({
-        url: url,
-        method: 'post',
-        data: message,
-        //config: { headers: {'Content-Type': 'application/octet-stream' }}
-      })*/
-
-      /*axios.post(url, message)
-        .then((response) => {
-          resolve(response.data);
-        })
-        .catch((error) => {
-          console.warn(error);
-          reject(error);
-        });*/
-
+    return new Promise(async (resolve, reject) => {
       let body = JSON.stringify(message);
-      //console.info(body);
 
       const request = new Request(url, {
         method: 'POST',
         mode: 'cors',
         headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
+          'Content-Type': 'application/json'
         },
         body: body
       });
-      fetch(request).then(
-        async response => {
-          let responseJson = await response.json();
-          resolve(responseJson);
-        },
-        error => {
-          console.error(error);
-          reject(error);
+
+      try {
+        const response = await fetch(request);
+        if (!response.ok) {
+          throw new Error('Network response was not ok.');
         }
-      );
+        resolve(response.json());
+      } catch (error) {
+        console.error(error);
+        reject(error);
+      }
     });
   }
 }
