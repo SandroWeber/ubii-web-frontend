@@ -1,7 +1,5 @@
 /* eslint-disable no-console */
 
-//import axios from 'axios';
-
 class RESTClient {
   /**
    * Communication endpoint implementing REST pattern.
@@ -11,8 +9,6 @@ class RESTClient {
   constructor(host = 'localhost', port = 5555) {
     this.host = host;
     this.port = port;
-
-    //axios.defaults.headers.post['Content-Type'] = 'application/octet-stream';
   }
 
   send(route, message) {
