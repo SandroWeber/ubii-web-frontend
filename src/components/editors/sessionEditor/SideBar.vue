@@ -33,7 +33,7 @@
         return interaction.id === this.$props.selected;
       },
       select: function(interaction) {
-        this.$props.selected = interaction.id;
+        this.$emit('select', interaction.id);
       }
     }
   };
