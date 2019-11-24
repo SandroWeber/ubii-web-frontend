@@ -9,9 +9,13 @@
                         @select="select"
                 ></side-bar>
                 <div class="main">
-                    <top-bar class="top-bar-instance"></top-bar>
+                    <top-bar class="top-bar-instance"
+                         :session="selectedSession"
+                    ></top-bar>
 
-                    <graph-view></graph-view>
+                    <graph-view
+                            :session="selectedSession"
+                    ></graph-view>
                 </div>
             </div>
         </UbiiClientContent>
@@ -46,7 +50,7 @@
     data: () => {
       return {
         selectedSession: {
-          interactions: []
+          interactions: [{ id: 1, label: 'Interaction 1' }, { id: 2, label: 'Interaction 2' }, { id: 3, label: 'Interaction 3'}, { id: 4, label: 'Interaction 4' }]
         },
         selectedInteraction: 0,
         ubiiClientService: UbiiClientService

@@ -6,16 +6,30 @@
 
 <script>
   import * as THREE from 'three';
+  const OrbitControls = require('three-orbit-controls')(THREE);
 
   export default {
     name: 'GraphView',
-    data() {
+    props: {
+      session: {
+        type: Object,
+        required: true
+      },
+    },
+    data: () => {
       return {
         camera: null,
         scene: null,
         renderer: null,
-        mesh: null
+        mesh: [],
+        controls: null
       };
+    },
+    watch: {
+      session: function(newVal, oldVal) {
+        console.log(newVal, oldVal);
+        this.addNodes(newVal.interactions);
+      }
     },
     methods: {
       init: function() {
@@ -33,26 +47,33 @@
 
         this.scene = new THREE.Scene();
 
-        let geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-        let material = new THREE.MeshNormalMaterial();
 
-        this.mesh = new THREE.Mesh(geometry, material);
-        this.scene.add(this.mesh);
+        this.addNodes(this.session.interactions);
 
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(container.clientWidth, container.clientHeight);
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         container.appendChild(this.renderer.domElement);
       },
       animate: function() {
         if (this.renderer) {
           requestAnimationFrame(this.animate);
-          this.mesh.rotation.x += 0.01;
-          this.mesh.rotation.y += 0.02;
           this.renderer.render(this.scene, this.camera);
         }
       },
       stop: function() {
         this.renderer = null;
+      },
+      addNodes: function(interactions) {
+        for(let [index, interaction] of interactions.entries()) {
+          let geometry = new THREE.SphereGeometry(0.2, 12, 12);
+          let material = new THREE.MeshBasicMaterial({color: 0x0033cc, wireframe: true});
+          let mesh = new THREE.Mesh(geometry, material);
+          mesh.position.set(-2+index, 0, 0);
+
+          this.mesh.push(mesh);
+          this.scene.add(mesh);
+        }
       }
     },
     mounted() {

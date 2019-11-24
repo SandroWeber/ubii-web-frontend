@@ -6,7 +6,13 @@
 
 <script>
   export default {
-    name: 'TopBar'
+    name: 'TopBar',
+    props: {
+      session: {
+        type: Object,
+        required: true
+      },
+    }
   };
 </script>
 
