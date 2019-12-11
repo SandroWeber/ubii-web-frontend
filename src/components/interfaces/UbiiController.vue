@@ -342,6 +342,7 @@ export default {
         this.canvasDisplayArea.width,
         this.canvasDisplayArea.height
       ];
+      console.info('displayDimensions ' + displayDimensions);
 
       let imageDataRGBA = undefined;
       if (image.dataFormat === ImageDataFormats.GRAY8) {
@@ -376,6 +377,7 @@ export default {
 
       // calculate proper rescale width/height
       let resizeDimensions = [imgData.width, imgData.height];
+      console.info('resizeDimensions ' + resizeDimensions);
       if (imgData.width > imgData.height) {
         resizeDimensions[0] = displayDimensions[0];
         resizeDimensions[1] = imgData.height * (displayDimensions[0] / imgData.width);
@@ -388,6 +390,8 @@ export default {
         resizeWidth: resizeDimensions[0],
         resizeHeight: resizeDimensions[1]
       }).then(imgBitmap => {
+        console.info(imgData);
+        console.info(imgBitmap);
         ctx.drawImage(imgBitmap, 0, 0);
       });
     },
