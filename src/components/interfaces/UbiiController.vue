@@ -205,6 +205,7 @@ export default {
             messageFormat: 'string',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
           }
+          //TODO: clear image topic
         ]
       };
       // add vibration component if available
@@ -357,6 +358,7 @@ export default {
         image.width,
         image.height
       );
+      //TODO: proper scaling for height > width
       createImageBitmap(imgData, 0, 0, imgData.width, imgData.height, {
         resizeWidth: displaySize[0],
         resizeHeight: imgData.height * (displaySize[0] / imgData.width)
