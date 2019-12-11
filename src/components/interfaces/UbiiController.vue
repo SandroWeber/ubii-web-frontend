@@ -177,6 +177,11 @@ export default {
             topic: topicPrefix + '/set_image',
             messageFormat: 'ubii.dataStructure.Image2D',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+          },
+          {
+            topic: topicPrefix + '/clear_image',
+            messageFormat: 'boolean',
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
           }
         ]
       };
@@ -205,6 +210,7 @@ export default {
       this.componentButtonStart = this.ubiiDevice.components[5];
       this.componentSetColor = this.ubiiDevice.components[6];
       this.componentSetImage = this.ubiiDevice.components[7];
+      this.componentClearImage = this.ubiiDevice.components[8];
     },
     registerUbiiSpecs: function() {
       if (this.initializing || this.hasRegisteredUbiiDevice) {
@@ -234,6 +240,10 @@ export default {
 
             UbiiClientService.subscribe(this.componentSetImage.topic, image => {
               this.drawImage(image);
+            });
+
+            UbiiClientService.subscribe(this.componentClearImage.topic, () => {
+              this.clearImage();
             });
 
             if (this.componentVibration) {
@@ -291,7 +301,7 @@ export default {
     drawImage: function(image) {
       const ctx = this.canvasDisplayArea.getContext('2d');
 
-      let displaySize = [
+      let displayDimensions = [
         this.canvasDisplayArea.width,
         this.canvasDisplayArea.height
       ];
@@ -318,12 +328,7 @@ export default {
       }
 
       // clear before drawing
-      ctx.clearRect(
-        0,
-        0,
-        this.canvasDisplayArea.width,
-        this.canvasDisplayArea.height
-      );
+      ctx.clearRect(0, 0, displayDimensions[0], displayDimensions[1]);
 
       // draw image data
       const imgData = new ImageData(
@@ -331,12 +336,28 @@ export default {
         image.width,
         image.height
       );
+
+      // calculate proper rescale width/height
+      let resizeDimensions = [imgData.width, imgData.height];
+      if (imgData.width > imgData.height) {
+        resizeDimensions[0] = displayDimensions[0];
+        resizeDimensions[1] = imgData.height * (displayDimensions[0] / imgData.width);
+      } else {
+        resizeDimensions[0] = imgData.width * (displayDimensions[1] / imgData.height);
+        resizeDimensions[1] = displayDimensions[1];
+      }
+
       createImageBitmap(imgData, 0, 0, imgData.width, imgData.height, {
-        resizeWidth: displaySize[0],
-        resizeHeight: imgData.height * (displaySize[0] / imgData.width)
+        resizeWidth: resizeDimensions[0],
+        resizeHeight: resizeDimensions[1]
       }).then(imgBitmap => {
         ctx.drawImage(imgBitmap, 0, 0);
       });
+    },
+    clearImage: function() {
+      const ctx = this.canvasDisplayArea.getContext('2d');
+
+      ctx.clearRect(0, 0, this.canvasDisplayArea.width, this.canvasDisplayArea.height);
     },
     publishContinuousDeviceData: function() {
       this.deviceData['analog-stick-left'] &&
