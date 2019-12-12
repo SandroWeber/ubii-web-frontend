@@ -384,11 +384,10 @@ export default {
         resizeDimensions[1] = displayDimensions[1];
       }
 
-      createImageBitmap(imgData, 0, 0, imgData.width, imgData.height, {
-        resizeWidth: resizeDimensions[0],
-        resizeHeight: resizeDimensions[1]
-      }).then(imgBitmap => {
-        ctx.drawImage(imgBitmap, 0, 0);
+      createImageBitmap(imgData, 0, 0, imgData.width, imgData.height).then(imgBitmap => {
+        let startX = displayDimensions[0] > resizeDimensions[0] ? ((displayDimensions[0] - resizeDimensions[0]) / 2) : 0;
+        let startY = displayDimensions[1] > resizeDimensions[1] ? ((displayDimensions[1] - resizeDimensions[1]) / 2) : 0;
+        ctx.drawImage(imgBitmap, startX, startY, resizeDimensions[0], resizeDimensions[1]);
       });
     },
     clearImage: function() {
