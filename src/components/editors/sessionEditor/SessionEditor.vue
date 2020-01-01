@@ -4,17 +4,19 @@
             <div class="session-editor">
                 <side-bar
                         class="side-bar-instance"
-                        :session="selectedSession"
-                        :selected=selectedInteraction
-                        @select="select"
+                        :scenarios="scenarios"
+                        :selectedScenario="selectedScenario"
+                        :selectedInteraction=selectedInteraction
+                        @select="selectInteraction"
+                        @selectScenario="selectScenario"
                 ></side-bar>
                 <div class="main">
                     <top-bar class="top-bar-instance"
-                         :session="selectedSession"
+                         :session="scenarios[selectedScenario].session"
                     ></top-bar>
 
                     <graph-view
-                            :session="selectedSession"
+                            :session="scenarios[selectedScenario].session"
                     ></graph-view>
                 </div>
             </div>
@@ -36,6 +38,7 @@
   /* fontawesome */
   import { library } from '@fortawesome/fontawesome-svg-core';
   import { faPlay } from '@fortawesome/free-solid-svg-icons';
+  import { scenarios } from './modules/session-scenarios';
 
   library.add(faPlay);
 
@@ -49,9 +52,8 @@
     },
     data: () => {
       return {
-        selectedSession: {
-          interactions: [{ id: 1, label: 'Interaction 1' }, { id: 2, label: 'Interaction 2' }, { id: 3, label: 'Interaction 3'}, { id: 4, label: 'Interaction 4' }]
-        },
+        scenarios: scenarios,
+        selectedScenario: 0,
         selectedInteraction: 0,
         ubiiClientService: UbiiClientService
       };
@@ -82,8 +84,11 @@
       this.stopEditor();
     },
     methods: {
-      select: function(id) {
+      selectInteraction: function(id) {
         this.selectedInteraction = id;
+      },
+      selectScenario: function(id) {
+        this.selectedScenario = id;
       },
       startEditor: function() {
         // subscribe to session info topic
@@ -112,7 +117,8 @@
         }
       },
       update: function(session) {
-        this.data.selectedSession = session;
+        console.log(session);
+        this.data.selectedScenario = session;
       }
     }
   };

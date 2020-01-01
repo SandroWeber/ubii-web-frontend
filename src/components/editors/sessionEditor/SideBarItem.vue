@@ -1,63 +1,80 @@
 <template>
-    <div class="side-bar-item"
-         :class="{ selected: selected }"
-         @click.exact="select()">
+    <div>
+        <div class="side-bar-item-top" v-on:click="collapse" id="item">
+            <span class="icon" v-bind:class="{ rotated: rotated }">
 
-        <font-awesome-icon
-                icon="info-circle"
-                class="icon"
-        />
-      {{label}}
+            <font-awesome-icon
+                icon="chevron-up"
+                size="xs"
+             /></span>
+            {{title}}
+        </div>
+        <b-collapse visible :id="title" class="collapseable-content"><slot></slot></b-collapse>
+        <b-tooltip target="item" placement="right">Test</b-tooltip>
     </div>
 </template>
 
 <script>
+  import Vue from 'vue'
+  import BootstrapVue from 'bootstrap-vue'
+  import 'bootstrap/dist/css/bootstrap.css'
+  import 'bootstrap-vue/dist/bootstrap-vue.css'
+  import { BCollapse, BTooltip } from 'bootstrap-vue'
+
   import { library } from '@fortawesome/fontawesome-svg-core'
-  import { faInfoCircle } from '@fortawesome/free-solid-svg-icons'
-  library.add(faInfoCircle);
+  import { faChevronUp } from '@fortawesome/free-solid-svg-icons'
+  library.add(faChevronUp);
+
+  Vue.use(BootstrapVue);
 
   export default {
     name: 'SideBarItem',
+    components : {
+      'b-collapse': BCollapse,
+    },
     props: {
-      id: {
-        type: Number,
-        required: true
-      },
-      label: {
-        type: String,
-        required: true
-      },
-      selected: {
-        type: Boolean,
-        required: true
+      title: String,
+    },
+    data: function(){
+      return {
+        rotated: false,
       }
     },
     methods: {
-      select: function() {
-        this.$emit('select');
-      },
+      collapse: function() {
+        this.rotated = !this.rotated;
+        this.$root.$emit('bv::toggle::collapse', this.$props.title)
+      }
     }
   };
 </script>
 
 <style scoped>
-    .side-bar-item {
-        background-color: #2D2A2E;
+    .side-bar-item-top {
+        cursor: pointer;
         padding: 0.5em 1em 0.5em 1em;
+        background-color: #939293;
+        padding-left: 50px;
+        position: relative;
         display: flex;
         align-items: center;
     }
 
-    .side-bar-item:hover {
-        background-color: #403E41;
-        cursor: pointer;
+    .side-bar-item-top:hover {
+        background-color: #B6B5B5;
+    }
+
+    .collapseable-content {
+        padding: 0;
     }
 
     .icon {
-        margin-right: 0.5em;
+        position: absolute;
+        left: 18px;
+        transition: transform 0.3s ease-in-out;
     }
 
-    .selected {
-        color: #DDD866;
+    .rotated {
+        transform: rotate(180deg);
     }
 </style>
