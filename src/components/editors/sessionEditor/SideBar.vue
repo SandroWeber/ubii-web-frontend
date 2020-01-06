@@ -1,27 +1,31 @@
 <template>
-    <div class="side-bar">
+    <div class="side-bar" id="side-bar">
         <div class="side-bar-top">
             Session: {{session.name}}<br/>
             Interactions: {{session.interactions.length}}
         </div>
-        <side-bar-item title="Interaction List">
+        <side-bar-item title="Interaction List"
+                       :desc="'Choose an interaction on which you want to focus'">
             <list-item v-for="interaction in session.interactions"
                        :selected="isSelectedInteraction(interaction)"
                        :key="interaction.id"
                        :id="interaction.id"
                        :normal="true"
                        :list_item="1"
-                       @select="select(interaction)">{{interaction.label}}
+                       @select="select(interaction)">{{interaction.name}}
             </list-item>
         </side-bar-item>
-        <side-bar-item title="Session Scenarios">
+        <side-bar-item title="Session Scenarios Testing"
+                       :desc="'Choose a made-up scenario of chained interactions for testing'">
             <list-item v-for="scenario in scenarios"
                        :selected="isSelectedScenario(scenario)"
                        :key="scenario.name"
                        :normal="false"
                        :list_item="0"
                        :id="scenario.id">{{scenario.name}}:
-                <button v-if="!isSelectedScenario(scenario)" class="button" @click.exact="selectScenario(scenario.id)">Activate</button>
+                <button v-if="!isSelectedScenario(scenario)" class="button" @click.exact="selectScenario(scenario.id)">
+                    Activate
+                </button>
             </list-item>
         </side-bar-item>
     </div>
@@ -39,7 +43,7 @@
         type: Number
       },
       selectedInteraction: {
-        type: Number
+        type: String
       },
       scenarios: {
         type: Array

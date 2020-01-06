@@ -54,7 +54,7 @@
       return {
         scenarios: scenarios,
         selectedScenario: 0,
-        selectedInteraction: 0,
+        selectedInteraction: '',
         ubiiClientService: UbiiClientService
       };
     },
@@ -143,6 +143,7 @@
 
     .side-bar-instance {
         flex-basis: 300px;
+        max-width: 350px;
     }
 
     .top-bar-instance {

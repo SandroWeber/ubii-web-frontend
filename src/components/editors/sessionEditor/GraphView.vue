@@ -6,6 +6,9 @@
 
 <script>
   import * as THREE from 'three';
+  import $ from 'jquery';
+  import ForceGraph3D from '3d-force-graph';
+
   const OrbitControls = require('three-orbit-controls')(THREE);
 
   export default {
@@ -14,7 +17,7 @@
       session: {
         type: Object,
         required: true
-      },
+      }
     },
     data: () => {
       return {
@@ -22,58 +25,62 @@
         scene: null,
         renderer: null,
         mesh: [],
-        controls: null
+        controls: null,
+        graph: null
       };
     },
     watch: {
       session: function(newVal, oldVal) {
         console.log(newVal, oldVal);
-        this.addNodes(newVal.interactions);
+        this.reinit();
+        if(newVal.interactions.length > 0) {
+          this.addNodes(newVal.interactions);
+        }
       }
     },
     methods: {
       init: function() {
-        let container = document.getElementById(
-          'example-threejs-render-container'
-        );
-
-        this.camera = new THREE.PerspectiveCamera(
-          70,
-          container.clientWidth / container.clientHeight,
-          0.01,
-          10
-        );
-        this.camera.position.z = 1;
-
-        this.scene = new THREE.Scene();
-
-
-        this.addNodes(this.session.interactions);
-
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
-        this.renderer.setSize(container.clientWidth, container.clientHeight);
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-        container.appendChild(this.renderer.domElement);
+        this.graph = ForceGraph3D({ width: 500 });
+        this.graph(document.getElementById('example-threejs-render-container'))
+        this.graph.d3Force('charge').strength(-150);
+        $(window).resize(this.resize);
+        this.resize();
+      },
+      reinit: function() {
+        this.graph.graphData({
+          'nodes': [{ id: 'id1', name: 'Input - Start', val: 0 }, {
+            id: 'id2',
+            name: 'Output End',
+            val: 0
+          }], 'links': [{ source: 'id1', target: 'id2' }]
+        });
+      },
+      resize: function() {
+        let width = parseInt($(window).width()) - parseInt($('#side-bar').css('width'));
+        let height = parseInt($('#side-bar').css('height'));
+        this.graph.width(width).height(height).refresh();
       },
       animate: function() {
-        if (this.renderer) {
-          requestAnimationFrame(this.animate);
-          this.renderer.render(this.scene, this.camera);
-        }
+
       },
       stop: function() {
-        this.renderer = null;
+
       },
       addNodes: function(interactions) {
-        for(let [index, interaction] of interactions.entries()) {
-          let geometry = new THREE.SphereGeometry(0.2, 12, 12);
-          let material = new THREE.MeshBasicMaterial({color: 0x0033cc, wireframe: true});
-          let mesh = new THREE.Mesh(geometry, material);
-          mesh.position.set(-2+index, 0, 0);
+        const { nodes, links } = this.graph.graphData();
+        let newNodes = [], newLinks = [];
+        interactions.forEach(((interaction) => {
+          newNodes.push({ id: interaction.id, name: interaction.name, val: 0 });
+        }));
+        newNodes.forEach((interaction, index) => {
+          if(index < newNodes.length - 1) {
+            newLinks.push({source: interaction.id, target: newNodes[index+1].id});
+          }
+        });
+        newLinks.push({source: 'id1', target: newNodes[0].id}, {source: newNodes[newNodes.length - 1].id, target: 'id2'});
+        this.graph.graphData({ nodes: [...nodes, ...newNodes], links: newLinks});
 
-          this.mesh.push(mesh);
-          this.scene.add(mesh);
-        }
+        setTimeout(console.log(this.graph.graphData()), 3000);
       }
     },
     mounted() {
@@ -82,7 +89,7 @@
       });
 
       this.init();
-      this.animate();
+
     },
     beforeDestroy: function() {
       this.stop();

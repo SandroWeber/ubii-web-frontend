@@ -1,10 +1,45 @@
+import uuidv4 from 'uuid/v4';
+
 let scenarios = [
   {
     id: 0,
     name: 'Scenario 1',
     session: {
-      interactions: [{ id: 1, label: 'Interaction 1' }, { id: 2, label: 'Interaction 2' }, {
-        id: 3, label: 'Interaction 3' }, { id: 4, label: 'Interaction 4' }],
+      interactions: [{
+        id: uuidv4(),
+        name: 'interaction_1',
+        processingCallback: () => {},
+        processFrequency: 60,
+        inputFormats: [
+          {
+            internalName: 'input-name_1',
+            messageFormat: 'ubii.dataStructure.Vector2'
+          },
+        ],
+        outputFormats: [
+          {
+            internalName: 'output-name_1',
+            messageFormat: 'ubii.dataStructure.Vector2'
+          }
+        ]
+      }, {
+        id: uuidv4(),
+        name: 'interaction_2',
+        processingCallback: () => {},
+        processFrequency: 60,
+        inputFormats: [
+          {
+            internalName: 'input-name_2',
+            messageFormat: 'ubii.dataStructure.Vector2'
+          },
+        ],
+        outputFormats: [
+          {
+            internalName: 'output-name_2',
+            messageFormat: 'ubii.dataStructure.Vector2'
+          }
+        ]
+      },],
       ioMappings: [],
       tags: [],
       authors: [],

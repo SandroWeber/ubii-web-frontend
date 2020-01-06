@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="side-bar-item-top" v-on:click="collapse" id="item">
+        <div class="side-bar-item-top" v-on:click="collapse" v-bind:id="'item-'+title">
             <span class="icon" v-bind:class="{ rotated: rotated }">
 
             <font-awesome-icon
@@ -10,7 +10,7 @@
             {{title}}
         </div>
         <b-collapse visible :id="title" class="collapseable-content"><slot></slot></b-collapse>
-        <b-tooltip target="item" placement="right">Test</b-tooltip>
+        <b-tooltip v-bind:target="'item-'+title" placement="right">{{desc}}</b-tooltip>
     </div>
 </template>
 
@@ -31,9 +31,11 @@
     name: 'SideBarItem',
     components : {
       'b-collapse': BCollapse,
+      'b-tooltip': BTooltip
     },
     props: {
       title: String,
+      desc: String
     },
     data: function(){
       return {
