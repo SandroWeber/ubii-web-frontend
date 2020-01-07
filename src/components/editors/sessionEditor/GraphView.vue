@@ -31,29 +31,29 @@
     },
     watch: {
       session: function(newVal, oldVal) {
-        console.log(newVal, oldVal);
-        this.reinit();
-        if(newVal.interactions.length > 0) {
-          this.addNodes(newVal.interactions);
-        }
+        this.reinit(newVal);
       }
     },
     methods: {
       init: function() {
         this.graph = ForceGraph3D({ width: 500 });
-        this.graph(document.getElementById('example-threejs-render-container'))
+        this.graph(document.getElementById('example-threejs-render-container'));
         this.graph.d3Force('charge').strength(-150);
+        this.graph.nodeColor(node => (node.id == 'id1' || node.id == 'id2') ? 'red' : 'blue');
+        this.graph.backgroundColor('#19181A');
         $(window).resize(this.resize);
         this.resize();
+        this.reinit(this.$props.session);
       },
-      reinit: function() {
+      reinit: function(newVal) {
         this.graph.graphData({
-          'nodes': [{ id: 'id1', name: 'Input - Start', val: 0 }, {
-            id: 'id2',
-            name: 'Output End',
-            val: 0
-          }], 'links': [{ source: 'id1', target: 'id2' }]
+          'nodes': [{ id: 'id1', name: 'Input - Start', val: 0},
+            { id: 'id2', name: 'Output End', val: 0}],
+          'links': [{ source: 'id1', target: 'id2' }]
         });
+        if (newVal.interactions.length > 0) {
+          this.addNodes(newVal.interactions);
+        }
       },
       resize: function() {
         let width = parseInt($(window).width()) - parseInt($('#side-bar').css('width'));
@@ -73,14 +73,15 @@
           newNodes.push({ id: interaction.id, name: interaction.name, val: 0 });
         }));
         newNodes.forEach((interaction, index) => {
-          if(index < newNodes.length - 1) {
-            newLinks.push({source: interaction.id, target: newNodes[index+1].id});
+          if (index < newNodes.length - 1) {
+            newLinks.push({ source: interaction.id, target: newNodes[index + 1].id });
           }
         });
-        newLinks.push({source: 'id1', target: newNodes[0].id}, {source: newNodes[newNodes.length - 1].id, target: 'id2'});
-        this.graph.graphData({ nodes: [...nodes, ...newNodes], links: newLinks});
-
-        setTimeout(console.log(this.graph.graphData()), 3000);
+        newLinks.push({ source: 'id1', target: newNodes[0].id }, {
+          source: newNodes[newNodes.length - 1].id,
+          target: 'id2'
+        });
+        this.graph.graphData({ nodes: [...nodes, ...newNodes], links: newLinks });
       }
     },
     mounted() {
@@ -89,7 +90,6 @@
       });
 
       this.init();
-
     },
     beforeDestroy: function() {
       this.stop();

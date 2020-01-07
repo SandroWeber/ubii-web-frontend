@@ -5,18 +5,19 @@
                 <side-bar
                         class="side-bar-instance"
                         :scenarios="scenarios"
-                        :selectedScenario="selectedScenario"
+                        :sessions="sessions"
+                        :selected="selected"
                         :selectedInteraction=selectedInteraction
-                        @select="selectInteraction"
-                        @selectScenario="selectScenario"
+                        @selectInteraction="selectInteraction"
+                        @select="select"
                 ></side-bar>
                 <div class="main">
                     <top-bar class="top-bar-instance"
-                         :session="scenarios[selectedScenario].session"
+                         :session="session"
                     ></top-bar>
 
                     <graph-view
-                            :session="scenarios[selectedScenario].session"
+                            :session="session"
                     ></graph-view>
                 </div>
             </div>
@@ -53,12 +54,28 @@
     data: () => {
       return {
         scenarios: scenarios,
-        selectedScenario: 0,
+        sessions: [],
+        selected: '',
         selectedInteraction: '',
         ubiiClientService: UbiiClientService
       };
     },
-    /* STEP 1: mounted() is our vue component entry point, start here! */
+    watch: {
+
+    },
+    computed: {
+      session: function() {
+        let search = this.$data.sessions.filter(el => el.id === this.$data.selected);
+        if(search.length != 1) {
+          return this.$data.scenarios.filter(el => el.id === this.$data.selected)[0].session;
+        } else {
+          return search[0];
+        }
+      }
+    },
+    created: function() {
+      this.select('0');
+    },
     mounted: function() {
       // unsubscribe before page is suddenly closed
       window.addEventListener('beforeunload', () => {
@@ -78,7 +95,9 @@
 
       UbiiClientService.onDisconnect(() => {
         this.stopEditor();
+
       });
+      this.select('0');
     },
     beforeDestroy: function() {
       this.stopEditor();
@@ -87,8 +106,8 @@
       selectInteraction: function(id) {
         this.selectedInteraction = id;
       },
-      selectScenario: function(id) {
-        this.selectedScenario = id;
+      select: function(id) {
+        this.selected = id;
       },
       startEditor: function() {
         // subscribe to session info topic
@@ -117,8 +136,7 @@
         }
       },
       update: function(session) {
-        console.log(session);
-        this.data.selectedScenario = session;
+        this.sessions.push(session);
       }
     }
   };

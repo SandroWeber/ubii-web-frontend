@@ -8,14 +8,19 @@
                 class="icon"
                 v-if="list_item == 1"
         />
+        <font-awesome-icon
+                icon="list-alt"
+                class="icon"
+                v-if="list_item == 2"
+        />
         <slot></slot>
     </div>
 </template>
 
 <script>
   import { library } from '@fortawesome/fontawesome-svg-core'
-  import { faInfoCircle } from '@fortawesome/free-solid-svg-icons'
-  library.add(faInfoCircle);
+  import { faInfoCircle, faListAlt } from '@fortawesome/free-solid-svg-icons'
+  library.add(faInfoCircle, faListAlt);
 
   export default {
     name: 'ListItem',

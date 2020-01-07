@@ -2,7 +2,7 @@ import uuidv4 from 'uuid/v4';
 
 let scenarios = [
   {
-    id: 0,
+    id: '0',
     name: 'Scenario 1',
     session: {
       interactions: [{
@@ -48,7 +48,7 @@ let scenarios = [
     }
   },
   {
-    id: 1,
+    id: '1',
     name: 'Scenario 2',
     session: {
       interactions: [],

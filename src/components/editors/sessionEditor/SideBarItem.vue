@@ -8,6 +8,7 @@
                 size="xs"
              /></span>
             {{title}}
+            <b-badge v-if="this.$props.content != null" class="badge" variant="primary">{{this.$props.content.length}}</b-badge>
         </div>
         <b-collapse visible :id="title" class="collapseable-content"><slot></slot></b-collapse>
         <b-tooltip v-bind:target="'item-'+title" placement="right">{{desc}}</b-tooltip>
@@ -19,7 +20,7 @@
   import BootstrapVue from 'bootstrap-vue'
   import 'bootstrap/dist/css/bootstrap.css'
   import 'bootstrap-vue/dist/bootstrap-vue.css'
-  import { BCollapse, BTooltip } from 'bootstrap-vue'
+  import { BCollapse, BTooltip, BBadge } from 'bootstrap-vue'
 
   import { library } from '@fortawesome/fontawesome-svg-core'
   import { faChevronUp } from '@fortawesome/free-solid-svg-icons'
@@ -31,11 +32,13 @@
     name: 'SideBarItem',
     components : {
       'b-collapse': BCollapse,
-      'b-tooltip': BTooltip
+      'b-tooltip': BTooltip,
+      'b-badge': BBadge
     },
     props: {
       title: String,
-      desc: String
+      desc: String,
+      content: Array
     },
     data: function(){
       return {
@@ -78,5 +81,9 @@
 
     .rotated {
         transform: rotate(180deg);
+    }
+
+    .badge {
+        margin-left: 15px;
     }
 </style>
