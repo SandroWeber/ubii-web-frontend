@@ -422,13 +422,13 @@ export default {
   display: grid;
   grid-gap: 15px;
   grid-template-columns: 2fr 6fr;
-  grid-template-rows: 30px 300px 30px auto auto;
+  grid-template-rows: 30px 300px auto 30px auto;
   grid-template-areas:
     'header-demo header-demo'
     'demo-options demo-mouse-area'
+    'description-options description-mouse-area'
     'header-description header-description'
-    'description-general description-general'
-    'description-options description-mouse-area';
+    'description-general description-general';
   height: 100%;
 }
 
