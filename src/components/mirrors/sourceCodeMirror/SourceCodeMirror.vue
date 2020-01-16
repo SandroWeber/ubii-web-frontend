@@ -51,20 +51,6 @@ export default {
     }
   },
   methods: {},
-  /*watch: {
-    isEditable: function() {
-      if (!this.isEditable) {
-        // enable/disable editing when source is changed
-        var myElements = document.querySelectorAll('.CodeMirror');
-        for (var i = 0; i < myElements.length; i++) {
-          myElements[i].CodeMirror.on('beforeChange', (codemirror, event) => {
-            console.info('cancel!');
-            event.cancel();
-          });
-        }
-      }
-    }
-  },*/
   mounted: function() {
     var myElements = document.querySelectorAll('.CodeMirror');
 
