@@ -27,6 +27,7 @@ export default {
     codemirror: codemirror
   },
   data: function() {
+    console.info(this.isEditable);
     return {
       codemirror: {
         options: {
@@ -35,7 +36,7 @@ export default {
           theme: 'base16-dark',
           lineNumbers: true,
           line: true,
-          readOnly: this.isEditable
+          readOnly: !this.isEditable
         }
       }
     };
@@ -50,7 +51,6 @@ export default {
       }
     }
   },
-  methods: {},
   mounted: function() {
     var myElements = document.querySelectorAll('.CodeMirror');
 
