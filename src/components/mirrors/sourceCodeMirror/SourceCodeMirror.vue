@@ -26,7 +26,7 @@ export default {
   components: {
     codemirror: codemirror
   },
-  data: () => {
+  data: function() {
     return {
       codemirror: {
         options: {
@@ -34,7 +34,8 @@ export default {
           mode: 'text/javascript',
           theme: 'base16-dark',
           lineNumbers: true,
-          line: true
+          line: true,
+          readOnly: this.isEditable
         }
       }
     };
@@ -50,9 +51,8 @@ export default {
     }
   },
   methods: {},
-  watch: {
+  /*watch: {
     isEditable: function() {
-      console.info(this.isEditable);
       if (!this.isEditable) {
         // enable/disable editing when source is changed
         var myElements = document.querySelectorAll('.CodeMirror');
@@ -64,7 +64,7 @@ export default {
         }
       }
     }
-  },
+  },*/
   mounted: function() {
     var myElements = document.querySelectorAll('.CodeMirror');
 
