@@ -9,7 +9,7 @@ let interactionsToSync = new Map();
 
 // Backend data helper:
 const backendData = {
-  pull: async function(context) {
+  pull: async function (context) {
     return new Promise(async (resolve, reject) => {
       try {
         // clear all ...
@@ -59,7 +59,7 @@ const backendData = {
       }
     });
   },
-  register: async function(context, interaction) {
+  register: async function (context, interaction) {
     return await new Promise(async (resolve, reject) => {
       try {
         // register new interaction at the backend
@@ -85,7 +85,7 @@ const backendData = {
       }
     });
   },
-  delete: async function(context, interaction) {
+  delete: async function (context, interaction) {
     return await new Promise(async (resolve, reject) => {
       try {
         // delete interaction at the backend
@@ -111,7 +111,7 @@ const backendData = {
       }
     });
   },
-  update: async function(context, interaction) {
+  update: async function (context, interaction) {
     return await new Promise(async (resolve, reject) => {
       try {
         await UbiiClientService.client
@@ -246,7 +246,7 @@ const mutations = {
   },
   setInteraction(state, payload) {
     let id = payload.interaction.id;
-    let index = state.recordTree.findIndex(function(element) {
+    let index = state.recordTree.findIndex(function (element) {
       return element.id === id;
     });
     if (index !== -1) {
@@ -257,7 +257,7 @@ const mutations = {
   removeInteraction(state, payload) {
     let id = payload.currentInteractionId;
     // TODO Add recursive find
-    let index = state.recordTree.findIndex(function(element) {
+    let index = state.recordTree.findIndex(function (element) {
       return element.id === id;
     });
     if (index !== -1) {

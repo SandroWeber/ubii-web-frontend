@@ -27,7 +27,6 @@ export default {
     codemirror: codemirror
   },
   data: function() {
-    console.info(this.isEditable);
     return {
       codemirror: {
         options: {
