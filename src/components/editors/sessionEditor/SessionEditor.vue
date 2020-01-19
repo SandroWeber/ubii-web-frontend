@@ -8,6 +8,7 @@
                         :sessions="sessions"
                         :selected="selected"
                         :selectedInteraction=selectedInteraction
+                        :eventBus="eventBus"
                         @selectInteraction="selectInteraction"
                         @select="select"
                 ></side-bar>
@@ -18,6 +19,7 @@
 
                     <graph-view
                             :session="session"
+                            :eventBus="eventBus"
                     ></graph-view>
                 </div>
             </div>
@@ -26,6 +28,8 @@
 </template>
 
 <script>
+  import Vue from 'vue';
+
   import TopBar from './TopBar.vue';
   import SideBar from './SideBar.vue';
   import GraphView from './GraphView.vue';
@@ -36,10 +40,12 @@
   import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
   import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
+
   /* fontawesome */
   import { library } from '@fortawesome/fontawesome-svg-core';
   import { faPlay } from '@fortawesome/free-solid-svg-icons';
   import { scenarios } from './modules/session-scenarios';
+
 
   library.add(faPlay);
 
@@ -57,7 +63,8 @@
         sessions: [],
         selected: '',
         selectedInteraction: '',
-        ubiiClientService: UbiiClientService
+        ubiiClientService: UbiiClientService,
+        eventBus: null,
       };
     },
     watch: {
@@ -75,6 +82,9 @@
     },
     created: function() {
       this.select('0');
+    },
+    beforeMount: function() {
+      this.eventBus = new Vue();
     },
     mounted: function() {
       // unsubscribe before page is suddenly closed
@@ -113,7 +123,6 @@
         // subscribe to session info topic
         UbiiClientService.subscribe(
           DEFAULT_TOPICS.INFO_TOPICS.NEW_SESSION,
-          // a callback to be called when new data on this topic arrives
           sessionInfo => {
             this.update(sessionInfo);
           }

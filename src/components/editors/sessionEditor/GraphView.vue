@@ -17,6 +17,9 @@
       session: {
         type: Object,
         required: true
+      },
+      eventBus: {
+        type: Object
       }
     },
     data: () => {
@@ -44,6 +47,9 @@
         $(window).resize(this.resize);
         this.resize();
         this.reinit(this.$props.session);
+        this.eventBus.$on('get-msg', (msg) => {
+          console.log(msg);
+        })
       },
       reinit: function(newVal) {
         this.graph.graphData({

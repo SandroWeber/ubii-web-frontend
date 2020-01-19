@@ -25,7 +25,9 @@
                        @select="selectInteraction(interaction)">{{interaction.name}}
             </list-item>
         </side-bar-item>
-        <side-bar-item title="Settings" :desc="'Change various options about the visualization.'"></side-bar-item>
+        <side-bar-item title="Settings" :desc="'Change various options about the visualization.'">
+            <settings-container :eventBus="eventBus"></settings-container>
+        </side-bar-item>
         <side-bar-item title="Session Scenarios Testing"
                        :desc="'Choose a made-up scenario of chained interactions for testing.'" :content="scenarios">
             <list-item v-for="scenario in scenarios"
@@ -45,10 +47,11 @@
 <script>
   import ListItem from './ListItem';
   import SideBarItem from './SideBarItem';
+  import SettingsContainer from './SettingsContainer';
 
   export default {
     name: 'SideBar',
-    components: { SideBarItem, ListItem },
+    components: { SettingsContainer, SideBarItem, ListItem },
     props: {
       selected: {
         type: String
@@ -61,6 +64,9 @@
       },
       sessions: {
         type: Array
+      },
+      eventBus: {
+        type: Object
       }
     },
     watch: {

@@ -39,6 +39,40 @@ let scenarios = [
             messageFormat: 'ubii.dataStructure.Vector2'
           }
         ]
+      }, {
+        id: uuidv4(),
+        name: 'interaction_3',
+        processingCallback: () => {},
+        processFrequency: 60,
+        inputFormats: [
+          {
+            internalName: 'input-name_3',
+            messageFormat: 'ubii.dataStructure.Vector2'
+          },
+        ],
+        outputFormats: [
+          {
+            internalName: 'output-name_3',
+            messageFormat: 'ubii.dataStructure.Vector2'
+          }
+        ]
+      }, {
+        id: uuidv4(),
+        name: 'interaction_4',
+        processingCallback: () => {},
+        processFrequency: 60,
+        inputFormats: [
+          {
+            internalName: 'input-name_4',
+            messageFormat: 'ubii.dataStructure.Vector2'
+          },
+        ],
+        outputFormats: [
+          {
+            internalName: 'output-name_4',
+            messageFormat: 'ubii.dataStructure.Vector2'
+          }
+        ]
       },],
       ioMappings: [],
       tags: [],
