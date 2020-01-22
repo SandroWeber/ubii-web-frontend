@@ -346,7 +346,6 @@ class ClientNodeWeb {
       }
     }
 
-    console.info('SUCCESS subscribeRegex(' + regexString + ')');
     return true;
   }
 
@@ -396,7 +395,6 @@ class ClientNodeWeb {
       }
     }
 
-    console.info('SUCCESS unsubscribeRegex(' + regexString + ')');
     return true;
   }
 
