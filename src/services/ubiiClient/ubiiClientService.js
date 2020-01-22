@@ -40,7 +40,7 @@ class UbiiClientService {
         if (this.client.isInitialized()) {
           console.info(
             'UbiiClientService - client connected with ID:\n' +
-              this.client.clientSpecification.id
+            this.client.clientSpecification.id
           );
           this.connected = true;
           this.connecting = false;
@@ -164,12 +164,16 @@ class UbiiClientService {
     return this.client && this.client.subscribe(topic, callback);
   }
 
+  async unsubscribe(topic) {
+    return this.client && this.client.unsubscribe(topic);
+  }
+
   subscribeRegex(regex, callback) {
     return this.client && this.client.subscribeRegex(regex, callback);
   }
 
-  async unsubscribe(topic) {
-    return this.client && this.client.unsubscribe(topic);
+  unsubscribeRegex(regex, callback) {
+    return this.client && this.client.unsubscribeRegex(regex, callback);
   }
 
   getUUIDv4Regex() {
