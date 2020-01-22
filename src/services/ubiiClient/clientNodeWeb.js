@@ -33,7 +33,7 @@ class ClientNodeWeb {
 
     this.topicDataCallbacks = new Map();
     this.topicDataRegexCallbacks = new Map();
-    this.topicDataRegexes = new Map();
+    //this.topicDataRegexes = new Map();
   }
 
   /**
@@ -277,42 +277,6 @@ class ClientNodeWeb {
     );
   }
 
-  /**
-   * Subscribe to the specified regex.
-   * @param {*} regexString
-   * @param {*} callback
-   */
-  async subscribeRegex(regexString, callback) {
-    let message = {
-      topic: DEFAULT_TOPICS.SERVICES.TOPIC_SUBSCRIPTION,
-      topicSubscription: {
-        clientId: this.clientSpecification.id,
-        subscribeTopicRegexp: regexString
-      }
-    };
-
-    return this.callService(message).then(
-      reply => {
-        if (reply.success !== undefined && reply.success !== null) {
-          let callbacks = this.topicDataRegexCallbacks.get(regexString);
-          if (callbacks && callbacks.length > 0) {
-            callbacks.push(callback);
-          } else {
-            this.topicDataRegexes.set(regexString, new RegExp(regexString));
-            this.topicDataRegexCallbacks.set(regexString, [callback]);
-          }
-        } else {
-          console.error(
-            'ClientNodeWeb - subscribe failed (' + regexString + ')\n' + reply
-          );
-        }
-      },
-      error => {
-        console.error(error);
-      }
-    );
-  }
-
   async unsubscribe(topic) {
     this.topicDataCallbacks.delete(topic);
 
@@ -325,6 +289,115 @@ class ClientNodeWeb {
     };
 
     return this.callService(message);
+  }
+
+  /**
+   * Subscribe to the specified regex.
+   * @param {*} regexString
+   * @param {*} callback
+   */
+  async subscribeRegex(regexString, callback) {
+    // already subscribed to regexString, add callback to list
+    let registeredRegex = this.topicDataRegexCallbacks.get(regexString);
+    if (registeredRegex) {
+      if (registeredRegex.callbacks && Array.isArray(registeredRegex.callbacks)) {
+        registeredRegex.callbacks.push(callback);
+      } else {
+        registeredRegex.callbacks = [callback];
+      }
+    }
+    // need to subscribe at backend
+    else {
+      let message = {
+        topic: DEFAULT_TOPICS.SERVICES.TOPIC_SUBSCRIPTION,
+        topicSubscription: {
+          clientId: this.clientSpecification.id,
+          subscribeTopicRegexp: regexString
+        }
+      };
+
+      try {
+        let reply = await this.callService(message);
+        if (reply.success !== undefined && reply.success !== null) {
+          let newRegex = {
+            callbacks: [callback],
+            regex: new RegExp(regexString)
+          };
+          this.topicDataRegexCallbacks.set(regexString, newRegex);
+        } else {
+          // another component subscribed in the meantime?
+          let registeredRegex = this.topicDataRegexCallbacks.get(regexString);
+          if (registeredRegex && registeredRegex.callbacks.length > 0) {
+            registeredRegex.callbacks.push(callback);
+          }
+          else {
+            console.error(
+              'ClientNodeWeb - could not subscribe to regex ' + regexString + ', response:\n' + reply
+            );
+            return false;
+          }
+        }
+      }
+      catch (error) {
+        console.error(
+          'ClientNodeWeb - subscribeRegex(' + regexString + ') failed: \n' + error
+        );
+        return false;
+      }
+    }
+
+    console.info('SUCCESS subscribeRegex(' + regexString + ')');
+    return true;
+  }
+
+  /**
+   * Unsubscribe from the specified regex.
+   * @param {*} regexString
+   * @param {*} callback
+   */
+  async unsubscribeRegex(regexString, callback) {
+    let registeredRegex = this.topicDataRegexCallbacks.get(regexString);
+    if (registeredRegex === undefined) {
+      return false;
+    }
+
+    // remove callback from list of callbacks
+    let index = registeredRegex.callbacks.indexOf(callback);
+    if (index >= 0) {
+      registeredRegex.callbacks.splice(index, 1);
+    }
+
+    // if no callbacks left, unsubscribe at backend
+    if (registeredRegex.callbacks.length === 0) {
+      let message = {
+        topic: DEFAULT_TOPICS.SERVICES.TOPIC_SUBSCRIPTION,
+        topicSubscription: {
+          clientId: this.clientSpecification.id,
+          unsubscribeTopicRegexp: regexString
+        }
+      };
+
+      try {
+        let reply = await this.callService(message);
+        if (reply.success !== undefined && reply.success !== null) {
+          this.topicDataRegexCallbacks.delete(regexString);
+        } else {
+          console.error(
+            'ClientNodeWeb - could not unsubscribe from regex ' + regexString + ', response:\n' + reply
+          );
+          return false;
+        }
+      }
+      catch (error) {
+        console.error(
+          'ClientNodeWeb - unsubscribeRegex(' + regexString + ') failed: \n' + error
+        );
+        return false;
+      }
+    }
+
+    console.info('SUCCESS unsubscribeRegex(' + regexString + ')');
+    return true;
   }
 
   /**
@@ -348,7 +421,7 @@ class ClientNodeWeb {
        console.info(message);
        console.info(buffer.length);
        console.info(buffer);
-
+ 
        return resolve(message);
        },
        (error) => {
@@ -389,10 +462,10 @@ class ClientNodeWeb {
     if (record && record.topic) {
       let callbacks = this.topicDataCallbacks.get(record.topic);
       if (!callbacks) {
-        this.topicDataRegexCallbacks.forEach((value, key) => {
-          let regex = this.topicDataRegexes.get(key);
+        this.topicDataRegexCallbacks.forEach((value) => {
+          let regex = value.regex;
           if (regex.test(record.topic)) {
-            callbacks = value;
+            callbacks = value.callbacks;
           }
         });
       }
