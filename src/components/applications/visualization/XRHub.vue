@@ -24,21 +24,22 @@ export default {
   },
   methods: {
     init: function() {
-      let container = document.getElementById('xrhub-render-container');
+      this.container = document.getElementById('xrhub-render-container');
 
       this.xrHub = new XRHub();
       this.scene = this.xrHub.scene;
 
       this.camera = new THREE.PerspectiveCamera(
         70,
-        container.clientWidth / container.clientHeight,
+        this.container.clientWidth / this.container.clientHeight,
         0.01,
         10
       );
+      this.camera.position.y = 1;
       this.camera.position.z = 1;
       this.scene.add(this.camera);
 
-      this.controls = new FirstPersonControls(this.camera, container);
+      this.controls = new FirstPersonControls(this.camera, this.container);
 
       let geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
       let material = new THREE.MeshNormalMaterial();
@@ -47,8 +48,8 @@ export default {
       this.scene.add(this.mesh);
 
       this.renderer = new THREE.WebGLRenderer({ antialias: true });
-      this.renderer.setSize(container.clientWidth, container.clientHeight);
-      container.appendChild(this.renderer.domElement);
+      this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+      this.container.appendChild(this.renderer.domElement);
     },
     animate: function() {
       const renderer = this.renderer;
@@ -74,6 +75,16 @@ export default {
   mounted() {
     window.addEventListener('beforeunload', () => {
       this.stop();
+    });
+    window.addEventListener('resize', () => {
+      if (this.camera && this.container && this.renderer) {
+        this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
+        this.camera.updateProjectionMatrix();
+
+        this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+      }
+      
+      this.controls && this.controls.handleResize();
     });
 
     this.init();
