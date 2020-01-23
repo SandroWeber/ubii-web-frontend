@@ -26,7 +26,7 @@ export default {
     init: function() {
       this.container = document.getElementById('xrhub-render-container');
 
-      this.xrHub = new XRHub();
+      this.xrHub = new XRHub(this.container);
       this.scene = this.xrHub.scene;
 
       this.camera = new THREE.PerspectiveCamera(
@@ -48,8 +48,20 @@ export default {
       this.scene.add(this.mesh);
 
       this.renderer = new THREE.WebGLRenderer({ antialias: true });
-      this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+      this.renderer.setSize(
+        this.container.clientWidth,
+        this.container.clientHeight
+      );
       this.container.appendChild(this.renderer.domElement);
+
+      let webpage = XRHub.createWebCanvas(
+        'https://threejs.org/examples/?q=css#css3d_youtube',
+        2,
+        2,
+        2,
+        0
+      );
+      //this.scene.add(webpage);
     },
     animate: function() {
       const renderer = this.renderer;
@@ -78,12 +90,16 @@ export default {
     });
     window.addEventListener('resize', () => {
       if (this.camera && this.container && this.renderer) {
-        this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
+        this.camera.aspect =
+          this.container.clientWidth / this.container.clientHeight;
         this.camera.updateProjectionMatrix();
 
-        this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+        this.renderer.setSize(
+          this.container.clientWidth,
+          this.container.clientHeight
+        );
       }
-      
+
       this.controls && this.controls.handleResize();
     });
 

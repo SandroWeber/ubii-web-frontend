@@ -9,10 +9,8 @@ import * as THREE from 'three';
 THREE.FirstPersonControls = function (object, domElement) {
 
     if (domElement === undefined) {
-
         console.warn('THREE.FirstPersonControls: The second parameter "domElement" is now mandatory.');
         domElement = document;
-
     }
 
     this.object = object;
@@ -81,10 +79,9 @@ THREE.FirstPersonControls = function (object, domElement) {
             this.viewHalfX = this.domElement.offsetWidth / 2;
             this.viewHalfY = this.domElement.offsetHeight / 2;
         }
-
     };
 
-    this.getMousePosition = function(event) {
+    this.getMousePosition = function (event) {
         let mouseX = 0, mouseY = 0;
         if (this.domElement === document) {
             mouseX = event.pageX - this.viewHalfX;
@@ -216,7 +213,7 @@ THREE.FirstPersonControls = function (object, domElement) {
 
     };
 
-    this.updateRotation = function(delta) {
+    this.updateRotation = function (delta) {
         if (!this.mouseDragOn) {
             return;
         }
@@ -254,7 +251,7 @@ THREE.FirstPersonControls = function (object, domElement) {
         this.object.lookAt(targetPosition);
     };
 
-    this.updatePosition = function(delta) {
+    this.updatePosition = function (delta) {
         if (this.heightSpeed) {
 
             var y = THREE.Math.clamp(this.object.position.y, this.heightMin, this.heightMax);
