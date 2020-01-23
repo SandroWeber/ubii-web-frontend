@@ -10,7 +10,6 @@
 import * as THREE from 'three';
 
 import XRHub from '../sharedModules/XRHub';
-import FirstPersonControls from '../sharedModules/FirstPersonControls';
 
 export default {
   name: 'XR-Hub',
@@ -27,51 +26,16 @@ export default {
       this.container = document.getElementById('xrhub-render-container');
 
       this.xrHub = new XRHub(this.container);
-      this.scene = this.xrHub.scene;
-
-      this.camera = new THREE.PerspectiveCamera(
-        70,
-        this.container.clientWidth / this.container.clientHeight,
-        0.01,
-        10
-      );
-      this.camera.position.y = 1;
-      this.camera.position.z = 1;
-      this.scene.add(this.camera);
-
-      this.controls = new FirstPersonControls(this.camera, this.container);
-
-      let geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-      let material = new THREE.MeshNormalMaterial();
-
-      this.mesh = new THREE.Mesh(geometry, material);
-      this.scene.add(this.mesh);
-
-      this.renderer = new THREE.WebGLRenderer({ antialias: true });
-      this.renderer.setSize(
-        this.container.clientWidth,
-        this.container.clientHeight
-      );
-      this.container.appendChild(this.renderer.domElement);
-
-      let webpage = XRHub.createWebCanvas(
-        'https://threejs.org/examples/?q=css#css3d_youtube',
-        2,
-        2,
-        2,
-        0
-      );
-      //this.scene.add(webpage);
     },
     animate: function() {
-      const renderer = this.renderer;
-      const scene = this.scene;
-      const camera = this.camera;
-      const mesh = this.mesh;
-      const controls = this.controls;
+      const renderer = this.xrHub.renderer;
+      const scene = this.xrHub.scene;
+      const camera = this.xrHub.camera;
+      const mesh = this.xrHub.mesh;
+      const controls = this.xrHub.controls;
       const clock = new THREE.Clock();
 
-      this.renderer.setAnimationLoop(function() {
+      renderer.setAnimationLoop(function() {
         let delta = clock.getDelta();
 
         mesh.rotation.x += delta;
@@ -81,7 +45,9 @@ export default {
       });
     },
     stop: function() {
-      this.renderer && this.renderer.setAnimationLoop(null);
+      this.xrHub &&
+        this.xrHub.renderer &&
+        this.xrHub.renderer.setAnimationLoop(null);
     }
   },
   mounted() {
@@ -89,18 +55,18 @@ export default {
       this.stop();
     });
     window.addEventListener('resize', () => {
-      if (this.camera && this.container && this.renderer) {
-        this.camera.aspect =
+      if (this.xrHub.camera && this.xrHub.container && this.xrHub.renderer) {
+        this.xrHub.camera.aspect =
           this.container.clientWidth / this.container.clientHeight;
-        this.camera.updateProjectionMatrix();
+        this.xrHub.camera.updateProjectionMatrix();
 
-        this.renderer.setSize(
+        this.xrHub.renderer.setSize(
           this.container.clientWidth,
           this.container.clientHeight
         );
       }
 
-      this.controls && this.controls.handleResize();
+      this.xrHub.controls && this.xrHub.controls.handleResize();
     });
 
     this.init();
