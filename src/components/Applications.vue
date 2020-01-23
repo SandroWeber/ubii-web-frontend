@@ -5,6 +5,13 @@
         <span class="label">Visualization</span>
       </div>
       <div class="grid">
+        <router-link to="/applications/visualization/xr-hub" class="interface-link" tag="div">
+          <app-tile class="layer-three background round shadow purple-accent">
+            <font-awesome-icon icon="users" class="interface-icon" />
+            <p>XR Hub</p>
+          </app-tile>
+        </router-link>
+
         <router-link
           to="/applications/visualization/3d_pose_visualizer"
           class="interface-link"
@@ -143,7 +150,8 @@ import {
   faKeyboard,
   faHandPointer,
   faHandScissors,
-  faEye
+  faEye,
+  faUsers
 } from '@fortawesome/free-solid-svg-icons';
 library.add(
   faMousePointer,
@@ -155,7 +163,8 @@ library.add(
   faKeyboard,
   faHandPointer,
   faEye,
-  faHandScissors
+  faHandScissors,
+  faUsers
 );
 
 export default {
