@@ -29,7 +29,11 @@ export default {
     },
     animate: function() {
       const renderer = this.xrHub.renderer;
+      const webContentRenderer = this.xrHub.webContentRenderer;
+
       const scene = this.xrHub.scene;
+      const webContentScene = this.xrHub.webContentScene;
+
       const camera = this.xrHub.camera;
       const mesh = this.xrHub.mesh;
       const controls = this.xrHub.controls;
@@ -41,6 +45,7 @@ export default {
         mesh.rotation.x += delta;
         mesh.rotation.y += delta;
         renderer.render(scene, camera);
+        webContentRenderer.render(webContentScene, camera);
         controls.update(delta);
       });
     },
@@ -61,6 +66,10 @@ export default {
         this.xrHub.camera.updateProjectionMatrix();
 
         this.xrHub.renderer.setSize(
+          this.container.clientWidth,
+          this.container.clientHeight
+        );
+        this.xrHub.webContentRenderer.setSize(
           this.container.clientWidth,
           this.container.clientHeight
         );

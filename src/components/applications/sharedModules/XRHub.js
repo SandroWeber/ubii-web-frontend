@@ -1,10 +1,8 @@
 import * as THREE from 'three';
-import {
-  CSS3DRenderer,
-  CSS3DObject
-} from 'three/examples/jsm/renderers/CSS3DRenderer.js';
+import { CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 
 import FirstPersonControls from '../sharedModules/FirstPersonControls';
+import ThreeWebContentCanvas from './ThreeWebContentCanvas';
 
 class XRHub {
   constructor(container) {
@@ -15,6 +13,8 @@ class XRHub {
 
   initVRScene() {
     this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color('skyblue');
+
     this.createGroundPlane();
 
     this.camera = new THREE.PerspectiveCamera(
@@ -35,11 +35,16 @@ class XRHub {
     this.mesh = new THREE.Mesh(geometry, material);
     this.scene.add(this.mesh);
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer = new THREE.WebGLRenderer({
+      alpha: true /*, antialias: true*/
+    });
+    this.renderer.domElement.style.position = 'absolute'; // required (??)
+    this.renderer.setClearColor(0x000000, 0); // required
     this.renderer.setSize(
       this.container.clientWidth,
       this.container.clientHeight
     );
+    this.renderer.domElement.style.zIndex = '1'; // required
     this.container.appendChild(this.renderer.domElement);
   }
 
@@ -51,14 +56,23 @@ class XRHub {
       this.container.clientHeight
     );
 
-    let webpage = XRHub.createWebCanvas(
+    /*let webpage = XRHub.createWebCanvas(
       'https://threejs.org/examples/?q=css#css3d_youtube',
       2,
       2,
       2,
       0
     );
-    this.webContentScene.add(webpage);
+    this.webContentScene.add(webpage);*/
+
+    let url = 'https://threejs.org/'; // 'https://threejs.org/examples/?q=css#css3d_youtube';
+    let webContent = new ThreeWebContentCanvas(
+      url,
+      this.scene,
+      this.webContentScene
+    );
+    webContent.setPosition(-1, 1, -1);
+    webContent.setRotationQuaternion(new THREE.Quaternion());
   }
 
   createGroundPlane() {
@@ -72,7 +86,7 @@ class XRHub {
     this.scene.add(plane);
   }
 
-  static createWebCanvas(url, x, y, z, ry) {
+  /*static createWebCanvas(url, x, y, z, ry) {
     var div = document.createElement('div');
     div.style.width = '480px';
     div.style.height = '360px';
@@ -90,7 +104,7 @@ class XRHub {
     object.rotation.y = ry;
 
     return object;
-  }
+  }*/
 }
 
 export default XRHub;
