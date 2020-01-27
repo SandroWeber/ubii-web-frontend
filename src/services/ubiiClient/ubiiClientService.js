@@ -10,6 +10,7 @@ class UbiiClientService {
   constructor() {
     this.serverIP = window.location.hostname;
     this.serverPort = '8102';
+
     this.client = undefined;
     this.connected = undefined;
     this.connecting = false;

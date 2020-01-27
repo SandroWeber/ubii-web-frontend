@@ -290,7 +290,6 @@ export default {
         // register the mouse pointer device
         UbiiClientService.registerDevice(this.$data.ubiiDevice)
           .then(response => {
-            console.info(response);
             // the device specs we send to backend intentionally left out the device ID
             // if the backend accepts the device registration, it will send back our specs
             // plus any necessary info (like the ID) filled in by the backend
@@ -329,7 +328,6 @@ export default {
                 session: this.$data.ubiiSession
               })
               .then(response => {
-                console.info(response);
                 if (response.success) {
                   this.$data.exampleStarted = true;
                 }

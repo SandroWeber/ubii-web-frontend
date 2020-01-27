@@ -60,8 +60,9 @@ class ClientNodeWeb {
               }
             )
             .catch(error => {
-              console.warn(error);
-              return reject();
+              console.error(error);
+              reject(error);
+              throw error;
             });
         } else {
           this.initializeTopicDataClient();
@@ -99,8 +100,8 @@ class ClientNodeWeb {
           new Uint8Array(arrayBuffer)
         );
         this._onTopicDataMessageReceived(message);
-      } catch (e) {
-        console.info(e);
+      } catch (error) {
+        console.error(error);
       }
     });
   }
@@ -428,19 +429,24 @@ class ClientNodeWeb {
        });*/
 
       // VARIANT B: JSON
-      this.serviceClient.send('/services', message).then(
-        reply => {
-          let message = this.translatorServiceReply.createMessageFromPayload(
-            reply
-          );
+      this.serviceClient
+        .send('/services', message)
+        .then(
+          reply => {
+            let message = this.translatorServiceReply.createMessageFromPayload(
+              reply
+            );
 
-          return resolve(message);
-        },
-        error => {
+            return resolve(message);
+          },
+          rejection => {
+            console.warn(rejection);
+            return reject(rejection);
+          }
+        )
+        .catch(error => {
           console.error(error);
-          return reject();
-        }
-      );
+        });
     });
   }
 
