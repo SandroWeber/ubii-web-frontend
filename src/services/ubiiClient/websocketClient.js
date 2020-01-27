@@ -33,8 +33,6 @@ class WebsocketClient {
     try {
       let url = Vue.config.useHTTPS ? 'wss://' : 'ws://';
       url += `${this.host}:${this.port}?clientID=${this.identity}`;
-      //let url = `wss://${this.host}:${this.port}?clientID=${this.identity}`;
-      //let url = `ws://${this.host}:${this.port}?clientID=${this.identity}`;
       console.info(url);
       this.websocket = new WebSocket(
         url /*, {
@@ -60,10 +58,10 @@ class WebsocketClient {
       if (!this.processMessage) {
         console.warn(
           '[' +
-            new Date() +
-            '] WebsocketClient.onMessageReceived() has not been set!' +
-            '\nMessage received:\n' +
-            message
+          new Date() +
+          '] WebsocketClient.onMessageReceived() has not been set!' +
+          '\nMessage received:\n' +
+          message
         );
       } else {
         this.processMessage(message);
