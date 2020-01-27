@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-import Vue from 'vue';
 
 class WebsocketClient {
   /**
@@ -15,6 +14,7 @@ class WebsocketClient {
     this.identity = identity;
     this.host = host;
     this.port = port;
+    this.useHTTPS = process.env.NODE_ENV === 'production' ? true : false;
 
     if (autoconnect) {
       try {
@@ -31,7 +31,7 @@ class WebsocketClient {
   start() {
     // init
     try {
-      let url = Vue.config.useHTTPS ? 'wss://' : 'ws://';
+      let url = this.useHTTPS ? 'wss://' : 'ws://';
       url += `${this.host}:${this.port}?clientID=${this.identity}`;
       console.info(url);
       this.websocket = new WebSocket(

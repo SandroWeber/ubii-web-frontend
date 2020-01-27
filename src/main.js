@@ -9,7 +9,6 @@ Vue.component('font-awesome-icon', FontAwesomeIcon);
 
 /* vue app */
 Vue.config.productionTip = false;
-Vue.config.useHTTPS = false;
 
 new Vue({
   store,
