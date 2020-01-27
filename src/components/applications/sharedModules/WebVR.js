@@ -18,9 +18,9 @@
 /* eslint-disable no-redeclare */
 
 var WebVR = {
-  createButton: function(renderer, options) {
+  createButton: function (renderer, options) {
     if (options && options.frameOfReferenceType) {
-      renderer.vr.setFrameOfReferenceType(options.frameOfReferenceType);
+      renderer.xr.setFrameOfReferenceType(options.frameOfReferenceType);
     }
 
     function showEnterVR(device) {
@@ -30,25 +30,25 @@ var WebVR = {
       button.style.width = '100px';
       button.textContent = 'ENTER VR';
 
-      button.onmouseenter = function() {
+      button.onmouseenter = function () {
         button.style.opacity = '1.0';
       };
 
-      button.onmouseleave = function() {
+      button.onmouseleave = function () {
         button.style.opacity = '0.5';
       };
 
-      button.onclick = function() {
+      button.onclick = function () {
         device.isPresenting
           ? device.exitPresent()
           : device.requestPresent([
-              {
-                source: renderer.domElement
-              }
-            ]);
+            {
+              source: renderer.domElement
+            }
+          ]);
       };
 
-      renderer.vr.setDevice(device);
+      renderer.xr.setDevice(device);
     }
 
     function showEnterXR(device) {
@@ -57,7 +57,7 @@ var WebVR = {
       function onSessionStarted(session) {
         session.addEventListener('end', onSessionEnded);
 
-        renderer.vr.setSession(session);
+        renderer.xr.setSession(session);
         button.textContent = 'EXIT VR';
 
         currentSession = session;
@@ -66,7 +66,7 @@ var WebVR = {
       function onSessionEnded(event) {
         currentSession.removeEventListener('end', onSessionEnded);
 
-        renderer.vr.setSession(null);
+        renderer.xr.setSession(null);
         button.textContent = 'ENTER VR';
 
         currentSession = null;
@@ -78,15 +78,15 @@ var WebVR = {
       button.style.width = '100px';
       button.textContent = 'ENTER VR';
 
-      button.onmouseenter = function() {
+      button.onmouseenter = function () {
         button.style.opacity = '1.0';
       };
 
-      button.onmouseleave = function() {
+      button.onmouseleave = function () {
         button.style.opacity = '0.5';
       };
 
-      button.onclick = function() {
+      button.onclick = function () {
         if (currentSession === null) {
           device
             .requestSession({
@@ -99,7 +99,7 @@ var WebVR = {
         }
       };
 
-      renderer.vr.setDevice(device);
+      renderer.xr.setDevice(device);
     }
 
     function showVRNotFound() {
@@ -111,7 +111,7 @@ var WebVR = {
       button.onmouseenter = null;
       button.onmouseleave = null;
       button.onclick = null;
-      //renderer.vr.setDevice(null);
+      //renderer.xr.setDevice(null);
     }
 
     function stylizeElement(element) {
@@ -136,13 +136,13 @@ var WebVR = {
 
       navigator.xr
         .requestDevice()
-        .then(function(device) {
+        .then(function (device) {
           device
             .supportsSession({
               immersive: true,
               exclusive: true /* DEPRECATED */
             })
-            .then(function() {
+            .then(function () {
               showEnterXR(device);
             })
             .catch(showVRNotFound);
@@ -157,7 +157,7 @@ var WebVR = {
 
       window.addEventListener(
         'vrdisplayconnect',
-        function(event) {
+        function (event) {
           showEnterVR(event.display);
         },
         false
@@ -165,7 +165,7 @@ var WebVR = {
 
       window.addEventListener(
         'vrdisplaydisconnect',
-        function(event) {
+        function (event) {
           showVRNotFound();
         },
         false
@@ -173,7 +173,7 @@ var WebVR = {
 
       window.addEventListener(
         'vrdisplaypresentchange',
-        function(event) {
+        function (event) {
           button.textContent = event.display.isPresenting
             ? 'EXIT VR'
             : 'ENTER VR';
@@ -183,7 +183,7 @@ var WebVR = {
 
       window.addEventListener(
         'vrdisplayactivate',
-        function(event) {
+        function (event) {
           event.display.requestPresent([
             {
               source: renderer.domElement
@@ -195,7 +195,7 @@ var WebVR = {
 
       navigator
         .getVRDisplays()
-        .then(function(displays) {
+        .then(function (displays) {
           if (displays.length > 0) {
             showEnterVR(displays[0]);
           } else {

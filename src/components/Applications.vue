@@ -8,7 +8,14 @@
         <router-link to="/applications/visualization/xr-hub" class="interface-link" tag="div">
           <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="users" class="interface-icon" />
-            <p>XR Hub</p>
+            <p>XR Hub - Desktop</p>
+          </app-tile>
+        </router-link>
+
+        <router-link to="/applications/visualization/xr-hub-vr" class="interface-link" tag="div">
+          <app-tile class="layer-three background round shadow purple-accent">
+            <font-awesome-icon icon="users" class="interface-icon" />
+            <p>XR Hub - VR</p>
           </app-tile>
         </router-link>
 

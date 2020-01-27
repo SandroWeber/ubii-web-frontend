@@ -82,8 +82,13 @@ export default new Router({
   /* applications - visualization */
   {
     path: '/applications/visualization/xr-hub',
-    name: 'Application - XR Hub',
+    name: 'Application - XR Hub Desktop',
     component: () => import('./components/applications/visualization/XRHub.vue')
+  },
+  {
+    path: '/applications/visualization/xr-hub-vr',
+    name: 'Application - XR Hub VR',
+    component: () => import('./components/applications/visualization/XRHubVR.vue')
   },
   {
     path: '/applications/visualization/3d_pose_visualizer',

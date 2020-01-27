@@ -9,9 +9,10 @@ import * as THREE from 'three';
 
 import XRHub from '../sharedModules/XRHub';
 import FirstPersonControls from '../sharedModules/FirstPersonControls';
+import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 
 export default {
-  name: 'XR-Hub-Desktop',
+  name: 'XR-Hub-VR',
   data() {
     return {};
   },
@@ -33,6 +34,12 @@ export default {
       this.xrHub.css3DScene.add(this.camera);
 
       this.controls = new FirstPersonControls(this.camera, this.container);
+
+      //this.container.appendChild(WebVR.createButton(this.xrHub.webGLRenderer));
+      this.container.appendChild(
+        VRButton.createButton(this.xrHub.webGLRenderer)
+      );
+      this.xrHub.webGLRenderer.xr.enabled = true;
     },
     animate: function() {
       const xrHub = this.xrHub;

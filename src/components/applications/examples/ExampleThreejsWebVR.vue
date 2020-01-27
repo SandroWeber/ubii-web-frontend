@@ -6,8 +6,9 @@
 
 <script>
 /* eslint-disable no-console */
-
 import * as Three from 'three';
+import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
+
 import WebVR from '../sharedModules/WebVR';
 
 export default {
@@ -47,8 +48,9 @@ export default {
       this.renderer.setSize(container.clientWidth, container.clientHeight);
       container.appendChild(this.renderer.domElement);
 
-      container.appendChild(WebVR.createButton(this.renderer));
-      this.renderer.vr.enabled = true;
+      //container.appendChild(WebVR.createButton(this.renderer));
+      container.appendChild(VRButton.createButton(this.renderer));
+      this.renderer.xr.enabled = true;
     },
     animate: function() {
       const renderer = this.renderer;
