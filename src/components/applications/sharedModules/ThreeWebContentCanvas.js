@@ -2,16 +2,18 @@ import * as THREE from 'three';
 import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 
 class ThreeWebContentCanvas {
-  constructor(url, webglScene, css3DScene) {
+  constructor(url, resolutionWidth, resolutionHeight) {
     this.url = url;
 
-    this.webglScene = webglScene;
-    this.css3DScene = css3DScene;
+    this.resolution = [resolutionWidth, resolutionHeight];
 
     this.webGLCanvas = this.createWebGLCanvas();
-    this.webglScene.add(this.webGLCanvas);
     this.css3DCanvas = this.createCSS3DCanvas();
-    this.css3DScene.add(this.css3DCanvas);
+  }
+
+  addToScenes(webGLScene, css3DScene) {
+    webGLScene.add(this.webGLCanvas);
+    css3DScene.add(this.css3DCanvas);
   }
 
   setPosition(x, y, z) {
@@ -24,6 +26,14 @@ class ThreeWebContentCanvas {
     this.css3DCanvas.quaternion.set(quat.x, quat.y, quat.z, quat.w);
   }
 
+  setSize(x, y) {
+    this.webGLCanvas.scale.set(x, y, 1);
+
+    let factorX = 1 / this.resolution[0];
+    let factorY = 1 / this.resolution[1];
+    this.css3DCanvas.scale.set(factorX * x, factorY * y, 1);
+  }
+
   createWebGLCanvas() {
     let material = new THREE.MeshBasicMaterial({
       side: THREE.DoubleSide
@@ -32,7 +42,7 @@ class ThreeWebContentCanvas {
     material.opacity = 0;
     material.blending = THREE.NoBlending;
 
-    let geometry = new THREE.PlaneGeometry();
+    let geometry = new THREE.PlaneGeometry(1, 1);
     let webglPlaneMesh = new THREE.Mesh(geometry, material);
 
     return webglPlaneMesh;
@@ -40,13 +50,13 @@ class ThreeWebContentCanvas {
 
   createCSS3DCanvas() {
     var div = document.createElement('div');
-    div.style.width = '480px';
-    div.style.height = '360px';
+    div.style.width = this.resolution[0] + 'px';
+    div.style.height = this.resolution[1] + 'px';
     div.style.backgroundColor = '#000';
 
     var iframe = document.createElement('iframe');
-    iframe.style.width = '480px';
-    iframe.style.height = '360px';
+    iframe.style.width = this.resolution[0] + 'px';
+    iframe.style.height = this.resolution[1] + 'px';
     iframe.style.border = '0px';
     iframe.src = this.url;
     div.appendChild(iframe);

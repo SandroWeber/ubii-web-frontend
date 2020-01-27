@@ -5,11 +5,10 @@
 </template>
 
 <script>
-/* eslint-disable no-console */
-
 import * as THREE from 'three';
 
 import XRHub from '../sharedModules/XRHub';
+import FirstPersonControls from '../sharedModules/FirstPersonControls';
 
 export default {
   name: 'XR-Hub',
@@ -26,33 +25,49 @@ export default {
       this.container = document.getElementById('xrhub-render-container');
 
       this.xrHub = new XRHub(this.container);
+
+      this.camera = new THREE.PerspectiveCamera(
+        70,
+        this.container.clientWidth / this.container.clientHeight,
+        0.01,
+        10
+      );
+      this.camera.position.y = 1;
+      this.camera.position.z = 1;
+      this.xrHub.webGLScene.add(this.camera);
+      this.xrHub.css3DScene.add(this.camera);
+
+      this.controls = new FirstPersonControls(this.camera, this.container);
     },
     animate: function() {
-      const renderer = this.xrHub.renderer;
-      const webContentRenderer = this.xrHub.webContentRenderer;
+      const xrHub = this.xrHub;
+      const webGLRenderer = this.xrHub.webGLRenderer;
+      const css3DRenderer = this.xrHub.css3DRenderer;
 
-      const scene = this.xrHub.scene;
-      const webContentScene = this.xrHub.webContentScene;
+      const webGLScene = this.xrHub.webGLScene;
+      const css3DScene = this.xrHub.css3DScene;
 
-      const camera = this.xrHub.camera;
-      const mesh = this.xrHub.mesh;
-      const controls = this.xrHub.controls;
+      const camera = this.camera;
+      const controls = this.controls;
       const clock = new THREE.Clock();
 
-      renderer.setAnimationLoop(function() {
+      webGLRenderer.setAnimationLoop(function() {
         let delta = clock.getDelta();
-
-        mesh.rotation.x += delta;
-        mesh.rotation.y += delta;
-        renderer.render(scene, camera);
-        webContentRenderer.render(webContentScene, camera);
+        xrHub.update(delta);
         controls.update(delta);
+        webGLRenderer.render(webGLScene, camera);
+        css3DRenderer.render(css3DScene, camera);
       });
+
+      let renderLoopWebContent = () => {
+        requestAnimationFrame(renderLoopWebContent);
+      };
+      renderLoopWebContent();
     },
     stop: function() {
       this.xrHub &&
-        this.xrHub.renderer &&
-        this.xrHub.renderer.setAnimationLoop(null);
+        this.xrHub.webGLRenderer &&
+        this.xrHub.webGLRenderer.setAnimationLoop(null);
     }
   },
   mounted() {
@@ -60,12 +75,16 @@ export default {
       this.stop();
     });
     window.addEventListener('resize', () => {
-      if (this.xrHub.camera && this.xrHub.container && this.xrHub.renderer) {
+      if (
+        this.xrHub.camera &&
+        this.xrHub.container &&
+        this.xrHub.webGLRenderer
+      ) {
         this.xrHub.camera.aspect =
           this.container.clientWidth / this.container.clientHeight;
         this.xrHub.camera.updateProjectionMatrix();
 
-        this.xrHub.renderer.setSize(
+        this.xrHub.webGLRenderer.setSize(
           this.container.clientWidth,
           this.container.clientHeight
         );

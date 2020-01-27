@@ -4,9 +4,11 @@
  * @author paulirish / http://paulirish.com/
  */
 
+/* eslint-disable no-console */
+
 import * as THREE from 'three';
 
-THREE.FirstPersonControls = function (object, domElement) {
+let FirstPersonControls = function (object, domElement) {
 
     if (domElement === undefined) {
         console.warn('THREE.FirstPersonControls: The second parameter "domElement" is now mandatory.');
@@ -50,6 +52,9 @@ THREE.FirstPersonControls = function (object, domElement) {
     this.moveBackward = false;
     this.moveLeft = false;
     this.moveRight = false;
+
+    this.shiftKey = false;
+    this.shiftMultiplier = 5;
 
     this.viewHalfX = 0;
     this.viewHalfY = 0;
@@ -146,7 +151,6 @@ THREE.FirstPersonControls = function (object, domElement) {
     };
 
     this.onKeyDown = function (event) {
-
         //event.preventDefault();
 
         switch (event.keyCode) {
@@ -165,13 +169,14 @@ THREE.FirstPersonControls = function (object, domElement) {
 
             case 82: /*R*/ this.moveUp = true; break;
             case 70: /*F*/ this.moveDown = true; break;
-
         }
 
+        if (event.shiftKey) {
+            this.shiftKey = true;
+        }
     };
 
     this.onKeyUp = function (event) {
-
         switch (event.keyCode) {
 
             case 38: /*up*/
@@ -191,6 +196,9 @@ THREE.FirstPersonControls = function (object, domElement) {
 
         }
 
+        if (event.shiftKey) {
+            this.shiftKey = false;
+        }
     };
 
     this.lookAt = function (x, y, z) {
@@ -264,6 +272,9 @@ THREE.FirstPersonControls = function (object, domElement) {
         }
 
         var actualMoveSpeed = delta * this.movementSpeed;
+        if (this.shiftKey) {
+            actualMoveSpeed *= this.shiftMultiplier;
+        }
 
         if (this.moveForward || (this.autoForward && !this.moveBackward)) this.object.translateZ(- (actualMoveSpeed + this.autoSpeedFactor));
         if (this.moveBackward) this.object.translateZ(actualMoveSpeed);
@@ -342,4 +353,4 @@ THREE.FirstPersonControls = function (object, domElement) {
 
 };
 
-export default THREE.FirstPersonControls;
+export default FirstPersonControls;
