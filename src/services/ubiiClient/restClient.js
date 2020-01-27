@@ -1,40 +1,43 @@
 /* eslint-disable no-console */
 
-import axios from 'axios';
-
-
 class RESTClient {
   /**
    * Communication endpoint implementing REST pattern.
    * @param {*} host Host to connect to.
    * @param {*} port Port to connect to.
    */
-  constructor(host = 'localhost',
-              port = 5555) {
+  constructor(host = 'localhost', port = 5555) {
     this.host = host;
     this.port = port;
-
-    //axios.defaults.headers.post['Content-Type'] = 'application/octet-stream';
+    this.useHTTPS = process.env.NODE_ENV === 'production' ? true : false;
   }
 
   send(route, message) {
-    let url = 'http://' + this.host + ':' + this.port + route;
+    let url = this.useHTTPS ? 'https://' : 'http://';
+    url += this.host + ':' + this.port + route;
 
-    return new Promise((resolve, reject) => {
-      /*axios({
-        url: url,
-        method: 'post',
-        data: message,
-        //config: { headers: {'Content-Type': 'application/octet-stream' }}
-      })*/
-      axios.post(url, message)
-        .then((response) => {
-          resolve(response.data);
-        })
-        .catch((error) => {
-          console.warn(error);
-          reject(error);
-        });
+    return new Promise(async (resolve, reject) => {
+      let body = JSON.stringify(message);
+
+      const request = new Request(url, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: body
+      });
+
+      try {
+        const response = await fetch(request);
+        if (!response.ok) {
+          throw new Error('Network response was not ok.');
+        }
+        return resolve(response.json());
+      } catch (error) {
+        console.error(error);
+        return reject(error);
+      }
     });
   }
 }
