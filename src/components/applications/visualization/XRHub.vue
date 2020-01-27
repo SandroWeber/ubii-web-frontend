@@ -58,11 +58,6 @@ export default {
         webGLRenderer.render(webGLScene, camera);
         css3DRenderer.render(css3DScene, camera);
       });
-
-      let renderLoopWebContent = () => {
-        requestAnimationFrame(renderLoopWebContent);
-      };
-      renderLoopWebContent();
     },
     stop: function() {
       this.xrHub &&
