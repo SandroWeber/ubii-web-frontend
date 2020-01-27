@@ -37,13 +37,18 @@ export default {
     this.open = true;
   },
   beforeDestroy: function() {
+    UbiiClientService.unsubscribeRegex(
+      this.regexAllTopics,
+      this.handleTopicData
+    );
     this.open = false;
   },
   data: () => {
     return {
       ubiiClientService: UbiiClientService,
       serviceTopicList: [],
-      topicData: {}
+      topicData: {},
+      regexAllTopics: '.*'
     };
   },
   methods: {
@@ -57,9 +62,13 @@ export default {
         });
       });
 
-      UbiiClientService.subscribeRegex('.*', (data, topic) => {
-        Vue.set(this.topicData, topic, util.inspect(data));
-      });
+      UbiiClientService.subscribeRegex(
+        this.regexAllTopics,
+        this.handleTopicData
+      );
+    },
+    handleTopicData: function(data, topic) {
+      Vue.set(this.topicData, topic, util.inspect(data));
     }
   }
 };

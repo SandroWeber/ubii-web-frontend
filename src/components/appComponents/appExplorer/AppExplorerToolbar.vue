@@ -15,7 +15,7 @@
     </app-button>
 
     <app-button
-      v-if="options.tools.remove"
+      v-if="options.tools.remove && allSeletedEditable()"
       :class="'tool-button round low-contrast'"
       :contentSizePercentage="60"
       @click="remove()"
@@ -66,6 +66,10 @@
       AppInput
     },
     props: {
+      selectedRecords: {
+        type: Array,
+        required: true
+      },
       options: {
         type: Object,
         required: true,
@@ -86,6 +90,9 @@
       refresh: function(){
         this.$emit('refresh');
       },
+      allSeletedEditable: function() {
+        return this.selectedRecords.every(record => { return record.editable; });
+      }
     },
     computed: {
       filter: {

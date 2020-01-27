@@ -26,6 +26,7 @@
             class="layer-two round title-input"
             :id="'input-interaction-authors'"
             :type="'type'"
+            :isDisabled="!isEditable"
             v-model="authorsSource"
           />
           <!-- tags -->
@@ -34,6 +35,7 @@
             class="layer-two round title-input"
             :id="'input-interaction-tags'"
             :type="'type'"
+            :isDisabled="!isEditable"
             v-model="tagsSource"
           />
           <!-- description -->
@@ -42,6 +44,7 @@
             class="layer-two round title-input"
             :id="'input-interaction-description'"
             :type="'type'"
+            :isDisabled="!isEditable"
             v-model="descriptionSource"
           />
         </div>
@@ -55,7 +58,7 @@
         class="layer-three"
       />
       <div id="oncreated-content" class="code-wrapper layer-three border round">
-        <source-code-mirror v-model="onCreatedSource"></source-code-mirror>
+        <source-code-mirror v-model="onCreatedSource" :isEditable="isEditable"></source-code-mirror>
       </div>
     </div>
 
@@ -72,6 +75,7 @@
             class="process-frequency-input layer-two round title-input"
             :id="'input-interaction-processFrequency'"
             :type="'type'"
+            :isDisabled="!isEditable"
             v-model="processFrequencySource"
           />
         </div>
@@ -83,7 +87,7 @@
             :code="processingCallbackSource"
           />
           <div class="code-wrapper layer-three border round">
-            <source-code-mirror v-model="processingCallbackSource"></source-code-mirror>
+            <source-code-mirror v-model="processingCallbackSource" :isEditable="isEditable"></source-code-mirror>
           </div>
           <interaction-mirror-interface-list
             v-model="outputFormatSource"
@@ -113,7 +117,12 @@ library.add(faCaretDown, faCaretRight);
 export default {
   name: 'InteractionMirror',
   props: {
-    value: Object
+    value: Object,
+    isEditable: {
+      type: Boolean,
+      required: false,
+      default: true
+    }
   },
   components: {
     SourceCodeMirror,
