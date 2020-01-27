@@ -34,13 +34,7 @@ class WebsocketClient {
       let url = this.useHTTPS ? 'wss://' : 'ws://';
       url += `${this.host}:${this.port}?clientID=${this.identity}`;
       console.info(url);
-      this.websocket = new WebSocket(
-        url /*, {
-        protocolVersion: 8,
-        origin: 'https://localhost:' + this.port.toString(),
-        rejectUnauthorized: false
-      }*/
-      );
+      this.websocket = new WebSocket(url);
     } catch (error) {
       console.error(error);
     }
