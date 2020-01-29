@@ -128,7 +128,7 @@ export default {
 };
 </script>
 
-<style scoped lang="stylus">
+<style scoped>
 .performance-test-rtt {
   display: grid;
   grid-gap: 15px;
