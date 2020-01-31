@@ -27,6 +27,7 @@ class XRHub {
       this.container.clientHeight
     );
     this.webGLRenderer.domElement.style.zIndex = '1'; // required
+    this.webGLRenderer.domElement.style.pointerEvents = "none"; // required
     this.container.appendChild(this.webGLRenderer.domElement);
   }
 
