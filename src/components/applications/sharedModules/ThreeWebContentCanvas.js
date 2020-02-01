@@ -38,7 +38,7 @@ class ThreeWebContentCanvas {
     let material = new THREE.MeshBasicMaterial({
       side: THREE.DoubleSide
     });
-    material.color.set('white');
+    material.color.set('black');
     material.opacity = 0;
     material.blending = THREE.NoBlending;
 
