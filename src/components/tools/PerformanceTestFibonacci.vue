@@ -7,28 +7,40 @@
       @click="startTest()"
       :disabled="!ubiiClientService.isConnected"
     >
-      <font-awesome-icon icon="play" v-show="this.testData.status !== 'running'" />
-      <font-awesome-icon icon="spinner" v-show="this.testData.status === 'running'" />
+      <font-awesome-icon
+        icon="play"
+        v-show="this.testData.status !== 'running'"
+      />
+      <font-awesome-icon
+        icon="spinner"
+        v-show="this.testData.status === 'running'"
+      />
     </app-button>
 
     <div class="statistics-grid">
       <span>Status:</span>
-      <span class="test-status">{{this.testData.status}}</span>
+      <span class="test-status">{{ this.testData.status }}</span>
       <span>Number of correctly processed iterations:</span>
-      <span class="test-status">{{this.testData.numProcessingIterations}}</span>
+      <span class="test-status">{{
+        this.testData.numProcessingIterations
+      }}</span>
     </div>
 
     <div class="separator"></div>
 
     <div class="settings-grid">
-      <label for="fibonacci-session-count" class="setting-label"># sessions:</label>
+      <label for="fibonacci-session-count" class="setting-label"
+        ># sessions:</label
+      >
       <app-input
         :id="'fibonacci-session-count'"
         :type="'# sessions'"
         v-model="testData.sessionCount"
       />
 
-      <label for="fibonacci-interaction-count" class="setting-label"># interactions:</label>
+      <label for="fibonacci-interaction-count" class="setting-label"
+        ># interactions:</label
+      >
       <app-input
         :id="'fibonacci-interaction-count'"
         :type="'# interactions'"
@@ -38,7 +50,8 @@
       <label
         for="fibonacci-sequence-length"
         class="setting-label setting-3-label"
-      >fib sequence length (n):</label>
+        >fib sequence length (n):</label
+      >
       <app-input
         :id="'fibonacci-sequence-length'"
         class="setting-3-input"
@@ -50,15 +63,15 @@
 </template>
 
 <script>
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
-
-import { AppInput, AppButton } from '../appComponents/appComponents.js';
-
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faPlay, faSpinner } from '@fortawesome/free-solid-svg-icons';
 library.add(faPlay, faSpinner);
+
+import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import { AppInput, AppButton } from '../appComponents/appComponents.js';
+import PerformanceTestFibonacciHelper from './tests/performanceTestFibonacciHelper';
 
 export default {
   name: 'PerformanceTest-FibonacciProcessing',

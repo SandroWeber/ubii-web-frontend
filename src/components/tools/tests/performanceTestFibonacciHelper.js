@@ -1,49 +1,95 @@
 import uuidv4 from 'uuid/v4';
 
 class PerformanceTestFibonacciHelper {
-    processingCallback(inputs, outputs, state) {
-        let fibonacci = (num) => {
-            var a = 1, b = 0, temp;
+  processingCallback(inputs, outputs, state) {
+    let fibonacci = num => {
+      var a = 1,
+        b = 0,
+        temp;
 
-            while (num >= 0) {
-                temp = a;
-                a = a + b;
-                b = temp;
-                num--;
-            }
+      while (num >= 0) {
+        temp = a;
+        a = a + b;
+        b = temp;
+        num--;
+      }
 
-            return b;
+      return b;
+    };
+    let result = fibonacci(inputs.fibonacciInput);
+
+    outputs.fibonacciResult = result;
+  }
+
+  static createInteractionSpecs(number) {
+    return {
+      id: uuidv4(),
+      name: 'test-fibonacci-interaction-' + number,
+      inputFormats: [
+        {
+          internalName: 'fibonacciInput',
+          messageFormat: 'double'
         }
-        let result = fibonacci(inputs.fibonacciLength);
-
-        if (result === inputs.correctValue) {
-            outputs.finishedProcessingID = inputs.myID;
+      ],
+      outputFormats: [
+        {
+          internalName: 'fibonacciResult',
+          messageFormat: 'double'
         }
+      ],
+      processingCallback: this.processingCallback.toString()
+    };
+  }
+
+  createSessionSpecs(number) {
+    return {
+      id: uuidv4(),
+      name: 'test-fibonacci-session-' + number,
+      interactions: [],
+      ioMappings: []
+    };
+  }
+
+  addInteractionToSession(sessionSpecs, interactionSpecs) {
+    sessionSpecs.interactions.push(interactionSpecs);
+
+    let topicPrefix = '/' + interactionSpecs.id + '/';
+    let ioMappings = {
+      interactionId: interactionSpecs.id,
+      inputMappings: [],
+      outputMappings: []
+    };
+    interactionSpecs.inputFormats.forEach(element => {
+      ioMappings.inputMappings.push({
+        name: element.internalName,
+        topicSource: topicPrefix + element.internalName
+      });
+    });
+    interactionSpecs.outputFormats.forEach(element => {
+      ioMappings.outputMappings.push({
+        name: element.internalName,
+        topicDestination: topicPrefix + element.internalName
+      });
+    });
+    sessionSpecs.ioMappings.push(ioMappings);
+  }
+
+  createTestSpecs(sessionCount, interactionCountPerSession) {
+    let allSessionSpecs = [];
+
+    for (let s = 0; s < sessionCount; s++) {
+      let sessionSpecs = this.createSessionSpecs(s);
+
+      for (let i = 0; i < interactionCountPerSession; i++) {
+        let interactionSpecs = this.createInteractionSpecs(i);
+        this.addInteractionToSession(sessionSpecs, interactionSpecs);
+      }
+
+      allSessionSpecs.push(sessionSpecs);
     }
 
-    static createInteractionSpecs() {
-        return {
-            id: uuidv4(),
-            name: 'test-fibonacci-interaction',
-            inputFormats: [{
-                internalName: 'myID',
-                messageFormat: 'string'
-            },
-            {
-                internalName: 'fibonacciLength',
-                messageFormat: 'double'
-            },
-            {
-                internalName: 'correctValue',
-                messageFormat: 'double'
-            }],
-            output_formats: [{
-                internalName: 'finishedProcessingID',
-                messageFormat: 'string'
-            }],
-            processingCallback: this.processingCallback.toString()
-        }
-    }
+    return allSessionSpecs;
+  }
 }
 
 export default PerformanceTestFibonacciHelper;
