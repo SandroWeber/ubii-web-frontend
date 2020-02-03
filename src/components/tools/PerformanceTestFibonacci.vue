@@ -44,7 +44,7 @@
       <app-input
         :id="'fibonacci-interaction-count'"
         :type="'# interactions'"
-        v-model="testData.interactionCount"
+        v-model="testData.interactionCountPerSession"
       />
 
       <label
@@ -94,12 +94,13 @@ export default {
       testRunning: false,
       testData: {
         sessionCount: '1',
-        interactionCount: '5',
+        interactionCountPerSession: '5',
         fibSequenceLength: '20',
         status: 'unmeasured',
         numProcessingIterations: 'N/A',
         processingInteractionIDs: [],
-        device: {
+        allSessionsSpecs: []
+        /*device: {
           name: 'fibonacci-performance-test-device',
           deviceType:
             ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
@@ -111,13 +112,13 @@ export default {
               ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
             }
           ]
-        }
+        }*/
       }
     };
   },
   methods: {
     ubiiSetup: async function() {
-      if (!this.testData.device.registered) {
+      /*if (!this.testData.device.registered) {
         return UbiiClientService.registerDevice(this.testRTT.device).then(
           device => {
             this.testData.device = device;
@@ -127,20 +128,68 @@ export default {
         );
       } else {
         return this.testData.device;
-      }
+      }*/
     },
     prepareTest: function() {
-      this.testData.status = 'running';
+      // create all the specs for sessions and interactions
+      this.testData.allSessionsSpecs = PerformanceTestFibonacciHelper.createTestSpecs(
+        this.testData.sessionCount,
+        this.testData.interactionCountPerSession
+      );
+
+      this.testData.allSessionsSpecs.forEach(sessionSpec => {
+        sessionSpec.ioMappings.forEach(ioMapping => {
+          // publish the sequence lengths to be calculated for each interaction
+          ioMapping.inputMappings.forEach(inputMapping => {
+            if (
+              inputMapping.name.indexOf(
+                PerformanceTestFibonacciHelper.SEQENCE_LENGTH_INPUT_SUFFIX
+              ) !== -1
+            ) {
+              UbiiClientService.publishRecord({
+                topic:
+                  '/' +
+                  ioMapping.interactionId +
+                  '/' +
+                  PerformanceTestFibonacciHelper.SEQENCE_LENGTH_INPUT_SUFFIX,
+                double: parseFloat(this.testData.fibSequenceLength)
+              });
+            }
+          });
+
+          // subscribe to all interaction output topics
+          ioMapping.outputMappings.forEach(outputMapping => {
+            if (
+              outputMapping.name.indexOf(
+                PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX
+              ) !== -1
+            ) {
+              let subscriptionTopic =
+                '/' +
+                ioMapping.interactionId +
+                '/' +
+                PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX;
+              UbiiClientService.subscribe(
+                subscriptionTopic,
+                this.onProcessingFinishedCallback
+              );
+            }
+          });
+        });
+      });
     },
     startTest: async function() {
-      if (this.testData.status === 'running') return;
-
-      await UbiiClientService.deregisterDevice(this.testData.device);
-      await UbiiClientService.unsubscribe(
+      //await UbiiClientService.deregisterDevice(this.testData.device);
+      /*await UbiiClientService.unsubscribe(
         this.testData.device.components[0].topic
-      );
+      );*/
+
+      this.prepareTest();
+
+      this.testData.status = 'running';
     },
-    stopTest: async function() {}
+    stopTest: async function() {},
+    onProcessingFinishedCallback: function(topic, float) {}
   }
 };
 </script>

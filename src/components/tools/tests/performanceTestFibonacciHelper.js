@@ -1,7 +1,9 @@
 import uuidv4 from 'uuid/v4';
 
 class PerformanceTestFibonacciHelper {
-  processingCallback(inputs, outputs, state) {
+  static SEQENCE_LENGTH_INPUT_SUFFIX = 'fibonacciInput';
+  static PROCESSED_OUTPUT_SUFFIX = 'fibonacciResult';
+  static processingCallback(inputs, outputs, state) {
     let fibonacci = num => {
       var a = 1,
         b = 0,
@@ -27,21 +29,22 @@ class PerformanceTestFibonacciHelper {
       name: 'test-fibonacci-interaction-' + number,
       inputFormats: [
         {
-          internalName: 'fibonacciInput',
+          internalName:
+            PerformanceTestFibonacciHelper.SEQENCE_LENGTH_INPUT_SUFFIX,
           messageFormat: 'double'
         }
       ],
       outputFormats: [
         {
-          internalName: 'fibonacciResult',
+          internalName: PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX,
           messageFormat: 'double'
         }
       ],
-      processingCallback: this.processingCallback.toString()
+      processingCallback: PerformanceTestFibonacciHelper.processingCallback.toString()
     };
   }
 
-  createSessionSpecs(number) {
+  static createSessionSpecs(number) {
     return {
       id: uuidv4(),
       name: 'test-fibonacci-session-' + number,
@@ -50,7 +53,7 @@ class PerformanceTestFibonacciHelper {
     };
   }
 
-  addInteractionToSession(sessionSpecs, interactionSpecs) {
+  static addInteractionToSession(sessionSpecs, interactionSpecs) {
     sessionSpecs.interactions.push(interactionSpecs);
 
     let topicPrefix = '/' + interactionSpecs.id + '/';
@@ -74,7 +77,7 @@ class PerformanceTestFibonacciHelper {
     sessionSpecs.ioMappings.push(ioMappings);
   }
 
-  createTestSpecs(sessionCount, interactionCountPerSession) {
+  static createTestSpecs(sessionCount, interactionCountPerSession) {
     let allSessionSpecs = [];
 
     for (let s = 0; s < sessionCount; s++) {
