@@ -1,20 +1,51 @@
 <template>
     <div id="graph-view">
-        <div id="example-threejs-render-container" class="render-container"></div>
+        <div id="force-graph-container" class="render-container"></div>
+        <div id="threejs-container" class="render-container">
+            <div id="helper-container">
+                <b-button class="mb-2" variant="primary" @click="$bvToast.show('controls-toast')">
+                    <KeyboardIcon fillColor="#FF0000" />
+                </b-button>
+                <b-toast class="toaster-body" id="controls-toast" title="Controls" static>
+                    <p><Numeric1BoxIcon /> <span class="text">to</span> <Numeric4BoxIcon />  <span class="text">: Set node to Level (-4) to (-1)</span></p>
+                    <p><Numeric5BoxIcon /><span class="text">: Set node to Level 0</span></p>
+                    <p><Numeric6BoxIcon /> <span class="text">to</span> <Numeric9BoxIcon />  <span class="text">: Set node to Level 1 to 4</span></p>
+                    <p><AlphaWBoxIcon /> <AlphaABoxIcon /> <AlphaSBoxIcon /> <AlphaDBoxIcon /><span class="text">: Camera Pan Controls</span></p>
+                    <p><AlphaRBoxIcon /><span class="text">: Reset Camera to Front/2D View</span></p>
+                </b-toast>
+            </div>
+            <div id="node-label" class="tooltip-label"></div>
+        </div>
     </div>
 </template>
 
 <script>
-  import * as THREE from 'three';
   import $ from 'jquery';
-  import ForceGraph3D from '3d-force-graph';
+  import Vue from 'vue';
+  import { ForceGraphVis } from './modules/visualization/3d-force-graph';
+  import { setupThreejsEnvironment } from './modules/visualization/threejs-setup';
 
-  const OrbitControls = require('three-orbit-controls')(THREE);
+  import 'bootstrap/dist/css/bootstrap.css';
+  import 'bootstrap-vue/dist/bootstrap-vue.css';
+  import { BToast, BButton } from 'bootstrap-vue';
+
+  import 'vue-material-design-icons/styles.css';
+  import KeyboardIcon from 'vue-material-design-icons/Keyboard.vue';
+  import Numeric1BoxIcon from 'vue-material-design-icons/Numeric1Box.vue';
+  import Numeric4BoxIcon from 'vue-material-design-icons/Numeric4Box.vue';
+  import Numeric5BoxIcon from 'vue-material-design-icons/Numeric5Box.vue';
+  import Numeric6BoxIcon from 'vue-material-design-icons/Numeric6Box.vue';
+  import Numeric9BoxIcon from 'vue-material-design-icons/Numeric9Box.vue';
+  import AlphaWBoxIcon from 'vue-material-design-icons/AlphaWBox.vue';
+  import AlphaABoxIcon from 'vue-material-design-icons/AlphaABox.vue';
+  import AlphaSBoxIcon from 'vue-material-design-icons/AlphaSBox.vue';
+  import AlphaDBoxIcon from 'vue-material-design-icons/AlphaDBox.vue';
+  import AlphaRBoxIcon from 'vue-material-design-icons/AlphaRBox.vue';
 
   export default {
     name: 'GraphView',
     props: {
-      session: {
+      dataset: {
         type: Object,
         required: true
       },
@@ -22,88 +53,90 @@
         type: Object
       }
     },
+    components: {
+      'b-toast': BToast,
+      'b-button': BButton,
+      KeyboardIcon,
+      Numeric1BoxIcon,
+      Numeric4BoxIcon,
+      Numeric5BoxIcon,
+      Numeric6BoxIcon,
+      Numeric9BoxIcon,
+      AlphaWBoxIcon,
+      AlphaABoxIcon,
+      AlphaSBoxIcon,
+      AlphaDBoxIcon,
+      AlphaRBoxIcon,
+    },
     data: () => {
       return {
-        camera: null,
-        scene: null,
-        renderer: null,
-        mesh: [],
-        controls: null,
-        graph: null
+        visualizations: {},
+        view: 0,
       };
     },
     watch: {
-      session: function(newVal, oldVal) {
-        this.reinit(newVal);
+      view: function(val) {
+        if (val < 0 || val > 3) {
+          return;
+        }
+        if(val == 0) {
+          this.visualizations.forceGraph.resumeAnimation();
+          $('#threejs-container').hide();
+          $('#force-graph-container').show();
+        }
+
+        if(val == 1) {
+          this.visualizations.forceGraph.pauseAnimation();
+          $('#force-graph-container').hide();
+          $('#threejs-container').show();
+        }
       }
     },
     methods: {
       init: function() {
-        this.graph = ForceGraph3D({ width: 500 });
-        this.graph(document.getElementById('example-threejs-render-container'));
-        this.graph.d3Force('charge').strength(-150);
-        this.graph.nodeColor(node => (node.id == 'id1' || node.id == 'id2') ? 'red' : 'blue');
-        this.graph.backgroundColor('#19181A');
-        $(window).resize(this.resize);
-        this.resize();
-        this.reinit(this.$props.session);
-        this.eventBus.$on('get-msg', (msg) => {
-          console.log(msg);
-        })
-      },
-      reinit: function(newVal) {
-        this.graph.graphData({
-          'nodes': [{ id: 'id1', name: 'Input - Start', val: 0},
-            { id: 'id2', name: 'Output End', val: 0}],
-          'links': [{ source: 'id1', target: 'id2' }]
+        this.eventBus.$on('view-change', (val) => {
+          this.view = val;
         });
-        if (newVal.interactions.length > 0) {
-          this.addNodes(newVal.interactions);
-        }
-      },
-      resize: function() {
-        let width = parseInt($(window).width()) - parseInt($('#side-bar').css('width'));
-        let height = parseInt($('#side-bar').css('height'));
-        this.graph.width(width).height(height).refresh();
-      },
-      animate: function() {
 
+        this.visualizations.forceGraph = ForceGraphVis(document.getElementById('force-graph-container'))(this.$props.dataset);
+        this.visualizations.threegraph = setupThreejsEnvironment(document.getElementById('threejs-container'), this.$props.dataset);
       },
-      stop: function() {
-
-      },
-      addNodes: function(interactions) {
-        const { nodes, links } = this.graph.graphData();
-        let newNodes = [], newLinks = [];
-        interactions.forEach(((interaction) => {
-          newNodes.push({ id: interaction.id, name: interaction.name, val: 0 });
-        }));
-        newNodes.forEach((interaction, index) => {
-          if (index < newNodes.length - 1) {
-            newLinks.push({ source: interaction.id, target: newNodes[index + 1].id });
-          }
-        });
-        newLinks.push({ source: 'id1', target: newNodes[0].id }, {
-          source: newNodes[newNodes.length - 1].id,
-          target: 'id2'
-        });
-        this.graph.graphData({ nodes: [...nodes, ...newNodes], links: newLinks });
-      }
     },
     mounted() {
-      window.addEventListener('beforeunload', () => {
-        this.stop();
-      });
-
       this.init();
     },
-    beforeDestroy: function() {
-      this.stop();
-    }
   };
 </script>
 
 <style scoped>
+    .toaster-body {
+        color: black;
+    }
+
+    .toaster-body >>> span.material-design-icon, .toaster-body >>> svg {
+        width: 30px;
+        height: 30px;
+    }
+
+    .toaster-body >>> span.text {
+        display: inline-flex;
+        align-self: center;
+        position: relative;
+        height: 30px;
+        justify-content: center;
+        align-items: center;
+        top: -8px;
+    }
+
+    .mb-2 >>> svg, .mb-2 >>> span {
+        width: 25px;
+        height: 25px;
+    }
+
+    .toaster-body >>> p {
+        margin: 0;
+    }
+
     #graph-view {
         height: 100%;
         overflow: hidden;
@@ -114,5 +147,23 @@
 
     .render-container {
         height: 100%;
+        position: relative;
+        z-index: 1;
+    }
+
+    #helper-container {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        display: inline-block;
+        /*background-color: rgba(255,255,255,0.5);*/
+        z-index: 2;
+    }
+
+    .tooltip-label {
+        position: absolute;
+        z-index: 3;
+        color: white;
+        font-size: 1.0rem;
     }
 </style>

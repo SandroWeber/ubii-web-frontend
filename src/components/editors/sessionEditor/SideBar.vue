@@ -108,7 +108,6 @@
     .side-bar {
         height: 100%;
         background-color: #221F22;
-        flex-grow: 1;
         display: flex;
         flex-direction: column;
         border-right: 1px solid black;

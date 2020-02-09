@@ -8,7 +8,7 @@
   export default {
     name: 'TopBar',
     props: {
-      session: {
+      dataset: {
         type: Object,
         required: true
       },

@@ -14,11 +14,11 @@
                 ></side-bar>
                 <div class="main">
                     <top-bar class="top-bar-instance"
-                         :session="session"
+                         :dataset="session"
                     ></top-bar>
 
                     <graph-view
-                            :session="session"
+                            :dataset="session"
                             :eventBus="eventBus"
                     ></graph-view>
                 </div>
@@ -46,6 +46,8 @@
   import { faPlay } from '@fortawesome/free-solid-svg-icons';
   import { scenarios } from './modules/session-scenarios';
 
+  import { DataTranslator } from './modules/utils';
+
 
   library.add(faPlay);
 
@@ -65,6 +67,7 @@
         selectedInteraction: '',
         ubiiClientService: UbiiClientService,
         eventBus: null,
+        translator: null
       };
     },
     watch: {
@@ -73,11 +76,14 @@
     computed: {
       session: function() {
         let search = this.$data.sessions.filter(el => el.id === this.$data.selected);
+        let result;
         if(search.length != 1) {
-          return this.$data.scenarios.filter(el => el.id === this.$data.selected)[0].session;
+          result = this.$data.scenarios.filter(el => el.id === this.$data.selected)[0].session;
         } else {
-          return search[0];
+          result = search[0];
         }
+        let a =this.translator.translateFromUbii(result);
+        return a;
       }
     },
     created: function() {
@@ -85,6 +91,7 @@
     },
     beforeMount: function() {
       this.eventBus = new Vue();
+      this.translator = new DataTranslator();
     },
     mounted: function() {
       // unsubscribe before page is suddenly closed
@@ -108,6 +115,7 @@
 
       });
       this.select('0');
+
     },
     beforeDestroy: function() {
       this.stopEditor();

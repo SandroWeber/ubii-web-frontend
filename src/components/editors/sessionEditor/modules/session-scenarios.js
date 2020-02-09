@@ -6,7 +6,24 @@ let scenarios = [
     name: 'Scenario 1',
     session: {
       interactions: [{
-        id: uuidv4(),
+        id: '0',
+        name: 'interaction_0',
+        processingCallback: () => {},
+        processFrequency: 60,
+        inputFormats: [
+          {
+            internalName: 'input-name_0',
+            messageFormat: 'ubii.dataStructure.Vector2'
+          },
+        ],
+        outputFormats: [
+          {
+            internalName: 'output-name_0',
+            messageFormat: 'ubii.dataStructure.Vector2'
+          }
+        ]
+      }, {
+        id: '1',
         name: 'interaction_1',
         processingCallback: () => {},
         processFrequency: 60,
@@ -23,7 +40,7 @@ let scenarios = [
           }
         ]
       }, {
-        id: uuidv4(),
+        id: '2',
         name: 'interaction_2',
         processingCallback: () => {},
         processFrequency: 60,
@@ -40,7 +57,7 @@ let scenarios = [
           }
         ]
       }, {
-        id: uuidv4(),
+        id: '3',
         name: 'interaction_3',
         processingCallback: () => {},
         processFrequency: 60,
@@ -56,25 +73,69 @@ let scenarios = [
             messageFormat: 'ubii.dataStructure.Vector2'
           }
         ]
-      }, {
-        id: uuidv4(),
-        name: 'interaction_4',
-        processingCallback: () => {},
-        processFrequency: 60,
-        inputFormats: [
-          {
-            internalName: 'input-name_4',
-            messageFormat: 'ubii.dataStructure.Vector2'
-          },
-        ],
-        outputFormats: [
-          {
-            internalName: 'output-name_4',
-            messageFormat: 'ubii.dataStructure.Vector2'
-          }
-        ]
       },],
-      ioMappings: [],
+      ioMappings: [
+        {
+          interactionId: '0',
+          inputMappings: [
+            {
+              name: 'input-name_0',
+              topicSource: 'topic0'
+            },
+          ],
+          outputMappings: [
+            {
+              name: 'output-name_0',
+              topicDestination: 'topic1'
+            }
+          ]
+        },
+        {
+          interactionId: '1',
+          inputMappings: [
+            {
+              name: 'input-name_1',
+              topicSource: 'topic1'
+            },
+          ],
+          outputMappings: [
+            {
+              name: 'output-name_1',
+              topicDestination: 'topic2'
+            }
+          ]
+        },
+        {
+          interactionId: '2',
+          inputMappings: [
+            {
+              name: 'input-name_2',
+              topicSource: 'topic1'
+            },
+          ],
+          outputMappings: [
+            {
+              name: 'output-name_2',
+              topicDestination: 'topic2'
+            }
+          ]
+        },
+        {
+          interactionId: '3',
+          inputMappings: [
+            {
+              name: 'input-name_3',
+              topicSource: 'topic2'
+            },
+          ],
+          outputMappings: [
+            {
+              name: 'output-name_3',
+              topicDestination: 'topic3'
+            }
+          ]
+        }
+      ],
       tags: [],
       authors: [],
       id: '',
