@@ -24,7 +24,7 @@
         selected: 1,
         options: [
           { value: 0, text: 'Simple 3D Force-Graph' },
-          { value: 1, text: 'Visualization with Topics' }
+          { value: 1, text: 'Custom 3D Graph' }
         ]
       };
     },

@@ -3,7 +3,7 @@
         <div id="force-graph-container" class="render-container"></div>
         <div id="threejs-container" class="render-container">
             <div id="helper-container">
-                <b-button class="mb-2" variant="primary" @click="$bvToast.show('controls-toast')">
+                <b-button id="controls-btn" class="mb-2" variant="primary" @click="$bvToast.show('controls-toast')">
                     <KeyboardIcon fillColor="#FF0000" />
                 </b-button>
                 <b-toast class="toaster-body" id="controls-toast" title="Controls" static>
@@ -11,10 +11,12 @@
                     <p><Numeric5BoxIcon /><span class="text">: Set node to Level 0</span></p>
                     <p><Numeric6BoxIcon /> <span class="text">to</span> <Numeric9BoxIcon />  <span class="text">: Set node to Level 1 to 4</span></p>
                     <p><AlphaWBoxIcon /> <AlphaABoxIcon /> <AlphaSBoxIcon /> <AlphaDBoxIcon /><span class="text">: Camera Pan Controls</span></p>
-                    <p><AlphaRBoxIcon /><span class="text">: Reset Camera to Front/2D View</span></p>
+                    <p><AlphaXBoxIcon /><span class="text">: Reset Camera to Main View (X-Axis/2D/Front)</span></p>
+                    <p><AlphaYBoxIcon /><span class="text">: Reset Camera to Level View (Y-Axis/2D/Side)</span></p>
                 </b-toast>
             </div>
             <div id="node-label" class="tooltip-label"></div>
+            <b-button id="view-badge" class="vis-badge" variant="primary">View: X-Axis (Main)</b-button>
         </div>
     </div>
 </template>
@@ -27,7 +29,7 @@
 
   import 'bootstrap/dist/css/bootstrap.css';
   import 'bootstrap-vue/dist/bootstrap-vue.css';
-  import { BToast, BButton } from 'bootstrap-vue';
+  import { BToast, BButton, BBadge } from 'bootstrap-vue';
 
   import 'vue-material-design-icons/styles.css';
   import KeyboardIcon from 'vue-material-design-icons/Keyboard.vue';
@@ -40,7 +42,8 @@
   import AlphaABoxIcon from 'vue-material-design-icons/AlphaABox.vue';
   import AlphaSBoxIcon from 'vue-material-design-icons/AlphaSBox.vue';
   import AlphaDBoxIcon from 'vue-material-design-icons/AlphaDBox.vue';
-  import AlphaRBoxIcon from 'vue-material-design-icons/AlphaRBox.vue';
+  import AlphaXBoxIcon from 'vue-material-design-icons/AlphaXBox.vue';
+  import AlphaYBoxIcon from 'vue-material-design-icons/AlphaYBox.vue';
 
   export default {
     name: 'GraphView',
@@ -56,6 +59,7 @@
     components: {
       'b-toast': BToast,
       'b-button': BButton,
+      'b-badge': BBadge,
       KeyboardIcon,
       Numeric1BoxIcon,
       Numeric4BoxIcon,
@@ -66,7 +70,8 @@
       AlphaABoxIcon,
       AlphaSBoxIcon,
       AlphaDBoxIcon,
-      AlphaRBoxIcon,
+      AlphaXBoxIcon,
+      AlphaYBoxIcon,
     },
     data: () => {
       return {
@@ -160,10 +165,29 @@
         z-index: 2;
     }
 
+    #controls-btn {
+        padding: 2px 0.75em;
+    }
+
     .tooltip-label {
         position: absolute;
         z-index: 3;
         color: white;
         font-size: 1.0rem;
+        background-color: #0069D9;
+        border: 1px solid white;
+        border-radius: 4px;
+        padding: 2px;
+    }
+
+    .vis-badge {
+        position: absolute;
+        z-index: 3;
+    }
+
+    #view-badge {
+        left: 80px;
+        top: 10px;
+        height: 38px;
     }
 </style>
