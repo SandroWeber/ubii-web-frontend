@@ -104,7 +104,7 @@ export default {
         settings: {
           sessionCount: '1',
           interactionCountPerSession: '5',
-          fibSequenceLength: '50',
+          fibSequenceLength: '999999',
           testDurationSeconds: '5'
         },
         statistics: {
