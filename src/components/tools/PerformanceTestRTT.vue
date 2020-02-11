@@ -3,7 +3,7 @@
     <h3>Round-Trip-Time</h3>
 
     <app-button
-      class="rtt-start-button"
+      class="start-button"
       @click="startTestRTT()"
       :disabled="!ubiiClientService.isConnected"
     >
@@ -11,9 +11,15 @@
       <font-awesome-icon icon="spinner" v-show="this.$data.testRTT.status === 'running'" />
     </app-button>
 
-    <span class="performance-test-rtt-status">{{this.$data.testRTT.status}}</span>
+    <div class="statistics-grid">
+      <!-- status -->
+      <span>Status:</span>
+      <span class="test-status">{{ this.$data.testRTT.status }}</span>
+    </div>
 
-    <div>
+    <div class="separator"></div>
+
+    <div class="settings-grid">
       <label for="rtt-message-count"># messages:</label>
       <app-input :id="'rtt-message-count'" :type="'# messages'" v-model="testRTT.messageCount" />
     </div>
@@ -128,14 +134,9 @@ export default {
 };
 </script>
 
-<style scoped lang="stylus">
-.performance-test-rtt {
-  display: grid;
-  grid-gap: 15px;
-  grid-template-columns: 200px auto;
-}
-
-.rtt-start-button {
+<style scoped>
+.start-button {
+  grid-area: run;
   width: 50px;
 }
 
@@ -147,5 +148,36 @@ export default {
 
 .fa-spinner {
   animation: spinner 1s linear infinite;
+}
+
+.performance-test-rtt {
+  display: grid;
+  grid-gap: 15px;
+  grid-template-columns: 50px 1fr 3px 1fr;
+  grid-template-rows: 20px 1fr;
+  grid-template-areas:
+    'run title title title'
+    'empty statistics separator settings';
+}
+
+.statistics-grid {
+  grid-area: statistics;
+  display: grid;
+  grid-gap: 15px;
+  grid-template-columns: 300px 1fr;
+  grid-template-rows: 25px;
+}
+
+.separator {
+  grid-area: separator;
+  background-color: white;
+}
+
+.settings-grid {
+  grid-area: settings;
+  display: grid;
+  grid-gap: 15px;
+  grid-template-columns: 200px 100px 200px 100px;
+  grid-template-rows: 25px;
 }
 </style>

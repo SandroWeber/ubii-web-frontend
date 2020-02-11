@@ -1,29 +1,38 @@
 <template>
-    <div class="performance-tests-grid">
-        <div class="performance-tests-section">
-            <performance-test-rtt></performance-test-rtt>
-        </div>
+  <div class="performance-tests-grid">
+    <div class="performance-tests-section">
+      <performance-test-rtt class="performance-test"></performance-test-rtt>
+      <performance-test-fibonacci class="performance-test"></performance-test-fibonacci>
     </div>
+  </div>
 </template>
 
 <script>
-  import PerformanceTestRTT from './PerformanceTestRTT.vue';
+import PerformanceTestRTT from './PerformanceTestRTT.vue';
+import PerformanceTestFibonacci from './PerformanceTestFibonacci.vue';
 
-  export default {
-    name: 'PerformanceTests',
-    components: {
-      PerformanceTestRtt: PerformanceTestRTT
-    }
+export default {
+  name: 'PerformanceTests',
+  components: {
+    PerformanceTestRtt: PerformanceTestRTT,
+    PerformanceTestFibonacci: PerformanceTestFibonacci
   }
+};
 </script>
 
 <style scoped lang="stylus">
-    .performance-tests-grid
-        display: grid
-        grid-gap: 15px
-        grid-template-columns: 1fr
+.performance-tests-grid {
+  display: grid;
+  grid-gap: 15px;
+  grid-template-columns: 1fr;
+}
 
-    .performance-tests-section
-        border-bottom: 3px solid white
-        margin: 15px
+.performance-tests-section {
+}
+
+.performance-test {
+  margin: 20px;
+  padding: 20px;
+  border-bottom: 3px solid white;
+}
 </style>
