@@ -3,7 +3,7 @@ import uuidv4 from 'uuid/v4';
 class PerformanceTestFibonacciHelper {
   static SEQENCE_LENGTH_INPUT_SUFFIX = 'fibonacciInput';
   static PROCESSED_OUTPUT_SUFFIX = 'fibonacciResult';
-  static processingCallback(inputs, outputs, state) {
+  static processingCallback(inputs, outputs) {
     let fibonacci = num => {
       var a = 1,
         b = 0,
