@@ -12,12 +12,24 @@
     </app-button>
 
     <div class="statistics-grid">
+      <!-- status -->
       <span>Status:</span>
       <span class="test-status">{{ this.testData.status }}</span>
+      <!-- time -->
+      <span>Test duration (ms):</span>
+      <span class="test-status">{{ this.testData.statistics.processingTime }}</span>
+      <!-- number of iterations processed -->
       <span>Number of processed iterations:</span>
       <span class="test-status">
         {{
-        this.testData.numProcessingIterations
+        this.testData.statistics.processingIterations
+        }}
+      </span>
+      <!-- iterations per seconds -->
+      <span>Iterations per second:</span>
+      <span class="test-status">
+        {{
+        this.testData.statistics.processingPerSecond
         }}
       </span>
     </div>
@@ -29,31 +41,34 @@
       <app-input
         :id="'fibonacci-session-count'"
         :type="'# sessions'"
-        v-model="testData.sessionCount"
+        v-model="testData.settings.sessionCount"
       />
 
       <label for="fibonacci-interaction-count" class="setting-label"># interactions:</label>
       <app-input
         :id="'fibonacci-interaction-count'"
         :type="'# interactions'"
-        v-model="testData.interactionCountPerSession"
+        v-model="testData.settings.interactionCountPerSession"
       />
 
       <label for="fibonacci-sequence-length" class="setting-label">fib sequence length (n):</label>
       <app-input
         :id="'fibonacci-sequence-length'"
         :type="'# interactions'"
-        v-model="testData.fibSequenceLength"
+        v-model="testData.settings.fibSequenceLength"
       />
 
       <label for="test-duration" class="setting-label">test duration (seconds):</label>
-      <app-input :id="'test-duration'" :type="'test duration'" v-model="testData.testDuration" />
+      <app-input
+        :id="'test-duration'"
+        :type="'test duration'"
+        v-model="testData.settings.testDurationSeconds"
+      />
     </div>
   </div>
 </template>
 
 <script>
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -84,51 +99,33 @@ export default {
       ubiiClientService: UbiiClientService,
       testRunning: false,
       testData: {
-        sessionCount: '1',
-        interactionCountPerSession: '5',
-        fibSequenceLength: '20',
-        testDuration: '5',
         status: 'unmeasured',
-        numProcessingIterations: 'N/A',
-        allSessionsSpecs: []
-        /*device: {
-          name: 'fibonacci-performance-test-device',
-          deviceType:
-            ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
-          components: [
-            {
-              topic:
-                '/' + UbiiClientService.getClientID + '/perf-test/fibonacci',
-              messageFormat: 'string',
-              ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
-            }
-          ]
-        }*/
+        allSessionsSpecs: [],
+        settings: {
+          sessionCount: '1',
+          interactionCountPerSession: '5',
+          fibSequenceLength: '20',
+          testDurationSeconds: '5'
+        },
+        statistics: {
+          processingIterations: 'N/A',
+          processingPerSecond: 'N/A',
+          processingTime: 'N/A',
+          processingFinished: [],
+          processingCountMap: new Map()
+        }
       }
     };
   },
   methods: {
-    ubiiSetup: async function() {
-      /*if (!this.testData.device.registered) {
-        return UbiiClientService.registerDevice(this.testRTT.device).then(
-          device => {
-            this.testData.device = device;
-            this.testData.device.registered = true;
-            return device;
-          }
-        );
-      } else {
-        return this.testData.device;
-      }*/
-    },
     prepareTest: function() {
-      this.testData.processingCountMap = new Map();
-      this.testData.processingFinished = [];
+      this.testData.statistics.processingFinished = [];
+      this.testData.statistics.processingCountMap.clear();
 
       // create all the specs for sessions and interactions
       this.testData.allSessionsSpecs = PerformanceTestFibonacciHelper.createTestSpecs(
-        this.testData.sessionCount,
-        this.testData.interactionCountPerSession
+        this.testData.settings.sessionCount,
+        this.testData.settings.interactionCountPerSession
       );
 
       this.testData.allSessionsSpecs.forEach(sessionSpec => {
@@ -146,7 +143,7 @@ export default {
                   ioMapping.interactionId +
                   '/' +
                   PerformanceTestFibonacciHelper.SEQENCE_LENGTH_INPUT_SUFFIX,
-                double: parseFloat(this.testData.fibSequenceLength)
+                double: parseFloat(this.testData.settings.fibSequenceLength)
               });
             }
           });
@@ -173,14 +170,9 @@ export default {
       });
     },
     startTest: async function() {
-      //await UbiiClientService.deregisterDevice(this.testData.device);
-      /*await UbiiClientService.unsubscribe(
-        this.testData.device.components[0].topic
-      );*/
-      this.testData.numProcessingIterations = 'N/A';
+      this.testData.statistics.processingIterations = 'N/A';
 
       this.prepareTest();
-      console.info(this.testData.processingFinished);
 
       this.testData.allSessionsSpecs.forEach(session => {
         UbiiClientService.client.callService({
@@ -190,14 +182,14 @@ export default {
       });
 
       this.testData.status = 'running';
-      this.testData.startTime = Date.now();
+      this.testData.statistics.startTime = Date.now();
       setTimeout(() => {
         this.stopTest();
-      }, parseInt(this.testData.testDuration) * 1000);
+      }, parseInt(this.testData.settings.testDurationSeconds) * 1000);
     },
     stopTest: async function() {
       this.testData.status = 'done';
-      this.testData.stopTime = Date.now();
+      this.testData.statistics.stopTime = Date.now();
       this.testData.allSessionsSpecs.forEach(session => {
         UbiiClientService.client.callService({
           topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
@@ -205,32 +197,33 @@ export default {
         });
       });
 
-      this.testData.processingFinished.forEach(id => {
-        if (!this.testData.processingCountMap.has(id)) {
-          let count = this.testData.processingFinished.reduce(
+      this.testData.statistics.processingFinished.forEach(id => {
+        if (!this.testData.statistics.processingCountMap.has(id)) {
+          let count = this.testData.statistics.processingFinished.reduce(
             (n, x) => n + (x === id),
             0
           );
-          this.testData.processingCountMap.set(id, count);
+          this.testData.statistics.processingCountMap.set(id, count);
         }
       });
 
-      let passedTime = this.testData.stopTime - this.testData.startTime;
-      console.info('passed time (ms): ' + passedTime);
-      let numProcessingIterations = 0;
-      this.testData.processingCountMap.forEach(value => {
-        numProcessingIterations += value;
+      let passedTime =
+        this.testData.statistics.stopTime - this.testData.statistics.startTime;
+      this.testData.statistics.processingTime = passedTime;
+
+      let processingIterations = 0;
+      this.testData.statistics.processingCountMap.forEach(value => {
+        processingIterations += value;
       });
-      console.info('numProcessingIterations: ' + numProcessingIterations);
-      this.testData.numProcessingIterations = numProcessingIterations;
+      this.testData.statistics.processingIterations = processingIterations;
+
+      this.testData.statistics.processingPerSecond =
+        processingIterations / (passedTime / 1000);
     },
     onProcessingFinishedCallback: function(float, topic) {
       if (this.testData.status === 'running') {
-        /*let count = this.testData.processingCountMap.get(id);
-        this.testData.processingCountMap.set(id, count++);
-        console.info(id + ' ' + count);*/
         let id = topic.substring(1, 37); // uuidv4 is 36 chars long
-        this.testData.processingFinished.push(id);
+        this.testData.statistics.processingFinished.push(id);
       }
     }
   }
@@ -242,9 +235,11 @@ export default {
   display: grid;
   grid-gap: 15px;
   grid-template-columns: 50px 1fr 3px 1fr;
-  grid-template-rows: 20px 25px 25px;
+  grid-template-rows: 20px 25px 25px 25px 25px;
   grid-template-areas:
     'run title title title'
+    'empty statistics separator settings'
+    'empty statistics separator settings'
     'empty statistics separator settings'
     'empty statistics separator settings';
 }
