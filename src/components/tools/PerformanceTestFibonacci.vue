@@ -104,7 +104,7 @@ export default {
         settings: {
           sessionCount: '1',
           interactionCountPerSession: '5',
-          fibSequenceLength: '20',
+          fibSequenceLength: '50',
           testDurationSeconds: '5'
         },
         statistics: {
@@ -121,6 +121,9 @@ export default {
     prepareTest: function() {
       this.testData.statistics.processingFinished = [];
       this.testData.statistics.processingCountMap.clear();
+      this.testData.statistics.processingIterations = 'N/A';
+      this.testData.statistics.processingPerSecond = 'N/A';
+      this.testData.statistics.processingTime = 'N/A';
 
       // create all the specs for sessions and interactions
       this.testData.allSessionsSpecs = PerformanceTestFibonacciHelper.createTestSpecs(
@@ -235,12 +238,9 @@ export default {
   display: grid;
   grid-gap: 15px;
   grid-template-columns: 50px 1fr 3px 1fr;
-  grid-template-rows: 20px 25px 25px 25px 25px;
+  grid-template-rows: 20px 1fr;
   grid-template-areas:
     'run title title title'
-    'empty statistics separator settings'
-    'empty statistics separator settings'
-    'empty statistics separator settings'
     'empty statistics separator settings';
 }
 
@@ -249,7 +249,7 @@ export default {
   display: grid;
   grid-gap: 15px;
   grid-template-columns: 300px 1fr;
-  grid-template-rows: 20px;
+  grid-template-rows: 25px 25px 25px 25px;
 }
 
 .separator {
@@ -261,8 +261,8 @@ export default {
   grid-area: settings;
   display: grid;
   grid-gap: 15px;
-  grid-template-columns: 200px 50px 200px 50px;
-  grid-template-rows: 20px 20px;
+  grid-template-columns: 200px 100px 200px 100px;
+  grid-template-rows: 25px 25px;
 }
 
 .test-title {
