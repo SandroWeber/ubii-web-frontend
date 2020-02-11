@@ -19,15 +19,13 @@ export default {
   methods: {
     init: function() {
       this.container = document.getElementById('xrhub-render-container');
-
-      this.xrHub = new XRHub(this.container);
-
       this.camera = new THREE.PerspectiveCamera(
         70,
         this.container.clientWidth / this.container.clientHeight,
         0.01,
         10
       );
+      this.xrHub = new XRHub(this.container, this.camera);
       this.camera.position.y = 1;
       this.camera.position.z = 1;
       this.xrHub.webGLScene.add(this.camera);

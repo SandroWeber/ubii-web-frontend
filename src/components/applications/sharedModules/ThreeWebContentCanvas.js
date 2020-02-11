@@ -2,13 +2,14 @@ import * as THREE from 'three';
 import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 
 class ThreeWebContentCanvas {
-  constructor(url, resolutionWidth, resolutionHeight) {
+  constructor(url, resolutionWidth, resolutionHeight, name) {
     this.url = url;
+    this.name = name;
 
     this.resolution = [resolutionWidth, resolutionHeight];
 
-    this.webGLCanvas = this.createWebGLCanvas();
     this.css3DCanvas = this.createCSS3DCanvas();
+    this.webGLCanvas = this.createWebGLCanvas(this.css3DCanvas);
   }
 
   addToScenes(webGLScene, css3DScene) {
@@ -34,16 +35,21 @@ class ThreeWebContentCanvas {
     this.css3DCanvas.scale.set(factorX * x, factorY * y, 1);
   }
 
-  createWebGLCanvas() {
+  createWebGLCanvas(css3DCannvas) {
     let material = new THREE.MeshBasicMaterial({
       side: THREE.DoubleSide
     });
-    material.color.set('white');
+    material.color.set('black');
     material.opacity = 0;
     material.blending = THREE.NoBlending;
 
     let geometry = new THREE.PlaneGeometry(1, 1);
     let webglPlaneMesh = new THREE.Mesh(geometry, material);
+    webglPlaneMesh.name = this.name;
+    webglPlaneMesh.custom = {
+      website: css3DCannvas.custom.website,
+      res: {x: this.resolution[0], y: this.resolution[1]},
+    };
 
     return webglPlaneMesh;
   }
@@ -62,6 +68,8 @@ class ThreeWebContentCanvas {
     div.appendChild(iframe);
 
     var object = new CSS3DObject(div);
+    object.name = this.name;
+    object.custom = {website: iframe};
 
     return object;
   }
