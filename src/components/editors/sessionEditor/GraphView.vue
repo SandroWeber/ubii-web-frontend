@@ -2,28 +2,35 @@
     <div id="graph-view">
         <div id="force-graph-container" class="render-container"></div>
         <div id="threejs-container" class="render-container">
-            <div id="helper-container">
-                <b-button id="controls-btn" class="mb-2" variant="primary" @click="$bvToast.show('controls-toast')">
-                    <KeyboardIcon fillColor="#FF0000" />
-                </b-button>
-                <b-toast class="toaster-body" id="controls-toast" title="Controls" static>
-                    <p><Numeric1BoxIcon /> <span class="text">to</span> <Numeric4BoxIcon />  <span class="text">: Set node to Level (-4) to (-1)</span></p>
-                    <p><Numeric5BoxIcon /><span class="text">: Set node to Level 0</span></p>
-                    <p><Numeric6BoxIcon /> <span class="text">to</span> <Numeric9BoxIcon />  <span class="text">: Set node to Level 1 to 4</span></p>
-                    <p><AlphaWBoxIcon /> <AlphaABoxIcon /> <AlphaSBoxIcon /> <AlphaDBoxIcon /><span class="text">: Camera Pan Controls</span></p>
-                    <p><AlphaXBoxIcon /><span class="text">: Reset Camera to Main View (X-Axis/2D/Front)</span></p>
-                    <p><AlphaYBoxIcon /><span class="text">: Reset Camera to Level View (Y-Axis/2D/Side)</span></p>
-                </b-toast>
+            <div class="ui-container top" v-if="visualizations.threegraph != null">
+                <div class="row"><span v-for="tag in structure" v-bind:key="tag.id" v-bind:style="'background-color:' + (tag.color == '#ffffff' ? '#b6b5b5' : tag.color)" class="ui-box ui-item">{{tag.id}}<b-badge variant="light">{{tag.content.length}}</b-badge></span>
+                </div>
             </div>
             <div id="node-label" class="tooltip-label"></div>
-            <b-button id="view-badge" class="vis-badge" variant="primary">View: X-Axis (Main)</b-button>
+            <div class="ui-container bottom">
+                <div class="row" style="margin-bottom: 10px">
+                    <b-toast class="toast-item" id="controls-toast" title="Controls" static>
+                        <p><Numeric1BoxIcon /> <span class="text">to</span> <Numeric4BoxIcon />  <span class="text">: Set node to Level (-4) to (-1)</span></p>
+                        <p><Numeric5BoxIcon /><span class="text">: Set node to Level 0</span></p>
+                        <p><Numeric6BoxIcon /> <span class="text">to</span> <Numeric9BoxIcon />  <span class="text">: Set node to Level 1 to 4</span></p>
+                        <p><AlphaWBoxIcon /> <AlphaABoxIcon /> <AlphaSBoxIcon /> <AlphaDBoxIcon /><span class="text">: Camera Pan Controls</span></p>
+                        <p><AlphaXBoxIcon /><span class="text">: Reset Camera to Main View (X-Axis/2D/Front)</span></p>
+                        <p><AlphaYBoxIcon /><span class="text">: Reset Camera to Level View (Y-Axis/2D/Side)</span></p>
+                    </b-toast>
+                </div>
+                <div class="row">
+                    <b-button id="controls-btn" class="ui-item" variant="primary" @click="$bvToast.show('controls-toast')">
+                        <KeyboardIcon fillColor="#FF0000" />
+                    </b-button>
+                    <b-button id="view-badge" class="ui-item" variant="primary">View: X-Axis (Main)</b-button>
+                </div>
+            </div>
         </div>
     </div>
 </template>
 
 <script>
   import $ from 'jquery';
-  import Vue from 'vue';
   import { ForceGraphVis } from './modules/visualization/3d-force-graph';
   import { setupThreejsEnvironment } from './modules/visualization/threejs-setup';
 
@@ -54,6 +61,9 @@
       },
       eventBus: {
         type: Object
+      },
+      settings: {
+        type: Object
       }
     },
     components: {
@@ -77,24 +87,27 @@
       return {
         visualizations: {},
         view: 0,
+        structure: ""
       };
     },
     watch: {
-      view: function(val) {
-        if (val < 0 || val > 3) {
-          return;
-        }
-        if(val == 0) {
-          this.visualizations.forceGraph.resumeAnimation();
-          $('#threejs-container').hide();
-          $('#force-graph-container').show();
-        }
-
-        if(val == 1) {
+      'settings.view': function(view) {
+        this.changeView(view);
+      },
+      'settings.dataset': function() {
+        if(this.visualizations.forceGraph != null) {
           this.visualizations.forceGraph.pauseAnimation();
-          $('#force-graph-container').hide();
-          $('#threejs-container').show();
+          this.visualizations.forceGraph = null;
+          $('#force-graph-container div:first-child').remove();
         }
+        if(this.visualizations.threegraph != null) {
+          this.visualizations.threegraph.cancelVisualization();
+          this.visualizations.threegraph = null;
+        }
+        this.changeView(this.settings.view);
+      },
+      'dataset.links': function() {
+        console.log('a');
       }
     },
     methods: {
@@ -102,10 +115,34 @@
         this.eventBus.$on('view-change', (val) => {
           this.view = val;
         });
-
-        this.visualizations.forceGraph = ForceGraphVis(document.getElementById('force-graph-container'))(this.$props.dataset);
-        this.visualizations.threegraph = setupThreejsEnvironment(document.getElementById('threejs-container'), this.$props.dataset);
+        this.changeView(this.settings.view);
+        this.$forceUpdate();
       },
+      changeView: function(view) {
+        if (view < 0 || view > 3) {
+          return;
+        }
+        if (view == 0) {
+          $('#threejs-container').hide();
+          $('#force-graph-container').show();
+          if(this.visualizations.forceGraph == null) {
+            this.visualizations.forceGraph = ForceGraphVis(document.getElementById('force-graph-container'))(JSON.parse(JSON.stringify(this.dataset)));
+          } else {
+            this.visualizations.forceGraph.resumeAnimation();
+          }
+        }
+
+        if (view == 1) {
+          $('#force-graph-container').hide();
+          $('#threejs-container').show();
+          if(this.visualizations.threegraph == null) {
+            this.visualizations.threegraph = setupThreejsEnvironment(document.getElementById('threejs-container'), this.dataset);
+            this.structure = this.visualizations.threegraph.scene.structure;
+          } else {
+            this.visualizations.forceGraph.pauseAnimation();
+          }
+        }
+      }
     },
     mounted() {
       this.init();
@@ -114,16 +151,16 @@
 </script>
 
 <style scoped>
-    .toaster-body {
+    .toast-item {
         color: black;
     }
 
-    .toaster-body >>> span.material-design-icon, .toaster-body >>> svg {
+    .toast-item >>> span.material-design-icon, .toast-item >>> svg {
         width: 30px;
         height: 30px;
     }
 
-    .toaster-body >>> span.text {
+    .toast-item >>> span.text {
         display: inline-flex;
         align-self: center;
         position: relative;
@@ -133,12 +170,12 @@
         top: -8px;
     }
 
-    .mb-2 >>> svg, .mb-2 >>> span {
+    .ui-item >>> svg, .ui-item >>> span {
         width: 25px;
         height: 25px;
     }
 
-    .toaster-body >>> p {
+    .toast-item >>> p {
         margin: 0;
     }
 
@@ -156,13 +193,47 @@
         z-index: 1;
     }
 
-    #helper-container {
+    .ui-container {
         position: absolute;
-        top: 10px;
-        left: 10px;
-        display: inline-block;
-        /*background-color: rgba(255,255,255,0.5);*/
+        left: 25px;
+        display: flex;
+        flex-direction: column;
         z-index: 2;
+        width: 100%;
+    }
+
+    .row {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .top {
+        top: 10px;
+    }
+
+    .bottom {
+        bottom: 10px;
+    }
+
+    .ui-item {
+        min-height: 38px;
+        margin-right: 20px;
+    }
+
+    .ui-box {
+        display: flex;
+        min-width: 100px;
+        align-items: center;
+        justify-content: center;
+        font-size: 1em;
+        border: 1px solid #000000;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    .ui-box >>> .badge {
+        margin: 0 0 0 10px;
+        font-size: 1em;
     }
 
     #controls-btn {
@@ -180,14 +251,4 @@
         padding: 2px;
     }
 
-    .vis-badge {
-        position: absolute;
-        z-index: 3;
-    }
-
-    #view-badge {
-        left: 80px;
-        top: 10px;
-        height: 38px;
-    }
 </style>

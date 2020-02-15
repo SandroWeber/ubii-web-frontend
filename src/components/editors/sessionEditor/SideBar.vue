@@ -4,17 +4,18 @@
             Session: {{session.name}}<br/>
             Interactions: {{session.interactions.length}}
         </div>
-        <side-bar-item title="Active Sessions" :desc="'Choose the live-session you want to analyze.'" :content="sessions">
+        <side-bar-item :id="'0'" :title="'Active Sessions'" :desc="'Choose the live-session you want to analyze.'" :content="sessions">
             <list-item v-for="session in sessions"
                        :key="session.id" :id="session.id"
                        :selected="isSelected(session.id)"
                        :normal="true"
                        :list_item="2"
-                       @select="select(session.id)">
+                       @select="select(session.id)"
+                       @change="change('dataset', session.id)">
                 <span><span>{{session.name}}</span><br/><span class="small">{{session.id}}</span></span>
             </list-item>
         </side-bar-item>
-        <side-bar-item title="Interactions"
+        <side-bar-item :id="'1'" :title="'Interactions'"
                        :desc="'Choose an interaction on which you want to focus.'" :content="session.interactions">
             <list-item v-for="interaction in session.interactions"
                        :selected="isSelectedInteraction(interaction)"
@@ -22,13 +23,14 @@
                        :id="interaction.id"
                        :normal="true"
                        :list_item="1"
-                       @select="selectInteraction(interaction)">{{interaction.name}}
+                       @select="selectInteraction(interaction)"
+                       @change="change('viewNode', interaction)">{{interaction.name}}
             </list-item>
         </side-bar-item>
-        <side-bar-item title="Settings" :desc="'Change various options about the visualization.'">
-            <settings-container :eventBus="eventBus"></settings-container>
+        <side-bar-item :id="'2'" :title="'Settings'" :desc="'Change various options about the visualization.'">
+            <settings-container :settings="settings" :eventBus="eventBus" @change="change"></settings-container>
         </side-bar-item>
-        <side-bar-item title="Session Scenarios Testing"
+        <side-bar-item :id="'3'" :title="'Session Scenarios Testing'"
                        :desc="'Choose a made-up scenario of chained interactions for testing.'" :content="scenarios">
             <list-item v-for="scenario in scenarios"
                        :selected="isSelected(scenario)"
@@ -36,7 +38,7 @@
                        :normal="false"
                        :list_item="0"
                        :id="scenario.id">{{scenario.name}}
-                <button v-if="!isSelected(scenario)" class="button" @click.exact="select(scenario.id)">
+                <button v-if="!isSelected(scenario)" class="button" @click.exact="change('dataset', scenario.id)">
                     Activate
                 </button>
             </list-item>
@@ -54,7 +56,10 @@
     components: { SettingsContainer, SideBarItem, ListItem },
     props: {
       selected: {
-        type: String
+        type: String,
+      },
+      settings: {
+        type: Object
       },
       selectedInteraction: {
         type: String
@@ -92,13 +97,16 @@
         return interaction.id === this.$props.selectedInteraction;
       },
       isSelected: function(session) {
-        return session.id === this.$props.selected;
+        return session.id == this.settings.dataset;
       },
       selectInteraction: function(interaction) {
         this.$emit('selectInteraction', interaction.id);
       },
       select: function(id) {
         this.$emit('select', id);
+      },
+      change: function(setting, value) {
+        this.$emit('change', setting, value);
       }
     }
   };

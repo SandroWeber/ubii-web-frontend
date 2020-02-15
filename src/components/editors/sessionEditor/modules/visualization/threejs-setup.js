@@ -13,7 +13,9 @@ export function setupThreejsEnvironment(domElement, dataset) {
     camera: null,
     controls: [],
     mouse: {},
-    composer: null
+    composer: null,
+    classification: [],
+    stop: false
   };
 
   let resizeRenderer = function() {
@@ -22,15 +24,18 @@ export function setupThreejsEnvironment(domElement, dataset) {
     $('#threejs-container').css('width', width);
     $('#threejs-container').css('height', height);
     state.renderer.setSize(width, height);
+    state.composer.setSize(width, height);
     state.camera.aspect = $(domElement).width() / $(domElement).height();
     state.camera.updateProjectionMatrix();
   };
 
   let animate = function() {
-    requestAnimationFrame(animate);
-    state.scene.update(state.mouse, state.camera);
-    // state.renderer.render(state.scene.getScene(), state.camera);
-    state.composer.render(state.scene, state.camera);
+    if(!state.stop){
+      requestAnimationFrame(animate);
+      state.scene.update(state.mouse, state.camera);
+      // state.renderer.render(state.scene.getScene(), state.camera);
+      state.composer.render(state.scene, state.camera);
+    }
   };
 
   state.camera =  new THREE.PerspectiveCamera(
@@ -40,11 +45,27 @@ export function setupThreejsEnvironment(domElement, dataset) {
     100
   );
 
+  state.cancelVisualization = function() {
+    document.removeEventListener("keydown", onKeyDown, false);
+    document.removeEventListener( 'mousemove', onMouseMove, false );
+    document.removeEventListener('click', onClick, false);
+    $(window).off('resize', resizeRenderer);
+    state.stop = true;
+    state.camera = null;
+    state.composer = null;
+    state.renderer = null;
+    state.controls = null;
+    state.mouse = null;
+    state.scenes = null;
+    state.scene = null;
+    state.classification = null;
+    $('#threejs-container canvas').remove();
+  }
+
   let showViewLabel = function(view) {
     if(view == '') {
-      $('#view-badge').hide();
+      $('#view-badge').html('View: 3D');
     } else {
-      $('#view-badge').show();
       if(view == 'X') {
         $('#view-badge').html('View: X-Axis (Main)');
       } else {
@@ -63,42 +84,46 @@ export function setupThreejsEnvironment(domElement, dataset) {
       state.controls[0].update();
       showViewLabel('Y');
     } else if (keyCode == 49) {
-      state.scenes[0].moveToLevel(-4);
-    } else if (keyCode == 50) {
-      state.scenes[0].moveToLevel(-3);
-    } else if (keyCode == 51) {
-      state.scenes[0].moveToLevel(-2);
-    } else if (keyCode == 52) {
-      state.scenes[0].moveToLevel(-1);
-    } else if (keyCode == 53) {
       state.scenes[0].moveToLevel(0);
-    } else if (keyCode == 54) {
+    } else if (keyCode == 50) {
       state.scenes[0].moveToLevel(1);
-    } else if (keyCode == 55) {
+    } else if (keyCode == 51) {
       state.scenes[0].moveToLevel(2);
-    } else if (keyCode == 56) {
+    } else if (keyCode == 52) {
       state.scenes[0].moveToLevel(3);
-    } else if (keyCode == 57) {
+    } else if (keyCode == 53) {
       state.scenes[0].moveToLevel(4);
+    } else if (keyCode == 54) {
+      state.scenes[0].moveToLevel(5);
+    } else if (keyCode == 55) {
+      state.scenes[0].moveToLevel(6);
+    } else if (keyCode == 56) {
+      state.scenes[0].moveToLevel(7);
+    } else if (keyCode == 57) {
+      state.scenes[0].moveToLevel(8);
     }
   };
 
   let onMouseMove = function(event) {
-    let actualX = (event.clientX - $(domElement).offset().left);
-    let actualY = (event.clientY - $(domElement).offset().top);
-    state.mouse.x = (actualX / $(domElement).width()) * 2 - 1;
-    state.mouse.y = -(actualY/ $(domElement).height()) * 2 + 1;
+    if(!state.stop) {
+      let actualX = (event.clientX - $(domElement).offset().left);
+      let actualY = (event.clientY - $(domElement).offset().top);
+      state.mouse.x = (actualX / $(domElement).width()) * 2 - 1;
+      state.mouse.y = -(actualY/ $(domElement).height()) * 2 + 1;
 
-    state.scene.updateLabelSpritePosition(actualX, actualY);
+      state.scene.updateLabelSpritePosition(actualX, actualY);
+    }
   };
 
   let onClick = function(event) {
-    state.scene.switchSelect();
+    if(!state.stop) {
+      state.scene.switchSelect();
+    }
   };
 
   state.camera.position.z = 6;
 
-  state.scenes.push(new Visualization1(dataset, domElement));
+  state.scenes.push(new Visualization1(dataset));
   state.scene = state.scenes[0];
 
   state.controls.push(new OrbitControls(state.camera, domElement));
@@ -133,10 +158,10 @@ export function setupThreejsEnvironment(domElement, dataset) {
 
   state.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   domElement.appendChild(state.renderer.domElement);
-  resizeRenderer();
   state.renderer.setClearColor(0x19181A, 1);
-  $(window).resize(resizeRenderer);
   state.composer = new EffectComposer(state.renderer);
+  resizeRenderer();
+  $(window).resize(resizeRenderer);
   let renderPass = new RenderPass(state.scene.getScene(), state.camera);
   let outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), state.scene.getScene(), state.camera);
   outlinePass.renderToScreen = true;

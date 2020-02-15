@@ -1,6 +1,6 @@
 <template>
     <div class="settings-container">
-        <b-form-select v-model="selected" :options="options"></b-form-select>
+        <b-form-select v-model="selected" :options="options" @input="changeView"></b-form-select>
     </div>
 </template>
 
@@ -17,11 +17,14 @@
     props: {
       eventBus: {
         type: Object
+      },
+      settings: {
+        type: Object
       }
     },
     data: function() {
       return {
-        selected: 1,
+        selected: this.settings.view,
         options: [
           { value: 0, text: 'Simple 3D Force-Graph' },
           { value: 1, text: 'Custom 3D Graph' }
@@ -29,15 +32,12 @@
       };
     },
     watch: {
-      selected: function(val) {
-        this.eventBus.$emit('view-change', val);
-      }
     },
     methods: {
       init: function() {
-        setTimeout(() => {
-          this.eventBus.$emit('view-change', this.selected);
-        }, 100);
+      },
+      changeView: function(view) {
+        this.$emit('change', 'view', view);
       }
     },
     mounted() {

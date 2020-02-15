@@ -53,6 +53,7 @@
         padding: 0.5em 1em 0.5em 1em;
         display: flex;
         align-items: center;
+        height: 50px;
     }
 
     .normal:hover {

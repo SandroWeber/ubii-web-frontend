@@ -9,17 +9,20 @@
                         :selected="selected"
                         :selectedInteraction=selectedInteraction
                         :eventBus="eventBus"
+                        :settings="settings"
                         @selectInteraction="selectInteraction"
                         @select="select"
+                        @change="change"
                 ></side-bar>
                 <div class="main">
-                    <top-bar class="top-bar-instance"
-                         :dataset="session"
-                    ></top-bar>
+<!--                    <top-bar class="top-bar-instance"-->
+<!--                         :dataset="session"-->
+<!--                    ></top-bar>-->
 
                     <graph-view
                             :dataset="session"
                             :eventBus="eventBus"
+                            :settings="settings"
                     ></graph-view>
                 </div>
             </div>
@@ -67,7 +70,12 @@
         selectedInteraction: '',
         ubiiClientService: UbiiClientService,
         eventBus: null,
-        translator: null
+        translator: null,
+        settings: {
+          view: 1,
+          dataset: 0,
+          viewNode: -1
+        }
       };
     },
     watch: {
@@ -75,10 +83,10 @@
     },
     computed: {
       session: function() {
-        let search = this.$data.sessions.filter(el => el.id === this.$data.selected);
+        let search = this.sessions.filter(el => el.id == this.settings.dataset);
         let result;
         if(search.length != 1) {
-          result = this.$data.scenarios.filter(el => el.id === this.$data.selected)[0].session;
+          result = this.scenarios.filter(el => el.id == this.settings.dataset)[0].session;
         } else {
           result = search[0];
         }
@@ -121,6 +129,9 @@
       this.stopEditor();
     },
     methods: {
+      change: function(setting, value) {
+        this.settings[setting] = value;
+      },
       selectInteraction: function(id) {
         this.selectedInteraction = id;
       },
