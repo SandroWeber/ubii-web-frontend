@@ -31,7 +31,7 @@ export class DataTranslator {
       }
       interactionIds.push(interaction.id);
       copy.interactions[index].id = idCounter++;
-      nodes.push({id: (idCounter-1), name: interaction.name});
+      nodes.push({id: (idCounter-1), name: interaction.name, tags: (interaction.tags == null || interaction.tags.length == 0 ? ['No Tag'] : interaction.tags)});
       interaction.inputFormats.forEach((format) => {
         leftLinks.push({'from': getTopicToFormatName(format.internalName, (idCounter-1), true), 'to':  (idCounter-1), 'how': format.messageFormat});
       });
@@ -48,4 +48,13 @@ export class DataTranslator {
     });
     return {'nodes': nodes, 'links': links};
   }
+}
+
+export function randomHexColor(hex) {
+  let part = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
+  let result = "";
+  for(let i = 0; i < 6; i++) {
+    result = result + part[Math.floor(Math.random() * 6)];
+  }
+  return '#' + result;
 }

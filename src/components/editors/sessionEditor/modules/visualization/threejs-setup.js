@@ -1,11 +1,12 @@
 import * as THREE from 'three';
 import $ from 'jquery';
-import { Visualization1 } from './threejs-scenes';
+import { Visualization1 } from './threejs-vis1';
+import { Visualization2 } from './threejs-vis2';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import DragControls from 'three-dragcontrols';
 import { RenderPass, EffectComposer, OutlinePass } from "three-outlinepass";
 
-export function setupThreejsEnvironment(domElement, dataset) {
+export function setupThreejsEnvironment(domElement, dataset, view) {
   let state = {
     renderer: null,
     scene: null,
@@ -15,7 +16,9 @@ export function setupThreejsEnvironment(domElement, dataset) {
     mouse: {},
     composer: null,
     classification: [],
-    stop: false
+    stop: false,
+    view: view,
+    eventhandlerfunctions: []
   };
 
   let resizeRenderer = function() {
@@ -38,17 +41,19 @@ export function setupThreejsEnvironment(domElement, dataset) {
     }
   };
 
-  state.camera =  new THREE.PerspectiveCamera(
-    75,
-    0.862,
-    0.1,
-    100
+  state.camera =  new THREE.OrthographicCamera(
+    window.innerWidth / - 50, window.innerWidth / 50, window.innerHeight / 50, window.innerHeight / -50, 0, 100
   );
+  state.camera.zoom = 4;
 
   state.cancelVisualization = function() {
-    document.removeEventListener("keydown", onKeyDown, false);
-    document.removeEventListener( 'mousemove', onMouseMove, false );
-    document.removeEventListener('click', onClick, false);
+    document.removeEventListener("keydown", state.eventhandlerfunctions[0], false);
+    document.removeEventListener( 'mousemove', state.eventhandlerfunctions[1], false );
+    document.removeEventListener('click', state.eventhandlerfunctions[2], false);
+    state.controls[1].removeEventListener('dragstart', state.eventhandlerfunctions[3], false);
+    state.controls[1].removeEventListener('dragend', state.eventhandlerfunctions[4], false);
+    state.controls[1].removeEventListener('drag', state.eventhandlerfunctions[5], false);
+    state.controls[1].removeEventListener('change', state.scene.drag, false);
     $(window).off('resize', resizeRenderer);
     state.stop = true;
     state.camera = null;
@@ -74,7 +79,7 @@ export function setupThreejsEnvironment(domElement, dataset) {
     }
   };
 
-  let onKeyDown = function(event) {
+  state.eventhandlerfunctions[0] = function onKeyDown(event) {
     let keyCode = event.which;
     if (keyCode == 88) {
       state.controls[0].reset();
@@ -84,27 +89,27 @@ export function setupThreejsEnvironment(domElement, dataset) {
       state.controls[0].update();
       showViewLabel('Y');
     } else if (keyCode == 49) {
-      state.scenes[0].moveToLevel(0);
+      state.scenes[0].moveTo(0);
     } else if (keyCode == 50) {
-      state.scenes[0].moveToLevel(1);
+      state.scenes[0].moveTo(1);
     } else if (keyCode == 51) {
-      state.scenes[0].moveToLevel(2);
+      state.scenes[0].moveTo(2);
     } else if (keyCode == 52) {
-      state.scenes[0].moveToLevel(3);
+      state.scenes[0].moveTo(3);
     } else if (keyCode == 53) {
-      state.scenes[0].moveToLevel(4);
+      state.scenes[0].moveTo(4);
     } else if (keyCode == 54) {
-      state.scenes[0].moveToLevel(5);
+      state.scenes[0].moveTo(5);
     } else if (keyCode == 55) {
-      state.scenes[0].moveToLevel(6);
+      state.scenes[0].moveTo(6);
     } else if (keyCode == 56) {
-      state.scenes[0].moveToLevel(7);
+      state.scenes[0].moveTo(7);
     } else if (keyCode == 57) {
-      state.scenes[0].moveToLevel(8);
+      state.scenes[0].moveTo(8);
     }
   };
 
-  let onMouseMove = function(event) {
+  state.eventhandlerfunctions[1] = function onMouseMove(event) {
     if(!state.stop) {
       let actualX = (event.clientX - $(domElement).offset().left);
       let actualY = (event.clientY - $(domElement).offset().top);
@@ -115,7 +120,7 @@ export function setupThreejsEnvironment(domElement, dataset) {
     }
   };
 
-  let onClick = function(event) {
+  state.eventhandlerfunctions[2] = function onClick(event) {
     if(!state.stop) {
       state.scene.switchSelect();
     }
@@ -123,7 +128,14 @@ export function setupThreejsEnvironment(domElement, dataset) {
 
   state.camera.position.z = 6;
 
-  state.scenes.push(new Visualization1(dataset));
+  switch(view) {
+    case 1:
+      state.scenes.push(new Visualization1(dataset));
+      break;
+    case 2:
+      state.scenes.push(new Visualization2(dataset));
+      break;
+  }
   state.scene = state.scenes[0];
 
   state.controls.push(new OrbitControls(state.camera, domElement));
@@ -134,27 +146,26 @@ export function setupThreejsEnvironment(domElement, dataset) {
     UP: 87,
     BOTTOM: 83,
   };
-  state.controls[0].screenSpacePanning = true;
-  state.controls[0].addEventListener('change', () => showViewLabel(''));
 
-  state.controls.push(new DragControls(state.scenes[0].meshes, state.camera, domElement));
-  state.controls[1].addEventListener('dragstart', function(event) {
+  state.eventhandlerfunctions[3] = function change() { showViewLabel('') };
+  state.eventhandlerfunctions[4] = function dragstart(event) {
     state.controls[0].enabled = false;
     state.scenes[0].dragstart(event);
-  });
-
-  state.controls[1].addEventListener('dragend', function(event) {
+  };
+  state.eventhandlerfunctions[5] =  function dragend(event) {
     state.controls[0].enabled = true;
     state.scenes[0].dragend(event);
-  });
+  };
+  state.controls[0].screenSpacePanning = true;
+  state.controls[0].addEventListener('change', state.eventhandlerfunctions[3], false);
+  state.controls.push(new DragControls(state.scenes[0].meshes, state.camera, domElement));
+  state.controls[1].addEventListener('dragstart', state.eventhandlerfunctions[4], false);
+  state.controls[1].addEventListener('dragend', state.eventhandlerfunctions[5], false);
+  state.controls[1].addEventListener('drag', state.scene.drag.bind(state.scene), false);
 
-  state.controls[1].addEventListener('drag', function(event) {
-    state.scenes[0].detectLevel();
-  });
-
-  document.addEventListener("keydown", onKeyDown, false);
-  document.addEventListener( 'mousemove', onMouseMove, false );
-  document.addEventListener('click', onClick, false);
+  document.addEventListener("keydown", state.eventhandlerfunctions[0], false);
+  document.addEventListener( 'mousemove', state.eventhandlerfunctions[1], false );
+  document.addEventListener('click', state.eventhandlerfunctions[2], false);
 
   state.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   domElement.appendChild(state.renderer.domElement);

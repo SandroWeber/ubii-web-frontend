@@ -10,9 +10,9 @@
             <div class="ui-container bottom">
                 <div class="row" style="margin-bottom: 10px">
                     <b-toast class="toast-item" id="controls-toast" title="Controls" static>
-                        <p><Numeric1BoxIcon /> <span class="text">to</span> <Numeric4BoxIcon />  <span class="text">: Set node to Level (-4) to (-1)</span></p>
-                        <p><Numeric5BoxIcon /><span class="text">: Set node to Level 0</span></p>
-                        <p><Numeric6BoxIcon /> <span class="text">to</span> <Numeric9BoxIcon />  <span class="text">: Set node to Level 1 to 4</span></p>
+                        <p><Numeric1BoxIcon /> <span class="text">to</span> <Numeric4BoxIcon />  <span class="text">: Set node to Level 1 to 4</span></p>
+                        <p><Numeric5BoxIcon /><span class="text">: Set node to Level 5</span></p>
+                        <p><Numeric6BoxIcon /> <span class="text">to</span> <Numeric9BoxIcon />  <span class="text">: Set node to Level 6 to 9</span></p>
                         <p><AlphaWBoxIcon /> <AlphaABoxIcon /> <AlphaSBoxIcon /> <AlphaDBoxIcon /><span class="text">: Camera Pan Controls</span></p>
                         <p><AlphaXBoxIcon /><span class="text">: Reset Camera to Main View (X-Axis/2D/Front)</span></p>
                         <p><AlphaYBoxIcon /><span class="text">: Reset Camera to Level View (Y-Axis/2D/Side)</span></p>
@@ -92,18 +92,11 @@
     },
     watch: {
       'settings.view': function(view) {
+        this.rebootVisualizer();
         this.changeView(view);
       },
       'settings.dataset': function() {
-        if(this.visualizations.forceGraph != null) {
-          this.visualizations.forceGraph.pauseAnimation();
-          this.visualizations.forceGraph = null;
-          $('#force-graph-container div:first-child').remove();
-        }
-        if(this.visualizations.threegraph != null) {
-          this.visualizations.threegraph.cancelVisualization();
-          this.visualizations.threegraph = null;
-        }
+        this.rebootVisualizer();
         this.changeView(this.settings.view);
       },
       'dataset.links': function() {
@@ -118,10 +111,22 @@
         this.changeView(this.settings.view);
         this.$forceUpdate();
       },
+      rebootVisualizer() {
+        if(this.visualizations.forceGraph != null) {
+          this.visualizations.forceGraph.pauseAnimation();
+          this.visualizations.forceGraph = null;
+          $('#force-graph-container div:first-child').remove();
+        }
+        if(this.visualizations.threegraph != null) {
+          this.visualizations.threegraph.cancelVisualization();
+          this.visualizations.threegraph = null;
+        }
+      },
       changeView: function(view) {
-        if (view < 0 || view > 3) {
+        if (view < 0 || view > 6) {
           return;
         }
+
         if (view == 0) {
           $('#threejs-container').hide();
           $('#force-graph-container').show();
@@ -132,13 +137,13 @@
           }
         }
 
-        if (view == 1) {
+        if (view >= 1) {
           $('#force-graph-container').hide();
           $('#threejs-container').show();
-          if(this.visualizations.threegraph == null) {
-            this.visualizations.threegraph = setupThreejsEnvironment(document.getElementById('threejs-container'), this.dataset);
+          if(this.visualizations.threegraph == null || this.visualizations.threegraph.view != view) {
+            this.visualizations.threegraph = setupThreejsEnvironment(document.getElementById('threejs-container'), this.dataset, view);
             this.structure = this.visualizations.threegraph.scene.structure;
-          } else {
+          } else if(this.visualizations.forceGraph != null) {
             this.visualizations.forceGraph.pauseAnimation();
           }
         }
@@ -229,6 +234,7 @@
         border: 1px solid #000000;
         border-radius: 5px;
         margin-bottom: 10px;
+        padding: 0 5px 0 5px;
     }
 
     .ui-box >>> .badge {
@@ -243,12 +249,12 @@
     .tooltip-label {
         position: absolute;
         z-index: 3;
-        color: white;
+        color: black;
         font-size: 1.0rem;
-        background-color: #0069D9;
+        background-color: #b5b5b5;
         border: 1px solid white;
         border-radius: 4px;
-        padding: 2px;
+        padding: 5px;
     }
 
 </style>

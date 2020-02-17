@@ -25,6 +25,7 @@ let scenarios = [
       }, {
         id: '1',
         name: 'interaction_1',
+        tags: ['Calc 1', 'Calc 2'],
         processingCallback: () => {},
         processFrequency: 60,
         inputFormats: [
@@ -42,6 +43,7 @@ let scenarios = [
       }, {
         id: '2',
         name: 'interaction_2',
+        tags: ['Calc 2'],
         processingCallback: () => {},
         processFrequency: 60,
         inputFormats: [
@@ -59,6 +61,7 @@ let scenarios = [
       }, {
         id: '3',
         name: 'interaction_3',
+        tags: ['Calc 2'],
         processingCallback: () => {},
         processFrequency: 60,
         inputFormats: [
