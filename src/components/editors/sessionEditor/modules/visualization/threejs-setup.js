@@ -2,11 +2,12 @@ import * as THREE from 'three';
 import $ from 'jquery';
 import { Visualization1 } from './threejs-vis1';
 import { Visualization2 } from './threejs-vis2';
+import { Visualization3 } from './threejs-vis3';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import DragControls from 'three-dragcontrols';
 import { RenderPass, EffectComposer, OutlinePass } from "three-outlinepass";
 
-export function setupThreejsEnvironment(domElement, dataset, view) {
+export function setupThreejsEnvironment(domElement, dataset, mode, sorting) {
   let state = {
     renderer: null,
     scene: null,
@@ -17,7 +18,7 @@ export function setupThreejsEnvironment(domElement, dataset, view) {
     composer: null,
     classification: [],
     stop: false,
-    view: view,
+    mode: mode,
     eventhandlerfunctions: []
   };
 
@@ -80,33 +81,7 @@ export function setupThreejsEnvironment(domElement, dataset, view) {
   };
 
   state.eventhandlerfunctions[0] = function onKeyDown(event) {
-    let keyCode = event.which;
-    if (keyCode == 88) {
-      state.controls[0].reset();
-      showViewLabel('X');
-    } else if (keyCode == 89) {
-      state.camera.position.set(-8, 0, 0);
-      state.controls[0].update();
-      showViewLabel('Y');
-    } else if (keyCode == 49) {
-      state.scenes[0].moveTo(0);
-    } else if (keyCode == 50) {
-      state.scenes[0].moveTo(1);
-    } else if (keyCode == 51) {
-      state.scenes[0].moveTo(2);
-    } else if (keyCode == 52) {
-      state.scenes[0].moveTo(3);
-    } else if (keyCode == 53) {
-      state.scenes[0].moveTo(4);
-    } else if (keyCode == 54) {
-      state.scenes[0].moveTo(5);
-    } else if (keyCode == 55) {
-      state.scenes[0].moveTo(6);
-    } else if (keyCode == 56) {
-      state.scenes[0].moveTo(7);
-    } else if (keyCode == 57) {
-      state.scenes[0].moveTo(8);
-    }
+    state.scene.onKeyDown(event, state.controls[0], state.camera, showViewLabel);
   };
 
   state.eventhandlerfunctions[1] = function onMouseMove(event) {
@@ -128,12 +103,15 @@ export function setupThreejsEnvironment(domElement, dataset, view) {
 
   state.camera.position.z = 6;
 
-  switch(view) {
-    case 1:
+  switch(mode) {
+    case 0:
       state.scenes.push(new Visualization1(dataset));
       break;
-    case 2:
+    case 1:
       state.scenes.push(new Visualization2(dataset));
+      break;
+    case 2:
+      state.scenes.push(new Visualization3(dataset, sorting));
       break;
   }
   state.scene = state.scenes[0];
@@ -150,7 +128,7 @@ export function setupThreejsEnvironment(domElement, dataset, view) {
   state.eventhandlerfunctions[3] = function change() { showViewLabel('') };
   state.eventhandlerfunctions[4] = function dragstart(event) {
     state.controls[0].enabled = false;
-    state.scenes[0].dragstart(event);
+    state.scenes[0].dragstart(event, state.camera);
   };
   state.eventhandlerfunctions[5] =  function dragend(event) {
     state.controls[0].enabled = true;

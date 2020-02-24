@@ -50,6 +50,25 @@ export class DataTranslator {
   }
 }
 
+export function translatedToMatrix(dataset) {
+  let result = [], temp1, temp2;
+  dataset.nodes.forEach(node1 => {
+    temp1 = [];
+    dataset.nodes.forEach(node2 => {
+      temp2 = dataset.links.find(link =>
+        link.source == node1.id && link.target == node2.id
+      );
+      if(temp2 != null) {
+        temp1.push(true);
+      } else {
+        temp1.push(false);
+      }
+    });
+    result.push(temp1);
+  });
+  return result;
+}
+
 export function randomHexColor(hex) {
   let part = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
   let result = "";

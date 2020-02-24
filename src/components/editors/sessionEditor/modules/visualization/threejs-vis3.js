@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import $ from 'jquery';
 import { SceneVisualization } from './threejs-scenes';
-import { randomHexColor } from '../utils';
+import { translatedToMatrix, randomHexColor } from '../utils';
 
-export class Visualization2 extends SceneVisualization {
-  constructor(dataset) {
+export class Visualization3 extends SceneVisualization {
+  constructor(dataset, show) {
     super();
     this.geometry = new THREE.SphereGeometry(0.2, 64, 64);
     this.material = new THREE.MeshLambertMaterial({
@@ -13,6 +13,7 @@ export class Visualization2 extends SceneVisualization {
     });
     this.dataset = dataset;
     this.level = -1;
+    this.show = show;
     this.createDataPoints();
     this.createLinks();
     this.setupStructure(dataset);
@@ -36,27 +37,66 @@ export class Visualization2 extends SceneVisualization {
 
   setupStructure(dataset) {
     this.structure = [];
-    let tags = [], tag = "";
-    dataset.nodes.forEach((node) => {
-      if(node.tags.length > 1) {
-        tag = this.getMixedTag(node);
-      } else {
-        tag = node.tags[0];
-      }
-      if(!tags.includes(tag)) {
-        this.structure.push({id: tag, color: randomHexColor(), content: []});
-        tags.push(tag);
-      }
-      this.meshes.find(el => el.userData.id == node.id).userData.tag = tag;
-    });
-
-    let counter = 1, temp = 0;
-    this.structure.forEach(el => {
-      if(el.id == 'No Tag') {
+    let matrix = translatedToMatrix(dataset);
+    let tags = [], tag = "", temp = 0;
+    if(this.show == 0) {
+      dataset.nodes.forEach((el1, index) => {
         temp = 0;
-      } else {
-        temp = counter;
-      }
+        matrix.forEach(el2 => {
+          if(el2[index]) {
+            temp++;
+          }
+        });
+        tag = temp + " incoming Edges";
+        if(!tags.includes(tag)) {
+          this.structure.push({id: tag, color: randomHexColor(), content: []});
+          tags.push(tag);
+        }
+        this.meshes.find(node => node.userData.id == dataset.nodes[index].id).userData.tag = tag;
+      });
+    } else if(this.show == 1) {
+      matrix.forEach((el1, index) => {
+        temp = 0;
+        el1.forEach(el2 => {
+          if(el2) {
+            temp++;
+          }
+        });
+        tag = temp + " outgoing Edges";
+        if(!tags.includes(tag)) {
+          this.structure.push({id: tag, color: randomHexColor(), content: []});
+          tags.push(tag);
+        }
+        this.meshes.find(node => node.userData.id == dataset.nodes[index].id).userData.tag = tag;
+      });
+    }  else if(this.show == 2) {
+      dataset.nodes.forEach((el1, index) => {
+        temp = 0;
+        matrix.forEach(el2 => {
+          if(el2[index]) {
+            temp++;
+          }
+        });
+        tag = temp + " incoming Edges";
+        temp = 0;
+        matrix[index].forEach(el2 => {
+          if(el2) {
+            temp++;
+          }
+        });
+        tag = tag + " | " + temp + " outgoing Edges";
+
+        if(!tags.includes(tag)) {
+          this.structure.push({id: tag, color: randomHexColor(), content: []});
+          tags.push(tag);
+        }
+        this.meshes.find(node => node.userData.id == dataset.nodes[index].id).userData.tag = tag;
+      });
+    }
+
+    let counter = 0;
+    this.structure.forEach(el => {
+      temp = counter;
       this.meshes.forEach(el2 => {
         if(el2.userData.tag == el.id) {
           el.content.push(el2);

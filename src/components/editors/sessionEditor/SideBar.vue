@@ -1,10 +1,10 @@
 <template>
     <div class="side-bar" id="side-bar">
         <div class="side-bar-top">
-            Session: {{session.name}}<br/>
-            Interactions: {{session.interactions.length}}
+            Dataset: {{session.name}}<br/>
+            Nodes: {{session.interactions.length}}
         </div>
-        <side-bar-item :id="'0'" :title="'Active Sessions'" :desc="'Choose the live-session you want to analyze.'" :content="sessions">
+        <side-bar-item :id="'0'" :title="'Datasets'" :desc="'Choose the dataset you want to display.'" :content="sessions">
             <list-item v-for="session in sessions"
                        :key="session.id" :id="session.id"
                        :selected="isSelected(session.id)"
@@ -15,8 +15,8 @@
                 <span><span>{{session.name}}</span><br/><span class="small">{{session.id}}</span></span>
             </list-item>
         </side-bar-item>
-        <side-bar-item :id="'1'" :title="'Interactions'"
-                       :desc="'Choose an interaction on which you want to focus.'" :content="session.interactions">
+        <side-bar-item :id="'1'" :title="'Nodes in Dataset'"
+                       :desc="'Choose a node on which you want to focus.'" :content="session.interactions">
             <list-item v-for="interaction in session.interactions"
                        :selected="isSelectedInteraction(interaction)"
                        :key="interaction.id"
@@ -30,8 +30,8 @@
         <side-bar-item :id="'2'" :title="'Settings'" :desc="'Change various options about the visualization.'">
             <settings-container :settings="settings" :eventBus="eventBus" @change="change"></settings-container>
         </side-bar-item>
-        <side-bar-item :id="'3'" :title="'Session Scenarios Testing'"
-                       :desc="'Choose a made-up scenario of chained interactions for testing.'" :content="scenarios">
+        <side-bar-item :id="'3'" :title="'Test-Datasets'"
+                       :desc="'Choose a made-up dataset for testing.'" :content="scenarios">
             <list-item v-for="scenario in scenarios"
                        :selected="isSelected(scenario)"
                        :key="scenario.name"

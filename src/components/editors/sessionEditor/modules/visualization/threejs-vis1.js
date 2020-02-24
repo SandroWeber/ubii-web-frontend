@@ -11,28 +11,14 @@ export class Visualization1 extends SceneVisualization {
       opacity: 0.8
     });
     this.dataset = dataset;
-    this.meshes = [];
-    this.arrows = [];
-    this.materials = [];
-    this.selected = [];
-    this.levels = [];
-    this.raycaster = new THREE.Raycaster();
-    this.nodeLabel = $('#node-label');
-    this.intersects = null;
-    this.oldPos;
-    this.same = false;
     this.level = -1;
     this.createDataPoints();
     this.createLinks();
     this.setupStructure();
-    this.calcStructure(dataset);
   }
 
   setupStructure(dataset) {
     this.structure = [{id: 'Level 1', color: "#CC0000", content: []}, {id: 'Level 2', color: "#D52E2E", content: []}, {id: 'Level 3', color: "#DC5454", content: []}, {id: 'Level 4', color: "#E27373", content: []}, {id: 'Level 5', color: "#ffffff", content: []}, {id: 'Level 6', color: "#7373D2", content: []}, {id: 'Level 7', color: "#5454C9", content: []}, {id: 'Level 8', color: "#2E2EBE", content: []}, {id: 'Level 9', color: "#0000B0", content: []}];
-  }
-
-  calcStructure(dataset) {
     this.structure[4].content.push(...this.meshes);
     this.meshes.forEach(el => el.userData.tag = 'Level 5');
   }
@@ -52,62 +38,14 @@ export class Visualization1 extends SceneVisualization {
     node.userData.tag = '';
   }
 
-  createDataPoints() {
-    let mesh, material;
-    this.dataset.nodes.forEach((node) => {
-      material = new THREE.MeshLambertMaterial({
-        transparent: true,
-        opacity: 0.8
-      });
-      this.materials.push(material);
-      mesh = new THREE.Mesh(this.geometry, material);
-      mesh.name = node.name;
-      mesh.userData = { 'id': node.id };
-      this.meshes.push(mesh);
-      mesh.position.set(THREE.Math.randFloat(-4, 4), THREE.Math.randFloat(-3, 3), 0);
-      this.scene.add(mesh);
-    });
-  }
-
-  setOutlinePass(outlinePass) {
-    this.outlinePassReference = outlinePass;
-  }
-
-  createLinks() {
-    this.dataset.links.forEach((link) => {this.createLink(link)});
-  }
-
-  createLink(link) {
-    let arrow, dir, origin, destination, length;
-    origin = this.meshes.find(el => el.userData.id == link.source).position;
-    destination = this.meshes.find(el => el.userData.id == link.target).position;
-    dir = new THREE.Vector3().subVectors(destination, origin);
-    length = dir.length() - 0.2;
-    arrow = new THREE.ArrowHelper(dir.normalize(), origin, 1, 0xffffff);
-    arrow.setLength(length, 0.4, 0.1);
-    this.arrows.push({ 'source': link.source, 'target': link.target, 'arrow': arrow });
-    this.scene.add(arrow);
-  }
-
-  updateLink(arrowLink, source, target) {
-    let dir, origin, destination, length;
-    origin = this.meshes.find(el => el.userData.id == source).position;
-    destination = this.meshes.find(el => el.userData.id == target).position;
-    dir = new THREE.Vector3().subVectors(destination, origin);
-    length = dir.length() - 0.2;
-    arrowLink.position.copy(origin);
-    arrowLink.setDirection(dir.normalize());
-    arrowLink.setLength(length, 0.4, 0.1);
-
-  }
-
-  dragstart(event) {
+  dragstart(event, camera) {
     if (this.selected[0] == event.object) {
       this.same = true;
     }
     this.deselect();
     this.select(event.object);
-    this.oldPos = (new THREE.Vector3()).copy(this.selected[0].position);
+    this.setDragging(true);
+    this.manageGuideline(true);
   }
 
   dragend(event) {
@@ -120,21 +58,21 @@ export class Visualization1 extends SceneVisualization {
       this.deselect();
       this.same = false;
     }
+    this.setDragging(false);
+    this.manageGuideline(false);
   }
 
   drag(event) {
     this.detectLevel();
-  }
-
-  changeArrow(mesh) {
-    let id = (this.meshes.find(el => el == mesh)).userData.id;
-    this.arrows.forEach(el => {
-      if (el.source == id) {
-        this.updateLink(el.arrow, id, el.target);
-      } else if (el.target == id) {
-        this.updateLink(el.arrow, el.source, id);
-      }
-    });
+    if(this.locked.x) {
+      this.selected[0].position.x = this.oldPos.x;
+    }
+    if(this.locked.y) {
+      this.selected[0].position.y = this.oldPos.y;
+    }
+    if(this.locked.z) {
+      this.selected[0].position.z = this.oldPos.z;
+    }
   }
 
   moveTo(level) {
@@ -174,25 +112,49 @@ export class Visualization1 extends SceneVisualization {
     }
   }
 
-  updateLabelSpritePosition(x, y) {
-    this.nodeLabel.css({ 'top': y, 'left': x + 30 });
-  }
-
-  select(node) {
-    this.selected.push(node);
-    this.outlinePassReference.selectedObjects = this.selected;
-  }
-
-  deselect() {
-    if (this.selected.length > 0) {
-      this.selected = [];
-      this.outlinePassReference.selectedObjects = [];
-    }
-  }
-
   switchSelect() {
     if (this.intersects.length == 0) {
       this.deselect();
+    }
+  }
+
+  onKeyDown(event, controls, camera, showViewLabel) {
+    let keyCode = event.which;
+    if (keyCode == 88) {
+      controls.reset();
+      showViewLabel('X');
+    } else if (keyCode == 89) {
+      camera.position.set(-8, 0, 0);
+      controls.update();
+      showViewLabel('Y');
+    } else if (keyCode == 49) {
+      this.moveTo(0);
+    } else if (keyCode == 50) {
+      this.moveTo(1);
+    } else if (keyCode == 51) {
+      this.moveTo(2);
+    } else if (keyCode == 52) {
+      this.moveTo(3);
+    } else if (keyCode == 53) {
+      this.moveTo(4);
+    } else if (keyCode == 54) {
+      this.moveTo(5);
+    } else if (keyCode == 55) {
+      this.moveTo(6);
+    } else if (keyCode == 56) {
+      this.moveTo(7);
+    } else if (keyCode == 57) {
+      this.moveTo(8);
+    } else if (keyCode == 81) {
+      this.locked.x = !this.locked.x;
+      this.locked.y = false;
+      this.setDragging(true);
+      this.manageGuideline(true);
+    } else if (keyCode == 69) {
+      this.locked.y = !this.locked.y;
+      this.locked.x = false;
+      this.setDragging(true);
+      this.manageGuideline(true);
     }
   }
 

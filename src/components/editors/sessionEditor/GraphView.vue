@@ -95,12 +95,22 @@
         this.rebootVisualizer();
         this.changeView(view);
       },
+      'settings.mode': function(mode) {
+        this.rebootVisualizer();
+        this.visualizations.threegraph = setupThreejsEnvironment(document.getElementById('threejs-container'), this.dataset, mode, this.settings.sorting);
+        this.structure = this.visualizations.threegraph.scene.structure;
+      },
       'settings.dataset': function() {
         this.rebootVisualizer();
         this.changeView(this.settings.view);
       },
       'dataset.links': function() {
         console.log('a');
+      },
+      'settings.sorting': function(sorting) {
+        this.rebootVisualizer();
+        this.visualizations.threegraph = setupThreejsEnvironment(document.getElementById('threejs-container'), this.dataset, this.settings.mode, sorting);
+        this.structure = this.visualizations.threegraph.scene.structure;
       }
     },
     methods: {
@@ -140,8 +150,8 @@
         if (view >= 1) {
           $('#force-graph-container').hide();
           $('#threejs-container').show();
-          if(this.visualizations.threegraph == null || this.visualizations.threegraph.view != view) {
-            this.visualizations.threegraph = setupThreejsEnvironment(document.getElementById('threejs-container'), this.dataset, view);
+          if(this.visualizations.threegraph == null || this.visualizations.threegraph.mode != this.settings.mode) {
+            this.visualizations.threegraph = setupThreejsEnvironment(document.getElementById('threejs-container'), this.dataset, this.settings.mode, this.settings.sorting);
             this.structure = this.visualizations.threegraph.scene.structure;
           } else if(this.visualizations.forceGraph != null) {
             this.visualizations.forceGraph.pauseAnimation();

@@ -74,7 +74,9 @@
         settings: {
           view: 1,
           dataset: 0,
-          viewNode: -1
+          viewNode: -1,
+          mode: 0,
+          sorting: 0,
         }
       };
     },
@@ -131,6 +133,7 @@
     methods: {
       change: function(setting, value) {
         this.settings[setting] = value;
+        console.log(value);
       },
       selectInteraction: function(id) {
         this.selectedInteraction = id;
