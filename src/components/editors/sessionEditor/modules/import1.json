@@ -1,0 +1,35 @@
+{
+    "id": "0001",
+    "name": "Dataset 1",
+    "nodes": [
+        {
+            "id": 0,
+            "name": "Node 1"
+        },
+        {
+            "id": 1,
+            "name": "Node 2"
+        },
+        {
+            "id": 2,
+            "name": "Node 3"
+        }
+    ],
+    "links": [
+        {
+            "source": 0,
+            "target": 1,
+            "how": "a"
+        },
+        {
+            "source": 1,
+            "target": 2,
+            "how": "a"
+        },
+        {
+            "source": 0,
+            "target": 2,
+            "how": "a"
+        }
+    ]
+}

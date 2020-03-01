@@ -20,25 +20,10 @@ export class Visualization3 extends SceneVisualization {
     this.locked.z = true;
   }
 
-  getMixedTag(node) {
-    if(node.tags.length == 0) {
-      return '';
-    } else if(node.tags.length == 1) {
-      return node.tags[0];
-    } else {
-      let tag = "";
-      node.tags.sort().forEach((el) => {
-        tag = tag + ' | ' + el;
-      });
-      tag = tag.slice(3);
-      return tag;
-    }
-  }
-
   setupStructure(dataset) {
     this.structure = [];
     let matrix = translatedToMatrix(dataset);
-    let tags = [], tag = "", temp = 0;
+    let levels = [], level = "", temp = 0;
     if(this.show == 0) {
       dataset.nodes.forEach((el1, index) => {
         temp = 0;
@@ -47,12 +32,12 @@ export class Visualization3 extends SceneVisualization {
             temp++;
           }
         });
-        tag = temp + " incoming Edges";
-        if(!tags.includes(tag)) {
-          this.structure.push({id: tag, color: randomHexColor(), content: []});
-          tags.push(tag);
+        level = temp + " incoming Edges";
+        if(!levels.includes(level)) {
+          this.structure.push({id: level, color: randomHexColor(), content: []});
+          levels.push(level);
         }
-        this.meshes.find(node => node.userData.id == dataset.nodes[index].id).userData.tag = tag;
+        this.meshes.find(node => node.userData.id == dataset.nodes[index].id).userData.level = level;
       });
     } else if(this.show == 1) {
       matrix.forEach((el1, index) => {
@@ -62,12 +47,12 @@ export class Visualization3 extends SceneVisualization {
             temp++;
           }
         });
-        tag = temp + " outgoing Edges";
-        if(!tags.includes(tag)) {
-          this.structure.push({id: tag, color: randomHexColor(), content: []});
-          tags.push(tag);
+        level = temp + " outgoing Edges";
+        if(!levels.includes(level)) {
+          this.structure.push({id: level, color: randomHexColor(), content: []});
+          levels.push(level);
         }
-        this.meshes.find(node => node.userData.id == dataset.nodes[index].id).userData.tag = tag;
+        this.meshes.find(node => node.userData.id == dataset.nodes[index].id).userData.level = level;
       });
     }  else if(this.show == 2) {
       dataset.nodes.forEach((el1, index) => {
@@ -77,20 +62,20 @@ export class Visualization3 extends SceneVisualization {
             temp++;
           }
         });
-        tag = temp + " incoming Edges";
+        level = temp + " incoming Edges";
         temp = 0;
         matrix[index].forEach(el2 => {
           if(el2) {
             temp++;
           }
         });
-        tag = tag + " | " + temp + " outgoing Edges";
+        level = level + " | " + temp + " outgoing Edges";
 
-        if(!tags.includes(tag)) {
-          this.structure.push({id: tag, color: randomHexColor(), content: []});
-          tags.push(tag);
+        if(!levels.includes(level)) {
+          this.structure.push({id: level, color: randomHexColor(), content: []});
+          levels.push(level);
         }
-        this.meshes.find(node => node.userData.id == dataset.nodes[index].id).userData.tag = tag;
+        this.meshes.find(node => node.userData.id == dataset.nodes[index].id).userData.level = level;
       });
     }
 
@@ -98,7 +83,7 @@ export class Visualization3 extends SceneVisualization {
     this.structure.forEach(el => {
       temp = counter;
       this.meshes.forEach(el2 => {
-        if(el2.userData.tag == el.id) {
+        if(el2.userData.level == el.id) {
           el.content.push(el2);
           this.moveTo(el2, (-1) * temp);
           el2.material.color.set(el.color);
@@ -106,21 +91,6 @@ export class Visualization3 extends SceneVisualization {
       });
       counter++;
     });
-  }
-
-  addTag(node, tag) {
-    node.userData.tag = 'Level '+(tag+1);
-    let index = this.structure.findIndex(el => el.id == 'Level '+(tag+1));
-    this.structure[index].content.push(node);
-    this.structure.splice(index, 1, this.structure[index]);
-  }
-
-  deleteTag(node) {
-    let tag = this.structure.find(el => el.id == node.userData.tag);
-    let index = tag.content.findIndex(el => el == node);
-    tag.content.splice(index, 1);
-    this.structure.splice(index, 1, this.structure[index]);
-    node.userData.tag = '';
   }
 
   dragstart(event, camera) {
@@ -197,7 +167,7 @@ export class Visualization3 extends SceneVisualization {
       obj = this.intersects[0].object;
       node = this.meshes.find(el => el == obj);
       this.nodeLabel.show();
-      this.nodeLabel.html('Name: ' + node.name + '<br /> Tag: ' + node.userData.tag);
+      this.nodeLabel.html('Name: ' + node.name + '<br /> Level: ' + node.userData.level);
     } else {
       this.nodeLabel.hide();
     }

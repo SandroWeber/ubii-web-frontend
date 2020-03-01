@@ -19,7 +19,7 @@ export class Visualization2 extends SceneVisualization {
     this.locked.z = true;
   }
 
-  getMixedTag(node) {
+  getMixedLevelName(node) {
     if(node.tags.length == 0) {
       return '';
     } else if(node.tags.length == 1) {
@@ -39,7 +39,7 @@ export class Visualization2 extends SceneVisualization {
     let tags = [], tag = "";
     dataset.nodes.forEach((node) => {
       if(node.tags.length > 1) {
-        tag = this.getMixedTag(node);
+        tag = this.getMixedLevelName(node);
       } else {
         tag = node.tags[0];
       }
@@ -47,7 +47,7 @@ export class Visualization2 extends SceneVisualization {
         this.structure.push({id: tag, color: randomHexColor(), content: []});
         tags.push(tag);
       }
-      this.meshes.find(el => el.userData.id == node.id).userData.tag = tag;
+      this.meshes.find(el => el.userData.id == node.id).userData.level = tag;
     });
 
     let counter = 1, temp = 0;
@@ -58,7 +58,7 @@ export class Visualization2 extends SceneVisualization {
         temp = counter;
       }
       this.meshes.forEach(el2 => {
-        if(el2.userData.tag == el.id) {
+        if(el2.userData.level == el.id) {
           el.content.push(el2);
           this.moveTo(el2, (-1) * temp);
           el2.material.color.set(el.color);
@@ -66,21 +66,6 @@ export class Visualization2 extends SceneVisualization {
       });
       counter++;
     });
-  }
-
-  addTag(node, tag) {
-    node.userData.tag = 'Level '+(tag+1);
-    let index = this.structure.findIndex(el => el.id == 'Level '+(tag+1));
-    this.structure[index].content.push(node);
-    this.structure.splice(index, 1, this.structure[index]);
-  }
-
-  deleteTag(node) {
-    let tag = this.structure.find(el => el.id == node.userData.tag);
-    let index = tag.content.findIndex(el => el == node);
-    tag.content.splice(index, 1);
-    this.structure.splice(index, 1, this.structure[index]);
-    node.userData.tag = '';
   }
 
   dragstart(event, camera) {
@@ -157,7 +142,7 @@ export class Visualization2 extends SceneVisualization {
       obj = this.intersects[0].object;
       node = this.meshes.find(el => el == obj);
       this.nodeLabel.show();
-      this.nodeLabel.html('Name: ' + node.name + '<br /> Tag: ' + node.userData.tag);
+      this.nodeLabel.html('Name: ' + node.name + '<br /> Tag: ' + node.userData.level);
     } else {
       this.nodeLabel.hide();
     }
