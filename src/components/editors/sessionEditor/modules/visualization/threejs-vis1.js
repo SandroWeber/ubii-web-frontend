@@ -18,18 +18,18 @@ export class Visualization1 extends SceneVisualization {
   }
 
   setupStructure(dataset) {
-    this.structure = [
-      { id: 'Level 1', color: '#CC0000', content: [], plane: null },
-      { id: 'Level 2', color: '#D52E2E', content: [], plane: null },
-      { id: 'Level 3', color: '#DC5454', content: [], plane: null },
-      { id: 'Level 4', color: '#E27373', content: [], plane: null },
-      { id: 'Level 5', color: '#ffffff', content: [], plane: null },
-      { id: 'Level 6', color: '#7373D2', content: [], plane: null },
-      { id: 'Level 7', color: '#5454C9', content: [], plane: null },
-      { id: 'Level 8', color: '#2E2EBE', content: [], plane: null },
-      { id: 'Level 9', color: '#0000B0', content: [], plane: null }
-    ];
-
+    this.addToStructure('Level 1', '#CC0000');
+    this.addToStructure('Level 2', '#D52E2E');
+    this.addToStructure('Level 3', '#DC5454');
+    this.addToStructure('Level 4', '#E27373');
+    this.addToStructure('Level 5', '#ffffff');
+    this.addToStructure('Level 6', '#7373D2');
+    this.addToStructure('Level 7', '#5454C9');
+    this.addToStructure('Level 8', '#2E2EBE');
+    this.addToStructure('Level 9', '#0000B0');
+    for (let i = 1; i < 10; i++) {
+      this.setLevelDepth('Level ' + i, i - 5);
+    }
     this.structure[4].content.push(...this.meshes);
     this.meshes.forEach(el => (el.userData.level = 'Level 5'));
   }
@@ -38,10 +38,12 @@ export class Visualization1 extends SceneVisualization {
     node.userData.level = 'Level ' + (level + 1);
     let index = this.structure.findIndex(el => el.id == 'Level ' + (level + 1));
     this.structure[index].content.push(node);
+    this.hoverState(true, node);
     this.structure.splice(index, 1, this.structure[index]);
   }
 
   deleteFromLevel(node) {
+    this.hoverState(false);
     let level = this.structure.find(el => el.id == node.userData.level);
     let index = level.content.findIndex(el => el == node);
     level.content.splice(index, 1);
@@ -91,7 +93,7 @@ export class Visualization1 extends SceneVisualization {
       this.selected[0].position.set(
         this.selected[0].position.x,
         this.selected[0].position.y,
-        (level - 4) * 1
+        this.structure.find(el => el.id == 'Level ' + (level + 1)).depth
       );
       this.detectLevel(level);
       this.changeArrow(this.selected[0]);
@@ -170,21 +172,6 @@ export class Visualization1 extends SceneVisualization {
       this.locked.x = false;
       this.setDragging(true);
       this.manageGuideline(true);
-    }
-  }
-
-  update(mouse, camera) {
-    let obj, node;
-    this.raycaster.setFromCamera(mouse, camera);
-    this.intersects = this.raycaster.intersectObjects(this.meshes);
-
-    if (this.intersects.length > 0) {
-      obj = this.intersects[0].object;
-      node = this.meshes.find(el => el == obj);
-      this.nodeLabel.show();
-      this.nodeLabel.html('Name: ' + node.name);
-    } else {
-      this.nodeLabel.hide();
     }
   }
 }

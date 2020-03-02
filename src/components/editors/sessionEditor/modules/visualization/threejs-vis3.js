@@ -23,59 +23,68 @@ export class Visualization3 extends SceneVisualization {
   setupStructure(dataset) {
     this.structure = [];
     let matrix = translatedToMatrix(dataset);
-    let levels = [], level = "", temp = 0;
-    if(this.show == 0) {
+    let levels = [],
+      level = '',
+      temp = 0;
+    if (this.show == 0) {
       dataset.nodes.forEach((el1, index) => {
         temp = 0;
         matrix.forEach(el2 => {
-          if(el2[index]) {
+          if (el2[index]) {
             temp++;
           }
         });
-        level = temp + " incoming Edges";
-        if(!levels.includes(level)) {
-          this.structure.push({id: level, color: randomHexColor(), content: []});
+        level = temp + ' incoming Edge' + (temp == 1 ? '' : 's');
+        if (!levels.includes(level)) {
+          this.addToStructure(level);
           levels.push(level);
         }
-        this.meshes.find(node => node.userData.id == dataset.nodes[index].id).userData.level = level;
+        this.meshes.find(
+          node => node.userData.id == dataset.nodes[index].id
+        ).userData.level = level;
       });
-    } else if(this.show == 1) {
+    } else if (this.show == 1) {
       matrix.forEach((el1, index) => {
         temp = 0;
         el1.forEach(el2 => {
-          if(el2) {
+          if (el2) {
             temp++;
           }
         });
-        level = temp + " outgoing Edges";
-        if(!levels.includes(level)) {
-          this.structure.push({id: level, color: randomHexColor(), content: []});
+        level = temp + ' outgoing Edge' + (temp == 1 ? '' : 's');
+        if (!levels.includes(level)) {
+          this.addToStructure(level);
           levels.push(level);
         }
-        this.meshes.find(node => node.userData.id == dataset.nodes[index].id).userData.level = level;
+        this.meshes.find(
+          node => node.userData.id == dataset.nodes[index].id
+        ).userData.level = level;
       });
-    }  else if(this.show == 2) {
+    } else if (this.show == 2) {
       dataset.nodes.forEach((el1, index) => {
         temp = 0;
         matrix.forEach(el2 => {
-          if(el2[index]) {
+          if (el2[index]) {
             temp++;
           }
         });
-        level = temp + " incoming Edges";
+        level = temp + ' incoming Edge' + (temp == 1 ? '' : 's');
         temp = 0;
         matrix[index].forEach(el2 => {
-          if(el2) {
+          if (el2) {
             temp++;
           }
         });
-        level = level + " | " + temp + " outgoing Edges";
+        level =
+          level + ' | ' + temp + ' outgoing Edge' + (temp == 1 ? '' : 's');
 
-        if(!levels.includes(level)) {
-          this.structure.push({id: level, color: randomHexColor(), content: []});
+        if (!levels.includes(level)) {
+          this.addToStructure(level);
           levels.push(level);
         }
-        this.meshes.find(node => node.userData.id == dataset.nodes[index].id).userData.level = level;
+        this.meshes.find(
+          node => node.userData.id == dataset.nodes[index].id
+        ).userData.level = level;
       });
     }
 
@@ -83,9 +92,10 @@ export class Visualization3 extends SceneVisualization {
     this.structure.forEach(el => {
       temp = counter;
       this.meshes.forEach(el2 => {
-        if(el2.userData.level == el.id) {
+        if (el2.userData.level == el.id) {
           el.content.push(el2);
-          this.moveTo(el2, (-1) * temp);
+          this.setLevelDepth(el.id, -1 * temp);
+          this.moveTo(el2, -1 * temp);
           el2.material.color.set(el.color);
         }
       });
@@ -115,13 +125,13 @@ export class Visualization3 extends SceneVisualization {
   }
 
   drag(event) {
-    if(this.locked.x) {
+    if (this.locked.x) {
       this.selected[0].position.x = this.oldPos.x;
     }
-    if(this.locked.y) {
+    if (this.locked.y) {
       this.selected[0].position.y = this.oldPos.y;
     }
-    if(this.locked.z) {
+    if (this.locked.z) {
       this.selected[0].position.z = this.oldPos.z;
     }
   }
@@ -156,20 +166,6 @@ export class Visualization3 extends SceneVisualization {
       this.locked.x = false;
       this.setDragging(true);
       this.manageGuideline(true);
-    }
-  }
-  update(mouse, camera) {
-    let obj, node;
-    this.raycaster.setFromCamera(mouse, camera);
-    this.intersects = this.raycaster.intersectObjects(this.meshes);
-
-    if (this.intersects.length > 0) {
-      obj = this.intersects[0].object;
-      node = this.meshes.find(el => el == obj);
-      this.nodeLabel.show();
-      this.nodeLabel.html('Name: ' + node.name + '<br /> Level: ' + node.userData.level);
-    } else {
-      this.nodeLabel.hide();
     }
   }
 }

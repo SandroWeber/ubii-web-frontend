@@ -1,9 +1,9 @@
 <template>
   <div class="side-bar" id="side-bar" v-if="datasets.length > 0">
     <div class="side-bar-top">
-      Dataset: {{dataset.name}}
+      Dataset: {{ dataset.name }}
       <br />
-      Nodes: {{dataset.nodes.length}}
+      Nodes: {{ dataset.nodes.length }}
     </div>
     <side-bar-item
       :id="'0'"
@@ -21,9 +21,9 @@
         @change="change"
       >
         <span>
-          <span>{{ds.name}}</span>
+          <span>{{ ds.name }}</span>
           <br />
-          <span class="small">{{ds.id}}</span>
+          <span class="small">{{ ds.id }}</span>
         </span>
       </list-item>
     </side-bar-item>
@@ -41,14 +41,20 @@
         :normal="true"
         :list_item="1"
         @change="change('viewNode', node.id)"
-      >{{node.name}}</list-item>
+        >{{ node.name }}</list-item
+      >
     </side-bar-item>
     <side-bar-item
       :id="'2'"
       :title="'Settings'"
       :desc="'Change various options about the visualization.'"
     >
-      <settings-container :settings="settings" @change="change" @addDataset="addDataset"></settings-container>
+      <settings-container
+        :dataset="dataset"
+        :settings="settings"
+        @change="change"
+        @addDataset="addDataset"
+      ></settings-container>
     </side-bar-item>
     <side-bar-item
       :id="'3'"
@@ -64,12 +70,14 @@
         :list_item="0"
         :id="ds.id"
       >
-        {{ds.name}}
-        <button
+        {{ ds.name }}
+        <b-button
+          v-bind:style="'margin-left: 20px;'"
           v-if="!isSelected(ds)"
-          class="button"
-          @click.exact="change('dataset', ds.id)"
-        >Activate</button>
+          @click="change('dataset', ds.id)"
+          variant="outline-primary"
+          >Show</b-button
+        >
       </list-item>
     </side-bar-item>
   </div>
@@ -80,9 +88,11 @@ import ListItem from './ListItem';
 import SideBarItem from './SideBarItem';
 import SettingsContainer from './SettingsContainer';
 
+import { BButton } from 'bootstrap-vue';
+
 export default {
   name: 'SideBar',
-  components: { SettingsContainer, SideBarItem, ListItem },
+  components: { SettingsContainer, SideBarItem, ListItem, 'b-button': BButton },
   props: {
     settings: {
       type: Object

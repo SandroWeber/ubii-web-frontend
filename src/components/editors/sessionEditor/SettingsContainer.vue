@@ -15,27 +15,88 @@
       <b-button @click="upload" variant="outline-primary">Import</b-button>
     </div>
     <b-form-group label="Graph:">
-      <b-form-select v-model="selectedView" :options="viewOptions" @input="changeView"></b-form-select>
+      <b-form-select
+        v-model="selectedView"
+        :options="viewOptions"
+        @input="changeView"
+      ></b-form-select>
     </b-form-group>
     <div v-if="selectedView == 1">
       <b-form-group label="Mode:">
-        <b-form-select v-model="selectedMode" :options="modeOptions" @input="changeMode"></b-form-select>
+        <b-form-select
+          v-model="selectedMode"
+          :options="modeOptions"
+          @input="changeMode"
+        ></b-form-select>
       </b-form-group>
       <div class="help-container" v-if="selectedView == 1">
         <font-awesome-icon icon="question-circle" class="icon" />
-        <span v-if="selectedMode == 0">Browse the graph without 9 individually usable Layers.</span>
-        <span
-          v-if="selectedMode == 1"
-        >Sort your Nodes in Layers depending on how which tags (or combination of tags) they reference.</span>
-        <span
-          v-if="selectedMode == 2"
-        >Sort your Nodes in Layers depending on how many edges flow into a node / out of a node.</span>
+        <span v-if="selectedMode == 0"
+          >Browse the graph without 9 individually usable Layers.</span
+        >
+        <span v-if="selectedMode == 1"
+          >Sort your Nodes in Layers depending on how which tags (or combination
+          of tags) they reference.</span
+        >
+        <span v-if="selectedMode == 2"
+          >Sort your Nodes in Layers depending on how many edges flow into a
+          node / out of a node.</span
+        >
+        <span v-if="selectedMode == 3"
+          >Sort your Nodes in Layers depending on how many steps they are away
+          from your Starting Node</span
+        >
       </div>
       <div v-if="selectedMode == 2">
         <b-form-group label="Sorting:">
-          <b-form-select v-model="selectedSorting" :options="sortingOptions" @input="changeSorting"></b-form-select>
+          <b-form-select
+            v-model="selectedSorting"
+            :options="sortingOptions"
+            @input="changeSorting"
+          ></b-form-select>
         </b-form-group>
       </div>
+      <div v-if="selectedMode == 3">
+        <b-form-group label="Starting Node:">
+          <b-form-select
+            v-model="selectedStartNode"
+            :options="startNodeOptions"
+            @input="changeStartNode"
+          ></b-form-select>
+        </b-form-group>
+      </div>
+      <b-form-group
+        label="Zero-Marker:"
+        labe-for="marker-toggle"
+        label-cols-sm="7"
+      >
+        <toggle-button
+          id="marker-toggle"
+          :height="28"
+          :width="90"
+          :color="{ unchecked: '#388DE8', checked: '#406184' }"
+          :font-size="15"
+          :value="true"
+          :labels="{ checked: 'Hidden', unchecked: 'Visible' }"
+          @change="changeZeroMarker"
+        ></toggle-button>
+      </b-form-group>
+      <b-form-group
+        label="Slim Levels:"
+        labe-for="level-slim-toggle"
+        label-cols-sm="7"
+      >
+        <toggle-button
+          id="level-slim-toggle"
+          :height="28"
+          :width="90"
+          :color="{ unchecked: '#388DE8', checked: '#406184' }"
+          :font-size="15"
+          :value="true"
+          :labels="{ checked: 'Slim', unchecked: 'Wide' }"
+          @change="changeSlimLevels"
+        ></toggle-button>
+      </b-form-group>
     </div>
   </div>
 </template>
@@ -44,6 +105,8 @@
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 import { BFormSelect, BFormGroup, BButton, BFormFile } from 'bootstrap-vue';
+
+import { ToggleButton } from 'vue-js-toggle-button';
 
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
@@ -55,10 +118,11 @@ export default {
     'b-form-select': BFormSelect,
     'b-form-group': BFormGroup,
     'b-button': BButton,
-    'b-form-file': BFormFile
+    'b-form-file': BFormFile,
+    'toggle-button': ToggleButton
   },
   props: {
-    eventBus: {
+    dataset: {
       type: Object
     },
     settings: {
@@ -70,6 +134,7 @@ export default {
       selectedView: this.settings.view,
       selectedMode: this.settings.mode,
       selectedSorting: this.settings.sorting,
+      selectedStartNode: this.settings.startNode,
       viewOptions: [
         { value: 0, text: 'Force-Graph' },
         { value: 1, text: 'Layered Graph' },
@@ -78,19 +143,25 @@ export default {
       modeOptions: [
         { value: 0, text: 'Browsing' },
         { value: 1, text: 'Tags' },
-        { value: 2, text: 'Node Degree' }
+        { value: 2, text: 'Node Degree' },
+        { value: 3, text: 'Steps' }
       ],
       sortingOptions: [
         { value: 0, text: 'Incoming Edges' },
         { value: 1, text: 'Outgoing Edges' },
         { value: 2, text: 'Incoming & Outgoing Edges' }
       ],
+      startNodeOptions: [],
       file: null
     };
   },
   watch: {},
   methods: {
-    init: function() {},
+    init: function() {
+      this.dataset.nodes.forEach((node, index) =>
+        this.startNodeOptions.push({ value: node.id, text: node.name })
+      );
+    },
     changeView: function(view) {
       this.$emit('change', 'view', view);
     },
@@ -99,6 +170,15 @@ export default {
     },
     changeSorting: function(sorting) {
       this.$emit('change', 'sorting', sorting);
+    },
+    changeZeroMarker: function(state) {
+      this.$emit('change', 'viewZeroMarker', !state.value);
+    },
+    changeStartNode: function(startNode) {
+      this.$emit('change', 'startNode', startNode);
+    },
+    changeSlimLevels: function(state) {
+      this.$emit('change', 'slimLevels', !state.value);
     },
     upload: function() {
       if (this.file != null) {

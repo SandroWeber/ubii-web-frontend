@@ -62,7 +62,10 @@ export default {
         dataset: '0',
         viewNode: -1,
         mode: 0,
-        sorting: 0
+        sorting: 0,
+        viewZeroMarker: false,
+        startNode: '0',
+        slimLevels: false
       }
     };
   },

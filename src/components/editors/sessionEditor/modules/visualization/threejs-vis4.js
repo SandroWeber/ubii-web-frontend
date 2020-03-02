@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import $ from 'jquery';
 import { SceneVisualization } from './threejs-scenes';
-import { randomHexColor } from '../utils';
+import { translatedToMatrix, randomHexColor } from '../utils';
 
-export class Visualization2 extends SceneVisualization {
-  constructor(dataset) {
+export class Visualization4 extends SceneVisualization {
+  constructor(dataset, startNode) {
     super();
     this.geometry = new THREE.SphereGeometry(0.2, 64, 64);
     this.material = new THREE.MeshLambertMaterial({
@@ -12,6 +12,7 @@ export class Visualization2 extends SceneVisualization {
       opacity: 0.8
     });
     this.dataset = dataset;
+    this.startNode = startNode;
     this.level = -1;
     this.createDataPoints();
     this.createLinks();
@@ -19,55 +20,59 @@ export class Visualization2 extends SceneVisualization {
     this.locked.z = true;
   }
 
-  getMixedLevelName(node) {
-    if (node.tags.length == 0) {
-      return '';
-    } else if (node.tags.length == 1) {
-      return node.tags[0];
-    } else {
-      let tag = '';
-      node.tags.sort().forEach(el => {
-        tag = tag + ' | ' + el;
-      });
-      tag = tag.slice(3);
-      return tag;
-    }
-  }
-
   setupStructure(dataset) {
     this.structure = [];
-    let tags = [],
-      tag = '';
-    dataset.nodes.forEach(node => {
-      if (node.tags.length > 1) {
-        tag = this.getMixedLevelName(node);
-      } else {
-        tag = node.tags[0];
-      }
-      if (!tags.includes(tag)) {
-        this.addToStructure(tag);
-        tags.push(tag);
-      }
-      this.meshes.find(el => el.userData.id == node.id).userData.level = tag;
-    });
-
-    let counter = 1,
-      temp = 0;
+    let matrix = translatedToMatrix(dataset);
+    let levels = [];
+    this.recursiveGraphCheck(
+      matrix,
+      levels,
+      dataset,
+      0,
+      dataset.nodes.findIndex(el => el.id == this.startNode)
+    );
+    let created = false;
+    let depth = 0;
+    let temp;
     this.structure.forEach(el => {
-      if (el.id == 'No Tag') {
-        temp = 0;
-      } else {
-        temp = counter;
+      if (el.depth > depth) {
+        depth = el.depth;
       }
-      this.meshes.forEach(el2 => {
-        if (el2.userData.level == el.id) {
-          el.content.push(el2);
-          this.setLevelDepth(el.id, -1 * temp);
-          this.moveTo(el2, -1 * temp);
-          el2.material.color.set(el.color);
+    });
+    depth++;
+    this.meshes.forEach(el => {
+      if (el.userData.level == undefined) {
+        if (!created) {
+          this.addToStructure('Unreachable');
+          created = true;
         }
-      });
-      counter++;
+        this.setLevelDepth('Unreachable', depth);
+        temp = this.structure.find(el2 => el2.id == 'Unreachable');
+        temp.content.push(el);
+        el.material.color.set(temp.color);
+        this.moveTo(el, depth);
+        el.userData.level = 'Unreachable';
+      }
+    });
+  }
+
+  recursiveGraphCheck(matrix, levels, dataset, counter, index) {
+    let level = counter + ' step' + (counter == 1 ? '' : 's');
+    if (!levels.includes(level)) {
+      levels.push(level);
+      this.addToStructure(level);
+    }
+    this.meshes[index].userData.level = level;
+    this.setLevelDepth(level, counter);
+    this.moveTo(this.meshes[index], counter);
+    let l = this.structure.find(el => el.id == level);
+    l.content.push(this.meshes[index]);
+    this.meshes[index].material.color.set(l.color);
+    let temp = counter + 1;
+    matrix[index].forEach((el, index2) => {
+      if (el) {
+        this.recursiveGraphCheck(matrix, levels, dataset, temp, index2);
+      }
     });
   }
 

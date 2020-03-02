@@ -7,18 +7,26 @@
           <span
             v-for="tag in structure"
             v-bind:key="tag.id"
-            v-bind:style="'background-color:' + (tag.color == '#ffffff' ? '#b6b5b5' : tag.color)"
+            v-bind:style="
+              'background-color:' +
+                (tag.color == '#ffffff' ? '#b6b5b5' : tag.color)
+            "
             class="ui-box ui-item"
           >
-            {{tag.id}}
-            <b-badge variant="light">{{tag.content.length}}</b-badge>
+            {{ tag.id }}
+            <b-badge variant="light">{{ tag.content.length }}</b-badge>
           </span>
         </div>
       </div>
       <div id="node-label" class="tooltip-label"></div>
       <div class="ui-container bottom">
         <div class="row" style="margin-bottom: 10px">
-          <b-toast class="toast-item" id="controls-toast" title="Controls" static>
+          <b-toast
+            class="toast-item"
+            id="controls-toast"
+            title="Controls"
+            static
+          >
             <p>
               <Numeric1BoxIcon />
               <span class="text">to</span>
@@ -44,11 +52,15 @@
             </p>
             <p>
               <AlphaXBoxIcon />
-              <span class="text">: Reset Camera to Main View (X-Axis/2D/Front)</span>
+              <span class="text"
+                >: Reset Camera to Main View (X-Axis/2D/Front)</span
+              >
             </p>
             <p>
               <AlphaYBoxIcon />
-              <span class="text">: Reset Camera to Level View (Y-Axis/2D/Side)</span>
+              <span class="text"
+                >: Reset Camera to Level View (Y-Axis/2D/Side)</span
+              >
             </p>
           </b-toast>
         </div>
@@ -61,7 +73,9 @@
           >
             <KeyboardIcon fillColor="#FF0000" />
           </b-button>
-          <b-button id="view-badge" class="ui-item" variant="primary">View: X-Axis (Main)</b-button>
+          <b-button id="view-badge" class="ui-item" variant="primary"
+            >View: X-Axis (Main)</b-button
+          >
         </div>
       </div>
     </div>
@@ -145,8 +159,10 @@ export default {
         document.getElementById('threejs-container'),
         this.dataset,
         mode,
-        this.settings.sorting
+        this.settings.sorting,
+        this.settings.startNode
       );
+      this.changeZeroMarker();
       this.structure = this.visualizations.threegraph.scene.structure;
     },
     'settings.dataset': function() {
@@ -156,14 +172,34 @@ export default {
     'dataset.links': function() {
       console.log('a');
     },
+    'settings.viewZeroMarker': function(show) {
+      this.changeZeroMarker();
+    },
+    'settings.slimLevels': function(slim) {
+      this.changeLevelAppearance();
+    },
+    'settings.startNode': function(node) {
+      this.rebootVisualizer();
+      this.visualizations.threegraph = setupThreejsEnvironment(
+        document.getElementById('threejs-container'),
+        this.dataset,
+        this.settings.mode,
+        this.settings.sorting,
+        node
+      );
+      this.changeZeroMarker();
+      this.structure = this.visualizations.threegraph.scene.structure;
+    },
     'settings.sorting': function(sorting) {
       this.rebootVisualizer();
       this.visualizations.threegraph = setupThreejsEnvironment(
         document.getElementById('threejs-container'),
         this.dataset,
         this.settings.mode,
-        sorting
+        sorting,
+        this.settings.startNode
       );
+      this.changeZeroMarker();
       this.structure = this.visualizations.threegraph.scene.structure;
     }
   },
@@ -211,12 +247,29 @@ export default {
             document.getElementById('threejs-container'),
             this.dataset,
             this.settings.mode,
-            this.settings.sorting
+            this.settings.sorting,
+            this.settings.startNode
           );
+          this.changeZeroMarker();
           this.structure = this.visualizations.threegraph.scene.structure;
         } else if (this.visualizations.forceGraph != null) {
           this.visualizations.forceGraph.pauseAnimation();
         }
+      }
+    },
+    changeZeroMarker() {
+      if (this.visualizations.threegraph != undefined) {
+        this.settings.viewZeroMarker
+          ? this.visualizations.threegraph.scene.showZeroMarker()
+          : this.visualizations.threegraph.scene.hideZeroMarker();
+      }
+    },
+
+    changeLevelAppearance() {
+      if (this.visualizations.threegraph != undefined) {
+        this.settings.slimLevels
+          ? this.visualizations.threegraph.scene.makeLevelsSlim()
+          : this.visualizations.threegraph.scene.makeLevelsWide();
       }
     }
   },
@@ -328,5 +381,6 @@ export default {
   border: 1px solid white;
   border-radius: 4px;
   padding: 5px;
+  display: none;
 }
 </style>
