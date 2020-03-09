@@ -46,7 +46,7 @@ export class Visualization4 extends SceneVisualization {
           this.addToStructure('Unreachable');
           created = true;
         }
-        this.setLevelDepth('Unreachable', depth);
+        this.setLevelDepth('Unreachable', this.layerStepSize * depth);
         temp = this.structure.find(el2 => el2.id == 'Unreachable');
         temp.content.push(el);
         el.material.color.set(temp.color);
@@ -63,8 +63,8 @@ export class Visualization4 extends SceneVisualization {
       this.addToStructure(level);
     }
     this.meshes[index].userData.level = level;
-    this.setLevelDepth(level, counter);
-    this.moveTo(this.meshes[index], counter);
+    this.setLevelDepth(level, this.layerStepSize * counter);
+    this.moveTo(this.meshes[index], this.layerStepSize * counter);
     let l = this.structure.find(el => el.id == level);
     l.content.push(this.meshes[index]);
     this.meshes[index].material.color.set(l.color);
@@ -93,20 +93,13 @@ export class Visualization4 extends SceneVisualization {
       this.deselect();
       this.same = false;
     }
+    this.setSlimLayers(this.slimLayers);
     this.setDragging(false);
     this.manageGuideline(false);
   }
 
   drag(event) {
-    if (this.locked.x) {
-      this.selected[0].position.x = this.oldPos.x;
-    }
-    if (this.locked.y) {
-      this.selected[0].position.y = this.oldPos.y;
-    }
-    if (this.locked.z) {
-      this.selected[0].position.z = this.oldPos.z;
-    }
+    this.dragBehaviour();
   }
 
   moveTo(node, level) {

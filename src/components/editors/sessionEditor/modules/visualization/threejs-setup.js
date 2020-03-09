@@ -13,7 +13,9 @@ export function setupThreejsEnvironment(
   dataset,
   mode,
   sorting,
-  startNode
+  startNode,
+  showAll,
+  slimLayers
 ) {
   let state = {
     renderer: null,
@@ -160,6 +162,8 @@ export function setupThreejsEnvironment(
       break;
   }
   state.scene = state.scenes[0];
+  state.scene.setShowAll(showAll);
+  state.scene.setSlimLayers(slimLayers);
 
   state.controls.push(new OrbitControls(state.camera, domElement));
   state.controls[0].keyPanSpeed = 20;
@@ -170,7 +174,7 @@ export function setupThreejsEnvironment(
     BOTTOM: 83
   };
 
-  state.eventhandlerfunctions[3] = function change() {
+  state.eventhandlerfunctions[3] = function change(event) {
     showViewLabel('');
   };
   state.eventhandlerfunctions[4] = function dragstart(event) {

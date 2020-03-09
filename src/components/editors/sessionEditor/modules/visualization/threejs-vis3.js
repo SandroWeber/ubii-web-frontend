@@ -94,8 +94,8 @@ export class Visualization3 extends SceneVisualization {
       this.meshes.forEach(el2 => {
         if (el2.userData.level == el.id) {
           el.content.push(el2);
-          this.setLevelDepth(el.id, -1 * temp);
-          this.moveTo(el2, -1 * temp);
+          this.setLevelDepth(el.id, -this.layerStepSize * temp);
+          this.moveTo(el2, -this.layerStepSize * temp);
           el2.material.color.set(el.color);
         }
       });
@@ -120,20 +120,13 @@ export class Visualization3 extends SceneVisualization {
       this.deselect();
       this.same = false;
     }
+    this.setSlimLayers(this.slimLayers);
     this.setDragging(false);
     this.manageGuideline(false);
   }
 
   drag(event) {
-    if (this.locked.x) {
-      this.selected[0].position.x = this.oldPos.x;
-    }
-    if (this.locked.y) {
-      this.selected[0].position.y = this.oldPos.y;
-    }
-    if (this.locked.z) {
-      this.selected[0].position.z = this.oldPos.z;
-    }
+    this.dragBehaviour();
   }
 
   moveTo(node, level) {

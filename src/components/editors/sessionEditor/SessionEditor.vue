@@ -65,7 +65,8 @@ export default {
         sorting: 0,
         viewZeroMarker: false,
         startNode: '0',
-        slimLevels: false
+        slimLayers: false,
+        showAll: true
       }
     };
   },

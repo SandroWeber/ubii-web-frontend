@@ -28,7 +28,7 @@ export class Visualization1 extends SceneVisualization {
     this.addToStructure('Level 8', '#2E2EBE');
     this.addToStructure('Level 9', '#0000B0');
     for (let i = 1; i < 10; i++) {
-      this.setLevelDepth('Level ' + i, i - 5);
+      this.setLevelDepth('Level ' + i, this.layerStepSize * (i - 5));
     }
     this.structure[4].content.push(...this.meshes);
     this.meshes.forEach(el => (el.userData.level = 'Level 5'));
@@ -71,21 +71,14 @@ export class Visualization1 extends SceneVisualization {
       this.deselect();
       this.same = false;
     }
+    this.setSlimLayers(this.slimLayers);
     this.setDragging(false);
     this.manageGuideline(false);
   }
 
   drag(event) {
     this.detectLevel();
-    if (this.locked.x) {
-      this.selected[0].position.x = this.oldPos.x;
-    }
-    if (this.locked.y) {
-      this.selected[0].position.y = this.oldPos.y;
-    }
-    if (this.locked.z) {
-      this.selected[0].position.z = this.oldPos.z;
-    }
+    this.dragBehaviour();
   }
 
   moveTo(level) {
@@ -101,6 +94,7 @@ export class Visualization1 extends SceneVisualization {
         this.deleteFromLevel(this.selected[0]);
       }
       this.addToLevel(this.selected[0], level);
+      this.setSlimLayers(this.slimLayers);
     }
   }
 
@@ -111,9 +105,12 @@ export class Visualization1 extends SceneVisualization {
     };
 
     if (level == undefined) {
-      let levels = [...Array(9).keys()].map(el => el - 4);
+      let levels = [...Array(9).keys()].map(
+        el => (el - 4) * this.layerStepSize
+      );
       let range = checkRange(this.selected[0].position.z);
       if (levels.includes(range)) {
+        range = range / this.layerStepSize;
         this.selected[0].material.color.set(this.structure[range + 4].color);
         this.level = range + 4;
       } else {

@@ -7,6 +7,7 @@
           <span
             v-for="tag in structure"
             v-bind:key="tag.id"
+            v-bind:id="tag.id.replace(/ |\|/g,'')"
             v-bind:style="
               'background-color:' +
                 (tag.color == '#ffffff' ? '#b6b5b5' : tag.color)
@@ -15,18 +16,19 @@
           >
             {{ tag.id }}
             <b-badge variant="light">{{ tag.content.length }}</b-badge>
+            <span
+              @click="() => {visualizations.threegraph.scene.focusOnLayer(tag.id)}"
+              class="focus-icon"
+            >
+              <VideoIcon></VideoIcon>
+            </span>
           </span>
         </div>
       </div>
       <div id="node-label" class="tooltip-label"></div>
       <div class="ui-container bottom">
         <div class="row" style="margin-bottom: 10px">
-          <b-toast
-            class="toast-item"
-            id="controls-toast"
-            title="Controls"
-            static
-          >
+          <b-toast class="toast-item" id="controls-toast" title="Controls" static>
             <p>
               <Numeric1BoxIcon />
               <span class="text">to</span>
@@ -52,15 +54,11 @@
             </p>
             <p>
               <AlphaXBoxIcon />
-              <span class="text"
-                >: Reset Camera to Main View (X-Axis/2D/Front)</span
-              >
+              <span class="text">: Reset Camera to Main View (X-Axis/2D/Front)</span>
             </p>
             <p>
               <AlphaYBoxIcon />
-              <span class="text"
-                >: Reset Camera to Level View (Y-Axis/2D/Side)</span
-              >
+              <span class="text">: Reset Camera to Level View (Y-Axis/2D/Side)</span>
             </p>
           </b-toast>
         </div>
@@ -73,9 +71,7 @@
           >
             <KeyboardIcon fillColor="#FF0000" />
           </b-button>
-          <b-button id="view-badge" class="ui-item" variant="primary"
-            >View: X-Axis (Main)</b-button
-          >
+          <b-button id="view-badge" class="ui-item" variant="primary">View: X-Axis (Main)</b-button>
         </div>
       </div>
     </div>
@@ -104,6 +100,7 @@ import AlphaSBoxIcon from 'vue-material-design-icons/AlphaSBox.vue';
 import AlphaDBoxIcon from 'vue-material-design-icons/AlphaDBox.vue';
 import AlphaXBoxIcon from 'vue-material-design-icons/AlphaXBox.vue';
 import AlphaYBoxIcon from 'vue-material-design-icons/AlphaYBox.vue';
+import VideoIcon from 'vue-material-design-icons/Video.vue';
 
 export default {
   name: 'GraphView',
@@ -130,7 +127,8 @@ export default {
     AlphaSBoxIcon,
     AlphaDBoxIcon,
     AlphaXBoxIcon,
-    AlphaYBoxIcon
+    AlphaYBoxIcon,
+    VideoIcon
   },
   data: () => {
     return {
@@ -160,7 +158,9 @@ export default {
         this.dataset,
         mode,
         this.settings.sorting,
-        this.settings.startNode
+        this.settings.startNode,
+        this.settings.showAll,
+        this.settings.slimLayers
       );
       this.changeZeroMarker();
       this.structure = this.visualizations.threegraph.scene.structure;
@@ -185,7 +185,9 @@ export default {
         this.dataset,
         this.settings.mode,
         this.settings.sorting,
-        node
+        node,
+        this.settings.showAll,
+        this.settings.slimLayers
       );
       this.changeZeroMarker();
       this.structure = this.visualizations.threegraph.scene.structure;
@@ -197,10 +199,18 @@ export default {
         this.dataset,
         this.settings.mode,
         sorting,
-        this.settings.startNode
+        this.settings.startNode,
+        this.settings.showAll,
+        this.settings.slimLayers
       );
       this.changeZeroMarker();
       this.structure = this.visualizations.threegraph.scene.structure;
+    },
+    'settings.showAll': function(showAll) {
+      this.visualizations.threegraph.scene.setShowAll(showAll);
+    },
+    'settings.slimLayers': function(slimLayers) {
+      this.visualizations.threegraph.scene.setSlimLayers(slimLayers);
     }
   },
   methods: {
@@ -248,7 +258,9 @@ export default {
             this.dataset,
             this.settings.mode,
             this.settings.sorting,
-            this.settings.startNode
+            this.settings.startNode,
+            this.settings.showAll,
+            this.settings.slimLayers
           );
           this.changeZeroMarker();
           this.structure = this.visualizations.threegraph.scene.structure;
@@ -300,8 +312,7 @@ export default {
   top: -8px;
 }
 
-.ui-item >>> svg,
-.ui-item >>> span {
+.ui-item >>> svg {
   width: 25px;
   height: 25px;
 }
@@ -347,7 +358,7 @@ export default {
 }
 
 .ui-item {
-  min-height: 38px;
+  min-height: 50px;
   margin-right: 20px;
 }
 
@@ -381,6 +392,29 @@ export default {
   border: 1px solid white;
   border-radius: 4px;
   padding: 5px;
+  display: none;
+}
+
+.focus-icon {
+  border: 2px solid black;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 5px 5px 5px 10px;
+  padding: 5px 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.focus-icon >>> svg {
+  top: -2px;
+  left: -4px;
+}
+
+.disabled {
+  background-color: #b2b0b0 !important;
+}
+
+.disabled >>> .focus-icon {
   display: none;
 }
 </style>
