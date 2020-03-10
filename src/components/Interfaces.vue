@@ -22,6 +22,13 @@
         </app-tile>
       </router-link>
 
+      <router-link to="/interfaces/ubii-gameCamera" class="interface-link" tag="div">
+        <app-tile class="layer-three background round shadow blue-accent">
+          <font-awesome-icon icon="camera" class="interface-icon" />
+          <p>Ubii Game Camera</p>
+        </app-tile>
+      </router-link>
+
       <router-link to="/interfaces/myo" class="interface-link" tag="div">
         <app-tile class="layer-three background round shadow blue-accent">
           <font-awesome-icon icon="ring" class="interface-icon" />

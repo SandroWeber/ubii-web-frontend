@@ -52,6 +52,11 @@ export default new Router({
     name: 'Interface - Camera',
     component: () => import('./components/interfaces/Camera.vue')
   },
+  {
+    path: '/interfaces/ubii-gameCamera',
+    name: "Interface - Ubii Game Camera",
+    component: () => import('./components/interfaces/UbiiGameCamera.vue')
+  },
   /* tools */
   {
     path: '/tools',
