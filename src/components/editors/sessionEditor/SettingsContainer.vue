@@ -51,9 +51,9 @@
           ></b-form-select>
         </b-form-group>
       </div>
-      <b-form-group label="Always show layers:" labe-for="layer-show-all" label-cols-sm="7">
+      <b-form-group label="Always show layers:" labe-for="layer-show-all-toggle" label-cols-sm="7">
         <toggle-button
-          id="layers-show-all"
+          id="layers-show-all-toggle"
           :height="28"
           :width="90"
           :color="{ unchecked: '#406184', checked: '#388DE8' }"
@@ -73,6 +73,18 @@
           :value="selectedSlimLevels"
           :labels="{ checked: 'Slim', unchecked: 'Wide' }"
           @change="changeSlimLevels"
+        ></toggle-button>
+      </b-form-group>
+      <b-form-group label="Snap to Grid:" labe-for="layer-grid-snap-toggle" label-cols-sm="7">
+        <toggle-button
+          id="layer-grid-snap-toggle"
+          :height="28"
+          :width="90"
+          :color="{ unchecked: '#406184', checked: '#388DE8' }"
+          :font-size="15"
+          :value="selectedSnapToGrid"
+          :labels="{ checked: 'Snap', unchecked: 'Free' }"
+          @change="changeSnapToGrid"
         ></toggle-button>
       </b-form-group>
       <b-form-group label="Zero-Marker:" labe-for="marker-toggle" label-cols-sm="7">
@@ -128,6 +140,7 @@ export default {
       selectedSlimLevels: this.settings.slimLevels,
       selectedShowAll: this.settings.showAll,
       selectedZeroMarker: this.settings.viewZeroMarker,
+      selectedSnapToGrid: this.settings.snapToGrid,
       viewOptions: [
         { value: 0, text: 'Force-Graph' },
         { value: 1, text: 'Layered Graph' },
@@ -175,6 +188,9 @@ export default {
     },
     changeShowAll: function(state) {
       this.$emit('change', 'showAll', state.value);
+    },
+    changeSnapToGrid: function(state) {
+      this.$emit('change', 'snapToGrid', state.value);
     },
     upload: function() {
       if (this.file != null) {

@@ -66,7 +66,8 @@ export default {
         viewZeroMarker: false,
         startNode: '0',
         slimLayers: false,
-        showAll: true
+        showAll: true,
+        snapToGrid: true
       }
     };
   },

@@ -153,17 +153,7 @@ export default {
     },
     'settings.mode': function(mode) {
       this.rebootVisualizer();
-      this.visualizations.threegraph = setupThreejsEnvironment(
-        document.getElementById('threejs-container'),
-        this.dataset,
-        mode,
-        this.settings.sorting,
-        this.settings.startNode,
-        this.settings.showAll,
-        this.settings.slimLayers
-      );
-      this.changeZeroMarker();
-      this.structure = this.visualizations.threegraph.scene.structure;
+      this.setUpThreeJS();
     },
     'settings.dataset': function() {
       this.rebootVisualizer();
@@ -175,42 +165,22 @@ export default {
     'settings.viewZeroMarker': function(show) {
       this.changeZeroMarker();
     },
-    'settings.slimLevels': function(slim) {
-      this.changeLevelAppearance();
-    },
     'settings.startNode': function(node) {
       this.rebootVisualizer();
-      this.visualizations.threegraph = setupThreejsEnvironment(
-        document.getElementById('threejs-container'),
-        this.dataset,
-        this.settings.mode,
-        this.settings.sorting,
-        node,
-        this.settings.showAll,
-        this.settings.slimLayers
-      );
-      this.changeZeroMarker();
-      this.structure = this.visualizations.threegraph.scene.structure;
+      this.setUpThreeJS();
     },
     'settings.sorting': function(sorting) {
       this.rebootVisualizer();
-      this.visualizations.threegraph = setupThreejsEnvironment(
-        document.getElementById('threejs-container'),
-        this.dataset,
-        this.settings.mode,
-        sorting,
-        this.settings.startNode,
-        this.settings.showAll,
-        this.settings.slimLayers
-      );
-      this.changeZeroMarker();
-      this.structure = this.visualizations.threegraph.scene.structure;
+      this.setUpThreeJS();
     },
     'settings.showAll': function(showAll) {
       this.visualizations.threegraph.scene.setShowAll(showAll);
     },
     'settings.slimLayers': function(slimLayers) {
       this.visualizations.threegraph.scene.setSlimLayers(slimLayers);
+    },
+    'settings.snapToGrid': function(snapToGrid) {
+      this.visualizations.threegraph.scene.setSnapToGrid(snapToGrid);
     }
   },
   methods: {
@@ -228,6 +198,15 @@ export default {
         this.visualizations.threegraph.cancelVisualization();
         this.visualizations.threegraph = null;
       }
+    },
+    setUpThreeJS() {
+      this.visualizations.threegraph = setupThreejsEnvironment(
+        document.getElementById('threejs-container'),
+        this.dataset,
+        this.settings
+      );
+      this.changeZeroMarker();
+      this.structure = this.visualizations.threegraph.scene.structure;
     },
     changeView: function(view) {
       if (view < 0 || view > 6) {
@@ -253,17 +232,7 @@ export default {
           this.visualizations.threegraph == null ||
           this.visualizations.threegraph.mode != this.settings.mode
         ) {
-          this.visualizations.threegraph = setupThreejsEnvironment(
-            document.getElementById('threejs-container'),
-            this.dataset,
-            this.settings.mode,
-            this.settings.sorting,
-            this.settings.startNode,
-            this.settings.showAll,
-            this.settings.slimLayers
-          );
-          this.changeZeroMarker();
-          this.structure = this.visualizations.threegraph.scene.structure;
+          this.setUpThreeJS();
         } else if (this.visualizations.forceGraph != null) {
           this.visualizations.forceGraph.pauseAnimation();
         }
@@ -274,14 +243,6 @@ export default {
         this.settings.viewZeroMarker
           ? this.visualizations.threegraph.scene.showZeroMarker()
           : this.visualizations.threegraph.scene.hideZeroMarker();
-      }
-    },
-
-    changeLevelAppearance() {
-      if (this.visualizations.threegraph != undefined) {
-        this.settings.slimLevels
-          ? this.visualizations.threegraph.scene.makeLevelsSlim()
-          : this.visualizations.threegraph.scene.makeLevelsWide();
       }
     }
   },
@@ -412,9 +373,5 @@ export default {
 
 .disabled {
   background-color: #b2b0b0 !important;
-}
-
-.disabled >>> .focus-icon {
-  display: none;
 }
 </style>

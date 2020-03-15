@@ -3,18 +3,19 @@ import $ from 'jquery';
 import { SceneVisualization } from './threejs-scenes';
 
 export class Visualization1 extends SceneVisualization {
-  constructor(dataset) {
-    super();
+  constructor(dataset, snapToGrid) {
+    super(dataset, snapToGrid);
     this.geometry = new THREE.SphereGeometry(0.2, 64, 64);
     this.material = new THREE.MeshLambertMaterial({
       transparent: true,
       opacity: 0.8
     });
-    this.dataset = dataset;
-    this.level = -1;
     this.createDataPoints();
     this.createLinks();
     this.setupStructure();
+    this.meshes.forEach(el => {
+      this.checkNodePositionOnGrid(el);
+    });
   }
 
   setupStructure(dataset) {
@@ -63,13 +64,12 @@ export class Visualization1 extends SceneVisualization {
 
   dragend(event) {
     this.changeArrow(event.object);
-    if (this.level >= 0) {
-      this.moveTo(this.level);
-      this.level = -1;
-    }
     if (this.same && this.oldPos.equals(this.selected[0].position)) {
       this.deselect();
       this.same = false;
+    } else if (!this.oldPos.equals(this.selected[0].position)) {
+      this.deleteNodeFromGrid(event.object);
+      this.checkNodePositionOnGrid(this.selected[0]);
     }
     this.setSlimLayers(this.slimLayers);
     this.setDragging(false);
@@ -77,25 +77,7 @@ export class Visualization1 extends SceneVisualization {
   }
 
   drag(event) {
-    this.detectLevel();
     this.dragBehaviour();
-  }
-
-  moveTo(level) {
-    if (this.selected.length > 0) {
-      this.selected[0].position.set(
-        this.selected[0].position.x,
-        this.selected[0].position.y,
-        this.structure.find(el => el.id == 'Level ' + (level + 1)).depth
-      );
-      this.detectLevel(level);
-      this.changeArrow(this.selected[0]);
-      if (this.selected[0].userData.level != '') {
-        this.deleteFromLevel(this.selected[0]);
-      }
-      this.addToLevel(this.selected[0], level);
-      this.setSlimLayers(this.slimLayers);
-    }
   }
 
   detectLevel(level) {
@@ -112,17 +94,14 @@ export class Visualization1 extends SceneVisualization {
       if (levels.includes(range)) {
         range = range / this.layerStepSize;
         this.selected[0].material.color.set(this.structure[range + 4].color);
-        this.level = range + 4;
       } else {
         this.selected[0].material.color.set(this.structure[4].color);
-        this.level = -1;
         if (this.selected[0].userData.level != '') {
           this.deleteFromLevel(this.selected[0]);
         }
       }
     } else {
       this.selected[0].material.color.set(this.structure[level].color);
-      this.level = -1;
     }
   }
 
@@ -142,23 +121,23 @@ export class Visualization1 extends SceneVisualization {
       controls.update();
       showViewLabel('Y');
     } else if (keyCode == 49) {
-      this.moveTo(0);
+      this.moveTo(this.selected[0], -4 * this.layerStepSize);
     } else if (keyCode == 50) {
-      this.moveTo(1);
+      this.moveTo(this.selected[0], -3 * this.layerStepSize);
     } else if (keyCode == 51) {
-      this.moveTo(2);
+      this.moveTo(this.selected[0], -2 * this.layerStepSize);
     } else if (keyCode == 52) {
-      this.moveTo(3);
+      this.moveTo(this.selected[0], -1 * this.layerStepSize);
     } else if (keyCode == 53) {
-      this.moveTo(4);
+      this.moveTo(this.selected[0], 0 * this.layerStepSize);
     } else if (keyCode == 54) {
-      this.moveTo(5);
+      this.moveTo(this.selected[0], 1 * this.layerStepSize);
     } else if (keyCode == 55) {
-      this.moveTo(6);
+      this.moveTo(this.selected[0], 2 * this.layerStepSize);
     } else if (keyCode == 56) {
-      this.moveTo(7);
+      this.moveTo(this.selected[0], 3 * this.layerStepSize);
     } else if (keyCode == 57) {
-      this.moveTo(8);
+      this.moveTo(this.selected[0], 4 * this.layerStepSize);
     } else if (keyCode == 81) {
       this.locked.x = !this.locked.x;
       this.locked.y = false;

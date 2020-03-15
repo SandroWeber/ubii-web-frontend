@@ -8,15 +8,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import DragControls from 'three-dragcontrols';
 import { RenderPass, EffectComposer, OutlinePass } from 'three-outlinepass';
 
-export function setupThreejsEnvironment(
-  domElement,
-  dataset,
-  mode,
-  sorting,
-  startNode,
-  showAll,
-  slimLayers
-) {
+export function setupThreejsEnvironment(domElement, dataset, settings) {
   let state = {
     renderer: null,
     scene: null,
@@ -27,7 +19,6 @@ export function setupThreejsEnvironment(
     composer: null,
     classification: [],
     stop: false,
-    mode: mode,
     eventhandlerfunctions: []
   };
 
@@ -47,7 +38,6 @@ export function setupThreejsEnvironment(
     if (!state.stop) {
       requestAnimationFrame(animate);
       state.scene.update(state.mouse, state.camera);
-      // state.renderer.render(state.scene.getScene(), state.camera);
       state.composer.render(state.scene, state.camera);
     }
   };
@@ -147,23 +137,27 @@ export function setupThreejsEnvironment(
 
   state.camera.position.z = 6;
 
-  switch (mode) {
+  switch (settings.mode) {
     case 0:
-      state.scenes.push(new Visualization1(dataset));
+      state.scenes.push(new Visualization1(dataset, settings.snapToGrid));
       break;
     case 1:
-      state.scenes.push(new Visualization2(dataset));
+      state.scenes.push(new Visualization2(dataset, settings.snapToGrid));
       break;
     case 2:
-      state.scenes.push(new Visualization3(dataset, sorting));
+      state.scenes.push(
+        new Visualization3(dataset, settings.snapToGrid, settings.sorting)
+      );
       break;
     case 3:
-      state.scenes.push(new Visualization4(dataset, startNode));
+      state.scenes.push(
+        new Visualization4(dataset, settings.snapToGrid, settings.startNode)
+      );
       break;
   }
   state.scene = state.scenes[0];
-  state.scene.setShowAll(showAll);
-  state.scene.setSlimLayers(slimLayers);
+  state.scene.setShowAll(settings.showAll);
+  state.scene.setSlimLayers(settings.slimLayers);
 
   state.controls.push(new OrbitControls(state.camera, domElement));
   state.controls[0].keyPanSpeed = 20;

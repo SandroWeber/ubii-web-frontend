@@ -4,19 +4,16 @@ import { SceneVisualization } from './threejs-scenes';
 import { randomHexColor } from '../utils';
 
 export class Visualization2 extends SceneVisualization {
-  constructor(dataset) {
-    super();
+  constructor(dataset, snapToGrid) {
+    super(dataset, snapToGrid);
     this.geometry = new THREE.SphereGeometry(0.2, 64, 64);
     this.material = new THREE.MeshLambertMaterial({
       transparent: true,
       opacity: 0.8
     });
-    this.dataset = dataset;
-    this.level = -1;
     this.createDataPoints();
     this.createLinks();
     this.setupStructure(dataset);
-    this.locked.z = true;
   }
 
   getMixedLevelName(node) {
@@ -77,7 +74,6 @@ export class Visualization2 extends SceneVisualization {
     }
     this.deselect();
     this.select(event.object);
-    this.level = this.selected[0].position.z;
     this.setDragging(true);
     this.manageGuideline(true);
   }
@@ -95,11 +91,6 @@ export class Visualization2 extends SceneVisualization {
 
   drag(event) {
     this.dragBehaviour();
-  }
-
-  moveTo(node, level) {
-    node.position.set(node.position.x, node.position.y, level);
-    this.changeArrow(node);
   }
 
   switchSelect() {

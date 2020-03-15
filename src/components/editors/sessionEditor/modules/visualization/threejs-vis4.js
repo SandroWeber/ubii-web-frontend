@@ -4,20 +4,17 @@ import { SceneVisualization } from './threejs-scenes';
 import { translatedToMatrix, randomHexColor } from '../utils';
 
 export class Visualization4 extends SceneVisualization {
-  constructor(dataset, startNode) {
-    super();
+  constructor(dataset, snapToGrid, startNode) {
+    super(dataset, snapToGrid);
     this.geometry = new THREE.SphereGeometry(0.2, 64, 64);
     this.material = new THREE.MeshLambertMaterial({
       transparent: true,
       opacity: 0.8
     });
-    this.dataset = dataset;
     this.startNode = startNode;
-    this.level = -1;
     this.createDataPoints();
     this.createLinks();
     this.setupStructure(dataset);
-    this.locked.z = true;
   }
 
   setupStructure(dataset) {
@@ -82,7 +79,6 @@ export class Visualization4 extends SceneVisualization {
     }
     this.deselect();
     this.select(event.object);
-    this.level = this.selected[0].position.z;
     this.setDragging(true);
     this.manageGuideline(true);
   }
@@ -100,11 +96,6 @@ export class Visualization4 extends SceneVisualization {
 
   drag(event) {
     this.dragBehaviour();
-  }
-
-  moveTo(node, level) {
-    node.position.set(node.position.x, node.position.y, level);
-    this.changeArrow(node);
   }
 
   switchSelect() {

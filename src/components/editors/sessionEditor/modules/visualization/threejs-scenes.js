@@ -3,14 +3,15 @@ import $ from 'jquery';
 import { randomHexColor } from '../utils';
 
 export class SceneVisualization {
-  constructor() {
+  constructor(dataset, snapToGrid) {
     this.scene = new THREE.Scene();
     let light = new THREE.AmbientLight(0xadadad);
     this.scene.add(new THREE.DirectionalLight(0xffffff, 1));
     this.scene.add(light);
 
+    this.dataset = dataset;
     this.structure = [];
-    this.locked = { x: false, y: false, z: false };
+    this.locked = { x: false, y: false, z: true };
     this.guideline = null;
     this.oldPos;
     this.meshes = [];
@@ -31,6 +32,8 @@ export class SceneVisualization {
     this.showAllLayers = false;
     this.slimLayers = false;
     this.focusedLayer = '';
+    this.gridPositions = [];
+    this.snapToGrid = snapToGrid;
   }
 
   setShowAll(showAll) {
@@ -49,6 +52,10 @@ export class SceneVisualization {
       this.calculateLayerDimensions(el.id);
       this.setLayerDimensions(el.id);
     });
+  }
+
+  setSnapToGrid(snapToGrid) {
+    this.snapToGrid = snapToGrid;
   }
 
   getScene() {
@@ -86,6 +93,11 @@ export class SceneVisualization {
   setDragging(dragging) {
     this.isDragging = dragging;
     this.oldPos = new THREE.Vector3().copy(this.selected[0].position);
+  }
+
+  moveTo(node, level) {
+    node.position.set(node.position.x, node.position.y, level);
+    this.changeArrow(node);
   }
 
   dragBehaviour() {
@@ -597,7 +609,7 @@ export class SceneVisualization {
       this.materials.push(material);
       mesh = new THREE.Mesh(this.geometry, material);
       mesh.name = node.name;
-      mesh.userData = { id: node.id };
+      mesh.userData = { id: node.id, onGrid: false };
       this.meshes.push(mesh);
       mesh.position.set(
         THREE.Math.randFloat(-this.steps, this.steps),
@@ -721,6 +733,93 @@ export class SceneVisualization {
     this.structure.forEach(
       el => (el.plane.scale.y = this.steps * this.stepSize * 2)
     );
+  }
+
+  deleteNodeFromGrid(node) {
+    if (node.userData.onGrid) {
+      let ind = this.gridPositions.find(el => el.name == node.name);
+      this.gridPositions.splice(ind, 1);
+      node.userData.onGrid = false;
+    }
+  }
+
+  checkNodePositionOnGrid(node) {
+    if (!this.snapToGrid) {
+      return;
+    }
+    let distance = this.stepSize * this.steps;
+    let x = Number.MAX_VALUE,
+      y = Number.MAX_VALUE,
+      xi = 0,
+      yi = 0;
+    let temp;
+    for (let i = -distance; i <= distance; i += this.stepSize) {
+      temp = Math.abs(i - node.position.x);
+      if (temp < x) {
+        x = temp;
+        xi = i;
+      }
+      temp = Math.abs(i - node.position.y);
+      if (temp < y) {
+        y = temp;
+        yi = i;
+      }
+    }
+    this.positionNodeOnGrid(node, { x: xi, y: yi }, true);
+  }
+
+  positionNodeOnGrid(node, pos, search) {
+    if (search) {
+      if (this.checkGridPosition(pos.x, pos.y, node.userData.level) < 0) {
+        node.position.x = pos.x;
+        node.position.y = pos.y;
+        node.userData.onGrid = true;
+        this.changeArrow(node);
+        this.gridPositions.push(node);
+        return true;
+      } else {
+        let positions = [
+          { x: pos.x, y: pos.y + 1 },
+          { x: pos.x + 1, y: pos.y + 1 },
+          { x: pos.x + 1, y: pos.y },
+          { x: pos.x + 1, y: pos.y - 1 },
+          { x: pos.x, y: pos.y - 1 },
+          { x: pos.x - 1, y: pos.y - 1 },
+          { x: pos.x - 1, y: pos.y },
+          { x: pos.x - 1, y: pos.y + 1 }
+        ];
+        for (let i = 0; i < positions.length; i++) {
+          if (this.positionNodeOnGrid(node, positions[i], false)) {
+            return true;
+          }
+        }
+        return this.positionNodeOnGrid(node, positions[0], true);
+      }
+    } else {
+      if (this.checkGridPosition(pos.x, pos.y, node.userData.level) < 0) {
+        node.position.x = pos.x;
+        node.position.y = pos.y;
+        node.userData.onGrid = true;
+        this.changeArrow(node);
+        this.gridPositions.push(node);
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
+  checkGridPosition(x, y, level) {
+    for (let i = 0; i < this.gridPositions.length; i++) {
+      if (
+        this.gridPositions[i].userData.level == level &&
+        this.gridPositions[i].position.x == x &&
+        this.gridPositions[i].position.y == y
+      ) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   update(mouse, camera) {
