@@ -41,7 +41,8 @@ export class DataTranslator {
         tags:
           interaction.tags == null || interaction.tags.length == 0
             ? ['No Tag']
-            : interaction.tags
+            : interaction.tags,
+        links: []
       });
       interaction.inputFormats.forEach(format => {
         leftLinks.push({

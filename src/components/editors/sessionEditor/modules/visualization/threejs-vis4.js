@@ -74,7 +74,7 @@ export class Visualization4 extends SceneVisualization {
   }
 
   dragstart(event, camera) {
-    if (this.selected[0] == event.object) {
+    if (this.selected == event.object) {
       this.same = true;
     }
     this.deselect();
@@ -85,7 +85,7 @@ export class Visualization4 extends SceneVisualization {
 
   dragend(event) {
     this.changeArrow(event.object);
-    if (this.same && this.oldPos.equals(this.selected[0].position)) {
+    if (this.same && this.oldPos.equals(this.selected.position)) {
       this.deselect();
       this.same = false;
     }
@@ -96,12 +96,6 @@ export class Visualization4 extends SceneVisualization {
 
   drag(event) {
     this.dragBehaviour();
-  }
-
-  switchSelect() {
-    if (this.intersects.length == 0) {
-      this.deselect();
-    }
   }
 
   onKeyDown(event, controls, camera, showViewLabel) {

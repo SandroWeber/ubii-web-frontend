@@ -14,7 +14,11 @@
           <!--                         :dataset="session"-->
           <!--                    ></top-bar>-->
 
-          <graph-view :datasets="datasets" :settings="settings"></graph-view>
+          <graph-view
+            :datasets="datasets"
+            :settings="settings"
+            @change="change"
+          ></graph-view>
         </div>
       </div>
     </UbiiClientContent>
@@ -163,7 +167,7 @@ export default {
 
 .side-bar-instance {
   flex-basis: 300px;
-  max-width: 350px;
+  max-width: 300px;
 }
 
 .top-bar-instance {

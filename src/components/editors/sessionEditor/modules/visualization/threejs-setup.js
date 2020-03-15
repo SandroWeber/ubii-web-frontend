@@ -8,7 +8,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import DragControls from 'three-dragcontrols';
 import { RenderPass, EffectComposer, OutlinePass } from 'three-outlinepass';
 
-export function setupThreejsEnvironment(domElement, dataset, settings) {
+export function setupThreejsEnvironment(domElement, dataset, settings, change) {
   let state = {
     renderer: null,
     scene: null,
@@ -130,7 +130,7 @@ export function setupThreejsEnvironment(domElement, dataset, settings) {
   };
 
   state.eventhandlerfunctions[2] = function onClick(event) {
-    if (!state.stop) {
+    if (!state.stop && event.toElement.nodeName == 'CANVAS') {
       state.scene.switchSelect();
     }
   };
@@ -158,6 +158,7 @@ export function setupThreejsEnvironment(domElement, dataset, settings) {
   state.scene = state.scenes[0];
   state.scene.setShowAll(settings.showAll);
   state.scene.setSlimLayers(settings.slimLayers);
+  state.scene.setChange(change);
 
   state.controls.push(new OrbitControls(state.camera, domElement));
   state.controls[0].keyPanSpeed = 20;

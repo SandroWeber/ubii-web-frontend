@@ -53,7 +53,7 @@ export class Visualization1 extends SceneVisualization {
   }
 
   dragstart(event, camera) {
-    if (this.selected[0] == event.object) {
+    if (this.selected == event.object) {
       this.same = true;
     }
     this.deselect();
@@ -64,12 +64,12 @@ export class Visualization1 extends SceneVisualization {
 
   dragend(event) {
     this.changeArrow(event.object);
-    if (this.same && this.oldPos.equals(this.selected[0].position)) {
+    if (this.same && this.oldPos.equals(this.selected.position)) {
       this.deselect();
       this.same = false;
-    } else if (!this.oldPos.equals(this.selected[0].position)) {
+    } else if (!this.oldPos.equals(this.selected.position)) {
       this.deleteNodeFromGrid(event.object);
-      this.checkNodePositionOnGrid(this.selected[0]);
+      this.checkNodePositionOnGrid(this.selected);
     }
     this.setSlimLayers(this.slimLayers);
     this.setDragging(false);
@@ -90,24 +90,18 @@ export class Visualization1 extends SceneVisualization {
       let levels = [...Array(9).keys()].map(
         el => (el - 4) * this.layerStepSize
       );
-      let range = checkRange(this.selected[0].position.z);
+      let range = checkRange(this.selected.position.z);
       if (levels.includes(range)) {
         range = range / this.layerStepSize;
-        this.selected[0].material.color.set(this.structure[range + 4].color);
+        this.selected.material.color.set(this.structure[range + 4].color);
       } else {
-        this.selected[0].material.color.set(this.structure[4].color);
-        if (this.selected[0].userData.level != '') {
-          this.deleteFromLevel(this.selected[0]);
+        this.selected.material.color.set(this.structure[4].color);
+        if (this.selected.userData.level != '') {
+          this.deleteFromLevel(this.selected);
         }
       }
     } else {
-      this.selected[0].material.color.set(this.structure[level].color);
-    }
-  }
-
-  switchSelect() {
-    if (this.intersects.length == 0) {
-      this.deselect();
+      this.selected.material.color.set(this.structure[level].color);
     }
   }
 
@@ -121,23 +115,23 @@ export class Visualization1 extends SceneVisualization {
       controls.update();
       showViewLabel('Y');
     } else if (keyCode == 49) {
-      this.moveTo(this.selected[0], -4 * this.layerStepSize);
+      this.moveTo(this.selected, -4 * this.layerStepSize);
     } else if (keyCode == 50) {
-      this.moveTo(this.selected[0], -3 * this.layerStepSize);
+      this.moveTo(this.selected, -3 * this.layerStepSize);
     } else if (keyCode == 51) {
-      this.moveTo(this.selected[0], -2 * this.layerStepSize);
+      this.moveTo(this.selected, -2 * this.layerStepSize);
     } else if (keyCode == 52) {
-      this.moveTo(this.selected[0], -1 * this.layerStepSize);
+      this.moveTo(this.selected, -1 * this.layerStepSize);
     } else if (keyCode == 53) {
-      this.moveTo(this.selected[0], 0 * this.layerStepSize);
+      this.moveTo(this.selected, 0 * this.layerStepSize);
     } else if (keyCode == 54) {
-      this.moveTo(this.selected[0], 1 * this.layerStepSize);
+      this.moveTo(this.selected, 1 * this.layerStepSize);
     } else if (keyCode == 55) {
-      this.moveTo(this.selected[0], 2 * this.layerStepSize);
+      this.moveTo(this.selected, 2 * this.layerStepSize);
     } else if (keyCode == 56) {
-      this.moveTo(this.selected[0], 3 * this.layerStepSize);
+      this.moveTo(this.selected, 3 * this.layerStepSize);
     } else if (keyCode == 57) {
-      this.moveTo(this.selected[0], 4 * this.layerStepSize);
+      this.moveTo(this.selected, 4 * this.layerStepSize);
     } else if (keyCode == 81) {
       this.locked.x = !this.locked.x;
       this.locked.y = false;

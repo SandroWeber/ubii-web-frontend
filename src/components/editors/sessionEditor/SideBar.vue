@@ -44,6 +44,9 @@
         >{{ node.name }}</list-item
       >
     </side-bar-item>
+    <side-bar-item :id="'2'" :title="'Inspector for selected Node '">
+      <NodeInspector :dataset="dataset" :settings="settings"></NodeInspector>
+    </side-bar-item>
     <side-bar-item
       :id="'2'"
       :title="'Settings'"
@@ -86,13 +89,20 @@
 <script>
 import ListItem from './ListItem';
 import SideBarItem from './SideBarItem';
+import NodeInspector from './NodeInspector';
 import SettingsContainer from './SettingsContainer';
 
 import { BButton } from 'bootstrap-vue';
 
 export default {
   name: 'SideBar',
-  components: { SettingsContainer, SideBarItem, ListItem, 'b-button': BButton },
+  components: {
+    SettingsContainer,
+    SideBarItem,
+    ListItem,
+    NodeInspector,
+    'b-button': BButton
+  },
   props: {
     settings: {
       type: Object

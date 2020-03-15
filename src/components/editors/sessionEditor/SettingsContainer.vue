@@ -15,22 +15,32 @@
       <b-button @click="upload" variant="outline-primary">Import</b-button>
     </div>
     <b-form-group label="Graph:">
-      <b-form-select v-model="selectedView" :options="viewOptions" @input="changeView"></b-form-select>
+      <b-form-select
+        v-model="selectedView"
+        :options="viewOptions"
+        @input="changeView"
+      ></b-form-select>
     </b-form-group>
     <div v-if="selectedView == 1">
       <b-form-group label="Mode:">
-        <b-form-select v-model="selectedMode" :options="modeOptions" @input="changeMode"></b-form-select>
+        <b-form-select
+          v-model="selectedMode"
+          :options="modeOptions"
+          @input="changeMode"
+        ></b-form-select>
       </b-form-group>
       <div class="help-container" v-if="selectedView == 1">
         <font-awesome-icon icon="question-circle" class="icon" />
-        <span v-if="selectedMode == 0">Browse the graph with 9 individually usable Layers.</span>
+        <span v-if="selectedMode == 0"
+          >Browse the graph with 9 individually usable Layers.</span
+        >
         <span v-if="selectedMode == 1">
           Sort your Nodes in Layers depending on how which tags (or combination
           of tags) they reference.
         </span>
         <span v-if="selectedMode == 2">
-          Sort your Nodes in Layers depending on how many edges flow into a
-          node / out of a node.
+          Sort your Nodes in Layers depending on how many edges flow into a node
+          / out of a node.
         </span>
         <span v-if="selectedMode == 3">
           Sort your Nodes in Layers depending on how many steps they are away
@@ -39,7 +49,11 @@
       </div>
       <div v-if="selectedMode == 2">
         <b-form-group label="Sorting:">
-          <b-form-select v-model="selectedSorting" :options="sortingOptions" @input="changeSorting"></b-form-select>
+          <b-form-select
+            v-model="selectedSorting"
+            :options="sortingOptions"
+            @input="changeSorting"
+          ></b-form-select>
         </b-form-group>
       </div>
       <div v-if="selectedMode == 3">
@@ -51,7 +65,11 @@
           ></b-form-select>
         </b-form-group>
       </div>
-      <b-form-group label="Always show layers:" labe-for="layer-show-all-toggle" label-cols-sm="7">
+      <b-form-group
+        label="Always show layers:"
+        labe-for="layer-show-all-toggle"
+        label-cols-sm="7"
+      >
         <toggle-button
           id="layers-show-all-toggle"
           :height="28"
@@ -63,7 +81,11 @@
           @change="changeShowAll"
         ></toggle-button>
       </b-form-group>
-      <b-form-group label="Slim Layers:" labe-for="layer-slim-toggle" label-cols-sm="7">
+      <b-form-group
+        label="Slim Layers:"
+        labe-for="layer-slim-toggle"
+        label-cols-sm="7"
+      >
         <toggle-button
           id="layer-slim-toggle"
           :height="28"
@@ -75,7 +97,11 @@
           @change="changeSlimLevels"
         ></toggle-button>
       </b-form-group>
-      <b-form-group label="Snap to Grid:" labe-for="layer-grid-snap-toggle" label-cols-sm="7">
+      <b-form-group
+        label="Snap to Grid:"
+        labe-for="layer-grid-snap-toggle"
+        label-cols-sm="7"
+      >
         <toggle-button
           id="layer-grid-snap-toggle"
           :height="28"
@@ -87,7 +113,11 @@
           @change="changeSnapToGrid"
         ></toggle-button>
       </b-form-group>
-      <b-form-group label="Zero-Marker:" labe-for="marker-toggle" label-cols-sm="7">
+      <b-form-group
+        label="Zero-Marker:"
+        labe-for="marker-toggle"
+        label-cols-sm="7"
+      >
         <toggle-button
           id="marker-toggle"
           :height="28"

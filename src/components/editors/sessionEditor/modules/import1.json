@@ -4,15 +4,32 @@
     "nodes": [
         {
             "id": 0,
-            "name": "Node 1"
+            "name": "Node 1",
+            "tags": [],
+            "links": [
+                "https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Array/join",
+                "https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Array/map"
+            ],
+            "data": {
+                "field1": "value1",
+                "field2": "value2",
+                "field3": "value3",
+                "field4": "value4",
+                "field5": "value5",
+                "field6": "value6"
+            }
         },
         {
             "id": 1,
-            "name": "Node 2"
+            "name": "Node 2",
+            "tags": [],
+            "links": []
         },
         {
             "id": 2,
-            "name": "Node 3"
+            "name": "Node 3",
+            "tags": [],
+            "links": []
         }
     ],
     "links": [

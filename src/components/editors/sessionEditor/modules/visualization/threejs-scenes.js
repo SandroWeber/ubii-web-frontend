@@ -20,6 +20,7 @@ export class SceneVisualization {
     this.selected = [];
     this.levels = [];
     this.intersects = null;
+    this.planeIntersects = null;
     this.same = false;
     this.raycaster = new THREE.Raycaster();
     this.nodeLabel = $('#node-label');
@@ -34,6 +35,7 @@ export class SceneVisualization {
     this.focusedLayer = '';
     this.gridPositions = [];
     this.snapToGrid = snapToGrid;
+    this.change = null;
   }
 
   setShowAll(showAll) {
@@ -92,7 +94,11 @@ export class SceneVisualization {
 
   setDragging(dragging) {
     this.isDragging = dragging;
-    this.oldPos = new THREE.Vector3().copy(this.selected[0].position);
+    this.oldPos = new THREE.Vector3().copy(this.selected.position);
+  }
+
+  setChange(change) {
+    this.change = change;
   }
 
   moveTo(node, level) {
@@ -101,25 +107,29 @@ export class SceneVisualization {
   }
 
   dragBehaviour() {
-    if (this.locked.x) {
-      this.selected[0].position.x = this.oldPos.x;
-    }
-    if (this.locked.y) {
-      this.selected[0].position.y = this.oldPos.y;
-    }
-    if (this.locked.z) {
-      this.selected[0].position.z = this.oldPos.z;
+    this.point = null;
+    this.point = this.planeIntersects.find(
+      el => el.object.userData.id == this.selected.userData.level
+    );
+    if (this.point != null) {
+      this.selected.position.x = this.point.point.x;
+      this.selected.position.y = this.point.point.y;
+      this.selected.position.z = this.point.point.z;
+    } else {
+      this.selected.position.x = this.oldPos.x;
+      this.selected.position.y = this.oldPos.y;
+      this.selected.position.z = this.oldPos.z;
     }
     let distance = this.steps * this.stepSize;
-    if (this.selected[0].position.x > distance) {
-      this.selected[0].position.x = distance;
-    } else if (this.selected[0].position.x < -distance) {
-      this.selected[0].position.x = -distance;
+    if (this.selected.position.x > distance) {
+      this.selected.position.x = distance;
+    } else if (this.selected.position.x < -distance) {
+      this.selected.position.x = -distance;
     }
-    if (this.selected[0].position.y > distance) {
-      this.selected[0].position.y = distance;
-    } else if (this.selected[0].position.y < -distance) {
-      this.selected[0].position.y = -distance;
+    if (this.selected.position.y > distance) {
+      this.selected.position.y = distance;
+    } else if (this.selected.position.y < -distance) {
+      this.selected.position.y = -distance;
     }
   }
 
@@ -215,12 +225,16 @@ export class SceneVisualization {
       c = color;
     }
 
+    let plane = this.createLayerPlane(c);
+
     this.structure.push({
       id: id,
       color: c,
       content: [],
-      plane: this.createLayerPlane(c)
+      plane: plane
     });
+
+    plane.p.userData.id = id;
 
     this.calculateLayerDimensions(id);
     this.setLayerDimensions(id);
@@ -670,14 +684,16 @@ export class SceneVisualization {
   }
 
   select(node) {
-    this.selected.push(node);
-    this.outlinePassReference.selectedObjects = this.selected;
+    this.selected = node;
+    this.outlinePassReference.selectedObjects = [this.selected];
+    this.change('viewNode', node.userData.id);
   }
 
   deselect() {
-    if (this.selected.length > 0) {
-      this.selected = [];
+    if (this.selected != null) {
+      this.selected = null;
       this.outlinePassReference.selectedObjects = [];
+      this.change('viewNode', -1);
     }
   }
 
@@ -726,6 +742,12 @@ export class SceneVisualization {
 
   makeLevelsSlim() {}
 
+  switchSelect() {
+    if (this.intersects.length == 0) {
+      this.deselect();
+    }
+  }
+
   makeLevelsWide() {
     this.structure.forEach(
       el => (el.plane.scale.x = this.steps * this.stepSize * 2)
@@ -745,6 +767,11 @@ export class SceneVisualization {
 
   checkNodePositionOnGrid(node) {
     if (!this.snapToGrid) {
+      if (this.point != null) {
+        this.selected.position.x = this.oldPos.x;
+        this.selected.position.y = this.oldPos.y;
+        this.selected.position.z = this.oldPos.z;
+      }
       return;
     }
     let distance = this.stepSize * this.steps;
@@ -826,6 +853,9 @@ export class SceneVisualization {
     let obj, node;
     this.raycaster.setFromCamera(mouse, camera);
     this.intersects = this.raycaster.intersectObjects(this.meshes);
+    this.planeIntersects = this.raycaster.intersectObjects(
+      this.structure.map(el => el.plane.p)
+    );
 
     if (this.intersects.length > 0) {
       obj = this.intersects[0].object;
