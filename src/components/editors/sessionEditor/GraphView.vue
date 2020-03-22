@@ -95,7 +95,8 @@
 
 <script>
 import $ from 'jquery';
-import { ForceGraphVis } from './modules/visualization/3d-force-graph';
+import { twoDForceGraphVis } from './modules/visualization/2d-force-graph';
+import { threeDForceGraphVis } from './modules/visualization/3d-force-graph';
 import { setupThreejsEnvironment } from './modules/visualization/threejs-setup';
 
 import 'bootstrap/dist/css/bootstrap.css';
@@ -242,7 +243,7 @@ export default {
         $('#threejs-container').hide();
         $('#force-graph-container').show();
         if (this.visualizations.forceGraph == null) {
-          this.visualizations.forceGraph = ForceGraphVis(
+          this.visualizations.forceGraph = twoDForceGraphVis(
             document.getElementById('force-graph-container')
           )(JSON.parse(JSON.stringify(this.dataset)));
         } else {
@@ -250,7 +251,19 @@ export default {
         }
       }
 
-      if (view >= 1) {
+      if (view == 1) {
+        $('#threejs-container').hide();
+        $('#force-graph-container').show();
+        if (this.visualizations.forceGraph == null) {
+          this.visualizations.forceGraph = threeDForceGraphVis(
+            document.getElementById('force-graph-container')
+          )(JSON.parse(JSON.stringify(this.dataset)));
+        } else {
+          this.visualizations.forceGraph.resumeAnimation();
+        }
+      }
+
+      if (view >= 2) {
         $('#force-graph-container').hide();
         $('#threejs-container').show();
         if (
@@ -311,7 +324,6 @@ export default {
 }
 
 #graph-view {
-  height: 100%;
   overflow: hidden;
   flex-grow: 1;
   display: flex;

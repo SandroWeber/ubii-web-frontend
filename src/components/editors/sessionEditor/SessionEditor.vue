@@ -10,15 +10,19 @@
           @addDataset="addDataset"
         ></side-bar>
         <div class="main">
-          <!--                    <top-bar class="top-bar-instance"-->
-          <!--                         :dataset="session"-->
-          <!--                    ></top-bar>-->
-
           <graph-view
             :datasets="datasets"
             :settings="settings"
             @change="change"
           ></graph-view>
+          <settings-container
+            id="settings-container"
+            class="settings-container-instance"
+            :dataset="dataset"
+            :settings="settings"
+            @change="change"
+            @addDataset="addDataset"
+          ></settings-container>
         </div>
       </div>
     </UbiiClientContent>
@@ -28,7 +32,7 @@
 <script>
 import Vue from 'vue';
 
-import TopBar from './TopBar.vue';
+import SettingsContainer from './SettingsContainer.vue';
 import SideBar from './SideBar.vue';
 import GraphView from './GraphView.vue';
 
@@ -50,7 +54,7 @@ library.add(faPlay);
 export default {
   name: 'SessionEditor',
   components: {
-    TopBar: TopBar,
+    SettingsContainer: SettingsContainer,
     SideBar: SideBar,
     GraphView: GraphView,
     UbiiClientContent
@@ -62,7 +66,7 @@ export default {
       ubiiClientService: UbiiClientService,
       translator: null,
       settings: {
-        view: 1,
+        view: 2,
         dataset: '0',
         viewNode: -1,
         mode: 0,
@@ -108,6 +112,11 @@ export default {
   beforeDestroy: function() {
     this.stopEditor();
   },
+  computed: {
+    dataset: function() {
+      return this.datasets.find(ds => ds.id == this.settings.dataset);
+    }
+  },
   methods: {
     change: function(setting, value) {
       this.settings[setting] = value;
@@ -149,28 +158,27 @@ export default {
 </script>
 
 <style scoped lang="stylus">
-.main {
-  flex-basis: 0;
-  flex-grow: 999;
-  box-shadow: -1px 1px 10px 0px #101010;
-}
-
 .session-editor {
   height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  align-items: stretch;
-  align-content: flex-start;
 }
+
+.main {
+  box-shadow: -1px 1px 10px 0px #101010;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+}
+
 
 .side-bar-instance {
-  flex-basis: 300px;
-  max-width: 300px;
+  display: flex;
+  flex: 0 0 300px;
 }
 
-.top-bar-instance {
+.settings-container-instance {
   height: 200px;
 }
 </style>

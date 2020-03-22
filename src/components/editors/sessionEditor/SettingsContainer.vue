@@ -1,75 +1,70 @@
 <template>
   <div class="settings-container">
-    <b-form-group label="Import:" labe-for="file" label-cols-sm="3">
-      <b-form-file
-        size="sm"
-        v-model="file"
-        placeholder="Choose .json file"
-        drop-placeholder="Drop .json file here..."
-        accept=".json"
-        ref="file-input"
-        id="file"
-      ></b-form-file>
-    </b-form-group>
-    <div v-bind:style="'display: flex; justify-content: flex-end;'">
-      <b-button @click="upload" variant="outline-primary">Import</b-button>
+    <div class="settings-group">
+      <div class="settings-row">
+        Import:
+      </div>
+      <div <div class="settings-row">
+        <b-form-file
+          size="sm"
+          v-model="file"
+          placeholder="Choose .json file"
+          drop-placeholder="Drop .json file here..."
+          accept=".json"
+          ref="file-input"
+          id="file"
+        ></b-form-file>
+        <b-button @click="upload" variant="outline-primary">Import</b-button>
+      </div>
+      <div class="settings-row">
+        Graph:
+      </div>
+      <div <div class="settings-row">
+        <b-form-select
+          v-model="selectedView"
+          :options="viewOptions"
+          @input="changeView"
+        ></b-form-select>
+      </div>
     </div>
-    <b-form-group label="Graph:">
-      <b-form-select
-        v-model="selectedView"
-        :options="viewOptions"
-        @input="changeView"
-      ></b-form-select>
-    </b-form-group>
-    <div v-if="selectedView == 1">
-      <b-form-group label="Mode:">
+    <div class="settings-group" v-if="selectedView == 2">
+      <div class="settings-row">
+        Mode:
+      </div>
+      <div <div class="settings-row">
         <b-form-select
           v-model="selectedMode"
           :options="modeOptions"
           @input="changeMode"
         ></b-form-select>
-      </b-form-group>
-      <div class="help-container" v-if="selectedView == 1">
-        <font-awesome-icon icon="question-circle" class="icon" />
-        <span v-if="selectedMode == 0"
-          >Browse the graph with 9 individually usable Layers.</span
-        >
-        <span v-if="selectedMode == 1">
-          Sort your Nodes in Layers depending on how which tags (or combination
-          of tags) they reference.
-        </span>
-        <span v-if="selectedMode == 2">
-          Sort your Nodes in Layers depending on how many edges flow into a node
-          / out of a node.
-        </span>
-        <span v-if="selectedMode == 3">
-          Sort your Nodes in Layers depending on how many steps they are away
-          from your Starting Node
-        </span>
       </div>
-      <div v-if="selectedMode == 2">
-        <b-form-group label="Sorting:">
-          <b-form-select
-            v-model="selectedSorting"
-            :options="sortingOptions"
-            @input="changeSorting"
-          ></b-form-select>
-        </b-form-group>
+      <div class="settings-row">
+        Explanation:
       </div>
-      <div v-if="selectedMode == 3">
-        <b-form-group label="Starting Node:">
-          <b-form-select
-            v-model="selectedStartNode"
-            :options="startNodeOptions"
-            @input="changeStartNode"
-          ></b-form-select>
-        </b-form-group>
+      <div class="settings-row">
+        <div class="help-container" v-if="selectedView == 2">
+          <font-awesome-icon icon="question-circle" class="icon" />
+          <span v-if="selectedMode == 0"
+            >Browse the graph with 9 individually usable Layers.</span
+          >
+          <span v-if="selectedMode == 1">
+            Sort your Nodes in Layers depending on how which tags (or
+            combination of tags) they reference.
+          </span>
+          <span v-if="selectedMode == 2">
+            Sort your Nodes in Layers depending on how many edges flow into a
+            node / out of a node.
+          </span>
+          <span v-if="selectedMode == 3">
+            Sort your Nodes in Layers depending on how many steps they are away
+            from your Starting Node
+          </span>
+        </div>
       </div>
-      <b-form-group
-        label="Always show layers:"
-        labe-for="layer-show-all-toggle"
-        label-cols-sm="7"
-      >
+    </div>
+    <div v-if="selectedView == 2" class="settings-group switches-right">
+      <div class="settings-row">
+        Always show layers:
         <toggle-button
           id="layers-show-all-toggle"
           :height="28"
@@ -80,12 +75,9 @@
           :labels="{ checked: 'On', unchecked: 'Off' }"
           @change="changeShowAll"
         ></toggle-button>
-      </b-form-group>
-      <b-form-group
-        label="Slim Layers:"
-        labe-for="layer-slim-toggle"
-        label-cols-sm="7"
-      >
+      </div>
+      <div class="settings-row">
+        Slim Layers:
         <toggle-button
           id="layer-slim-toggle"
           :height="28"
@@ -96,12 +88,9 @@
           :labels="{ checked: 'Slim', unchecked: 'Wide' }"
           @change="changeSlimLevels"
         ></toggle-button>
-      </b-form-group>
-      <b-form-group
-        label="Snap to Grid:"
-        labe-for="layer-grid-snap-toggle"
-        label-cols-sm="7"
-      >
+      </div>
+      <div class="settings-row">
+        Snap to Grid:
         <toggle-button
           id="layer-grid-snap-toggle"
           :height="28"
@@ -112,12 +101,9 @@
           :labels="{ checked: 'Snap', unchecked: 'Free' }"
           @change="changeSnapToGrid"
         ></toggle-button>
-      </b-form-group>
-      <b-form-group
-        label="Zero-Marker:"
-        labe-for="marker-toggle"
-        label-cols-sm="7"
-      >
+      </div>
+      <div class="settings-row">
+        Toggle Zero Marker:
         <toggle-button
           id="marker-toggle"
           :height="28"
@@ -128,7 +114,30 @@
           :labels="{ checked: 'Visible', unchecked: 'Hidden' }"
           @change="changeZeroMarker"
         ></toggle-button>
-      </b-form-group>
+      </div>
+    </div>
+    <div
+      v-if="selectedView == 2 && (selectedMode == 2 || selectedMode == 3)"
+      class="settings-group"
+    >
+      <div class="settings-row">
+        <span v-if="selectedMode == 2">Sorting:</span>
+        <span v-if="selectedMode == 3">Starting Node:</span>
+      </div>
+      <div class="settings-row">
+        <b-form-select
+          v-if="selectedMode == 2"
+          v-model="selectedSorting"
+          :options="sortingOptions"
+          @input="changeSorting"
+        ></b-form-select>
+        <b-form-select
+          v-if="selectedMode == 3"
+          v-model="selectedStartNode"
+          :options="startNodeOptions"
+          @input="changeStartNode"
+        ></b-form-select>
+      </div>
     </div>
   </div>
 </template>
@@ -172,9 +181,10 @@ export default {
       selectedZeroMarker: this.settings.viewZeroMarker,
       selectedSnapToGrid: this.settings.snapToGrid,
       viewOptions: [
-        { value: 0, text: 'Force-Graph' },
-        { value: 1, text: 'Layered Graph' },
-        { value: 2, text: 'Grouped Graph' }
+        { value: 0, text: '2D Force-Graph' },
+        { value: 1, text: '3D Force-Graph' },
+        { value: 2, text: 'Layered Graph' },
+        { value: 3, text: 'Grouped Graph' }
       ],
       modeOptions: [
         { value: 0, text: 'Browsing' },
@@ -240,17 +250,62 @@ export default {
 
 <style scoped>
 .settings-container {
-  padding: 20px;
+  width: 100%;
   font-size: 1.2em;
+  background-color: #2d2a2e;
+  display: flex;
+  flex-direction: row;
+  border-top: 1px solid black;
+  overflow-x: auto;
+  flex-wrap: nowrap;
 }
 
 .help-container {
   font-size: 0.8em;
   font-style: italic;
-  margin-bottom: 15px;
 }
 
 .icon {
   margin-right: 10px;
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100%;
+  padding: 10px 20px;
+  margin: 0px 20px;
+  flex: 0 0 400px;
+  width: 400px;
+  flex: 0 0 400px;
+  white-space: nowrap;
+}
+
+.settings-group:last-child {
+  padding-right: 40px;
+}
+
+.settings-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  height: 25%;
+  width: 100%;
+}
+
+.settings-row button {
+  margin-left: 20px;
+}
+
+.settings-row span {
+  display: block;
+  width: 400px;
+  overflow-wrap: break-word;
+}
+
+.switches-right label {
+  margin-left: auto;
 }
 </style>

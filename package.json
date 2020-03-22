@@ -19,6 +19,7 @@
     "bootstrap": "^4.4.1",
     "bootstrap-vue": "^2.1.0",
     "dat.gui": "^0.7.6",
+    "force-graph": "^1.26.3",
     "i": "^0.3.6",
     "jquery": "^3.4.1",
     "myo": "^3.0.0",

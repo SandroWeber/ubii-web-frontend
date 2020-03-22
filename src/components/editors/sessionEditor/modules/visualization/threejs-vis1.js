@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import $ from 'jquery';
 import { SceneVisualization } from './threejs-scenes';
+import { setupThreejsEnvironment } from './threejs-setup';
 
 export class Visualization1 extends SceneVisualization {
   constructor(dataset, snapToGrid) {
@@ -116,22 +117,49 @@ export class Visualization1 extends SceneVisualization {
       showViewLabel('Y');
     } else if (keyCode == 49) {
       this.moveTo(this.selected, -4 * this.layerStepSize);
+      this.structure.find(el => el.id == 'Level 1').content.push(this.selected);
+      this.selected.userData.level = 'Level 1';
+      this.setSlimLayers(this.slimLayers);
     } else if (keyCode == 50) {
       this.moveTo(this.selected, -3 * this.layerStepSize);
+      this.structure.find(el => el.id == 'Level 2').content.push(this.selected);
+      this.selected.userData.level = 'Level 2';
+      this.setSlimLayers(this.slimLayers);
     } else if (keyCode == 51) {
       this.moveTo(this.selected, -2 * this.layerStepSize);
+      this.structure.find(el => el.id == 'Level 3').content.push(this.selected);
+      this.selected.userData.level = 'Level 3';
+      this.setSlimLayers(this.slimLayers);
     } else if (keyCode == 52) {
       this.moveTo(this.selected, -1 * this.layerStepSize);
+      this.structure.find(el => el.id == 'Level 4').content.push(this.selected);
+      this.selected.userData.level = 'Level 4';
+      this.setSlimLayers(this.slimLayers);
     } else if (keyCode == 53) {
       this.moveTo(this.selected, 0 * this.layerStepSize);
+      this.structure.find(el => el.id == 'Level 5').content.push(this.selected);
+      this.selected.userData.level = 'Level 5';
+      this.setSlimLayers(this.slimLayers);
     } else if (keyCode == 54) {
       this.moveTo(this.selected, 1 * this.layerStepSize);
+      this.structure.find(el => el.id == 'Level 6').content.push(this.selected);
+      this.selected.userData.level = 'Level 6';
+      this.setSlimLayers(this.slimLayers);
     } else if (keyCode == 55) {
       this.moveTo(this.selected, 2 * this.layerStepSize);
+      this.structure.find(el => el.id == 'Level 7').content.push(this.selected);
+      this.selected.userData.level = 'Level 7';
+      this.setSlimLayers(this.slimLayers);
     } else if (keyCode == 56) {
       this.moveTo(this.selected, 3 * this.layerStepSize);
+      this.structure.find(el => el.id == 'Level 8').content.push(this.selected);
+      this.selected.userData.level = 'Level 8';
+      this.setSlimLayers(this.slimLayers);
     } else if (keyCode == 57) {
       this.moveTo(this.selected, 4 * this.layerStepSize);
+      this.structure.find(el => el.id == 'Level 9').content.push(this.selected);
+      this.selected.userData.level = 'Level 9';
+      this.setSlimLayers(this.slimLayers);
     } else if (keyCode == 81) {
       this.locked.x = !this.locked.x;
       this.locked.y = false;

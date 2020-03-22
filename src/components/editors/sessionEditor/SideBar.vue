@@ -48,18 +48,6 @@
       <NodeInspector :dataset="dataset" :settings="settings"></NodeInspector>
     </side-bar-item>
     <side-bar-item
-      :id="'2'"
-      :title="'Settings'"
-      :desc="'Change various options about the visualization.'"
-    >
-      <settings-container
-        :dataset="dataset"
-        :settings="settings"
-        @change="change"
-        @addDataset="addDataset"
-      ></settings-container>
-    </side-bar-item>
-    <side-bar-item
       :id="'3'"
       :title="'Test-Datasets'"
       :desc="'Choose a made-up dataset for testing.'"
@@ -90,14 +78,11 @@
 import ListItem from './ListItem';
 import SideBarItem from './SideBarItem';
 import NodeInspector from './NodeInspector';
-import SettingsContainer from './SettingsContainer';
-
 import { BButton } from 'bootstrap-vue';
 
 export default {
   name: 'SideBar',
   components: {
-    SettingsContainer,
     SideBarItem,
     ListItem,
     NodeInspector,

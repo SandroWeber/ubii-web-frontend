@@ -767,7 +767,7 @@ export class SceneVisualization {
 
   checkNodePositionOnGrid(node) {
     if (!this.snapToGrid) {
-      if (this.point != null) {
+      if (this.point == null) {
         this.selected.position.x = this.oldPos.x;
         this.selected.position.y = this.oldPos.y;
         this.selected.position.z = this.oldPos.z;

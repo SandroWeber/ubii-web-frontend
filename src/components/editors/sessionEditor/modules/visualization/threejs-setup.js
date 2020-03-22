@@ -25,9 +25,24 @@ export function setupThreejsEnvironment(domElement, dataset, settings, change) {
   let resizeRenderer = function() {
     let width =
       parseInt($(window).width()) - parseInt($('#side-bar').css('width'));
-    let height = parseInt($('#side-bar').css('height'));
+    let height = parseInt($('#side-bar').css('height')) - 200;
     $('#threejs-container').css('width', width);
     $('#threejs-container').css('height', height);
+    if (width < 1800) {
+      $('.main').css('width', width);
+    } else {
+      $('.main').css('width', '100%');
+    }
+
+    // if (
+    //   $('.settings-container')
+    //     .first()
+    //     .scrollLeft() != 0
+    // ) {
+    //   $('.settings-container')
+    //     .first()
+    //     .addClass('scrollbar-height');
+    // }
     state.renderer.setSize(width, height);
     state.composer.setSize(width, height);
     state.camera.aspect = $(domElement).width() / $(domElement).height();
