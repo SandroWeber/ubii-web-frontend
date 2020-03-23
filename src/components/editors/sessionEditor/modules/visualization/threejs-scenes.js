@@ -17,7 +17,7 @@ export class SceneVisualization {
     this.meshes = [];
     this.arrows = [];
     this.materials = [];
-    this.selected = [];
+    this.selected = null;
     this.levels = [];
     this.intersects = null;
     this.planeIntersects = null;
@@ -87,6 +87,8 @@ export class SceneVisualization {
   detectLevel(level) {
     throw new Error('Cannot call abstract method');
   }
+
+  onKeyUp(event, controls) {}
 
   setOutlinePass(outlinePass) {
     this.outlinePassReference = outlinePass;

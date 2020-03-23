@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import $ from 'jquery';
 import { SceneVisualization } from './threejs-scenes';
-import { setupThreejsEnvironment } from './threejs-setup';
 
 export class Visualization1 extends SceneVisualization {
   constructor(dataset, snapToGrid) {

@@ -191,11 +191,14 @@ export default {
     },
     'settings.viewNode': function(viewNode) {
       if (viewNode >= 0) {
-        this.visualizations.threegraph.scene.select(
-          this.visualizations.threegraph.scene.meshes.find(
-            el => el.userData.id == viewNode
-          )
-        );
+        if (this.settings.view == 2) {
+          this.visualizations.threegraph.scene.select(
+            this.visualizations.threegraph.scene.meshes.find(
+              el => el.userData.id == viewNode
+            )
+          );
+        } else {
+        }
       }
     },
     'settings.showAll': function(showAll) {
@@ -413,5 +416,9 @@ export default {
 
 .disabled {
   background-color: #b2b0b0 !important;
+}
+
+.enabled {
+  border-color: white;
 }
 </style>

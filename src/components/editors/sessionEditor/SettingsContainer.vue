@@ -62,8 +62,8 @@
         </div>
       </div>
     </div>
-    <div v-if="selectedView == 2" class="settings-group switches-right">
-      <div class="settings-row">
+    <div v-if="selectedView >= 2" class="settings-group switches-right">
+      <div class="settings-row" v-if="selectedView == 2">
         Always show layers:
         <toggle-button
           id="layers-show-all-toggle"
@@ -76,7 +76,7 @@
           @change="changeShowAll"
         ></toggle-button>
       </div>
-      <div class="settings-row">
+      <div class="settings-row" v-if="selectedView == 2">
         Slim Layers:
         <toggle-button
           id="layer-slim-toggle"
@@ -89,7 +89,7 @@
           @change="changeSlimLevels"
         ></toggle-button>
       </div>
-      <div class="settings-row">
+      <div class="settings-row" v-if="selectedView == 2">
         Snap to Grid:
         <toggle-button
           id="layer-grid-snap-toggle"

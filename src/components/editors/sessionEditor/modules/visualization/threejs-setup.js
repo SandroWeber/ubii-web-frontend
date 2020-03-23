@@ -4,6 +4,7 @@ import { Visualization1 } from './threejs-vis1';
 import { Visualization2 } from './threejs-vis2';
 import { Visualization3 } from './threejs-vis3';
 import { Visualization4 } from './threejs-vis4';
+import { GroupedGraph } from './threejs-gg-vis';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import DragControls from 'three-dragcontrols';
 import { RenderPass, EffectComposer, OutlinePass } from 'three-outlinepass';
@@ -74,6 +75,11 @@ export function setupThreejsEnvironment(domElement, dataset, settings, change) {
       false
     );
     document.removeEventListener(
+      'keyup',
+      state.eventhandlerfunctions[6],
+      false
+    );
+    document.removeEventListener(
       'mousemove',
       state.eventhandlerfunctions[1],
       false
@@ -133,6 +139,10 @@ export function setupThreejsEnvironment(domElement, dataset, settings, change) {
     );
   };
 
+  state.eventhandlerfunctions[6] = function onKeyUp(event) {
+    state.scene.onKeyUp(event, state.controls[1]);
+  };
+
   state.eventhandlerfunctions[1] = function onMouseMove(event) {
     if (!state.stop) {
       let actualX = event.clientX - $(domElement).offset().left;
@@ -152,27 +162,33 @@ export function setupThreejsEnvironment(domElement, dataset, settings, change) {
 
   state.camera.position.z = 6;
 
-  switch (settings.mode) {
-    case 0:
-      state.scenes.push(new Visualization1(dataset, settings.snapToGrid));
-      break;
-    case 1:
-      state.scenes.push(new Visualization2(dataset, settings.snapToGrid));
-      break;
-    case 2:
-      state.scenes.push(
-        new Visualization3(dataset, settings.snapToGrid, settings.sorting)
-      );
-      break;
-    case 3:
-      state.scenes.push(
-        new Visualization4(dataset, settings.snapToGrid, settings.startNode)
-      );
-      break;
+  if (settings.view == 2) {
+    switch (settings.mode) {
+      case 0:
+        state.scenes.push(new Visualization1(dataset, settings.snapToGrid));
+        break;
+      case 1:
+        state.scenes.push(new Visualization2(dataset, settings.snapToGrid));
+        break;
+      case 2:
+        state.scenes.push(
+          new Visualization3(dataset, settings.snapToGrid, settings.sorting)
+        );
+        break;
+      case 3:
+        state.scenes.push(
+          new Visualization4(dataset, settings.snapToGrid, settings.startNode)
+        );
+        break;
+    }
+    state.scene = state.scenes[0];
+
+    state.scene.setShowAll(settings.showAll);
+    state.scene.setSlimLayers(settings.slimLayers);
+  } else {
+    state.scenes.push(new GroupedGraph(dataset, settings.snapToGrid));
+    state.scene = state.scenes[0];
   }
-  state.scene = state.scenes[0];
-  state.scene.setShowAll(settings.showAll);
-  state.scene.setSlimLayers(settings.slimLayers);
   state.scene.setChange(change);
 
   state.controls.push(new OrbitControls(state.camera, domElement));
@@ -221,6 +237,7 @@ export function setupThreejsEnvironment(domElement, dataset, settings, change) {
   );
 
   document.addEventListener('keydown', state.eventhandlerfunctions[0], false);
+  document.addEventListener('keyup', state.eventhandlerfunctions[6], false);
   document.addEventListener('mousemove', state.eventhandlerfunctions[1], false);
   document.addEventListener('click', state.eventhandlerfunctions[2], false);
 
@@ -237,7 +254,7 @@ export function setupThreejsEnvironment(domElement, dataset, settings, change) {
     state.camera
   );
   outlinePass.renderToScreen = true;
-  outlinePass.selectedObjects = state.scene.selected;
+  outlinePass.selectedObjects = [];
 
   state.composer.addPass(renderPass);
   state.composer.addPass(outlinePass);

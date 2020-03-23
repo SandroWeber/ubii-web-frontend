@@ -2,7 +2,7 @@
   <div class="NodeInspector">
     <div class="data-item">
       <span class="label">Node:</span>&nbsp;
-      <span v-if="settings.viewNode == -1">No Node selected</span>
+      <span v-if="settings.viewNode <= -1">No Node selected</span>
       <span v-else>{{ node.name }}</span>
     </div>
     <div v-if="settings.viewNode >= 0" class="data-list">
