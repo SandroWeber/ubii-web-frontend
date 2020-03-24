@@ -26,7 +26,7 @@ export class GroupedGraph extends GroupedGraphScene {
     let oldPos = this.oldPos;
     this.setDragging(false);
     this.changeArrow(event.object);
-    if (!event.object.userData.group) {
+    if (!event.object.userData.isGroup) {
       if (this.same && oldPos.equals(this.selectedNode.position)) {
         this.deselect(event.object);
         this.same = false;
@@ -49,8 +49,18 @@ export class GroupedGraph extends GroupedGraphScene {
         el.position = new THREE.Vector3().addVectors(dir, el.position);
         this.changeArrow(el);
       });
-
+      this.calcBoundingBox(event.object.userData.id);
       find.position = new THREE.Vector3().copy(event.object.position);
+    }
+    if (event.object.userData.group != '') {
+      this.calcBoundingBox(event.object.userData.group);
+      let find = this.structure.find(
+        el => el.meshes.node.userData.id == event.object.userData.group
+      );
+      let position = this.calcCentroid(find.content);
+      find.meshes.node.position.x = position.x;
+      find.meshes.node.position.y = position.y;
+      find.meshes.node.position.z = position.z;
     }
   }
 
@@ -70,9 +80,17 @@ export class GroupedGraph extends GroupedGraphScene {
     } else if (keyCode == 17) {
       this.selectKeyPressed = true;
     } else if (keyCode == 77) {
-      this.addToStructure();
+      if (this.selected.length > 0) {
+        this.addToStructure();
+      }
     } else if (keyCode == 82) {
-      this.deleteFromStructure(this.selectedNode.userData.id);
+      if (
+        this.structure.length > 0 &&
+        this.selectedNode != null &&
+        this.selectedNode.userData.isGroup
+      ) {
+        this.deleteFromStructure(this.selectedNode.userData.id);
+      }
     }
   }
 

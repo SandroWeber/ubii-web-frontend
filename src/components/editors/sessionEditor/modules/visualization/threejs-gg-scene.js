@@ -103,7 +103,7 @@ export class GroupedGraphScene {
     if (start) {
       this.hover = obj;
       this.nodeLabel.show();
-      if (!obj.userData.group) {
+      if (!obj.userData.isGroup) {
         this.nodeLabel.html('Name: ' + obj.name);
       } else {
         this.nodeLabel.html(obj.name);
@@ -136,6 +136,7 @@ export class GroupedGraphScene {
     rest.forEach(el => (el.visible = false));
 
     let selected = this.selected.map(el => el.userData.id);
+    this.selected.forEach(el => (el.userData.group = id));
 
     let meshes = {};
     meshes.node = new THREE.Mesh(
@@ -147,20 +148,18 @@ export class GroupedGraphScene {
       })
     );
 
-    let position = { x: 0, y: 0, z: 0 };
     this.selected.forEach(el => {
-      position.x += el.position.x;
-      position.y += el.position.y;
-      position.z += el.position.z;
+      el.userData.group = id;
+      el.material.color.set(c);
     });
-    position.x /= this.selected.length;
-    position.y /= this.selected.length;
-    position.z /= this.selected.length;
+
+    let position = this.calcCentroid(this.selected);
 
     let temp = new THREE.Vector3(position.x, position.y, position.z);
 
     meshes.node.userData.id = id;
-    meshes.node.userData.group = true;
+    meshes.node.userData.isGroup = true;
+    meshes.node.userData.group = '';
     meshes.node.name = 'Group' + id;
 
     this.meshes.push(meshes.node);
@@ -208,14 +207,73 @@ export class GroupedGraphScene {
       this.changeArrowWithNode(el.arrow, id, true);
     });
 
+    let geometry = new THREE.Geometry();
+    geometry.vertices.push(
+      new THREE.Vector3(1, -1, 1),
+      new THREE.Vector3(1, -1, -1),
+      new THREE.Vector3(-1, -1, -1),
+      new THREE.Vector3(-1, -1, 1),
+      new THREE.Vector3(1, 1, 1),
+      new THREE.Vector3(1, 1, -1),
+      new THREE.Vector3(-1, 1, -1),
+      new THREE.Vector3(-1, 1, 1)
+    );
+
+    geometry.faces.push(
+      new THREE.Face3(0, 1, 2),
+      new THREE.Face3(0, 2, 3),
+      new THREE.Face3(0, 1, 5),
+      new THREE.Face3(0, 4, 5),
+      new THREE.Face3(3, 2, 6),
+      new THREE.Face3(3, 7, 6),
+      new THREE.Face3(3, 0, 4),
+      new THREE.Face3(3, 7, 4),
+      new THREE.Face3(2, 1, 5),
+      new THREE.Face3(2, 6, 5),
+      new THREE.Face3(4, 5, 6),
+      new THREE.Face3(4, 7, 6)
+    );
+
+    let boundingBox = new THREE.Mesh(
+      geometry,
+      new THREE.MeshBasicMaterial({
+        color: c,
+        transparent: true,
+        opacity: 0.2,
+        side: THREE.DoubleSide
+      })
+    );
+
+    boundingBox.renderOrder = 1;
+    this.scene.add(boundingBox);
+    boundingBox.visible = false;
+
+    meshes.box = boundingBox;
+
     this.structure.push({
-      id: 'Group' + id++,
+      id: 'Group' + id,
       color: c,
       content: [...this.selected],
+      max: {},
       visible: true,
       position: temp,
       meshes: meshes
     });
+
+    this.calcBoundingBox(id);
+  }
+
+  calcCentroid(points) {
+    let position = { x: 0, y: 0, z: 0 };
+    points.forEach(el => {
+      position.x += el.position.x;
+      position.y += el.position.y;
+      position.z += el.position.z;
+    });
+    position.x /= points.length;
+    position.y /= points.length;
+    position.z /= points.length;
+    return position;
   }
 
   deleteFromStructure(group) {
@@ -223,6 +281,8 @@ export class GroupedGraphScene {
     let index = this.structure.findIndex(el => el.id == group);
     find.content.forEach(el => {
       el.visible = true;
+      el.userData.group = '';
+      el.material.color.set('#FFFFFF');
     });
     find.meshes.arrowsIn.forEach(el => {
       this.changeArrowWithNode(el.arrow, el.origin, false);
@@ -234,7 +294,102 @@ export class GroupedGraphScene {
       el.arrow.line.visible = true;
       el.arrow.cone.visible = true;
     });
+    this.scene.remove(find.meshes.box);
     this.delete = [find.meshes.node, index];
+  }
+
+  calcBoundingBox(group) {
+    let x = [];
+    let y = [];
+    let z = [];
+    let posX, posY, posZ;
+
+    let find = this.structure.find(el => el.meshes.node.userData.id == group);
+
+    find.content.forEach(el => {
+      posX = el.position.x;
+      posY = el.position.y;
+      posZ = el.position.z;
+      if (x.length == 0) {
+        x.push(posX);
+      } else if (x.length == 1) {
+        if (x[0] > posX) {
+          x.unshift(posX);
+        } else {
+          x.push(posX);
+        }
+      } else {
+        if (x[0] > posX) {
+          x[0] = posX;
+        } else if (x[1] < posX) {
+          x[1] = posX;
+        }
+      }
+      if (y.length == 0) {
+        y.push(posY);
+      } else if (y.length == 1) {
+        if (y[0] > posY) {
+          y.unshift(posY);
+        } else {
+          y.push(posY);
+        }
+      } else {
+        if (y[0] > posY) {
+          y[0] = posY;
+        } else if (y[1] < posY) {
+          y[1] = posY;
+        }
+      }
+      if (z.length == 0) {
+        z.push(posZ);
+      } else if (z.length == 1) {
+        if (z[0] > posZ) {
+          z.unshift(posZ);
+        } else {
+          z.push(posZ);
+        }
+      } else {
+        if (z[0] > posZ) {
+          z[0] = posZ;
+        } else if (z[1] < posZ) {
+          z[1] = posZ;
+        }
+      }
+    });
+
+    x[0] -= 0.2;
+    x[1] += 0.2;
+    y[0] -= 0.2;
+    y[1] += 0.2;
+    z[0] -= 0.2;
+    z[1] += 0.2;
+
+    let g = find.meshes.box.geometry;
+    g.verticesNeedUpdate = true;
+    g.vertices[0].x = x[1];
+    g.vertices[0].y = y[0];
+    g.vertices[0].z = z[1];
+    g.vertices[1].x = x[1];
+    g.vertices[1].y = y[0];
+    g.vertices[1].z = z[0];
+    g.vertices[2].x = x[0];
+    g.vertices[2].y = y[0];
+    g.vertices[2].z = z[0];
+    g.vertices[3].x = x[0];
+    g.vertices[3].y = y[0];
+    g.vertices[3].z = z[1];
+    g.vertices[4].x = x[1];
+    g.vertices[4].y = y[1];
+    g.vertices[4].z = z[1];
+    g.vertices[5].x = x[1];
+    g.vertices[5].y = y[1];
+    g.vertices[5].z = z[0];
+    g.vertices[6].x = x[0];
+    g.vertices[6].y = y[1];
+    g.vertices[6].z = z[0];
+    g.vertices[7].x = x[0];
+    g.vertices[7].y = y[1];
+    g.vertices[7].z = z[1];
   }
 
   focusOnLayer(group) {
@@ -245,6 +400,7 @@ export class GroupedGraphScene {
       el.visible = !v;
     });
     find.meshes.node.visible = v;
+    find.meshes.box.visible = !v;
     find.meshes.arrowsIn.forEach(el => {
       if (v) {
         this.changeArrowWithNode(el.arrow, find.meshes.node.userData.id, false);
@@ -336,7 +492,7 @@ export class GroupedGraphScene {
       this.materials.push(material);
       mesh = new THREE.Mesh(this.geometry, material);
       mesh.name = node.name;
-      mesh.userData = { id: node.id, group: false };
+      mesh.userData = { id: node.id, isGroup: false, group: '' };
       this.meshes.push(mesh);
       mesh.position.set(
         THREE.Math.randFloat(-this.steps, this.steps),

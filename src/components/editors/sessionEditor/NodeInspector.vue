@@ -75,6 +75,10 @@ export default {
   font-size: 0.9em;
 }
 
+.data-item:last-child {
+  margin: 0;
+}
+
 .data-list > :last-child {
   margin: 0px;
 }

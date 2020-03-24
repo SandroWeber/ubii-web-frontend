@@ -274,12 +274,11 @@ export default {
   flex-direction: column;
   justify-content: flex-start;
   height: 100%;
-  padding: 10px 20px;
+  padding: 10px 20px 25px 20px;
   margin: 0px 20px;
   flex: 0 0 400px;
   width: 400px;
   flex: 0 0 400px;
-  white-space: nowrap;
 }
 
 .settings-group:last-child {
@@ -300,7 +299,6 @@ export default {
 }
 
 .settings-row span {
-  display: block;
   width: 400px;
   overflow-wrap: break-word;
 }
