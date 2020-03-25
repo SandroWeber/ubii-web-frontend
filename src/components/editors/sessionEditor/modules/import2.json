@@ -1,1 +1,47 @@
-"{}"
+{
+    "id": "02",
+    "name": "Dataset 2",
+    "nodes": [
+        {
+            "id": 0,
+            "name": "Node 1",
+            "tags": [
+                "Tag 1"
+            ],
+            "links": [],
+            "data": {
+                "field1": "value1"
+            }
+        },
+        {
+            "id": 1,
+            "name": "Node 2",
+            "tags": [
+                "No Tags"
+            ],
+            "links": []
+        },
+        {
+            "id": 2,
+            "name": "Node 3",
+            "tags": [
+                "No Tags"
+            ],
+            "links": []
+        }
+    ],
+    "links": [
+        {
+            "source": 0,
+            "target": 1
+        },
+        {
+            "source": 1,
+            "target": 2
+        },
+        {
+            "source": 0,
+            "target": 2
+        }
+    ]
+}
