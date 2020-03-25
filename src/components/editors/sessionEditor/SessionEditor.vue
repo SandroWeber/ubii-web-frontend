@@ -67,12 +67,12 @@ export default {
       translator: null,
       settings: {
         view: 2,
-        dataset: '0',
+        dataset: '0001',
         viewNode: -1,
         mode: 0,
         sorting: 0,
         viewZeroMarker: false,
-        startNode: '0',
+        startNode: '1',
         slimLayers: false,
         showAll: true,
         snapToGrid: true
@@ -83,9 +83,7 @@ export default {
   beforeMount: function() {
     this.translator = new DataTranslator();
     scenarios.forEach(scenario => {
-      let translated = this.translator.translateFromUbii(scenario);
-      translated.test = true;
-      this.datasets.push(translated);
+      this.datasets.push(scenario);
     });
   },
   mounted: function() {

@@ -89,6 +89,11 @@
           >
         </div>
       </div>
+      <div id="warning">
+        This graph contains cycles!<br />
+        Showing the number of steps from one node to all others requires an
+        acylclic graph.
+      </div>
     </div>
   </div>
 </template>
@@ -98,6 +103,8 @@ import $ from 'jquery';
 import { twoDForceGraphVis } from './modules/visualization/2d-force-graph';
 import { threeDForceGraphVis } from './modules/visualization/3d-force-graph';
 import { setupThreejsEnvironment } from './modules/visualization/threejs-setup';
+
+import { translatedToMatrix } from './modules/utils';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
@@ -228,6 +235,19 @@ export default {
       }
     },
     setUpThreeJS() {
+      if (this.settings.view == 2) {
+        if (this.settings.mode == 3) {
+          if (this.checkIfCylic(this.dataset)) {
+            $('#warning').show();
+            this.structure = [];
+            return;
+          }
+        } else {
+          $('#warning').hide();
+        }
+      } else {
+        $('#warning').hide();
+      }
       this.visualizations.threegraph = setupThreejsEnvironment(
         document.getElementById('threejs-container'),
         this.dataset,
@@ -236,6 +256,47 @@ export default {
       );
       this.changeZeroMarker();
       this.structure = this.visualizations.threegraph.scene.structure;
+    },
+    checkIfCylic(dataset) {
+      //Got this algorithm from here https://www.geeksforgeeks.org/detect-cycle-in-a-graph/
+      let recursiveCheck = (i, visited, recStack, matrix) => {
+        if (recStack[i]) {
+          return true;
+        }
+
+        if (visited[i]) {
+          return false;
+        }
+
+        visited[i] = true;
+        recStack[i] = true;
+
+        for (let j = 0; j < matrix[i].length; j++) {
+          if (matrix[i][j]) {
+            if (recursiveCheck(j, visited, recStack, matrix)) {
+              return true;
+            }
+          }
+        }
+
+        recStack[i] = false;
+
+        return false;
+      };
+
+      let visited = [];
+      let recStack = [];
+      dataset.nodes.forEach(el => {
+        visited.push(false);
+        recStack.push(false);
+      });
+      let matrix = translatedToMatrix(dataset);
+      for (let i = 0; i < dataset.nodes.length; i++) {
+        if (recursiveCheck(i, visited, recStack, matrix)) {
+          return true;
+        }
+      }
+      return false;
     },
     changeView: function(view) {
       if (view < 0 || view > 6) {
@@ -420,5 +481,20 @@ export default {
 
 .enabled {
   border-color: white;
+}
+
+#warning {
+  padding: 20px;
+  border: 2px solid red;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 50%;
+  left: 30%;
+  width: 40%;
+  background-color: black;
+  font-size: 1.2em;
+  display: none;
 }
 </style>

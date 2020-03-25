@@ -30,7 +30,7 @@
     <side-bar-item
       :id="'1'"
       :title="'Nodes in Dataset'"
-      :desc="'Choose a node on which you want to focus.'"
+      :desc="'Choose a node on which you want to select.'"
       :content="dataset.nodes"
     >
       <list-item
@@ -44,7 +44,11 @@
         >{{ node.name }}</list-item
       >
     </side-bar-item>
-    <side-bar-item :id="'2'" :title="'Inspector for selected Node '">
+    <side-bar-item
+      :id="'2'"
+      :desc="'Inspect the data of a node.'"
+      :title="'Node Inspector'"
+    >
       <NodeInspector :dataset="dataset" :settings="settings"></NodeInspector>
     </side-bar-item>
     <side-bar-item
@@ -126,6 +130,7 @@ export default {
   flex-direction: column;
   border-right: 1px solid black;
   font-size: 1em;
+  overflow-y: auto;
 }
 
 .side-bar-top {

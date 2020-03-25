@@ -1,16 +1,24 @@
 <template>
   <div>
-    <div class="side-bar-item-top" v-on:click="collapse" v-bind:id="'item-'+id">
+    <div
+      class="side-bar-item-top"
+      v-on:click="collapse"
+      v-bind:id="'item-' + id"
+    >
       <span class="icon" v-bind:class="{ rotated: rotated }">
         <font-awesome-icon icon="chevron-up" size="xs" />
       </span>
-      {{title}}
-      <b-badge v-if="this.$props.content != null" variant="primary">{{this.$props.content.length}}</b-badge>
+      {{ title }}
+      <b-badge v-if="this.$props.content != null" variant="primary">{{
+        this.$props.content.length
+      }}</b-badge>
     </div>
     <b-collapse visible :id="title" class="collapseable-content">
       <slot></slot>
     </b-collapse>
-    <b-tooltip v-bind:target="'item-'+id" placement="right">{{desc}}</b-tooltip>
+    <b-tooltip v-bind:target="'item-' + id" placement="top">{{
+      desc
+    }}</b-tooltip>
   </div>
 </template>
 

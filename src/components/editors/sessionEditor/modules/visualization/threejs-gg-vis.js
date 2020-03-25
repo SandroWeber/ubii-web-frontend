@@ -80,7 +80,7 @@ export class GroupedGraph extends GroupedGraphScene {
     } else if (keyCode == 17) {
       this.selectKeyPressed = true;
     } else if (keyCode == 77) {
-      if (this.selected.length > 0) {
+      if (this.selected.length > 1) {
         this.addToStructure();
       }
     } else if (keyCode == 82) {

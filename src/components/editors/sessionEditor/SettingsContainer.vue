@@ -201,7 +201,14 @@ export default {
       file: null
     };
   },
-  watch: {},
+  watch: {
+    dataset: function(ds) {
+      this.startNodeOptions = [];
+      ds.nodes.forEach((node, index) =>
+        this.startNodeOptions.push({ value: node.id, text: node.name })
+      );
+    }
+  },
   methods: {
     init: function() {
       this.dataset.nodes.forEach((node, index) =>

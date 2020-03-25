@@ -18,7 +18,7 @@
         <span v-if="node.links.length == 0"> No Links</span>
         <span v-else>
           <div v-for="link in node.links" :key="link">
-            <a target="_blank" :href="link">{{ link }}</a>
+            <a class="l" target="_blank" :href="link">{{ link }}</a>
           </div>
         </span>
       </div>
@@ -85,5 +85,10 @@ export default {
 
 .label {
   text-decoration: underline;
+}
+
+.l {
+  word-wrap: break-word;
+  word-break: break-word;
 }
 </style>

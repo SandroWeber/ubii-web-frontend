@@ -72,7 +72,7 @@ export class Visualization1 extends SceneVisualization {
       this.checkNodePositionOnGrid(this.selected);
     }
     this.setSlimLayers(this.slimLayers);
-    this.setDragging(false);
+    this.isDragging = false;
     this.manageGuideline(false);
   }
 
@@ -107,6 +107,30 @@ export class Visualization1 extends SceneVisualization {
 
   onKeyDown(event, controls, camera, showViewLabel) {
     let keyCode = event.which;
+
+    let move = (layer, pos, obj) => {
+      if (
+        obj.focusedLayer == '' &&
+        obj.focusedLayer != layer &&
+        obj.selected != null
+      ) {
+        obj.moveTo(obj.selected, pos * obj.layerStepSize);
+        let find = obj.structure.find(
+          el => el.id == obj.selected.userData.level
+        );
+        obj.showLayer(find.id, false);
+        find.content.splice(
+          find.content.findIndex(
+            el => el.userData.id == obj.selected.userData.id
+          ),
+          1
+        );
+        obj.structure.find(el => el.id == layer).content.push(obj.selected);
+        obj.selected.userData.level = layer;
+        obj.setSlimLayers(obj.slimLayers);
+      }
+    };
+
     if (keyCode == 88) {
       controls.reset();
       showViewLabel('X');
@@ -115,50 +139,23 @@ export class Visualization1 extends SceneVisualization {
       controls.update();
       showViewLabel('Y');
     } else if (keyCode == 49) {
-      this.moveTo(this.selected, -4 * this.layerStepSize);
-      this.structure.find(el => el.id == 'Level 1').content.push(this.selected);
-      this.selected.userData.level = 'Level 1';
-      this.setSlimLayers(this.slimLayers);
+      move('Level 1', -4, this);
     } else if (keyCode == 50) {
-      this.moveTo(this.selected, -3 * this.layerStepSize);
-      this.structure.find(el => el.id == 'Level 2').content.push(this.selected);
-      this.selected.userData.level = 'Level 2';
-      this.setSlimLayers(this.slimLayers);
+      move('Level 2', -3, this);
     } else if (keyCode == 51) {
-      this.moveTo(this.selected, -2 * this.layerStepSize);
-      this.structure.find(el => el.id == 'Level 3').content.push(this.selected);
-      this.selected.userData.level = 'Level 3';
-      this.setSlimLayers(this.slimLayers);
+      move('Level 3', -2, this);
     } else if (keyCode == 52) {
-      this.moveTo(this.selected, -1 * this.layerStepSize);
-      this.structure.find(el => el.id == 'Level 4').content.push(this.selected);
-      this.selected.userData.level = 'Level 4';
-      this.setSlimLayers(this.slimLayers);
+      move('Level 4', -1, this);
     } else if (keyCode == 53) {
-      this.moveTo(this.selected, 0 * this.layerStepSize);
-      this.structure.find(el => el.id == 'Level 5').content.push(this.selected);
-      this.selected.userData.level = 'Level 5';
-      this.setSlimLayers(this.slimLayers);
+      move('Level 5', 0, this);
     } else if (keyCode == 54) {
-      this.moveTo(this.selected, 1 * this.layerStepSize);
-      this.structure.find(el => el.id == 'Level 6').content.push(this.selected);
-      this.selected.userData.level = 'Level 6';
-      this.setSlimLayers(this.slimLayers);
+      move('Level 6', 1, this);
     } else if (keyCode == 55) {
-      this.moveTo(this.selected, 2 * this.layerStepSize);
-      this.structure.find(el => el.id == 'Level 7').content.push(this.selected);
-      this.selected.userData.level = 'Level 7';
-      this.setSlimLayers(this.slimLayers);
+      move('Level 7', 2, this);
     } else if (keyCode == 56) {
-      this.moveTo(this.selected, 3 * this.layerStepSize);
-      this.structure.find(el => el.id == 'Level 8').content.push(this.selected);
-      this.selected.userData.level = 'Level 8';
-      this.setSlimLayers(this.slimLayers);
+      move('Level 8', 3, this);
     } else if (keyCode == 57) {
-      this.moveTo(this.selected, 4 * this.layerStepSize);
-      this.structure.find(el => el.id == 'Level 9').content.push(this.selected);
-      this.selected.userData.level = 'Level 9';
-      this.setSlimLayers(this.slimLayers);
+      move('Level 9', 4, this);
     } else if (keyCode == 81) {
       this.locked.x = !this.locked.x;
       this.locked.y = false;

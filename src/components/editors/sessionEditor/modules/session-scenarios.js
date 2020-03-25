@@ -2,157 +2,99 @@ import uuidv4 from 'uuid/v4';
 
 let scenarios = [
   {
-    interactions: [
+    id: '0001',
+    name: 'Dataset 1',
+    test: true,
+    nodes: [
       {
-        id: '0',
-        name: 'interaction_0',
-        processingCallback: () => {},
-        processFrequency: 60,
-        inputFormats: [
-          {
-            internalName: 'input-name_0',
-            messageFormat: 'ubii.dataStructure.Vector2'
-          }
-        ],
-        outputFormats: [
-          {
-            internalName: 'output-name_0',
-            messageFormat: 'ubii.dataStructure.Vector2'
-          }
-        ]
+        id: 1,
+        name: 'Node 1',
+        tags: ['Tag 1', 'Tag 2', 'Tag 3'],
+        links: []
       },
       {
-        id: '1',
-        name: 'interaction_1',
-        tags: ['Calc 1', 'Calc 2'],
-        processingCallback: () => {},
-        processFrequency: 60,
-        inputFormats: [
-          {
-            internalName: 'input-name_1',
-            messageFormat: 'ubii.dataStructure.Vector2'
-          }
-        ],
-        outputFormats: [
-          {
-            internalName: 'output-name_1',
-            messageFormat: 'ubii.dataStructure.Vector2'
-          }
-        ]
+        id: 2,
+        name: 'Node 2',
+        tags: ['No Tags'],
+        links: []
       },
       {
-        id: '2',
-        name: 'interaction_2',
-        tags: ['Calc 2'],
-        processingCallback: () => {},
-        processFrequency: 60,
-        inputFormats: [
-          {
-            internalName: 'input-name_2',
-            messageFormat: 'ubii.dataStructure.Vector2'
-          }
-        ],
-        outputFormats: [
-          {
-            internalName: 'output-name_2',
-            messageFormat: 'ubii.dataStructure.Vector2'
-          }
-        ]
-      },
-      {
-        id: '3',
-        name: 'interaction_3',
-        tags: ['Calc 2'],
-        processingCallback: () => {},
-        processFrequency: 60,
-        inputFormats: [
-          {
-            internalName: 'input-name_3',
-            messageFormat: 'ubii.dataStructure.Vector2'
-          }
-        ],
-        outputFormats: [
-          {
-            internalName: 'output-name_3',
-            messageFormat: 'ubii.dataStructure.Vector2'
-          }
-        ]
+        id: 3,
+        name: 'Node 3',
+        tags: ['No Tags'],
+        links: []
       }
     ],
-    ioMappings: [
+    links: [
       {
-        interactionId: '0',
-        inputMappings: [
-          {
-            name: 'input-name_0',
-            topicSource: 'topic0'
-          }
-        ],
-        outputMappings: [
-          {
-            name: 'output-name_0',
-            topicDestination: 'topic1'
-          }
-        ]
+        source: 1,
+        target: 2,
+        how: 'a'
       },
       {
-        interactionId: '1',
-        inputMappings: [
-          {
-            name: 'input-name_1',
-            topicSource: 'topic1'
-          }
-        ],
-        outputMappings: [
-          {
-            name: 'output-name_1',
-            topicDestination: 'topic2'
-          }
-        ]
+        source: 2,
+        target: 3,
+        how: 'a'
       },
       {
-        interactionId: '2',
-        inputMappings: [
-          {
-            name: 'input-name_2',
-            topicSource: 'topic1'
-          }
-        ],
-        outputMappings: [
-          {
-            name: 'output-name_2',
-            topicDestination: 'topic2'
-          }
-        ]
-      },
-      {
-        interactionId: '3',
-        inputMappings: [
-          {
-            name: 'input-name_3',
-            topicSource: 'topic2'
-          }
-        ],
-        outputMappings: [
-          {
-            name: 'output-name_3',
-            topicDestination: 'topic3'
-          }
-        ]
+        source: 1,
+        target: 3,
+        how: 'a'
       }
-    ],
-    tags: [],
-    authors: [],
-    id: '0',
-    name: 'scenario_1'
+    ]
   },
   {
-    interactions: [],
-    ioMappings: [],
-    tags: [],
-    authors: [],
-    id: '1',
-    name: 'scenario_2'
+    id: '0002',
+    name: 'Dataset 2',
+    test: true,
+    nodes: [
+      {
+        id: 1,
+        name: 'Node 1',
+        tags: ['Tag 1', 'Tag 2', 'Tag 3'],
+        links: []
+      },
+      {
+        id: 2,
+        name: 'Node 2',
+        tags: ['No Tags'],
+        links: []
+      },
+      {
+        id: 3,
+        name: 'Node 3',
+        tags: ['No Tags'],
+        links: []
+      },
+      {
+        id: 4,
+        name: 'Node 4',
+        tags: ['No Tags'],
+        links: []
+      }
+    ],
+    links: [
+      {
+        source: 1,
+        target: 2,
+        how: 'a'
+      },
+      {
+        source: 1,
+        target: 4,
+        how: 'a'
+      },
+      {
+        source: 2,
+        target: 3,
+        how: 'a'
+      },
+      {
+        source: 3,
+        target: 4,
+        how: 'a'
+      }
+    ]
   }
 ];
 

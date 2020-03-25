@@ -36,6 +36,7 @@ export class Visualization4 extends SceneVisualization {
         depth = el.depth;
       }
     });
+    depth /= this.layerStepSize;
     depth++;
     this.meshes.forEach(el => {
       if (el.userData.level == undefined) {
@@ -47,9 +48,39 @@ export class Visualization4 extends SceneVisualization {
         temp = this.structure.find(el2 => el2.id == 'Unreachable');
         temp.content.push(el);
         el.material.color.set(temp.color);
-        this.moveTo(el, depth);
+        this.moveTo(el, this.layerStepSize * depth);
         el.userData.level = 'Unreachable';
       }
+    });
+    let del = [];
+    this.structure.forEach(el => {
+      temp = [];
+      el.content.forEach(el2 => {
+        if (el2.userData.level != el.id) {
+          temp.push(el2);
+        }
+      });
+      temp.forEach(el2 => {
+        el.content.splice(
+          el.content.findIndex(el3 => el3.userData.level == el2.userData.level),
+          1
+        );
+      });
+      if (el.content.length == 0) {
+        del.push(el.id);
+      }
+    });
+    del.forEach(el => {
+      let find = this.structure.find(el2 => el2.id == el);
+      this.scene.remove(find.plane.p);
+      find.plane.b.forEach(el2 => {
+        this.scene.remove(el2);
+      });
+      find.plane.g.forEach(el2 => {
+        this.scene.remove(el2);
+      });
+      temp = this.structure.findIndex(el2 => el2.id == el);
+      this.structure.splice(temp, 1);
     });
   }
 
@@ -88,9 +119,12 @@ export class Visualization4 extends SceneVisualization {
     if (this.same && this.oldPos.equals(this.selected.position)) {
       this.deselect();
       this.same = false;
+    } else if (!this.oldPos.equals(this.selected.position)) {
+      this.deleteNodeFromGrid(event.object);
+      this.checkNodePositionOnGrid(this.selected);
     }
     this.setSlimLayers(this.slimLayers);
-    this.setDragging(false);
+    this.isDragging = false;
     this.manageGuideline(false);
   }
 

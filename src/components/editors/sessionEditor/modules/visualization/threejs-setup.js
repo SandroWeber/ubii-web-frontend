@@ -34,16 +34,6 @@ export function setupThreejsEnvironment(domElement, dataset, settings, change) {
     } else {
       $('.main').css('width', '100%');
     }
-
-    // if (
-    //   $('.settings-container')
-    //     .first()
-    //     .scrollLeft() != 0
-    // ) {
-    //   $('.settings-container')
-    //     .first()
-    //     .addClass('scrollbar-height');
-    // }
     state.renderer.setSize(width, height);
     state.composer.setSize(width, height);
     state.camera.aspect = $(domElement).width() / $(domElement).height();
@@ -63,7 +53,7 @@ export function setupThreejsEnvironment(domElement, dataset, settings, change) {
     window.innerWidth / 50,
     window.innerHeight / 50,
     window.innerHeight / -50,
-    0,
+    -10,
     100
   );
   state.camera.zoom = 4;
@@ -199,7 +189,7 @@ export function setupThreejsEnvironment(domElement, dataset, settings, change) {
     UP: 87,
     BOTTOM: 83
   };
-
+  state.controls[0].minZoom = 2.5;
   state.eventhandlerfunctions[3] = function change(event) {
     showViewLabel('');
   };

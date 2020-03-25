@@ -25,7 +25,8 @@ export class SceneVisualization {
     this.raycaster = new THREE.Raycaster();
     this.nodeLabel = $('#node-label');
     this.stepSize = 1;
-    this.steps = 4;
+    let temp = dataset.nodes.length * dataset.nodes.length;
+    this.steps = temp < 16 ? 4 : temp/dataset.nodes.length;
     this.layerStepSize = 3;
     this.hover = null;
     this.zero = {};
@@ -229,11 +230,37 @@ export class SceneVisualization {
 
     let plane = this.createLayerPlane(c);
 
+    let distance = this.steps * this.stepSize;
+    let geometry = new THREE.Geometry();
+    geometry.vertices.push(
+      new THREE.Vector3(distance, distance, 0),
+      new THREE.Vector3(distance, -distance, 0),
+      new THREE.Vector3(-distance, -distance, 0),
+      new THREE.Vector3(-distance, distance, 0)
+    );
+
+    geometry.faces.push(new THREE.Face3(0, 1, 2), new THREE.Face3(0, 2, 3));
+
+    let fullPlane = new THREE.Mesh(
+      geometry,
+      new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 1,
+        side: THREE.DoubleSide
+      })
+    );
+
+    fullPlane.material.visible = false;
+    fullPlane.userData.id = id;
+    this.scene.add(fullPlane);
+
     this.structure.push({
       id: id,
       color: c,
       content: [],
-      plane: plane
+      plane: plane,
+      fullPlane: fullPlane
     });
 
     plane.p.userData.id = id;
@@ -398,6 +425,7 @@ export class SceneVisualization {
     let find = this.structure.find(str => str.id == id);
     find.depth = depth;
     find.plane.p.position.z = depth;
+    find.fullPlane.position.z = depth;
     find.plane.b.forEach(el => {
       el.geometry.verticesNeedUpdate = true;
       el.geometry.vertices[0].z = depth;
@@ -855,9 +883,15 @@ export class SceneVisualization {
     let obj, node;
     this.raycaster.setFromCamera(mouse, camera);
     this.intersects = this.raycaster.intersectObjects(this.meshes);
-    this.planeIntersects = this.raycaster.intersectObjects(
-      this.structure.map(el => el.plane.p)
-    );
+    if (this.slimLayers) {
+      this.planeIntersects = this.raycaster.intersectObjects(
+        this.structure.map(el => el.fullPlane)
+      );
+    } else {
+      this.planeIntersects = this.raycaster.intersectObjects(
+        this.structure.map(el => el.plane.p)
+      );
+    }
 
     if (this.intersects.length > 0) {
       obj = this.intersects[0].object;

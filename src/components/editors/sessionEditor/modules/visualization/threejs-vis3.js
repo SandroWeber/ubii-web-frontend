@@ -115,9 +115,12 @@ export class Visualization3 extends SceneVisualization {
     if (this.same && this.oldPos.equals(this.selected.position)) {
       this.deselect();
       this.same = false;
+    } else if (!this.oldPos.equals(this.selected.position)) {
+      this.deleteNodeFromGrid(event.object);
+      this.checkNodePositionOnGrid(this.selected);
     }
     this.setSlimLayers(this.slimLayers);
-    this.setDragging(false);
+    this.isDragging = false;
     this.manageGuideline(false);
   }
 
