@@ -38,21 +38,11 @@
             title="Controls"
             static
           >
-            <p>
+            <p v-if="settings.mode == 0 && settings.view == 2">
               <Numeric1BoxIcon />
               <span class="text">to</span>
-              <Numeric4BoxIcon />
-              <span class="text">: Set node to Level 1 to 4</span>
-            </p>
-            <p>
-              <Numeric5BoxIcon />
-              <span class="text">: Set node to Level 5</span>
-            </p>
-            <p>
-              <Numeric6BoxIcon />
-              <span class="text">to</span>
               <Numeric9BoxIcon />
-              <span class="text">: Set node to Level 6 to 9</span>
+              <span class="text">: Set node to Level 1 to 9</span>
             </p>
             <p>
               <AlphaWBoxIcon />
@@ -308,7 +298,8 @@ export default {
         $('#force-graph-container').show();
         if (this.visualizations.forceGraph == null) {
           this.visualizations.forceGraph = twoDForceGraphVis(
-            document.getElementById('force-graph-container')
+            document.getElementById('force-graph-container'),
+            this.change
           )(JSON.parse(JSON.stringify(this.dataset)));
         } else {
           this.visualizations.forceGraph.resumeAnimation();
@@ -320,7 +311,8 @@ export default {
         $('#force-graph-container').show();
         if (this.visualizations.forceGraph == null) {
           this.visualizations.forceGraph = threeDForceGraphVis(
-            document.getElementById('force-graph-container')
+            document.getElementById('force-graph-container'),
+            this.change
           )(JSON.parse(JSON.stringify(this.dataset)));
         } else {
           this.visualizations.forceGraph.resumeAnimation();
@@ -419,7 +411,7 @@ export default {
 }
 
 .bottom {
-  bottom: 10px;
+  bottom: 40px;
 }
 
 .ui-item {

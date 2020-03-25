@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import ForceGraph from 'force-graph';
 
-export function twoDForceGraphVis(domElement) {
+export function twoDForceGraphVis(domElement, change) {
   let graph = ForceGraph({ width: 500 });
   graph(domElement);
   graph.d3Force('charge').strength(-800);
@@ -32,6 +32,13 @@ export function twoDForceGraphVis(domElement) {
     graph.linkVisibility(true);
     graph.linkDirectionalArrowLength(12);
     graph.linkDirectionalArrowRelPos(1);
+    graph.onNodeHover(node => {
+      if (node != null) {
+        change('viewNode', node.id);
+      } else {
+        change('viewNode', -1);
+      }
+    });
     graph.graphData(dataset);
 
     return graph;

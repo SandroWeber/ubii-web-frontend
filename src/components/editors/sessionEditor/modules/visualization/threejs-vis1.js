@@ -127,6 +127,9 @@ export class Visualization1 extends SceneVisualization {
         );
         obj.structure.find(el => el.id == layer).content.push(obj.selected);
         obj.selected.userData.level = layer;
+        obj.selected.material.color.set(
+          obj.structure.find(el => el.id == layer).color
+        );
         obj.setSlimLayers(obj.slimLayers);
       }
     };

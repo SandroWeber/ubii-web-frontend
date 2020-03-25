@@ -177,6 +177,6 @@ export default {
 }
 
 .settings-container-instance {
-  height: 200px;
+  height: 240px;
 }
 </style>

@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import ForceGraph3D from '3d-force-graph';
 
-export function threeDForceGraphVis(domElement) {
+export function threeDForceGraphVis(domElement, change) {
   let graph = ForceGraph3D({ width: 500 });
   graph(domElement);
   graph.d3Force('charge').strength(-150);
@@ -30,6 +30,13 @@ export function threeDForceGraphVis(domElement) {
     graph.linkColor(() => 'rgba(255,255,255,1)');
     graph.linkDirectionalArrowLength(4);
     graph.linkDirectionalArrowRelPos(1);
+    graph.onNodeHover(node => {
+      if (node != null) {
+        change('viewNode', node.id);
+      } else {
+        change('viewNode', -1);
+      }
+    });
     return graph;
   };
 }

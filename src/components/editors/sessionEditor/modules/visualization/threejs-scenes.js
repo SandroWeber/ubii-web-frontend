@@ -25,8 +25,11 @@ export class SceneVisualization {
     this.raycaster = new THREE.Raycaster();
     this.nodeLabel = $('#node-label');
     this.stepSize = 1;
-    let temp = dataset.nodes.length * dataset.nodes.length;
-    this.steps = temp < 16 ? 4 : temp/dataset.nodes.length;
+    let i = 4;
+    while (i * i < dataset.nodes.length) {
+      i++;
+    }
+    this.steps = i;
     this.layerStepSize = 3;
     this.hover = null;
     this.zero = {};
@@ -290,6 +293,8 @@ export class SceneVisualization {
         side: THREE.DoubleSide
       })
     );
+
+    plane.renderOrder = 1;
 
     if (!this.showAllLevels) {
       plane.visible = false;
@@ -666,7 +671,9 @@ export class SceneVisualization {
 
   createLinks() {
     this.dataset.links.forEach(link => {
-      this.createLink(link);
+      if (link.source != link.target) {
+        this.createLink(link);
+      }
     });
   }
 

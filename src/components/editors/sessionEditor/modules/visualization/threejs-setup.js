@@ -53,7 +53,7 @@ export function setupThreejsEnvironment(domElement, dataset, settings, change) {
     window.innerWidth / 50,
     window.innerHeight / 50,
     window.innerHeight / -50,
-    -10,
+    -20,
     100
   );
   state.camera.zoom = 4;
@@ -81,12 +81,12 @@ export function setupThreejsEnvironment(domElement, dataset, settings, change) {
     );
     state.controls[1].removeEventListener(
       'dragstart',
-      state.eventhandlerfunctions[3],
+      state.eventhandlerfunctions[4],
       false
     );
     state.controls[1].removeEventListener(
       'dragend',
-      state.eventhandlerfunctions[4],
+      state.eventhandlerfunctions[5],
       false
     );
     state.controls[1].removeEventListener(

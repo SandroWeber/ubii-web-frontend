@@ -15,6 +15,9 @@ export class Visualization3 extends SceneVisualization {
     this.createDataPoints();
     this.createLinks();
     this.setupStructure(dataset);
+    this.meshes.forEach(el => {
+      this.checkNodePositionOnGrid(el);
+    });
   }
 
   setupStructure(dataset) {

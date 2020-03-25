@@ -140,7 +140,7 @@ export class GroupedGraphScene {
 
     let meshes = {};
     meshes.node = new THREE.Mesh(
-      new THREE.SphereGeometry(0.2, 64, 64),
+      new THREE.SphereGeometry(0.4, 64, 64),
       new THREE.MeshLambertMaterial({
         color: c,
         transparent: true,

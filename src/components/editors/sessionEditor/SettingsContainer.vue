@@ -45,15 +45,15 @@
         <div class="help-container" v-if="selectedView == 2">
           <font-awesome-icon icon="question-circle" class="icon" />
           <span v-if="selectedMode == 0"
-            >Browse the graph with 9 individually usable Layers.</span
+            >Explore the graph freely with 9 individually usable Layers.</span
           >
           <span v-if="selectedMode == 1">
-            Sort your Nodes in Layers depending on how which tags (or
-            combination of tags) they reference.
+            Sort your Nodes in Layers depending on which tags (or combination of
+            tags) they reference.
           </span>
           <span v-if="selectedMode == 2">
             Sort your Nodes in Layers depending on how many edges flow into a
-            node / out of a node.
+            node / out of a node (node degree).
           </span>
           <span v-if="selectedMode == 3">
             Sort your Nodes in Layers depending on how many steps they are away

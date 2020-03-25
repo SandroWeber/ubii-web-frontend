@@ -14,6 +14,9 @@ export class Visualization2 extends SceneVisualization {
     this.createDataPoints();
     this.createLinks();
     this.setupStructure(dataset);
+    this.meshes.forEach(el => {
+      this.checkNodePositionOnGrid(el);
+    });
   }
 
   getMixedLevelName(node) {

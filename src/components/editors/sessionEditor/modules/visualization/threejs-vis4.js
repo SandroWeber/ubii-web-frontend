@@ -15,6 +15,9 @@ export class Visualization4 extends SceneVisualization {
     this.createDataPoints();
     this.createLinks();
     this.setupStructure(dataset);
+    this.meshes.forEach(el => {
+      this.checkNodePositionOnGrid(el);
+    });
   }
 
   setupStructure(dataset) {
@@ -94,9 +97,17 @@ export class Visualization4 extends SceneVisualization {
     this.setLevelDepth(level, this.layerStepSize * counter);
     this.moveTo(this.meshes[index], this.layerStepSize * counter);
     let l = this.structure.find(el => el.id == level);
-    l.content.push(this.meshes[index]);
-    this.meshes[index].material.color.set(l.color);
+    let found = l.content.find(
+      el => el.userData.id == this.meshes[index].userData.id
+    );
+    if (found == undefined) {
+      l.content.push(this.meshes[index]);
+    }
+    if (index == 3 && level == '2 steps') {
+      console.log('here');
+    }
     let temp = counter + 1;
+    this.meshes[index].material.color.set(l.color);
     matrix[index].forEach((el, index2) => {
       if (el) {
         this.recursiveGraphCheck(matrix, levels, dataset, temp, index2);
