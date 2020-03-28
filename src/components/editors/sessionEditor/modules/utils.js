@@ -115,3 +115,45 @@ export function randomHexColor(hex) {
   }
   return '#' + result;
 }
+
+export function checkIfCylic(dataset) {
+  //Got this algorithm from here https://www.geeksforgeeks.org/detect-cycle-in-a-graph/
+  let recursiveCheck = (i, visited, recStack, matrix) => {
+    if (recStack[i]) {
+      return true;
+    }
+
+    if (visited[i]) {
+      return false;
+    }
+
+    visited[i] = true;
+    recStack[i] = true;
+
+    for (let j = 0; j < matrix[i].length; j++) {
+      if (matrix[i][j]) {
+        if (recursiveCheck(j, visited, recStack, matrix)) {
+          return true;
+        }
+      }
+    }
+
+    recStack[i] = false;
+
+    return false;
+  };
+
+  let visited = [];
+  let recStack = [];
+  dataset.nodes.forEach(el => {
+    visited.push(false);
+    recStack.push(false);
+  });
+  let matrix = translatedToMatrix(dataset);
+  for (let i = 0; i < dataset.nodes.length; i++) {
+    if (recursiveCheck(i, visited, recStack, matrix)) {
+      return true;
+    }
+  }
+  return false;
+}

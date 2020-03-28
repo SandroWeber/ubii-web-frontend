@@ -21,49 +21,49 @@
       </div>
       <div <div class="settings-row">
         <b-form-select
-          v-model="selectedView"
-          :options="viewOptions"
-          @input="changeView"
+          v-model="selectedGraphType"
+          :options="graphTypeOptions"
+          @input="changeGraphType"
         ></b-form-select>
       </div>
     </div>
-    <div class="settings-group" v-if="selectedView == 2">
+    <div class="settings-group" v-if="selectedGraphType == 2">
       <div class="settings-row">
         Mode:
       </div>
       <div <div class="settings-row">
         <b-form-select
-          v-model="selectedMode"
-          :options="modeOptions"
-          @input="changeMode"
+          v-model="selectedSceneId"
+          :options="sceneIdOptions"
+          @input="changeSceneId"
         ></b-form-select>
       </div>
       <div class="settings-row">
         Explanation:
       </div>
       <div class="settings-row">
-        <div class="help-container" v-if="selectedView == 2">
+        <div class="help-container" v-if="selectedGraphType == 2">
           <font-awesome-icon icon="question-circle" class="icon" />
-          <span v-if="selectedMode == 0"
+          <span v-if="selectedSceneId == 0"
             >Explore the graph freely with 9 individually usable Layers.</span
           >
-          <span v-if="selectedMode == 1">
+          <span v-if="selectedSceneId == 1">
             Sort your Nodes in Layers depending on which tags (or combination of
             tags) they reference.
           </span>
-          <span v-if="selectedMode == 2">
+          <span v-if="selectedSceneId == 2">
             Sort your Nodes in Layers depending on how many edges flow into a
             node / out of a node (node degree).
           </span>
-          <span v-if="selectedMode == 3">
+          <span v-if="selectedSceneId == 3">
             Sort your Nodes in Layers depending on how many steps they are away
             from your Starting Node
           </span>
         </div>
       </div>
     </div>
-    <div v-if="selectedView >= 2" class="settings-group switches-right">
-      <div class="settings-row" v-if="selectedView == 2">
+    <div v-if="selectedGraphType >= 2" class="settings-group switches-right">
+      <div class="settings-row" v-if="selectedGraphType == 2">
         Always show layers:
         <toggle-button
           id="layers-show-all-toggle"
@@ -76,7 +76,7 @@
           @change="changeShowAll"
         ></toggle-button>
       </div>
-      <div class="settings-row" v-if="selectedView == 2">
+      <div class="settings-row" v-if="selectedGraphType == 2">
         Slim Layers:
         <toggle-button
           id="layer-slim-toggle"
@@ -89,7 +89,7 @@
           @change="changeSlimLevels"
         ></toggle-button>
       </div>
-      <div class="settings-row" v-if="selectedView == 2">
+      <div class="settings-row" v-if="selectedGraphType == 2">
         Snap to Grid:
         <toggle-button
           id="layer-grid-snap-toggle"
@@ -117,22 +117,24 @@
       </div>
     </div>
     <div
-      v-if="selectedView == 2 && (selectedMode == 2 || selectedMode == 3)"
+      v-if="
+        selectedGraphType == 2 && (selectedSceneId == 2 || selectedSceneId == 3)
+      "
       class="settings-group"
     >
       <div class="settings-row">
-        <span v-if="selectedMode == 2">Sorting:</span>
-        <span v-if="selectedMode == 3">Starting Node:</span>
+        <span v-if="selectedSceneId == 2">Sorting:</span>
+        <span v-if="selectedSceneId == 3">Starting Node:</span>
       </div>
       <div class="settings-row">
         <b-form-select
-          v-if="selectedMode == 2"
+          v-if="selectedSceneId == 2"
           v-model="selectedSorting"
           :options="sortingOptions"
           @input="changeSorting"
         ></b-form-select>
         <b-form-select
-          v-if="selectedMode == 3"
+          v-if="selectedSceneId == 3"
           v-model="selectedStartNode"
           :options="startNodeOptions"
           @input="changeStartNode"
@@ -172,25 +174,25 @@ export default {
   },
   data: function() {
     return {
-      selectedView: this.settings.view,
-      selectedMode: this.settings.mode,
+      selectedGraphType: this.settings.view,
+      selectedSceneId: this.settings.mode,
       selectedSorting: this.settings.sorting,
       selectedStartNode: this.settings.startNode,
       selectedSlimLevels: this.settings.slimLevels,
       selectedShowAll: this.settings.showAll,
       selectedZeroMarker: this.settings.viewZeroMarker,
       selectedSnapToGrid: this.settings.snapToGrid,
-      viewOptions: [
-        { value: 0, text: '2D Force-Graph' },
-        { value: 1, text: '3D Force-Graph' },
-        { value: 2, text: 'Layered Graph' },
-        { value: 3, text: 'Grouped Graph' }
+      graphTypeOptions: [
+        { value: '2D-FORCE', text: '2D Force-Graph' },
+        { value: '3D-FORCE', text: '3D Force-Graph' },
+        { value: 'LAYERED', text: 'Layered Graph' },
+        { value: 'GROUPED', text: 'Grouped Graph' }
       ],
-      modeOptions: [
-        { value: 0, text: 'Browsing' },
-        { value: 1, text: 'Tags' },
-        { value: 2, text: 'Node Degree' },
-        { value: 3, text: 'Steps' }
+      sceneIdOptions: [
+        { value: 'EXPLORATION', text: 'Exploration' },
+        { value: 'TAGS', text: 'Tags' },
+        { value: 'DEGREE', text: 'Node Degree' },
+        { value: 'STEPS', text: 'Steps' }
       ],
       sortingOptions: [
         { value: 0, text: 'Incoming Edges' },
@@ -215,29 +217,29 @@ export default {
         this.startNodeOptions.push({ value: node.id, text: node.name })
       );
     },
-    changeView: function(view) {
-      this.$emit('change', 'view', view);
+    changeGraphType: function(value) {
+      this.$emit('change', 'graphType', value);
     },
-    changeMode: function(mode) {
-      this.$emit('change', 'mode', mode);
+    changeSceneId: function(value) {
+      this.$emit('change', 'sceneId', value);
     },
-    changeSorting: function(sorting) {
-      this.$emit('change', 'sorting', sorting);
+    changeSorting: function(value) {
+      this.$emit('change', 'sorting', value);
     },
-    changeZeroMarker: function(state) {
-      this.$emit('change', 'viewZeroMarker', state.value);
+    changeZeroMarker: function(value) {
+      this.$emit('change', 'viewZeroMarker', value.value);
     },
-    changeStartNode: function(startNode) {
-      this.$emit('change', 'startNode', startNode);
+    changeStartNode: function(value) {
+      this.$emit('change', 'startNode', value);
     },
-    changeSlimLevels: function(state) {
-      this.$emit('change', 'slimLayers', state.value);
+    changeSlimLevels: function(value) {
+      this.$emit('change', 'slimLayers', value.value);
     },
-    changeShowAll: function(state) {
-      this.$emit('change', 'showAll', state.value);
+    changeShowAll: function(value) {
+      this.$emit('change', 'showAll', value.value);
     },
-    changeSnapToGrid: function(state) {
-      this.$emit('change', 'snapToGrid', state.value);
+    changeSnapToGrid: function(value) {
+      this.$emit('change', 'snapToGrid', value.value);
     },
     upload: function() {
       if (this.file != null) {

@@ -1,11 +1,12 @@
 import * as THREE from 'three';
 import $ from 'jquery';
-import { SceneVisualization } from './threejs-scenes';
+import { LayeredGraphScene } from './threejs-scenes';
 import { randomHexColor } from '../utils';
 
-export class Visualization2 extends SceneVisualization {
+export class Visualization2 extends LayeredGraphScene {
   constructor(dataset, snapToGrid) {
     super(dataset, snapToGrid);
+    this.id = 'TAGS';
     this.geometry = new THREE.SphereGeometry(0.2, 64, 64);
     this.material = new THREE.MeshLambertMaterial({
       transparent: true,
@@ -71,7 +72,7 @@ export class Visualization2 extends SceneVisualization {
     });
   }
 
-  dragstart(event, camera) {
+  dragstart(event) {
     if (this.selected == event.object) {
       this.same = true;
     }
@@ -99,14 +100,14 @@ export class Visualization2 extends SceneVisualization {
     this.dragBehaviour();
   }
 
-  onKeyDown(event, controls, camera, showViewLabel) {
+  onKeyDown(event, showViewLabel) {
     let keyCode = event.which;
     if (keyCode == 88) {
-      controls.reset();
+      this.controls[0].reset();
       showViewLabel('X');
     } else if (keyCode == 89) {
-      camera.position.set(-8, 0, 0);
-      controls.update();
+      this.camera.position.set(-8, 0, 0);
+      this.controls[0].update();
       showViewLabel('Y');
     } else if (keyCode == 81) {
       this.locked.x = !this.locked.x;

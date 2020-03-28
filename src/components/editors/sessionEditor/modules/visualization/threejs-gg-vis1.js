@@ -2,9 +2,10 @@ import * as THREE from 'three';
 import $ from 'jquery';
 import { GroupedGraphScene } from './threejs-gg-scene';
 
-export class GroupedGraph extends GroupedGraphScene {
+export class GGVisualization1 extends GroupedGraphScene {
   constructor(dataset, snapToGrid) {
     super(dataset, snapToGrid);
+    this.id = 'BASIC';
     this.geometry = new THREE.SphereGeometry(0.2, 64, 64);
     this.material = new THREE.MeshLambertMaterial({
       transparent: true,
@@ -14,7 +15,7 @@ export class GroupedGraph extends GroupedGraphScene {
     this.createLinks();
   }
 
-  dragstart(event, camera) {
+  dragstart(event) {
     if (this.selectedNode == event.object) {
       this.same = true;
     }
@@ -68,14 +69,14 @@ export class GroupedGraph extends GroupedGraphScene {
     this.dragBehaviour();
   }
 
-  onKeyDown(event, controls, camera, showViewLabel) {
+  onKeyDown(event, showViewLabel) {
     let keyCode = event.which;
     if (keyCode == 88) {
-      controls.reset();
+      this.controls[0].reset();
       showViewLabel('X');
     } else if (keyCode == 89) {
-      camera.position.set(-8, 0, 0);
-      controls.update();
+      this.camera.position.set(-8, 0, 0);
+      this.controls[0].update();
       showViewLabel('Y');
     } else if (keyCode == 17) {
       this.selectKeyPressed = true;
@@ -94,7 +95,7 @@ export class GroupedGraph extends GroupedGraphScene {
     }
   }
 
-  onKeyUp(event, controls) {
+  onKeyUp(event) {
     let keyCode = event.which;
     if (keyCode == 17) {
       this.selectKeyPressed = false;

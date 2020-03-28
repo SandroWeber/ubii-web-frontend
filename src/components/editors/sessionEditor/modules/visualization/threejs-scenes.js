@@ -2,13 +2,13 @@ import * as THREE from 'three';
 import $ from 'jquery';
 import { randomHexColor } from '../utils';
 
-export class SceneVisualization {
-  constructor(dataset, snapToGrid) {
+export class LayeredGraphScene {
+  constructor(dataset, settings, renderer) {
     this.scene = new THREE.Scene();
     let light = new THREE.AmbientLight(0xadadad);
     this.scene.add(new THREE.DirectionalLight(0xffffff, 1));
     this.scene.add(light);
-
+    this.type = 'LAYERED';
     this.dataset = dataset;
     this.structure = [];
     this.locked = { x: false, y: false, z: true };
@@ -38,8 +38,90 @@ export class SceneVisualization {
     this.slimLayers = false;
     this.focusedLayer = '';
     this.gridPositions = [];
-    this.snapToGrid = snapToGrid;
+    this.snapToGrid = settings.snapToGrid;
     this.change = null;
+    this.controls = [];
+    this.showViewLabel = () => {};
+
+    this.camera = new THREE.OrthographicCamera(
+      window.innerWidth / -50,
+      window.innerWidth / 50,
+      window.innerHeight / 50,
+      window.innerHeight / -50,
+      -20,
+      100
+    );
+    this.camera.zoom = 4;
+
+    this.camera.position.z = 6;
+
+    this.controls.push(new OrbitControls(this.camera, renderer.domElement));
+    this.controls[0].keyPanSpeed = 20;
+    this.controls[0].keys = {
+      LEFT: 65,
+      RIGHT: 68,
+      UP: 87,
+      BOTTOM: 83
+    };
+    this.controls[0].minZoom = 2.5;
+    this.controls[0].screenSpacePanning = true;
+
+    state.controls[0].addEventListener(
+      'change',
+      event => {
+        this.showViewLabel('');
+      },
+      false
+    );
+
+    state.controls.push(
+      new DragControls(state.scenes[0].meshes, state.camera, domElement)
+    );
+    state.controls[1].addEventListener(
+      'dragstart',
+      event => {
+        this.controls[0].enabled = false;
+        this.dragstart(event);
+      },
+      false
+    );
+    state.controls[1].addEventListener(
+      'dragend',
+      event => {
+        this.controls[0].enabled = true;
+        this.dragend(event);
+      },
+      false
+    );
+    state.controls[1].addEventListener(
+      'drag',
+      state.scene.drag.bind(state.scene),
+      false
+    );
+
+    this.composer = new EffectComposer(renderer);
+    let renderPass = new RenderPass(this.scene, this.camera);
+    let outlinePass = new OutlinePass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      this.scene,
+      this.camera
+    );
+    outlinePass.renderToScreen = true;
+    outlinePass.selectedObjects = [];
+
+    this.composer.addPass(renderPass);
+    this.composer.addPass(outlinePass);
+
+    outlinePass.edgeStrength = 8;
+    outlinePass.edgeGlow = 0;
+    outlinePass.visibleEdgeColor.set(0xffe62b);
+    outlinePass.hiddenEdgeColor.set(0x000000);
+
+    this.scene.setOutlinePass(outlinePass);
+  }
+
+  setShowVielLabel(fct) {
+    this.showViewLabel = fct;
   }
 
   setShowAll(showAll) {
@@ -92,7 +174,7 @@ export class SceneVisualization {
     throw new Error('Cannot call abstract method');
   }
 
-  onKeyUp(event, controls) {}
+  onKeyUp(event) {}
 
   setOutlinePass(outlinePass) {
     this.outlinePassReference = outlinePass;
@@ -886,9 +968,9 @@ export class SceneVisualization {
     return -1;
   }
 
-  update(mouse, camera) {
+  update(mouse) {
     let obj, node;
-    this.raycaster.setFromCamera(mouse, camera);
+    this.raycaster.setFromCamera(mouse, this.camera);
     this.intersects = this.raycaster.intersectObjects(this.meshes);
     if (this.slimLayers) {
       this.planeIntersects = this.raycaster.intersectObjects(

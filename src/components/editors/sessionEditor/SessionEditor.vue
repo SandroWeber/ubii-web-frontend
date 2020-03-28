@@ -66,10 +66,10 @@ export default {
       ubiiClientService: UbiiClientService,
       translator: null,
       settings: {
-        view: 2,
+        graphType: 'LAYERED',
         dataset: '0001',
         viewNode: -1,
-        mode: 0,
+        sceneId: 'EXPLORATION',
         sorting: 0,
         viewZeroMarker: false,
         startNode: '1',

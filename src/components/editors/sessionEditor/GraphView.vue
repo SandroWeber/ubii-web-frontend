@@ -1,8 +1,13 @@
 <template>
   <div id="graph-view" v-if="datasets.length > 0">
-    <div id="force-graph-container" class="render-container"></div>
-    <div id="threejs-container" class="render-container">
-      <div class="ui-container top" v-if="visualizations.threegraph != null">
+    <div id="force-graph-container-2d" class="render-container"></div>
+    <div id="force-graph-container-3d" class="render-container"></div>
+    <div
+      id="threejs-container"
+      class="render-container"
+      v-if="settings.graphType == 'LAYERED'"
+    >
+      <div class="ui-container top">
         <div class="row">
           <span
             v-for="tag in structure"
@@ -85,6 +90,62 @@
         acylclic graph.
       </div>
     </div>
+    <div
+      id="threejs-container-grouped"
+      class="render-container"
+      v-if="settings.graphType == 'GROUPED'"
+    >
+      <div id="node-label" class="tooltip-label"></div>
+      <div class="ui-container bottom">
+        <div class="row" style="margin-bottom: 10px">
+          <b-toast
+            class="toast-item"
+            id="controls-toast"
+            title="Controls"
+            static
+          >
+            <p v-if="settings.mode == 0 && settings.view == 2">
+              <Numeric1BoxIcon />
+              <span class="text">to</span>
+              <Numeric9BoxIcon />
+              <span class="text">: Set node to Level 1 to 9</span>
+            </p>
+            <p>
+              <AlphaWBoxIcon />
+              <AlphaABoxIcon />
+              <AlphaSBoxIcon />
+              <AlphaDBoxIcon />
+              <span class="text">: Camera Pan Controls</span>
+            </p>
+            <p>
+              <AlphaXBoxIcon />
+              <span class="text"
+                >: Reset Camera to Main View (X-Axis/2D/Front)</span
+              >
+            </p>
+            <p>
+              <AlphaYBoxIcon />
+              <span class="text"
+                >: Reset Camera to Level View (Y-Axis/2D/Side)</span
+              >
+            </p>
+          </b-toast>
+        </div>
+        <div class="row">
+          <b-button
+            id="controls-btn"
+            class="ui-item"
+            variant="primary"
+            @click="$bvToast.show('controls-toast')"
+          >
+            <KeyboardIcon fillColor="#FF0000" />
+          </b-button>
+          <b-button id="view-badge" class="ui-item" variant="primary"
+            >View: X-Axis (Main)</b-button
+          >
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -92,9 +153,7 @@
 import $ from 'jquery';
 import { twoDForceGraphVis } from './modules/visualization/2d-force-graph';
 import { threeDForceGraphVis } from './modules/visualization/3d-force-graph';
-import { setupThreejsEnvironment } from './modules/visualization/threejs-setup';
-
-import { translatedToMatrix } from './modules/utils';
+import { VisualizationManager } from './modules/visualization/visualization-manager';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
@@ -145,7 +204,7 @@ export default {
   },
   data: () => {
     return {
-      visualizations: {},
+      visManager: null,
       view: 0,
       structure: ''
     };
@@ -156,188 +215,46 @@ export default {
     }
   },
   watch: {
-    datasets: function() {
-      this.rebootVisualizer();
-      this.changeView(this.settings.view);
+    'settings.graphType': function(view) {
+      this.visManager.showScene();
     },
-    'settings.view': function(view) {
-      this.rebootVisualizer();
-      this.changeView(view);
-    },
-    'settings.mode': function(mode) {
-      this.rebootVisualizer();
-      this.setUpThreeJS();
+    'settings.sceneId': function() {
+      this.visManager.showScene();
     },
     'settings.dataset': function() {
-      this.rebootVisualizer();
-      this.changeView(this.settings.view);
+      this.visManager.changeSetting('dataset', this.dataset);
     },
-    'dataset.links': function() {
-      console.log('a');
+    'settings.viewZeroMarker': function(value) {
+      this.visManager.changeSetting('viewZeroMarker');
     },
-    'settings.viewZeroMarker': function(show) {
-      this.changeZeroMarker();
+    'settings.startNode': function(value) {
+      this.visManager.changeSetting('startNode');
     },
-    'settings.startNode': function(node) {
-      this.rebootVisualizer();
-      this.setUpThreeJS();
+    'settings.sorting': function(value) {
+      this.visManager.changeSetting('sorting');
     },
-    'settings.sorting': function(sorting) {
-      this.rebootVisualizer();
-      this.setUpThreeJS();
+    'settings.viewNode': function(value) {
+      this.visManager.changeSetting('viewNode');
     },
-    'settings.viewNode': function(viewNode) {
-      if (viewNode >= 0) {
-        if (this.settings.view == 2) {
-          this.visualizations.threegraph.scene.select(
-            this.visualizations.threegraph.scene.meshes.find(
-              el => el.userData.id == viewNode
-            )
-          );
-        } else {
-        }
-      }
+    'settings.showAll': function() {
+      this.visManager.changeSetting('showAll');
     },
-    'settings.showAll': function(showAll) {
-      this.visualizations.threegraph.scene.setShowAll(showAll);
+    'settings.slimLayers': function() {
+      this.visManager.changeSetting('slimLayers');
     },
-    'settings.slimLayers': function(slimLayers) {
-      this.visualizations.threegraph.scene.setSlimLayers(slimLayers);
-    },
-    'settings.snapToGrid': function(snapToGrid) {
-      this.visualizations.threegraph.scene.setSnapToGrid(snapToGrid);
+    'settings.snapToGrid': function() {
+      this.visManager.changeSetting('snapToGrid');
     }
   },
   methods: {
     init: function() {
-      this.changeView(this.settings.view);
-      this.$forceUpdate();
-    },
-    rebootVisualizer() {
-      if (this.visualizations.forceGraph != null) {
-        this.visualizations.forceGraph.pauseAnimation();
-        this.visualizations.forceGraph = null;
-        $('#force-graph-container div:first-child').remove();
-      }
-      if (this.visualizations.threegraph != null) {
-        this.visualizations.threegraph.cancelVisualization();
-        this.visualizations.threegraph = null;
-      }
-    },
-    setUpThreeJS() {
-      if (this.settings.view == 2) {
-        if (this.settings.mode == 3) {
-          if (this.checkIfCylic(this.dataset)) {
-            $('#warning').show();
-            this.structure = [];
-            return;
-          }
-        } else {
-          $('#warning').hide();
-        }
-      } else {
-        $('#warning').hide();
-      }
-      this.visualizations.threegraph = setupThreejsEnvironment(
-        document.getElementById('threejs-container'),
+      this.visManager = new VisualizationManager(
         this.dataset,
         this.settings,
         this.change
       );
-      this.changeZeroMarker();
-      this.structure = this.visualizations.threegraph.scene.structure;
-    },
-    checkIfCylic(dataset) {
-      //Got this algorithm from here https://www.geeksforgeeks.org/detect-cycle-in-a-graph/
-      let recursiveCheck = (i, visited, recStack, matrix) => {
-        if (recStack[i]) {
-          return true;
-        }
-
-        if (visited[i]) {
-          return false;
-        }
-
-        visited[i] = true;
-        recStack[i] = true;
-
-        for (let j = 0; j < matrix[i].length; j++) {
-          if (matrix[i][j]) {
-            if (recursiveCheck(j, visited, recStack, matrix)) {
-              return true;
-            }
-          }
-        }
-
-        recStack[i] = false;
-
-        return false;
-      };
-
-      let visited = [];
-      let recStack = [];
-      dataset.nodes.forEach(el => {
-        visited.push(false);
-        recStack.push(false);
-      });
-      let matrix = translatedToMatrix(dataset);
-      for (let i = 0; i < dataset.nodes.length; i++) {
-        if (recursiveCheck(i, visited, recStack, matrix)) {
-          return true;
-        }
-      }
-      return false;
-    },
-    changeView: function(view) {
-      if (view < 0 || view > 6) {
-        return;
-      }
-
-      if (view == 0) {
-        $('#threejs-container').hide();
-        $('#force-graph-container').show();
-        if (this.visualizations.forceGraph == null) {
-          this.visualizations.forceGraph = twoDForceGraphVis(
-            document.getElementById('force-graph-container'),
-            this.change
-          )(JSON.parse(JSON.stringify(this.dataset)));
-        } else {
-          this.visualizations.forceGraph.resumeAnimation();
-        }
-      }
-
-      if (view == 1) {
-        $('#threejs-container').hide();
-        $('#force-graph-container').show();
-        if (this.visualizations.forceGraph == null) {
-          this.visualizations.forceGraph = threeDForceGraphVis(
-            document.getElementById('force-graph-container'),
-            this.change
-          )(JSON.parse(JSON.stringify(this.dataset)));
-        } else {
-          this.visualizations.forceGraph.resumeAnimation();
-        }
-      }
-
-      if (view >= 2) {
-        $('#force-graph-container').hide();
-        $('#threejs-container').show();
-        if (
-          this.visualizations.threegraph == null ||
-          this.visualizations.threegraph.mode != this.settings.mode
-        ) {
-          this.setUpThreeJS();
-        } else if (this.visualizations.forceGraph != null) {
-          this.visualizations.forceGraph.pauseAnimation();
-        }
-      }
-    },
-    changeZeroMarker() {
-      if (this.visualizations.threegraph != undefined) {
-        this.settings.viewZeroMarker
-          ? this.visualizations.threegraph.scene.showZeroMarker()
-          : this.visualizations.threegraph.scene.hideZeroMarker();
-      }
+      this.visManager.showScene();
+      this.$forceUpdate();
     },
     change: function(setting, value) {
       this.$emit('change', setting, value);

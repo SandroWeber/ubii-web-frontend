@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import $ from 'jquery';
-import { SceneVisualization } from './threejs-scenes';
+import { LayeredGraphScene } from './threejs-scenes';
 
-export class Visualization1 extends SceneVisualization {
+export class Visualization1 extends LayeredGraphScene {
   constructor(dataset, snapToGrid) {
     super(dataset, snapToGrid);
+    this.id = 'EXPLORATION';
     this.geometry = new THREE.SphereGeometry(0.2, 64, 64);
     this.material = new THREE.MeshLambertMaterial({
       transparent: true,
@@ -52,7 +53,7 @@ export class Visualization1 extends SceneVisualization {
     node.userData.level = '';
   }
 
-  dragstart(event, camera) {
+  dragstart(event) {
     if (this.selected == event.object) {
       this.same = true;
     }
@@ -105,7 +106,7 @@ export class Visualization1 extends SceneVisualization {
     }
   }
 
-  onKeyDown(event, controls, camera, showViewLabel) {
+  onKeyDown(event, showViewLabel) {
     let keyCode = event.which;
 
     let move = (layer, pos, obj) => {
@@ -135,11 +136,11 @@ export class Visualization1 extends SceneVisualization {
     };
 
     if (keyCode == 88) {
-      controls.reset();
+      this.controls[0].reset();
       showViewLabel('X');
     } else if (keyCode == 89) {
-      camera.position.set(-8, 0, 0);
-      controls.update();
+      this.camera.position.set(-8, 0, 0);
+      this.controls[0].update();
       showViewLabel('Y');
     } else if (keyCode == 49) {
       move('Level 1', -4, this);

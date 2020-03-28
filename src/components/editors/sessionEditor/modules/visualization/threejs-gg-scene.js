@@ -8,7 +8,7 @@ export class GroupedGraphScene {
     let light = new THREE.AmbientLight(0xadadad);
     this.scene.add(new THREE.DirectionalLight(0xffffff, 1));
     this.scene.add(light);
-
+    this.type = 'GROUPED';
     this.dataset = dataset;
     this.structure = [];
     this.locked = { x: false, y: false, z: true };
@@ -592,9 +592,9 @@ export class GroupedGraphScene {
     }
   }
 
-  update(mouse, camera) {
+  update(mouse) {
     let obj, node;
-    this.raycaster.setFromCamera(mouse, camera);
+    this.raycaster.setFromCamera(mouse, this.camera);
     this.intersects = this.raycaster.intersectObjects(this.meshes);
 
     if (this.delete != null && !this.isDragging) {
