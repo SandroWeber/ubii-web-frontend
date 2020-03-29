@@ -3,8 +3,8 @@ import $ from 'jquery';
 import { GroupedGraphScene } from './threejs-gg-scene';
 
 export class GGVisualization1 extends GroupedGraphScene {
-  constructor(dataset, snapToGrid) {
-    super(dataset, snapToGrid);
+  constructor(dataset, settings, renderer) {
+    super(dataset, settings, renderer);
     this.id = 'BASIC';
     this.geometry = new THREE.SphereGeometry(0.2, 64, 64);
     this.material = new THREE.MeshLambertMaterial({

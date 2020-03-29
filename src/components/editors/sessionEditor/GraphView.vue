@@ -2,11 +2,7 @@
   <div id="graph-view" v-if="datasets.length > 0">
     <div id="force-graph-container-2d" class="render-container"></div>
     <div id="force-graph-container-3d" class="render-container"></div>
-    <div
-      id="threejs-container"
-      class="render-container"
-      v-if="settings.graphType == 'LAYERED'"
-    >
+    <div id="threejs-container" class="render-container">
       <div class="ui-container top">
         <div class="row">
           <span
@@ -24,7 +20,7 @@
             <span
               @click="
                 () => {
-                  visualizations.threegraph.scene.focusOnLayer(tag.id);
+                  visManager.scene.focusOnLayer(tag.id);
                 }
               "
               class="focus-icon"
@@ -151,8 +147,6 @@
 
 <script>
 import $ from 'jquery';
-import { twoDForceGraphVis } from './modules/visualization/2d-force-graph';
-import { threeDForceGraphVis } from './modules/visualization/3d-force-graph';
 import { VisualizationManager } from './modules/visualization/visualization-manager';
 
 import 'bootstrap/dist/css/bootstrap.css';
@@ -254,6 +248,8 @@ export default {
         this.change
       );
       this.visManager.showScene();
+      this.visManager.resizeRenderer()();
+      this.structure = this.visManager.scene.structure;
       this.$forceUpdate();
     },
     change: function(setting, value) {

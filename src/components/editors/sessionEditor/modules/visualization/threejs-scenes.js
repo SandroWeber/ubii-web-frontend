@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import $ from 'jquery';
 import { randomHexColor } from '../utils';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import DragControls from 'three-dragcontrols';
+import { RenderPass, EffectComposer, OutlinePass } from 'three-outlinepass';
 
 export class LayeredGraphScene {
   constructor(dataset, settings, renderer) {
@@ -66,7 +69,7 @@ export class LayeredGraphScene {
     this.controls[0].minZoom = 2.5;
     this.controls[0].screenSpacePanning = true;
 
-    state.controls[0].addEventListener(
+    this.controls[0].addEventListener(
       'change',
       event => {
         this.showViewLabel('');
@@ -74,10 +77,10 @@ export class LayeredGraphScene {
       false
     );
 
-    state.controls.push(
-      new DragControls(state.scenes[0].meshes, state.camera, domElement)
+    this.controls.push(
+      new DragControls(this.meshes, this.camera, renderer.domElement)
     );
-    state.controls[1].addEventListener(
+    this.controls[1].addEventListener(
       'dragstart',
       event => {
         this.controls[0].enabled = false;
@@ -85,7 +88,7 @@ export class LayeredGraphScene {
       },
       false
     );
-    state.controls[1].addEventListener(
+    this.controls[1].addEventListener(
       'dragend',
       event => {
         this.controls[0].enabled = true;
@@ -93,11 +96,7 @@ export class LayeredGraphScene {
       },
       false
     );
-    state.controls[1].addEventListener(
-      'drag',
-      state.scene.drag.bind(state.scene),
-      false
-    );
+    this.controls[1].addEventListener('drag', this.drag.bind(this), false);
 
     this.composer = new EffectComposer(renderer);
     let renderPass = new RenderPass(this.scene, this.camera);
@@ -117,10 +116,10 @@ export class LayeredGraphScene {
     outlinePass.visibleEdgeColor.set(0xffe62b);
     outlinePass.hiddenEdgeColor.set(0x000000);
 
-    this.scene.setOutlinePass(outlinePass);
+    this.setOutlinePass(outlinePass);
   }
 
-  setShowVielLabel(fct) {
+  setShowViewLabel(fct) {
     this.showViewLabel = fct;
   }
 

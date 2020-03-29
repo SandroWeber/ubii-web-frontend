@@ -27,14 +27,14 @@
         ></b-form-select>
       </div>
     </div>
-    <div class="settings-group" v-if="selectedGraphType == 2">
+    <div class="settings-group">
       <div class="settings-row">
         Mode:
       </div>
-      <div <div class="settings-row">
+      <div class="settings-row">
         <b-form-select
           v-model="selectedSceneId"
-          :options="sceneIdOptions"
+          :options="sceneIdFilteredOptions"
           @input="changeSceneId"
         ></b-form-select>
       </div>
@@ -42,28 +42,31 @@
         Explanation:
       </div>
       <div class="settings-row">
-        <div class="help-container" v-if="selectedGraphType == 2">
+        <div class="help-container" v-if="selectedGraphType == 'LAYERED'">
           <font-awesome-icon icon="question-circle" class="icon" />
-          <span v-if="selectedSceneId == 0"
+          <span v-if="selectedSceneId == 'EXPLORATION'"
             >Explore the graph freely with 9 individually usable Layers.</span
           >
-          <span v-if="selectedSceneId == 1">
+          <span v-if="selectedSceneId == 'TAGS'">
             Sort your Nodes in Layers depending on which tags (or combination of
             tags) they reference.
           </span>
-          <span v-if="selectedSceneId == 2">
+          <span v-if="selectedSceneId == 'DEGREE'">
             Sort your Nodes in Layers depending on how many edges flow into a
             node / out of a node (node degree).
           </span>
-          <span v-if="selectedSceneId == 3">
+          <span v-if="selectedSceneId == 'STEPS'">
             Sort your Nodes in Layers depending on how many steps they are away
             from your Starting Node
           </span>
         </div>
       </div>
     </div>
-    <div v-if="selectedGraphType >= 2" class="settings-group switches-right">
-      <div class="settings-row" v-if="selectedGraphType == 2">
+    <div
+      v-if="selectedGraphType == 'LAYERED' || selectedGraphType == 'GROUPED'"
+      class="settings-group switches-right"
+    >
+      <div class="settings-row" v-if="selectedGraphType == 'LAYERED'">
         Always show layers:
         <toggle-button
           id="layers-show-all-toggle"
@@ -76,7 +79,7 @@
           @change="changeShowAll"
         ></toggle-button>
       </div>
-      <div class="settings-row" v-if="selectedGraphType == 2">
+      <div class="settings-row" v-if="selectedGraphType == 'LAYERED'">
         Slim Layers:
         <toggle-button
           id="layer-slim-toggle"
@@ -89,7 +92,7 @@
           @change="changeSlimLevels"
         ></toggle-button>
       </div>
-      <div class="settings-row" v-if="selectedGraphType == 2">
+      <div class="settings-row" v-if="selectedGraphType == 'LAYERED'">
         Snap to Grid:
         <toggle-button
           id="layer-grid-snap-toggle"
@@ -118,23 +121,24 @@
     </div>
     <div
       v-if="
-        selectedGraphType == 2 && (selectedSceneId == 2 || selectedSceneId == 3)
+        selectedGraphType == 'LAYERED' &&
+          (selectedSceneId == 'DEGREE' || selectedSceneId == 'STEPS')
       "
       class="settings-group"
     >
       <div class="settings-row">
-        <span v-if="selectedSceneId == 2">Sorting:</span>
-        <span v-if="selectedSceneId == 3">Starting Node:</span>
+        <span v-if="selectedSceneId == 'DEGREE'">Sorting:</span>
+        <span v-if="selectedSceneId == 'STEPS'">Starting Node:</span>
       </div>
       <div class="settings-row">
         <b-form-select
-          v-if="selectedSceneId == 2"
+          v-if="selectedSceneId == 'DEGREE'"
           v-model="selectedSorting"
           :options="sortingOptions"
           @input="changeSorting"
         ></b-form-select>
         <b-form-select
-          v-if="selectedSceneId == 3"
+          v-if="selectedSceneId == 'STEPS'"
           v-model="selectedStartNode"
           :options="startNodeOptions"
           @input="changeStartNode"
@@ -174,8 +178,8 @@ export default {
   },
   data: function() {
     return {
-      selectedGraphType: this.settings.view,
-      selectedSceneId: this.settings.mode,
+      selectedGraphType: this.settings.graphType,
+      selectedSceneId: this.settings.sceneId,
       selectedSorting: this.settings.sorting,
       selectedStartNode: this.settings.startNode,
       selectedSlimLevels: this.settings.slimLevels,
@@ -189,10 +193,11 @@ export default {
         { value: 'GROUPED', text: 'Grouped Graph' }
       ],
       sceneIdOptions: [
-        { value: 'EXPLORATION', text: 'Exploration' },
-        { value: 'TAGS', text: 'Tags' },
-        { value: 'DEGREE', text: 'Node Degree' },
-        { value: 'STEPS', text: 'Steps' }
+        { value: 'EXPLORATION', text: 'Exploration', graphType: 'LAYERED' },
+        { value: 'TAGS', text: 'Tags', graphType: 'LAYERED' },
+        { value: 'DEGREE', text: 'Node Degree', graphType: 'LAYERED' },
+        { value: 'STEPS', text: 'Steps', graphType: 'LAYERED' },
+        { value: 'BASIC', text: 'Manual', graphType: 'GROUPED' }
       ],
       sortingOptions: [
         { value: 0, text: 'Incoming Edges' },
@@ -203,12 +208,22 @@ export default {
       file: null
     };
   },
+  computed: {
+    sceneIdFilteredOptions: function() {
+      return this.sceneIdOptions.filter(
+        el => el.graphType == this.selectedGraphType
+      );
+    }
+  },
   watch: {
     dataset: function(ds) {
       this.startNodeOptions = [];
       ds.nodes.forEach((node, index) =>
         this.startNodeOptions.push({ value: node.id, text: node.name })
       );
+    },
+    'settings.sceneId': function(value) {
+      this.selectedSceneId = value;
     }
   },
   methods: {
@@ -218,6 +233,9 @@ export default {
       );
     },
     changeGraphType: function(value) {
+      let sceneId = this.sceneIdOptions.filter(el => el.graphType == value)[0]
+        .value;
+      this.$emit('change', 'sceneId', sceneId);
       this.$emit('change', 'graphType', value);
     },
     changeSceneId: function(value) {

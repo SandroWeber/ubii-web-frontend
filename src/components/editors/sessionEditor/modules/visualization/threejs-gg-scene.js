@@ -1,9 +1,12 @@
 import * as THREE from 'three';
 import $ from 'jquery';
 import { randomHexColor } from '../utils';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import DragControls from 'three-dragcontrols';
+import { RenderPass, EffectComposer, OutlinePass } from 'three-outlinepass';
 
 export class GroupedGraphScene {
-  constructor(dataset, snapToGrid) {
+  constructor(dataset, settings, renderer) {
     this.scene = new THREE.Scene();
     let light = new THREE.AmbientLight(0xadadad);
     this.scene.add(new THREE.DirectionalLight(0xffffff, 1));
@@ -35,10 +38,84 @@ export class GroupedGraphScene {
     this.slimLayers = false;
     this.focusedLayer = '';
     this.gridPositions = [];
-    this.snapToGrid = snapToGrid;
-    this.change = null;
     this.selectKeyPressed = false;
     this.delete = null;
+
+    this.change = null;
+    this.controls = [];
+    this.showViewLabel = () => {};
+
+    this.camera = new THREE.OrthographicCamera(
+      window.innerWidth / -50,
+      window.innerWidth / 50,
+      window.innerHeight / 50,
+      window.innerHeight / -50,
+      -20,
+      100
+    );
+    this.camera.zoom = 4;
+
+    this.camera.position.z = 6;
+
+    this.controls.push(new OrbitControls(this.camera, renderer.domElement));
+    this.controls[0].keyPanSpeed = 20;
+    this.controls[0].keys = {
+      LEFT: 65,
+      RIGHT: 68,
+      UP: 87,
+      BOTTOM: 83
+    };
+    this.controls[0].minZoom = 2.5;
+    this.controls[0].screenSpacePanning = true;
+
+    this.controls[0].addEventListener(
+      'change',
+      event => {
+        this.showViewLabel('');
+      },
+      false
+    );
+
+    this.controls.push(
+      new DragControls(this.meshes, this.camera, renderer.domElement)
+    );
+    this.controls[1].addEventListener(
+      'dragstart',
+      event => {
+        this.controls[0].enabled = false;
+        this.dragstart(event);
+      },
+      false
+    );
+    this.controls[1].addEventListener(
+      'dragend',
+      event => {
+        this.controls[0].enabled = true;
+        this.dragend(event);
+      },
+      false
+    );
+    this.controls[1].addEventListener('drag', this.drag.bind(this), false);
+
+    this.composer = new EffectComposer(renderer);
+    let renderPass = new RenderPass(this.scene, this.camera);
+    let outlinePass = new OutlinePass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      this.scene,
+      this.camera
+    );
+    outlinePass.renderToScreen = true;
+    outlinePass.selectedObjects = [];
+
+    this.composer.addPass(renderPass);
+    this.composer.addPass(outlinePass);
+
+    outlinePass.edgeStrength = 8;
+    outlinePass.edgeGlow = 0;
+    outlinePass.visibleEdgeColor.set(0xffe62b);
+    outlinePass.hiddenEdgeColor.set(0x000000);
+
+    this.setOutlinePass(outlinePass);
   }
 
   getScene() {
@@ -64,6 +141,10 @@ export class GroupedGraphScene {
   setDragging(dragging) {
     this.isDragging = dragging;
     this.oldPos = new THREE.Vector3().copy(this.selectedNode.position);
+  }
+
+  setShowViewLabel(fct) {
+    this.showViewLabel = fct;
   }
 
   setChange(change) {

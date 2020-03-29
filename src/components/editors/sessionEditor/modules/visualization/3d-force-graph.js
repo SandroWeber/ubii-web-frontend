@@ -3,7 +3,7 @@ import ForceGraph3D from '3d-force-graph';
 
 export function threeDForceGraphVis(domElement, change) {
   let graph = ForceGraph3D({ width: 500 });
-  graph(domElement);
+  graph(domElement[0]);
   graph.d3Force('charge').strength(-150);
   graph.nodeColor(node =>
     node.id == 'id1' || node.id == 'id2' ? 'red' : 'blue'

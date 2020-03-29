@@ -3,8 +3,8 @@ import $ from 'jquery';
 import { LayeredGraphScene } from './threejs-scenes';
 
 export class Visualization1 extends LayeredGraphScene {
-  constructor(dataset, snapToGrid) {
-    super(dataset, snapToGrid);
+  constructor(dataset, settings, renderer) {
+    super(dataset, settings, renderer);
     this.id = 'EXPLORATION';
     this.geometry = new THREE.SphereGeometry(0.2, 64, 64);
     this.material = new THREE.MeshLambertMaterial({
