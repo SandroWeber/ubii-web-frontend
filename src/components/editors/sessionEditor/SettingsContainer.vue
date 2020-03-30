@@ -233,9 +233,11 @@ export default {
       );
     },
     changeGraphType: function(value) {
-      let sceneId = this.sceneIdOptions.filter(el => el.graphType == value)[0]
-        .value;
-      this.$emit('change', 'sceneId', sceneId);
+      if (value != '2D-FORCE' && value != '3D-FORCE') {
+        let sceneId = this.sceneIdOptions.filter(el => el.graphType == value)[0]
+          .value;
+        this.$emit('change', 'sceneId', sceneId);
+      }
       this.$emit('change', 'graphType', value);
     },
     changeSceneId: function(value) {

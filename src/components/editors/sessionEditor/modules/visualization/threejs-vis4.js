@@ -12,6 +12,7 @@ export class Visualization4 extends LayeredGraphScene {
       transparent: true,
       opacity: 0.8
     });
+    this.startNode = settings.startNode;
     this.createDataPoints();
     this.createLinks();
     this.setupStructure(dataset);

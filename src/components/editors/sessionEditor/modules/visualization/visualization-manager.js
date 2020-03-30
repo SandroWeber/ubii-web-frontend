@@ -207,10 +207,7 @@ export class VisualizationManager {
     let visualization, scene;
     switch (this.settings.graphType) {
       case 'LAYERED':
-        if (
-          this.settings.sceneId == 'STEPS' &&
-          this.checkIfCylic(this.dataset)
-        ) {
+        if (this.settings.sceneId == 'STEPS' && checkIfCylic(this.dataset)) {
           $('#warning').show();
           this.structure = [];
           return;

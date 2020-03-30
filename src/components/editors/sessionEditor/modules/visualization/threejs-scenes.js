@@ -66,7 +66,7 @@ export class LayeredGraphScene {
       UP: 87,
       BOTTOM: 83
     };
-    this.controls[0].minZoom = 2.5;
+    this.controls[0].minZoom = 2;
     this.controls[0].screenSpacePanning = true;
 
     this.controls[0].addEventListener(

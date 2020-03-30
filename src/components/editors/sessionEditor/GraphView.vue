@@ -199,13 +199,19 @@ export default {
   data: () => {
     return {
       visManager: null,
-      view: 0,
-      structure: ''
+      view: 0
     };
   },
   computed: {
     dataset: function() {
       return this.datasets.find(ds => ds.id == this.settings.dataset);
+    },
+    structure: function() {
+      if (this.visManager != null && this.visManager.scene != null) {
+        return this.visManager.scene.structure;
+      } else {
+        return [];
+      }
     }
   },
   watch: {
@@ -249,7 +255,6 @@ export default {
       );
       this.visManager.showScene();
       this.visManager.resizeRenderer()();
-      this.structure = this.visManager.scene.structure;
       this.$forceUpdate();
     },
     change: function(setting, value) {

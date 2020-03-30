@@ -118,7 +118,7 @@ export default {
   methods: {
     change: function(setting, value) {
       this.settings[setting] = value;
-      console.log(setting + ': ' + value);
+      // console.log(setting + ': ' + value);
     },
     addDataset: function(dataset) {
       this.datasets.push(dataset);

@@ -12,6 +12,7 @@ export class Visualization3 extends LayeredGraphScene {
       transparent: true,
       opacity: 0.8
     });
+    this.show = settings.sorting;
     this.createDataPoints();
     this.createLinks();
     this.setupStructure(dataset);
