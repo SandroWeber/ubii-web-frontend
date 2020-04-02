@@ -254,6 +254,7 @@ export default {
         this.change
       );
       this.visManager.showScene();
+      this.visManager.animate();
       this.visManager.resizeRenderer()();
       this.$forceUpdate();
     },

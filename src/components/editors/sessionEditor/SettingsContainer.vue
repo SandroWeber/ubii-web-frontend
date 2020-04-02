@@ -42,7 +42,7 @@
         Explanation:
       </div>
       <div class="settings-row">
-        <div class="help-container" v-if="selectedGraphType == 'LAYERED'">
+        <div class="help-container">
           <font-awesome-icon icon="question-circle" class="icon" />
           <span v-if="selectedSceneId == 'EXPLORATION'"
             >Explore the graph freely with 9 individually usable Layers.</span
@@ -58,6 +58,9 @@
           <span v-if="selectedSceneId == 'STEPS'">
             Sort your Nodes in Layers depending on how many steps they are away
             from your Starting Node
+          </span>
+          <span v-if="selectedSceneId == 'BASIC'">
+            Structure the graph by merging nodes together to form groups.
           </span>
         </div>
       </div>

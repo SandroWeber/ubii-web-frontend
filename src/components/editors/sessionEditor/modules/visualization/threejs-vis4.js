@@ -4,8 +4,8 @@ import { LayeredGraphScene } from './threejs-scenes';
 import { translatedToMatrix, randomHexColor } from '../utils';
 
 export class Visualization4 extends LayeredGraphScene {
-  constructor(dataset, settings, renderer) {
-    super(dataset, settings, renderer);
+  constructor(dataset, settings, renderer, camera, orbitControls) {
+    super(dataset, settings, renderer, camera, orbitControls);
     this.id = 'STEPS';
     this.geometry = new THREE.SphereGeometry(0.2, 64, 64);
     this.material = new THREE.MeshLambertMaterial({
@@ -117,6 +117,7 @@ export class Visualization4 extends LayeredGraphScene {
   }
 
   dragstart(event) {
+    this.orbitControls.enabled = false;
     if (this.selected == event.object) {
       this.same = true;
     }
@@ -127,12 +128,13 @@ export class Visualization4 extends LayeredGraphScene {
   }
 
   dragend(event) {
-    this.changeArrow(event.object);
+    this.orbitControls.enabled = true;
+    this.changeArrow(this.selected);
     if (this.same && this.oldPos.equals(this.selected.position)) {
       this.deselect();
       this.same = false;
     } else if (!this.oldPos.equals(this.selected.position)) {
-      this.deleteNodeFromGrid(event.object);
+      this.deleteNodeFromGrid(this.selected);
       this.checkNodePositionOnGrid(this.selected);
     }
     this.setSlimLayers(this.slimLayers);
@@ -147,11 +149,11 @@ export class Visualization4 extends LayeredGraphScene {
   onKeyDown(event, showViewLabel) {
     let keyCode = event.which;
     if (keyCode == 88) {
-      this.controls[0].reset();
+      this.orbitControls.reset();
       showViewLabel('X');
     } else if (keyCode == 89) {
       this.camera.position.set(-8, 0, 0);
-      this.controls[0].update();
+      this.orbitControls.update();
       showViewLabel('Y');
     } else if (keyCode == 81) {
       this.locked.x = !this.locked.x;

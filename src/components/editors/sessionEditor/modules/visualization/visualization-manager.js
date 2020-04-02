@@ -4,6 +4,7 @@ import { Visualizations } from './graph-scenes';
 import { checkIfCylic } from '../utils';
 import { twoDForceGraphVis } from './2d-force-graph';
 import { threeDForceGraphVis } from './3d-force-graph';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 export class VisualizationManager {
   constructor(dataset, settings, change) {
@@ -24,6 +25,39 @@ export class VisualizationManager {
 
     this.resizeRenderer()();
     $(window).resize(this.resizeRenderer());
+
+    this.camera = new THREE.OrthographicCamera(
+      window.innerWidth / -50,
+      window.innerWidth / 50,
+      window.innerHeight / 50,
+      window.innerHeight / -50,
+      -20,
+      100
+    );
+    this.camera.zoom = 4;
+
+    this.camera.position.z = 6;
+
+    this.orbitControls = new OrbitControls(
+      this.camera,
+      document.getElementById('threejs-container')
+    );
+    this.orbitControls.keyPanSpeed = 20;
+    this.orbitControls.keys = {
+      LEFT: 65,
+      RIGHT: 68,
+      UP: 87,
+      BOTTOM: 83
+    };
+    this.orbitControls.screenSpacePanning = true;
+
+    this.orbitControls.addEventListener(
+      'change',
+      event => {
+        this.showViewLabel.bind(this, '');
+      },
+      false
+    );
 
     document.addEventListener(
       'keydown',
@@ -180,6 +214,7 @@ export class VisualizationManager {
         break;
       default:
         this.stop = false;
+        this.pauseDragControls();
         this.scene = this.scenes.find(
           el =>
             el.id == this.settings.sceneId && el.type == this.settings.graphType
@@ -198,7 +233,7 @@ export class VisualizationManager {
         if (this.scene == undefined) {
           this.addScene();
         }
-        this.animate();
+        this.scene.dragControls.enabled = true;
         break;
     }
   }
@@ -219,7 +254,9 @@ export class VisualizationManager {
         this.scene = new scene.scene(
           this.dataset,
           this.settings,
-          this.renderer
+          this.renderer,
+          this.camera,
+          this.orbitControls
         );
         this.scenes.push(this.scene);
         this.changeSetting('showAll');
@@ -233,7 +270,9 @@ export class VisualizationManager {
         this.scene = new scene.scene(
           this.dataset,
           this.settings,
-          this.renderer
+          this.renderer,
+          this.camera,
+          this.orbitControls
         );
         this.scenes.push(this.scene);
         break;
@@ -277,6 +316,12 @@ export class VisualizationManager {
     console.log('a');
   }
 
+  pauseDragControls() {
+    this.scenes.forEach(el => {
+      el.dragControls.enabled = false;
+    });
+  }
+
   resizeRenderer() {
     return () => {
       let width =
@@ -298,19 +343,19 @@ export class VisualizationManager {
       }
       this.renderer.setSize(width, height);
       this.scene.composer.setSize(width, height);
-      this.scene.camera.aspect =
+      this.camera.aspect =
         $('#threejs-container').width() / $('#threejs-container').height();
-      this.scene.camera.updateProjectionMatrix();
+      this.camera.updateProjectionMatrix();
     };
   }
 
   animate() {
+    requestAnimationFrame(() => this.animate());
     if (this.stop) {
       return;
     }
-    requestAnimationFrame(() => this.animate());
     this.scene.update(this.mouse);
-    this.scene.composer.render(this.scene.scene, this.scene.camera);
+    this.scene.composer.render(this.scene.scene, this.camera);
   }
 
   showViewLabel(view) {

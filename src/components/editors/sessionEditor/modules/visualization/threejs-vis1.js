@@ -3,8 +3,8 @@ import $ from 'jquery';
 import { LayeredGraphScene } from './threejs-scenes';
 
 export class Visualization1 extends LayeredGraphScene {
-  constructor(dataset, settings, renderer) {
-    super(dataset, settings, renderer);
+  constructor(dataset, settings, renderer, camera, orbitControls) {
+    super(dataset, settings, renderer, camera, orbitControls);
     this.id = 'EXPLORATION';
     this.geometry = new THREE.SphereGeometry(0.2, 64, 64);
     this.material = new THREE.MeshLambertMaterial({
@@ -54,6 +54,7 @@ export class Visualization1 extends LayeredGraphScene {
   }
 
   dragstart(event) {
+    this.orbitControls.enabled = false;
     if (this.selected == event.object) {
       this.same = true;
     }
@@ -64,6 +65,7 @@ export class Visualization1 extends LayeredGraphScene {
   }
 
   dragend(event) {
+    this.orbitControls.enabled = true;
     this.changeArrow(event.object);
     if (this.same && this.oldPos.equals(this.selected.position)) {
       this.deselect();
@@ -136,11 +138,11 @@ export class Visualization1 extends LayeredGraphScene {
     };
 
     if (keyCode == 88) {
-      this.controls[0].reset();
+      this.orbitControls.reset();
       showViewLabel('X');
     } else if (keyCode == 89) {
       this.camera.position.set(-8, 0, 0);
-      this.controls[0].update();
+      this.orbitControls.update();
       showViewLabel('Y');
     } else if (keyCode == 49) {
       move('Level 1', -4, this);

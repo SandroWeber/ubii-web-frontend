@@ -3,8 +3,8 @@ import $ from 'jquery';
 import { GroupedGraphScene } from './threejs-gg-scene';
 
 export class GGVisualization1 extends GroupedGraphScene {
-  constructor(dataset, settings, renderer) {
-    super(dataset, settings, renderer);
+  constructor(dataset, settings, renderer, camera, orbitControls) {
+    super(dataset, settings, renderer, camera, orbitControls);
     this.id = 'BASIC';
     this.geometry = new THREE.SphereGeometry(0.2, 64, 64);
     this.material = new THREE.MeshLambertMaterial({
@@ -16,6 +16,7 @@ export class GGVisualization1 extends GroupedGraphScene {
   }
 
   dragstart(event) {
+    this.orbitControls.enabled = false;
     if (this.selectedNode == event.object) {
       this.same = true;
     }
@@ -24,6 +25,7 @@ export class GGVisualization1 extends GroupedGraphScene {
   }
 
   dragend(event) {
+    this.orbitControls.enabled = true;
     let oldPos = this.oldPos;
     this.setDragging(false);
     this.changeArrow(event.object);
@@ -72,11 +74,11 @@ export class GGVisualization1 extends GroupedGraphScene {
   onKeyDown(event, showViewLabel) {
     let keyCode = event.which;
     if (keyCode == 88) {
-      this.controls[0].reset();
+      this.orbitControls.reset();
       showViewLabel('X');
     } else if (keyCode == 89) {
       this.camera.position.set(-8, 0, 0);
-      this.controls[0].update();
+      this.orbitControls.update();
       showViewLabel('Y');
     } else if (keyCode == 17) {
       this.selectKeyPressed = true;
