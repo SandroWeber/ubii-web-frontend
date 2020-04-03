@@ -80,7 +80,7 @@ export class LayeredGraphScene {
     outlinePass.edgeStrength = 8;
     outlinePass.edgeGlow = 0;
     outlinePass.visibleEdgeColor.set(0xffe62b);
-    outlinePass.hiddenEdgeColor.set(0x000000);
+    outlinePass.hiddenEdgeColor.set(0xffe62b);
 
     this.setOutlinePass(outlinePass);
   }
@@ -778,49 +778,6 @@ export class LayeredGraphScene {
       this.selected = null;
       this.outlinePassReference.selectedObjects = [];
       this.change('viewNode', -1);
-    }
-  }
-
-  manageGuideline(createNew) {
-    if (this.guideline != null) {
-      this.scene.remove(this.guideline);
-      this.guideline = null;
-    }
-    if (createNew && this.isDragging) {
-      let temp;
-      if (this.locked.x) {
-        temp = 1;
-      } else if (this.locked.y) {
-        temp = 2;
-      } else {
-        temp = 0;
-      }
-      if (temp != 0) {
-        let material = new THREE.LineBasicMaterial({
-          color: 0xffffff
-        });
-        let geometry = new THREE.Geometry();
-        let x = [],
-          y = [];
-        if (temp == 1) {
-          x.push(this.oldPos.x);
-          x.push(this.oldPos.x);
-          y.push(this.oldPos.y - 100);
-          y.push(this.oldPos.y + 100);
-        } else {
-          x.push(this.oldPos.x - 100);
-          x.push(this.oldPos.x + 100);
-          y.push(this.oldPos.y);
-          y.push(this.oldPos.y);
-        }
-        geometry.vertices.push(
-          new THREE.Vector3(x[0], y[0], this.oldPos.z),
-          new THREE.Vector3(x[1], y[1], this.oldPos.z)
-        );
-
-        this.guideline = new THREE.Line(geometry, material);
-        this.scene.add(this.guideline);
-      }
     }
   }
 

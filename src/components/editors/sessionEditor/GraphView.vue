@@ -37,6 +37,7 @@
             class="toast-item"
             id="controls-toast"
             title="Controls"
+            auto-hide-delay="3000"
             static
           >
             <p v-if="settings.mode == 0 && settings.view == 2">
@@ -67,16 +68,11 @@
           </b-toast>
         </div>
         <div class="row">
-          <b-button
-            id="controls-btn"
-            class="ui-item"
-            variant="primary"
-            @click="$bvToast.show('controls-toast')"
-          >
-            <KeyboardIcon fillColor="#FF0000" />
-          </b-button>
-          <b-button id="view-badge" class="ui-item" variant="primary"
-            >View: X-Axis (Main)</b-button
+          <span @click="$bvToast.show('controls-toast')" class="ui-box ui-item"
+            ><span class="focus-icon"><KeyboardIcon fillColor="#FF0000"/></span
+          ></span>
+          <span id="view-badge" class="ui-box ui-item"
+            >View: X-Axis (Main)</span
           >
         </div>
       </div>
@@ -84,62 +80,6 @@
         This graph contains cycles!<br />
         Showing the number of steps from one node to all others requires an
         acylclic graph.
-      </div>
-    </div>
-    <div
-      id="threejs-container-grouped"
-      class="render-container"
-      v-if="settings.graphType == 'GROUPED'"
-    >
-      <div id="node-label" class="tooltip-label"></div>
-      <div class="ui-container bottom">
-        <div class="row" style="margin-bottom: 10px">
-          <b-toast
-            class="toast-item"
-            id="controls-toast"
-            title="Controls"
-            static
-          >
-            <p v-if="settings.mode == 0 && settings.view == 2">
-              <Numeric1BoxIcon />
-              <span class="text">to</span>
-              <Numeric9BoxIcon />
-              <span class="text">: Set node to Level 1 to 9</span>
-            </p>
-            <p>
-              <AlphaWBoxIcon />
-              <AlphaABoxIcon />
-              <AlphaSBoxIcon />
-              <AlphaDBoxIcon />
-              <span class="text">: Camera Pan Controls</span>
-            </p>
-            <p>
-              <AlphaXBoxIcon />
-              <span class="text"
-                >: Reset Camera to Main View (X-Axis/2D/Front)</span
-              >
-            </p>
-            <p>
-              <AlphaYBoxIcon />
-              <span class="text"
-                >: Reset Camera to Level View (Y-Axis/2D/Side)</span
-              >
-            </p>
-          </b-toast>
-        </div>
-        <div class="row">
-          <b-button
-            id="controls-btn"
-            class="ui-item"
-            variant="primary"
-            @click="$bvToast.show('controls-toast')"
-          >
-            <KeyboardIcon fillColor="#FF0000" />
-          </b-button>
-          <b-button id="view-badge" class="ui-item" variant="primary"
-            >View: X-Axis (Main)</b-button
-          >
-        </div>
       </div>
     </div>
   </div>
@@ -347,7 +287,8 @@ export default {
   border: 1px solid #000000;
   border-radius: 5px;
   margin-bottom: 10px;
-  padding: 0 5px 0 5px;
+  padding: 0 10px 0 10px;
+  background-color: #2d2a2e;
 }
 
 .ui-box >>> .badge {

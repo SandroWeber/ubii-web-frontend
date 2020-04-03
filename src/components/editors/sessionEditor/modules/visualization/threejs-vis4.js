@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import $ from 'jquery';
-import { LayeredGraphScene } from './threejs-scenes';
+import { LayeredGraphScene } from './threejs-lg-scene';
 import { translatedToMatrix, randomHexColor } from '../utils';
 
 export class Visualization4 extends LayeredGraphScene {
@@ -155,16 +155,6 @@ export class Visualization4 extends LayeredGraphScene {
       this.camera.position.set(-8, 0, 0);
       this.orbitControls.update();
       showViewLabel('Y');
-    } else if (keyCode == 81) {
-      this.locked.x = !this.locked.x;
-      this.locked.y = false;
-      this.setDragging(true);
-      this.manageGuideline(true);
-    } else if (keyCode == 69) {
-      this.locked.y = !this.locked.y;
-      this.locked.x = false;
-      this.setDragging(true);
-      this.manageGuideline(true);
     }
   }
 }

@@ -120,7 +120,11 @@ export class VisualizationManager {
     let scene = this.scenes.find(
       el => el.id == this.settings.sceneId && el.type == this.settings.graphType
     );
-    if (scene == undefined) {
+    if (
+      scene == undefined &&
+      this.settings.graphType != '2D-FORCE' &&
+      this.settings.graphType != '3D-FORCE'
+    ) {
       return;
     }
 
@@ -155,7 +159,7 @@ export class VisualizationManager {
         break;
       case 'snapToGrid':
         if (this.settings.graphType == 'LAYERED') {
-          scene.setSnapToGrid(this.settings.sorting);
+          scene.setSnapToGrid(this.settings.snapToGrid);
         }
         break;
       case 'viewNode':
@@ -176,6 +180,14 @@ export class VisualizationManager {
           this.deleteScene(this.scenes[i]);
         }
         this.scenes = [];
+        if (this.settings.graphType == '2D-FORCE' && this.force_2d != null) {
+          this.force_2d.graphData(JSON.parse(JSON.stringify(this.dataset)));
+        } else if (
+          this.settings.graphType == '3D-FORCE' &&
+          this.force_3d != null
+        ) {
+          this.force_3d.graphData(JSON.parse(JSON.stringify(this.dataset)));
+        }
         this.showScene();
         break;
     }
@@ -300,8 +312,7 @@ export class VisualizationManager {
     }
 
     scene.camera = null;
-    scene.controls[0] = null;
-    scene.controls[1] = null;
+    scene.dragControls = null;
     scene.raycaster = null;
     scene.composer = null;
     scene.scene = null;

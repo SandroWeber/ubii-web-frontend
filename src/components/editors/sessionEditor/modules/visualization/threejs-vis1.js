@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import $ from 'jquery';
-import { LayeredGraphScene } from './threejs-scenes';
+import { LayeredGraphScene } from './threejs-lg-scene';
 
 export class Visualization1 extends LayeredGraphScene {
   constructor(dataset, settings, renderer, camera, orbitControls) {
@@ -162,16 +162,6 @@ export class Visualization1 extends LayeredGraphScene {
       move('Level 8', 3, this);
     } else if (keyCode == 57) {
       move('Level 9', 4, this);
-    } else if (keyCode == 81) {
-      this.locked.x = !this.locked.x;
-      this.locked.y = false;
-      this.setDragging(true);
-      this.manageGuideline(true);
-    } else if (keyCode == 69) {
-      this.locked.y = !this.locked.y;
-      this.locked.x = false;
-      this.setDragging(true);
-      this.manageGuideline(true);
     }
   }
 }

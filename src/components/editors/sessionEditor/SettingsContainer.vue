@@ -28,10 +28,20 @@
       </div>
     </div>
     <div class="settings-group">
-      <div class="settings-row">
+      <div
+        class="settings-row"
+        v-if="
+          selectedGraphType != '2D-FORCE' && selectedGraphType != '3D-FORCE'
+        "
+      >
         Mode:
       </div>
-      <div class="settings-row">
+      <div
+        class="settings-row"
+        v-if="
+          selectedGraphType != '2D-FORCE' && selectedGraphType != '3D-FORCE'
+        "
+      >
         <b-form-select
           v-model="selectedSceneId"
           :options="sceneIdFilteredOptions"
