@@ -61,7 +61,6 @@ export class Visualization1 extends LayeredGraphScene {
     this.deselect();
     this.select(event.object);
     this.setDragging(true);
-    this.manageGuideline(true);
   }
 
   dragend(event) {
@@ -76,7 +75,6 @@ export class Visualization1 extends LayeredGraphScene {
     }
     this.setSlimLayers(this.slimLayers);
     this.isDragging = false;
-    this.manageGuideline(false);
   }
 
   drag(event) {
