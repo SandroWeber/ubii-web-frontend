@@ -19,6 +19,9 @@ export class Visualization1 extends LayeredGraphScene {
     });
   }
 
+  /*
+   * This creates all the layers. In this case always 9. All nodes stay on Layer 5 at first.
+   */
   setupStructure(dataset) {
     this.addToStructure('Level 1', '#CC0000');
     this.addToStructure('Level 2', '#D52E2E');
@@ -79,31 +82,6 @@ export class Visualization1 extends LayeredGraphScene {
 
   drag(event) {
     this.dragBehaviour();
-  }
-
-  detectLevel(level) {
-    let checkRange = nmbr => {
-      let abs = Math.round(nmbr);
-      return Math.abs(abs - nmbr) <= 0.15 ? abs : nmbr;
-    };
-
-    if (level == undefined) {
-      let levels = [...Array(9).keys()].map(
-        el => (el - 4) * this.layerStepSize
-      );
-      let range = checkRange(this.selected.position.z);
-      if (levels.includes(range)) {
-        range = range / this.layerStepSize;
-        this.selected.material.color.set(this.structure[range + 4].color);
-      } else {
-        this.selected.material.color.set(this.structure[4].color);
-        if (this.selected.userData.level != '') {
-          this.deleteFromLevel(this.selected);
-        }
-      }
-    } else {
-      this.selected.material.color.set(this.structure[level].color);
-    }
   }
 
   onKeyDown(event, showViewLabel) {

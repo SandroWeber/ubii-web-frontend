@@ -174,7 +174,7 @@ export default {
       this.visManager.changeSetting('sorting');
     },
     'settings.viewNode': function(value) {
-      this.visManager.changeSetting('viewNode');
+      this.visManager.changeSetting('viewNode', value);
     },
     'settings.showAll': function() {
       this.visManager.changeSetting('showAll');

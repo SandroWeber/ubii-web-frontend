@@ -247,6 +247,7 @@ export default {
     },
     changeGraphType: function(value) {
       if (value != '2D-FORCE' && value != '3D-FORCE') {
+        //Reset sceneId by publishing first one of graphType when graphType changes
         let sceneId = this.sceneIdOptions.filter(el => el.graphType == value)[0]
           .value;
         this.$emit('change', 'sceneId', sceneId);

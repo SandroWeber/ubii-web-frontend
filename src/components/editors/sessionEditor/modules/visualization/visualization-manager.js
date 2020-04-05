@@ -31,12 +31,12 @@ export class VisualizationManager {
       window.innerWidth / 50,
       window.innerHeight / 50,
       window.innerHeight / -50,
-      -20,
-      100
+      0.1,
+      1000
     );
     this.camera.zoom = 4;
 
-    this.camera.position.z = 6;
+    this.camera.position.z = 14;
 
     this.orbitControls = new OrbitControls(
       this.camera,
@@ -66,6 +66,7 @@ export class VisualizationManager {
       },
       false
     );
+
     document.addEventListener(
       'keyup',
       event => {
@@ -73,6 +74,7 @@ export class VisualizationManager {
       },
       false
     );
+
     document.addEventListener(
       'mousemove',
       event => {
@@ -80,10 +82,12 @@ export class VisualizationManager {
       },
       false
     );
+
     document.addEventListener(
       'click',
       event => {
         if (!this.stop && event.toElement.nodeName == 'CANVAS') {
+          //Only send event when click happens on canvas
           this.scene.switchSelect();
         }
       },
@@ -129,7 +133,7 @@ export class VisualizationManager {
     }
 
     switch (setting) {
-      case 'viewZeroMarker':
+      case 'viewZeroMarker': //Change in setting: show or hide the zero marker
         if (
           this.settings.graphType == 'LAYERED' ||
           this.settings.graphType == 'GROUPED'
@@ -139,30 +143,31 @@ export class VisualizationManager {
             : scene.hideZeroMarker();
         }
         break;
-      case 'startNode':
-      case 'sorting':
+      case 'startNode': //Change in setting: starting node for steps mode for traversal
+      case 'sorting': //Change in setting: sorting for degree mode (number of incoming edges, outgoing edges or both)
         if (this.settings.graphType == 'LAYERED') {
+          //This change cannot be done in the scene, the scene has to be built from scratch
           let ind = this.deleteScene();
           this.removeScene(ind);
           this.showScene();
         }
         break;
-      case 'showAll':
+      case 'showAll': //Change in setting: should layers be displayed or the time or only on hover
         if (this.settings.graphType == 'LAYERED') {
           scene.setShowAll(this.settings.showAll);
         }
         break;
-      case 'slimLayers':
+      case 'slimLayers': //Change in setting: should layers be displayed in full size or only in the size that they actually need
         if (this.settings.graphType == 'LAYERED') {
           scene.setSlimLayers(this.settings.slimLayers);
         }
         break;
-      case 'snapToGrid':
+      case 'snapToGrid': //Change in setting: should dragging and dropping a node put it on the grid automatically or not
         if (this.settings.graphType == 'LAYERED') {
           scene.setSnapToGrid(this.settings.snapToGrid);
         }
         break;
-      case 'viewNode':
+      case 'viewNode': //Change in setting: which node should be selected
         if (
           this.settings.graphType == 'LAYERED' ||
           this.settings.graphType == 'GROUPED'
@@ -174,7 +179,9 @@ export class VisualizationManager {
           }
         }
         break;
-      case 'dataset':
+      case 'dataset': //Change in setting: new dataset should be shown, which affects all scenes
+        //This change cannot be done in the scene, the scene has to be built from scratch
+        //Furthermore delete all scenes because they all have to be provided with the new dataset
         this.dataset = value;
         for (let i = 0; i < this.scenes.length; i++) {
           this.deleteScene(this.scenes[i]);
@@ -193,6 +200,11 @@ export class VisualizationManager {
     }
   }
 
+  /* 
+  This methods switches betweens graphs types. This includes switching to 
+  the 2d and 3d force graphs which have their own threejs render environment
+  as well as switching between the other visualization scenes
+  */
   showScene() {
     $('#warning').hide();
     switch (this.settings.graphType) {
@@ -201,6 +213,7 @@ export class VisualizationManager {
         $('#force-graph-container-3d').hide();
         $('#threejs-container').hide();
         if (this.force_2d == null) {
+          //Initialize new 2d-force-graph
           this.force_2d = twoDForceGraphVis(
             $('#force-graph-container-2d'),
             this.change
@@ -208,13 +221,14 @@ export class VisualizationManager {
         } else {
           this.force_2d.resumeAnimation();
         }
-        this.stop = true;
+        this.stop = true; //Pause other scenes
         break;
       case '3D-FORCE':
         $('#force-graph-container-3d').show();
         $('#force-graph-container-2d').hide();
         $('#threejs-container').hide();
         if (this.force_3d == null) {
+          //Initialize new 3d-force-graph
           this.force_3d = threeDForceGraphVis(
             $('#force-graph-container-3d'),
             this.change
@@ -222,7 +236,7 @@ export class VisualizationManager {
         } else {
           this.force_3d.resumeAnimation();
         }
-        this.stop = true;
+        this.stop = true; //Pause other scenes
         break;
       default:
         this.stop = false;
@@ -230,7 +244,7 @@ export class VisualizationManager {
         this.scene = this.scenes.find(
           el =>
             el.id == this.settings.sceneId && el.type == this.settings.graphType
-        );
+        ); //switches to the right scene based on graphType and sceneId
 
         if (this.force_2d != null) {
           this.force_2d.pauseAnimation();
@@ -243,6 +257,8 @@ export class VisualizationManager {
         $('#threejs-container').show();
 
         if (this.scene == undefined) {
+          //If a scene relating to this graphType and sceneId
+          //hasn't been created yet, do that now
           this.addScene();
         }
         this.scene.dragControls.enabled = true;
@@ -255,6 +271,7 @@ export class VisualizationManager {
     switch (this.settings.graphType) {
       case 'LAYERED':
         if (this.settings.sceneId == 'STEPS' && checkIfCylic(this.dataset)) {
+          //Check if acylic graph for steps mode
           $('#warning').show();
           this.structure = [];
           return;
@@ -271,13 +288,15 @@ export class VisualizationManager {
           this.orbitControls
         );
         this.scenes.push(this.scene);
-        this.changeSetting('showAll');
-        this.changeSetting('slimLayers');
+        this.changeSetting('showAll'); //These have to be changed after constructor of scene
+        this.changeSetting('slimLayers'); //These have to be changed after constructor of scene
         break;
       case 'GROUPED':
         visualization = Visualizations.find(
           el => el.type == this.settings.graphType
         );
+        //Next line always searches for sceneId='BASIC' for Grouped Graph because
+        //that's the only one realized right now
         scene = visualization.scenes.find(el => el.id == 'BASIC');
         this.scene = new scene.scene(
           this.dataset,
@@ -290,11 +309,15 @@ export class VisualizationManager {
         break;
     }
     this.changeSetting('viewZeroMarker');
-    this.scene.setChange(this.change);
-    this.scene.setShowViewLabel(this.showViewLabel());
-    this.stop = false;
+    this.scene.setChange(this.change); //These have to be changed after constructor of scene
+    this.scene.setShowViewLabel(this.showViewLabel()); //These have to be changed after constructor of scene
+    this.stop = false; //stop would otherwise halt the animate function
   }
 
+  /* 
+  This function either deletes a parameter-given scene or deletes the one that is currently 
+  selected via sceneId and graphType in settings object
+  */
   deleteScene(scene) {
     let index;
     if (scene == undefined) {
@@ -359,14 +382,17 @@ export class VisualizationManager {
       this.camera.updateProjectionMatrix();
     };
   }
-
+  /*
+   * Animates the currently selected scene (gets selected in showScene())
+   */
   animate() {
     requestAnimationFrame(() => this.animate());
     if (this.stop) {
-      return;
+      //The animation of a normal threejs scene(right now from Layered or Grouped Graph) can be stopped
+      return; //Stopping the animation for example when one of the force-graphs is selected
     }
     this.scene.update(this.mouse);
-    this.scene.composer.render(this.scene.scene, this.camera);
+    this.scene.composer.render(this.scene.scene, this.camera); //this.scene.scene always render the selected scene
   }
 
   showViewLabel(view) {

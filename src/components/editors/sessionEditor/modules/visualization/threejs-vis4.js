@@ -21,6 +21,10 @@ export class Visualization4 extends LayeredGraphScene {
     });
   }
 
+  /*
+   * This creates all the layers. In this case when starting from one node and stepping down every path,
+   * every amount of step gets a layer.
+   */
   setupStructure(dataset) {
     this.structure = [];
     let matrix = translatedToMatrix(dataset);
@@ -86,6 +90,8 @@ export class Visualization4 extends LayeredGraphScene {
       temp = this.structure.findIndex(el2 => el2.id == el);
       this.structure.splice(temp, 1);
     });
+
+    this.structure.find(el => el.id == '0 steps').id += ' (start)';
   }
 
   recursiveGraphCheck(matrix, levels, dataset, counter, index) {

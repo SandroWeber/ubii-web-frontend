@@ -21,6 +21,9 @@ export class Visualization3 extends LayeredGraphScene {
     });
   }
 
+  /*
+   * This creates all the layers. In this case every incoming / outgoing / both (depending on this.show) degree gets its own layer
+   */
   setupStructure(dataset) {
     this.structure = [];
     let matrix = translatedToMatrix(dataset);

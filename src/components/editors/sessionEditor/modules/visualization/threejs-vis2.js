@@ -35,6 +35,9 @@ export class Visualization2 extends LayeredGraphScene {
     }
   }
 
+  /*
+   * This creates all the layers. In this case every Tag (combination of tags) gets its own layer
+   */
   setupStructure(dataset) {
     this.structure = [];
     let tags = [],
