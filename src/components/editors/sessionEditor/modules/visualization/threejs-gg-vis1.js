@@ -11,10 +11,15 @@ export class GGVisualization1 extends GroupedGraphScene {
       transparent: true,
       opacity: 0.8
     });
+    //The following methods are purposely not put in the super class constructor because in the future the bahavior of this visualization might need tweaking
     this.createDataPoints();
     this.createLinks();
   }
 
+  /*
+   * Method for handling the start of a dragging operation.
+   * This method is purposely not put in the super classes because in the future a visualization might be needing a different behavior on dragstart
+   */
   dragstart(event) {
     this.orbitControls.enabled = false;
     if (this.selectedNode == event.object) {
@@ -24,6 +29,10 @@ export class GGVisualization1 extends GroupedGraphScene {
     this.setDragging(true);
   }
 
+  /*
+   * Method for handling the end of a dragging operation.
+   * This method is purposely not put in the super classes because in the future a visualization might be needing a different behavior on dragend
+   */
   dragend(event) {
     this.orbitControls.enabled = true;
     let oldPos = this.oldPos;
@@ -67,16 +76,25 @@ export class GGVisualization1 extends GroupedGraphScene {
     }
   }
 
+  /*
+   * Method for handling the behavior during a dragging operation
+   * This method is purposely not put in the super classes because in the future a visualization might be needing a different behavior while dragging
+   */
   drag(event) {
     this.dragBehaviour();
   }
 
+  /*
+   * Method for handling keypresses
+   */
   onKeyDown(event, showViewLabel) {
     let keyCode = event.which;
     if (keyCode == 88) {
+      //X-button for front view
       this.orbitControls.reset();
       showViewLabel('X');
     } else if (keyCode == 89) {
+      //Y-button for side view
       this.camera.position.set(-8, 0, 0);
       this.orbitControls.update();
       showViewLabel('Y');
@@ -97,6 +115,9 @@ export class GGVisualization1 extends GroupedGraphScene {
     }
   }
 
+  /*
+   * Method for handling keyup events
+   */
   onKeyUp(event) {
     let keyCode = event.which;
     if (keyCode == 17) {

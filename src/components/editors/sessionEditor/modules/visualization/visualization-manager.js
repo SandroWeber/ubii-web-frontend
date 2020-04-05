@@ -188,11 +188,13 @@ export class VisualizationManager {
         }
         this.scenes = [];
         if (this.settings.graphType == '2D-FORCE' && this.force_2d != null) {
+          //For the force-graph just call grahData() with new dataset
           this.force_2d.graphData(JSON.parse(JSON.stringify(this.dataset)));
         } else if (
           this.settings.graphType == '3D-FORCE' &&
           this.force_3d != null
         ) {
+          //For the force-graph just call grahData() with new dataset
           this.force_3d.graphData(JSON.parse(JSON.stringify(this.dataset)));
         }
         this.showScene();

@@ -20,7 +20,7 @@
             <span
               @click="
                 () => {
-                  visManager.scene.focusOnLayer(tag.id);
+                  visManager.scene.focusOn(tag.id);
                 }
               "
               class="focus-icon"
@@ -287,7 +287,7 @@ export default {
   border: 1px solid #000000;
   border-radius: 5px;
   margin-bottom: 10px;
-  padding: 0 10px 0 10px;
+  padding: 0 9px 0 9px;
   background-color: #2d2a2e;
 }
 

@@ -309,7 +309,7 @@ export class LayeredGraphScene {
   }
 
   /*
-   * this adds a new layer to the structure of a graph
+   * this adds a new layer to the structure of a visualization
    */
   addToStructure(id, color) {
     let c;
@@ -695,7 +695,7 @@ export class LayeredGraphScene {
   /*
    * For showing one layer and hiding all others and reverse
    */
-  focusOnLayer(layer) {
+  focusOn(layer) {
     if (this.focusedLayer == '') {
       //If no layer is yet focused show only the from the param
       this.focusedLayer = layer;
@@ -839,7 +839,7 @@ export class LayeredGraphScene {
       this.meshes.push(mesh);
       //Right now the position is set randomly on a layer (first on z-coordinate = 0 and afterwards
       //moved to different layer depth (z-depth))
-      //This can be tweak to allow for any layout algorithm right herer
+      //This can be tweak to allow for any layout algorithm right here
       mesh.position.set(
         THREE.Math.randFloat(-this.steps, this.steps),
         THREE.Math.randFloat(-this.steps, this.steps),
@@ -908,6 +908,12 @@ export class LayeredGraphScene {
     });
   }
 
+  /*
+   * Inspiration for this mechanic of using an html element as a label on top of the canvas elements
+   * from the force-graph and three-forcegraph packages (which are also built into this visualizer)
+   * https://github.com/vasturiano/force-graph
+   * https://github.com/vasturiano/3d-force-graph
+   */
   updateLabelSpritePosition(x, y) {
     this.nodeLabel.css({ top: y, left: x + 30 });
   }
@@ -918,7 +924,7 @@ export class LayeredGraphScene {
   select(node) {
     this.selected = node;
     this.outlinePassReference.selectedObjects = [this.selected];
-    this.change('viewNode', node.userData.id); //pass new selection up through the vue components
+    this.change('viewNode', node.userData.id); //pass new "selection" up through the vue components
   }
 
   /*

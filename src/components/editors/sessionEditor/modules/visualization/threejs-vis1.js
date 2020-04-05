@@ -11,6 +11,7 @@ export class Visualization1 extends LayeredGraphScene {
       transparent: true,
       opacity: 0.8
     });
+    //The following methods are purposely not put in the super class constructor because in the future the bahavior of this visualization might need tweaking
     this.createDataPoints();
     this.createLinks();
     this.setupStructure();
@@ -39,6 +40,9 @@ export class Visualization1 extends LayeredGraphScene {
     this.meshes.forEach(el => (el.userData.level = 'Level 5'));
   }
 
+  /*
+   * Function specific to Exploration Mode because a user can manually add layer to another node
+   */
   addToLevel(node, level) {
     node.userData.level = 'Level ' + (level + 1);
     let index = this.structure.findIndex(el => el.id == 'Level ' + (level + 1));
@@ -47,6 +51,9 @@ export class Visualization1 extends LayeredGraphScene {
     this.structure.splice(index, 1, this.structure[index]);
   }
 
+  /*
+   * Function specific to Exploration Mode because a user can manually delete node from layer
+   */
   deleteFromLevel(node) {
     this.hoverState(false);
     let level = this.structure.find(el => el.id == node.userData.level);
@@ -56,9 +63,14 @@ export class Visualization1 extends LayeredGraphScene {
     node.userData.level = '';
   }
 
+  /*
+   * Method for handling the start of a dragging operation.
+   * This method is purposely not put in the super classes because in the future a visualization might be needing a different behavior on dragstart
+   */
   dragstart(event) {
     this.orbitControls.enabled = false;
     if (this.selected == event.object) {
+      //If the dragged node is the same one that is already selected
       this.same = true;
     }
     this.deselect();
@@ -66,24 +78,38 @@ export class Visualization1 extends LayeredGraphScene {
     this.setDragging(true);
   }
 
+  /*
+   * Method for handling the end of a dragging operation.
+   * This method is purposely not put in the super classes because in the future a visualization might be needing a different behavior on dragend
+   */
   dragend(event) {
     this.orbitControls.enabled = true;
     this.changeArrow(event.object);
     if (this.same && this.oldPos.equals(this.selected.position)) {
+      //If the user only clicked on a node (oldPos the same) just deselect
       this.deselect();
       this.same = false;
     } else if (!this.oldPos.equals(this.selected.position)) {
+      //If node actually got dragged somewhere else put it back on the grid
       this.deleteNodeFromGrid(event.object);
       this.checkNodePositionOnGrid(this.selected);
     }
-    this.setSlimLayers(this.slimLayers);
+    this.setSlimLayers(this.slimLayers); //maybe a layer has to resize if a node got dragged around
     this.isDragging = false;
   }
 
+  /*
+   * Method for handling the behavior during a dragging operation
+   * This method is purposely not put in the super classes because in the future a visualization might be needing a different behavior while dragging
+   */
   drag(event) {
     this.dragBehaviour();
+    //If visualization-specific stuff has to happend during drag, put it here
   }
 
+  /*
+   * Method for handling keypresses
+   */
   onKeyDown(event, showViewLabel) {
     let keyCode = event.which;
 
@@ -93,30 +119,35 @@ export class Visualization1 extends LayeredGraphScene {
         obj.focusedLayer != layer &&
         obj.selected != null
       ) {
+        //Only move a node to a layer that is visible (no layer is focused right now) and that is not the same layer
         obj.moveTo(obj.selected, pos * obj.layerStepSize);
         let find = obj.structure.find(
           el => el.id == obj.selected.userData.level
         );
         obj.showLayer(find.id, false);
+
+        //delete node from previous layer
         find.content.splice(
           find.content.findIndex(
             el => el.userData.id == obj.selected.userData.id
           ),
           1
         );
-        obj.structure.find(el => el.id == layer).content.push(obj.selected);
+        obj.structure.find(el => el.id == layer).content.push(obj.selected); //put node into new layer
         obj.selected.userData.level = layer;
         obj.selected.material.color.set(
           obj.structure.find(el => el.id == layer).color
         );
-        obj.setSlimLayers(obj.slimLayers);
+        obj.setSlimLayers(obj.slimLayers); //maybe a layer has to resize if it gets a new node
       }
     };
 
     if (keyCode == 88) {
+      //X-button for front view
       this.orbitControls.reset();
       showViewLabel('X');
     } else if (keyCode == 89) {
+      //Y-button for side view on layers
       this.camera.position.set(-8, 0, 0);
       this.orbitControls.update();
       showViewLabel('Y');

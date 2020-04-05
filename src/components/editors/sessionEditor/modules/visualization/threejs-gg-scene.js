@@ -13,15 +13,15 @@ export class GroupedGraphScene {
     this.scene.add(light);
     this.type = 'GROUPED';
     this.dataset = dataset;
-    this.structure = [];
+    this.structure = []; //The "interal structure" of a graph, can be whatever the current visualization / graphType chooses to focus on (e.g. layers, groups etc.)
     this.locked = { x: false, y: false, z: true };
     this.guideline = null;
-    this.oldPos;
+    this.oldPos; //needed to check if selected node was actually dragged or only just clicked on to deselect it
     this.meshes = [];
     this.arrows = [];
     this.materials = [];
-    this.selectedNode = null;
-    this.selected = [];
+    this.selectedNode = null; //the currently selected nodes (with strg pressed)
+    this.selected = []; //the currently selected node (settings.viewNode)
     this.levels = [];
     this.intersects = null;
     this.planeIntersects = null;
@@ -112,9 +112,13 @@ export class GroupedGraphScene {
 
   setDragging(dragging) {
     this.isDragging = dragging;
+    //The old position is needed to check if a node actually got dragged or only clicked on for deselecting
     this.oldPos = new THREE.Vector3().copy(this.selectedNode.position);
   }
 
+  /*
+   * binds reference for view label function in visualization-manager
+   */
   setShowViewLabel(fct) {
     this.showViewLabel = fct;
   }
@@ -128,68 +132,69 @@ export class GroupedGraphScene {
     this.changeArrow(node);
   }
 
-  focusOn(group) {
-    this.structure.forEach();
-    $('#' + temp.replace(/ |\|/g, '')).addClass('disabled');
-  }
-
+  /*
+   * what happens to a node during dragging motion
+   */
   dragBehaviour() {
     let distance = this.steps * this.stepSize;
     if (this.selectedNode.position.x > distance) {
+      //max x distance / border while dragging
       this.selectedNode.position.x = distance;
     } else if (this.selectedNode.position.x < -distance) {
       this.selectedNode.position.x = -distance;
     }
     if (this.selectedNode.position.y > distance) {
+      //max y distance / border while dragging
       this.selectedNode.position.y = distance;
     } else if (this.selectedNode.position.y < -distance) {
       this.selectedNode.position.y = -distance;
     }
     if (this.selectedNode.position.z > distance) {
+      //max z distance / border while dragging
       this.selectedNode.position.z = distance;
     } else if (this.selectedNode.position.z < -distance) {
       this.selectedNode.position.z = -distance;
     }
   }
 
+  /*
+   * What happens during hover over node
+   */
   hoverState(start, obj) {
     if (start) {
+      //start=true to show label
       this.hover = obj;
-      this.nodeLabel.show();
+      this.nodeLabel.show(); //this is the label that shows the nodes name and follows the mouse
       if (!obj.userData.isGroup) {
+        //if node is not in group show label
         this.nodeLabel.html('Name: ' + obj.name);
       } else {
         this.nodeLabel.html(obj.name);
       }
     } else if (this.hover != null) {
+      //start=false and hover object (set from first firing of this function) is existent
       this.hover = null;
       this.nodeLabel.hide();
     }
   }
 
+  /*
+   * this adds a new group to the structure of a visualization
+   */
   addToStructure() {
-    let c = randomHexColor();
+    let c = randomHexColor(); //right now only random colors are choosen
 
-    let id;
+    let id; //group-id is negative to put them into this.meshes
+    //and still be able to differentiate them (group node) from normal meshes
     if (this.structure.length > 0) {
+      //get next group-id from previous one
       id = this.structure[this.structure.length - 1].id;
       id = parseInt(id.substr(id.length - 2)) - 1;
     } else {
       id = -1;
     }
 
-    let rest = this.meshes.filter(el => {
-      for (let i = 0; i < this.selected.length; i++) {
-        if (this.selected[i].userData.id == el.userData.id) {
-          return false;
-        }
-      }
-    });
-
-    rest.forEach(el => (el.visible = false));
-
     let selected = this.selected.map(el => el.userData.id);
-    this.selected.forEach(el => (el.userData.group = id));
 
     let meshes = {};
     meshes.node = new THREE.Mesh(
@@ -206,14 +211,14 @@ export class GroupedGraphScene {
       el.material.color.set(c);
     });
 
-    let position = this.calcCentroid(this.selected);
+    let position = this.calcCentroid(this.selected); //get the centroid (3D center point) for the group node position
 
     let temp = new THREE.Vector3(position.x, position.y, position.z);
 
     meshes.node.userData.id = id;
     meshes.node.userData.isGroup = true;
     meshes.node.userData.group = '';
-    meshes.node.name = 'Group' + id;
+    meshes.node.name = 'Group' + id; //Using minus from negative group id as hyphen for group name
 
     this.meshes.push(meshes.node);
     this.scene.add(meshes.node);
@@ -221,46 +226,58 @@ export class GroupedGraphScene {
     meshes.node.position.y = temp.y;
     meshes.node.position.z = temp.z;
 
-    meshes.arrowsIn = [];
-    meshes.arrowsOut = [];
-    meshes.arrowsInside = [];
+    meshes.arrowsIn = []; //the edges that go into a node that is now part of the group
+    meshes.arrowsOut = []; //the edges that go out of a node that is now part of the group
+    meshes.arrowsInside = []; //the edges that go between two nodes that are both now part of the group
 
     this.arrows.forEach(el => {
       let sin, tin;
+      //check if source is in group
       if (selected.includes(el.source)) {
         sin = true;
       } else {
         sin = false;
       }
+
+      //check if target is in group
       if (selected.includes(el.target)) {
         tin = true;
       } else {
         tin = false;
       }
+
       if (sin && tin) {
+        //if source and target are in group, the whole edge is
         meshes.arrowsInside.push(el);
         el.arrow.line.visible = false;
         el.arrow.cone.visible = false;
       } else if (sin && !tin) {
+        //if only source is in group, edge goes out of the group
         meshes.arrowsOut.push({ arrow: el, origin: el.source });
       } else if (!sin && tin) {
+        //if only target is in group, edge goes into group
         meshes.arrowsIn.push({ arrow: el, origin: el.target });
       }
     });
 
+    //make all nodes that are now part of the group invisible
     this.selected.forEach(el => {
       el.visible = false;
     });
 
+    //hide all edges flowing to single nodes of group
     meshes.arrowsIn.forEach(el => {
       this.changeArrowWithNode(el.arrow, id, false);
     });
 
+    //hide all edges flowing from single nodes of group
     meshes.arrowsOut.forEach(el => {
       this.changeArrowWithNode(el.arrow, id, true);
     });
 
+    //create bounding box for group
     let geometry = new THREE.Geometry();
+    //8 corner points of a 3D box
     geometry.vertices.push(
       new THREE.Vector3(1, -1, 1),
       new THREE.Vector3(1, -1, -1),
@@ -272,6 +289,7 @@ export class GroupedGraphScene {
       new THREE.Vector3(-1, 1, 1)
     );
 
+    //sticht triangular faces together to form a 3D box (2 triangle per side, 6 sides per box)
     geometry.faces.push(
       new THREE.Face3(0, 1, 2),
       new THREE.Face3(0, 2, 3),
@@ -297,7 +315,7 @@ export class GroupedGraphScene {
       })
     );
 
-    boundingBox.renderOrder = 1;
+    boundingBox.renderOrder = 1; //so that nodes inside the box are still visible
     this.scene.add(boundingBox);
     boundingBox.visible = false;
 
@@ -316,7 +334,12 @@ export class GroupedGraphScene {
     this.calcBoundingBox(id);
   }
 
+  /*
+   * Calculate the center point from an array of points in 3D space
+   * The centroid gets used as position for the group node
+   */
   calcCentroid(points) {
+    //Just simply add up for every coordinate and divide through number of points
     let position = { x: 0, y: 0, z: 0 };
     points.forEach(el => {
       position.x += el.position.x;
@@ -329,6 +352,9 @@ export class GroupedGraphScene {
     return position;
   }
 
+  /*
+   * Remove a group from the visualization structure
+   */
   deleteFromStructure(group) {
     let find = this.structure.find(el => el.meshes.node.userData.id == group);
     let index = this.structure.findIndex(el => el.id == group);
@@ -351,6 +377,10 @@ export class GroupedGraphScene {
     this.delete = [find.meshes.node, index];
   }
 
+  /*
+   * Calulate the dimension of the bounding box of a group based on how far
+   * the nodes of the group are spread out
+   */
   calcBoundingBox(group) {
     let x = [];
     let y = [];
@@ -445,7 +475,10 @@ export class GroupedGraphScene {
     g.vertices[7].z = z[1];
   }
 
-  focusOnLayer(group) {
+  /*
+   * Opening a group or closing it again
+   */
+  focusOn(group) {
     let find = this.structure.find(el => el.id == group);
     find.visible = !find.visible;
     let v = find.visible;
@@ -497,24 +530,31 @@ export class GroupedGraphScene {
     let lineMat = new THREE.LineBasicMaterial({
       color: 0xffffff
     });
+
+    //Line on x-axis
     let geometry = new THREE.Geometry();
     geometry.vertices.push(
       new THREE.Vector3(-0.5, 0, 0),
       new THREE.Vector3(0.5, 0, 0)
     );
     this.zero.line1 = new THREE.Line(geometry, lineMat);
+
+    //Line on y-axis
     geometry = new THREE.Geometry();
     geometry.vertices.push(
       new THREE.Vector3(0, 0.5, 0),
       new THREE.Vector3(0, -0.5, 0)
     );
     this.zero.line2 = new THREE.Line(geometry, lineMat);
+
+    //Line on z-axis
     geometry = new THREE.Geometry();
     geometry.vertices.push(
       new THREE.Vector3(0, 0, -0.5),
       new THREE.Vector3(0, 0, 0.5)
     );
     this.zero.line3 = new THREE.Line(geometry, lineMat);
+
     this.scene.add(this.zero.circle);
     this.scene.add(this.zero.line1);
     this.scene.add(this.zero.line2);
@@ -535,6 +575,9 @@ export class GroupedGraphScene {
     this.zero.line3.visible = true;
   }
 
+  /*
+   * Creates all nodes
+   */
   createDataPoints() {
     let mesh, material;
     this.dataset.nodes.forEach(node => {
@@ -547,6 +590,8 @@ export class GroupedGraphScene {
       mesh.name = node.name;
       mesh.userData = { id: node.id, isGroup: false, group: '' };
       this.meshes.push(mesh);
+      //Right now the position is set randomly in 3D space
+      //This can be tweak to allow for any layout algorithm right here
       mesh.position.set(
         THREE.Math.randFloat(-this.steps, this.steps),
         THREE.Math.randFloat(-this.steps, this.steps),
@@ -567,7 +612,9 @@ export class GroupedGraphScene {
     origin = this.meshes.find(el => el.userData.id == link.source).position;
     destination = this.meshes.find(el => el.userData.id == link.target)
       .position;
+    //Calculate direction vector from origin to destination for edge
     dir = new THREE.Vector3().subVectors(destination, origin);
+
     length = dir.length() - 0.2;
     arrow = new THREE.ArrowHelper(dir.normalize(), origin, 1, 0xffffff);
     arrow.setLength(length, 0.4, 0.1);
@@ -579,6 +626,9 @@ export class GroupedGraphScene {
     this.scene.add(arrow);
   }
 
+  /*
+   * to update a links position update its origin and destination
+   */
   updateLink(arrowLink, source, target) {
     let dir, origin, destination, length;
     origin = this.meshes.find(el => el.userData.id == source).position;
@@ -590,6 +640,9 @@ export class GroupedGraphScene {
     arrowLink.setLength(length, 0.4, 0.1);
   }
 
+  /*
+   * This updates all edges that are linked to the changed node
+   */
   changeArrow(mesh) {
     let id = this.meshes.find(el => el == mesh).userData.id;
     this.arrows.forEach(el => {
@@ -601,6 +654,11 @@ export class GroupedGraphScene {
     });
   }
 
+  /*
+   * This is an intermediate function to change an edge that points into / out of a group
+   * because than it has to point to the centroid of the group instead (or in the case of
+   * an open group to the individual nodes)
+   */
   changeArrowWithNode(arrow, id, changeSource) {
     if (changeSource) {
       this.updateLink(arrow.arrow, id, arrow.target);
@@ -611,21 +669,34 @@ export class GroupedGraphScene {
     }
   }
 
+  /*
+   * Inspiration for this mechanic of using an html element as a label on top of the canvas elements
+   * from the force-graph and three-forcegraph packages (which are also built into this visualizer)
+   * https://github.com/vasturiano/force-graph
+   * https://github.com/vasturiano/3d-force-graph
+   */
   updateLabelSpritePosition(x, y) {
     this.nodeLabel.css({ top: y, left: x + 30 });
   }
 
+  /*
+   * Select a node
+   */
   select(node) {
     this.selectedNode = node;
     if (
       this.selected.findIndex(el => el.userData.id == node.userData.id) == -1
     ) {
+      //If node is not in selected array already, put it in
       this.selected.push(node);
     }
     this.outlinePassReference.selectedObjects = this.selected;
-    this.change('viewNode', node.userData.id);
+    this.change('viewNode', node.userData.id); //pass new "selection" up through the vue components
   }
 
+  /*
+   * Deselect a node
+   */
   deselect(node) {
     if (this.selected.length > 0) {
       this.selectedNode = null;
@@ -634,10 +705,13 @@ export class GroupedGraphScene {
         1
       );
       this.outlinePassReference.selectedObjects = this.selected;
-      this.change('viewNode', -1);
+      this.change('viewNode', -1); //pass new "selection" up through the vue components
     }
   }
 
+  /*
+   * This method is used to deselect all currently selected nodes when the user clicks anywhere on the canvas
+   */
   switchSelect() {
     if (!this.isDragging && this.intersects.length == 0) {
       let temp = this.selected.slice();
@@ -662,9 +736,9 @@ export class GroupedGraphScene {
 
     if (this.intersects.length > 0) {
       obj = this.intersects[0].object;
-      this.hoverState(true, obj);
+      this.hoverState(true, obj); //When hovering over a node show label
     } else if (!this.isDragging) {
-      this.hoverState(false);
+      this.hoverState(false); //When hovering over a node show label
     }
   }
 }
