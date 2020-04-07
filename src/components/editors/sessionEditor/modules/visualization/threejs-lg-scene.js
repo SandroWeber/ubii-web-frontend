@@ -154,6 +154,9 @@ export class LayeredGraphScene {
     this.oldPos = new THREE.Vector3().copy(this.selected.position);
   }
 
+  /*
+   * binds reference for change setting function in GraphView
+   */
   setChange(change) {
     this.change = change;
   }
@@ -708,7 +711,7 @@ export class LayeredGraphScene {
         if (el.id != layer) {
           el.plane.p.visible = false;
           el.plane.b.forEach(el2 => (el2.visible = false));
-          $('#' + temp.replace(/ |\|/g, '')).addClass('disabled');
+          $('#' + temp.replace(/ |\||\(|\)/g, '')).addClass('disabled');
         }
       });
 
@@ -739,7 +742,7 @@ export class LayeredGraphScene {
       //Show all layers again and reenable the labels on top of visualization in graph view
       this.structure.forEach(el => {
         temp = el.id;
-        $('#' + temp.replace(/ |\|/g, '')).removeClass('disabled');
+        $('#' + temp.replace(/ |\||\(|\)/g, '')).removeClass('disabled');
       });
 
       //Show all layers again but only if settings.showAll=true
@@ -837,6 +840,7 @@ export class LayeredGraphScene {
       mesh.name = node.name;
       mesh.userData = { id: node.id, onGrid: false };
       this.meshes.push(mesh);
+
       //Right now the position is set randomly on a layer (first on z-coordinate = 0 and afterwards
       //moved to different layer depth (z-depth))
       //This can be tweak to allow for any layout algorithm right here
@@ -1086,7 +1090,7 @@ export class LayeredGraphScene {
         return i;
       }
     }
-    return -1;
+    return -1; //if this positon is free return -1
   }
 
   update(mouse) {

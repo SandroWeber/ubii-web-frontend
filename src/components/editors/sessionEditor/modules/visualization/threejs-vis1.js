@@ -33,9 +33,14 @@ export class Visualization1 extends LayeredGraphScene {
     this.addToStructure('Level 7', '#5454C9');
     this.addToStructure('Level 8', '#2E2EBE');
     this.addToStructure('Level 9', '#0000B0');
+
+    //right now layer planes are all on z=0
+
     for (let i = 1; i < 10; i++) {
+      //put the different layer planes on their respective z-position
       this.setLevelDepth('Level ' + i, this.layerStepSize * (i - 5));
     }
+
     this.structure[4].content.push(...this.meshes);
     this.meshes.forEach(el => (el.userData.level = 'Level 5'));
   }

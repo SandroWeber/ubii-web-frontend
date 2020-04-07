@@ -92,27 +92,82 @@ export class Visualization4 extends LayeredGraphScene {
       this.structure.splice(temp, 1);
     });
 
-    this.structure.find(el => el.id == '0 steps').id += ' (start)';
+    //All the stuff from here on in this method is just to position all the layers
+    //relative to the center (z-coord=0)
+    let tempStr = {};
+    let temp1 = 1,
+      temp2 = 0;
+
+    let addToTemp = (id, counter) => {
+      if (!(id in tempStr)) {
+        tempStr[id] = counter;
+      }
+    };
+
+    //Find out how many layers there are (n) and count them from 0 to n
+    //The order here reflects the layers' order on the z-axis
+    this.structure.forEach(el => {
+      if (el.id in tempStr) {
+        return;
+      }
+      if (el.id == 'Unreachable') {
+        temp2 = 0;
+      } else {
+        temp2 = temp1;
+        temp1++;
+      }
+      addToTemp(el.id, temp2);
+    });
+
+    if (!('Unreachable' in tempStr)) {
+      Object.keys(tempStr).forEach(el => {
+        tempStr[el]--;
+      });
+    }
+
+    //Now calc temp1 which decides how far back each layer gets shifted
+    temp2 = Object.keys(tempStr).length;
+    if (temp2 % 2 == 0) {
+      //with an even number of layers they have to be shifted unevenly (no layer can be at z-coord=0)
+      temp1 = this.layerStepSize / 2 + (temp2 / 2 - 1) * this.layerStepSize;
+    } else {
+      //with an uneven number of layers they have to be shifted evenly (one layer can be at z-coord=0)
+      temp1 = Math.floor(temp2 / 2) * this.layerStepSize;
+    }
+
+    temp1 *= -1;
+
+    //actually put every layer on it's real depth (z-coord)
+    this.structure.forEach(el => {
+      temp2 = tempStr[el.id] * this.layerStepSize + temp1; //Shift each layer back by it's index and
+      //the space in between each layer
+
+      this.meshes.forEach(el2 => {
+        if (el2.userData.level == el.id) {
+          this.setLevelDepth(el.id, temp2);
+          this.moveTo(el2, temp2);
+          el2.material.color.set(el.color);
+        }
+      });
+    });
   }
 
   recursiveGraphCheck(matrix, levels, dataset, counter, index) {
     let level = counter + ' step' + (counter == 1 ? '' : 's');
+    if (level == '0 steps') {
+      level += ' (start)';
+    }
     if (!levels.includes(level)) {
       levels.push(level);
       this.addToStructure(level);
     }
     this.meshes[index].userData.level = level;
-    this.setLevelDepth(level, this.layerStepSize * counter);
-    this.moveTo(this.meshes[index], this.layerStepSize * counter);
     let l = this.structure.find(el => el.id == level);
     let found = l.content.find(
       el => el.userData.id == this.meshes[index].userData.id
     );
     if (found == undefined) {
       l.content.push(this.meshes[index]);
-    }
-    if (index == 3 && level == '2 steps') {
-      console.log('here');
     }
     let temp = counter + 1;
     this.meshes[index].material.color.set(l.color);

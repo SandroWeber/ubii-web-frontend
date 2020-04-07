@@ -21,7 +21,10 @@ export class Visualization2 extends LayeredGraphScene {
     });
   }
 
-  getMixedLevelName(node) {
+  /*
+   * Either returns 1) no tag   2) the single tag   3) a combination of all tags with " | " between them
+   */
+  getFormattedLayerName(node) {
     if (node.tags.length == 0) {
       return '';
     } else if (node.tags.length == 1) {
@@ -31,7 +34,7 @@ export class Visualization2 extends LayeredGraphScene {
       node.tags.sort().forEach(el => {
         tag = tag + ' | ' + el;
       });
-      tag = tag.slice(3);
+      tag = tag.slice(3); //cuts of first " | "
       return tag;
     }
   }
@@ -43,9 +46,12 @@ export class Visualization2 extends LayeredGraphScene {
     this.structure = [];
     let tags = [],
       tag = '';
+
+    //go through all nodes and their tags and add them structure of the graph
+    //which means adding a new layer for each individual getFormattedLayerName()
     dataset.nodes.forEach(node => {
       if (node.tags.length > 1) {
-        tag = this.getMixedLevelName(node);
+        tag = this.getFormattedLayerName(node);
       } else {
         tag = node.tags[0];
       }
@@ -56,23 +62,58 @@ export class Visualization2 extends LayeredGraphScene {
       this.meshes.find(el => el.userData.id == node.id).userData.level = tag;
     });
 
-    let counter = 0,
-      temp = 0;
-    this.structure.forEach(el => {
-      if (el.id == 'No Tag') {
-        temp = 0;
-      } else {
-        temp = counter;
+    //All the stuff from here on in this method is just to position all the layers
+    //relative to the center (z-coord=0)
+    let tempStr = {};
+    let temp1 = 1,
+      temp2 = 0;
+
+    let addToTemp = (id, counter) => {
+      if (!(id in tempStr)) {
+        tempStr[id] = counter;
       }
+    };
+
+    //Find out how many layers there are (n) and count them from 0 to n
+    //The order here reflects the layers' order on the z-axis
+    this.structure.forEach(el => {
+      if (el.id in tempStr) {
+        return;
+      }
+      if (el.id == 'No Tags') {
+        temp2 = 0;
+      } else {
+        temp2 = temp1;
+        temp1++;
+      }
+      addToTemp(el.id, temp2);
+    });
+
+    //Now calc temp1 which decides how far back each layer gets shifted
+    temp2 = Object.keys(tempStr).length;
+    if (temp2 % 2 == 0) {
+      //with an even number of layers they have to be shifted unevenly (no layer can be at z-coord=0)
+      temp1 = this.layerStepSize / 2 + (temp2 / 2 - 1) * this.layerStepSize;
+    } else {
+      //with an uneven number of layers they have to be shifted evenly (one layer can be at z-coord=0)
+      temp1 = Math.floor(temp2 / 2) * this.layerStepSize;
+    }
+
+    temp1 *= -1;
+
+    //actually put every layer on it's real depth (z-coord)
+    this.structure.forEach(el => {
+      temp2 = tempStr[el.id] * this.layerStepSize + temp1; //Shift each layer back by it's index and
+      //the space in between each layer
+
       this.meshes.forEach(el2 => {
         if (el2.userData.level == el.id) {
           el.content.push(el2);
-          this.setLevelDepth(el.id, -this.layerStepSize * temp);
-          this.moveTo(el2, -this.layerStepSize * temp);
+          this.setLevelDepth(el.id, temp2);
+          this.moveTo(el2, temp2);
           el2.material.color.set(el.color);
         }
       });
-      counter++;
     });
   }
 

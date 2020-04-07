@@ -27,7 +27,7 @@ let scenarios = [
       {
         id: 4,
         name: 'Node 4',
-        tags: ['Tag 2'],
+        tags: ['Tag 1'],
         links: []
       },
       {

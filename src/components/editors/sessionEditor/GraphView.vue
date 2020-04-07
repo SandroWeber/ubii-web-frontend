@@ -8,7 +8,7 @@
           <span
             v-for="tag in structure"
             v-bind:key="tag.id"
-            v-bind:id="tag.id.replace(/ |\|/g, '')"
+            v-bind:id="tag.id.replace(/ |\||\(|\)/g, '')"
             v-bind:style="
               'background-color:' +
                 (tag.color == '#ffffff' ? '#b6b5b5' : tag.color)
@@ -147,6 +147,7 @@ export default {
       return this.datasets.find(ds => ds.id == this.settings.dataset);
     },
     structure: function() {
+      //The internal structure of the graph (either layers or groups or what ever else come to mind)
       if (this.visManager != null && this.visManager.scene != null) {
         return this.visManager.scene.structure;
       } else {

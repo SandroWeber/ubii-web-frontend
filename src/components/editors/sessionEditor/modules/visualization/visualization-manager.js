@@ -127,7 +127,8 @@ export class VisualizationManager {
     if (
       scene == undefined &&
       this.settings.graphType != '2D-FORCE' &&
-      this.settings.graphType != '3D-FORCE'
+      this.settings.graphType != '3D-FORCE' &&
+      !this.stop
     ) {
       return;
     }
@@ -263,7 +264,9 @@ export class VisualizationManager {
           //hasn't been created yet, do that now
           this.addScene();
         }
-        this.scene.dragControls.enabled = true;
+        if (!this.stop) {
+          this.scene.dragControls.enabled = true;
+        }
         break;
     }
   }
@@ -275,6 +278,7 @@ export class VisualizationManager {
         if (this.settings.sceneId == 'STEPS' && checkIfCylic(this.dataset)) {
           //Check if acylic graph for steps mode
           $('#warning').show();
+          this.stop = true;
           this.structure = [];
           return;
         }

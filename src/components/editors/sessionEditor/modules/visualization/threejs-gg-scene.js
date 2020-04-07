@@ -123,13 +123,11 @@ export class GroupedGraphScene {
     this.showViewLabel = fct;
   }
 
+  /*
+   * binds reference for change setting function in GraphView
+   */
   setChange(change) {
     this.change = change;
-  }
-
-  moveTo(node, level) {
-    node.position.set(node.position.x, node.position.y, level);
-    this.changeArrow(node);
   }
 
   /*
@@ -289,7 +287,8 @@ export class GroupedGraphScene {
       new THREE.Vector3(-1, 1, 1)
     );
 
-    //sticht triangular faces together to form a 3D box (2 triangle per side, 6 sides per box)
+    //stitch triangular faces together to form a 3D box (2 triangle per side, 6 sides per box)
+    //by connecting 3 vertices each by index to form one face
     geometry.faces.push(
       new THREE.Face3(0, 1, 2),
       new THREE.Face3(0, 2, 3),
@@ -363,83 +362,117 @@ export class GroupedGraphScene {
       el.userData.group = '';
       el.material.color.set('#FFFFFF');
     });
+
+    //show all the individual ingoing edges again
     find.meshes.arrowsIn.forEach(el => {
       this.changeArrowWithNode(el.arrow, el.origin, false);
     });
+
+    //show all the individual outgoing edges again
     find.meshes.arrowsOut.forEach(el => {
       this.changeArrowWithNode(el.arrow, el.origin, true);
     });
+
+    //show all the individual inner (inside group) edges again
     find.meshes.arrowsInside.forEach(el => {
       el.arrow.line.visible = true;
       el.arrow.cone.visible = true;
     });
+
     this.scene.remove(find.meshes.box);
-    this.delete = [find.meshes.node, index];
+
+    this.delete = [find.meshes.node, index]; //deletion happens at dragend so temp. safe it for that
   }
 
   /*
    * Calulate the dimension of the bounding box of a group based on how far
    * the nodes of the group are spread out
+   * This is reused everytime a node in the group changes position relative
+   * to the other nodes in that group
    */
   calcBoundingBox(group) {
+    //Three arrays to safe "farthest position in any direciton (x/y/u)"
+    //index: 0 is for biggest positive coordinate
+    //index: 1 is for smallest negative coordinate
     let x = [];
     let y = [];
     let z = [];
-    let posX, posY, posZ;
+    let posX, posY, posZ; //these are temp positions for every cycle
 
     let find = this.structure.find(el => el.meshes.node.userData.id == group);
 
+    //Go through all nodes and check if they are "the farthest out in any direction (x/y/z)"
     find.content.forEach(el => {
       posX = el.position.x;
       posY = el.position.y;
       posZ = el.position.z;
+
+      //Check distance for x-axis
       if (x.length == 0) {
         x.push(posX);
       } else if (x.length == 1) {
         if (x[0] > posX) {
+          //if this node's positive x coord is bigger than temp
           x.unshift(posX);
         } else {
+          //if this node's negative x coord is smaller than temp
           x.push(posX);
         }
       } else {
         if (x[0] > posX) {
+          //if this node's positive x coord is bigger than temp
           x[0] = posX;
         } else if (x[1] < posX) {
+          //if this node's negative x coord is smaller than temp
           x[1] = posX;
         }
       }
+
+      //Check distance for y-axis
       if (y.length == 0) {
         y.push(posY);
       } else if (y.length == 1) {
         if (y[0] > posY) {
+          //if this node's positive y coord is bigger than temp
           y.unshift(posY);
         } else {
+          //if this node's negative y coord is smaller than temp
           y.push(posY);
         }
       } else {
         if (y[0] > posY) {
+          //if this node's positive y coord is bigger than temp
           y[0] = posY;
         } else if (y[1] < posY) {
+          //if this node' negative y coord is smaller than temp
           y[1] = posY;
         }
       }
+
+      //Check distance for z-axis
       if (z.length == 0) {
         z.push(posZ);
       } else if (z.length == 1) {
         if (z[0] > posZ) {
+          //if this node's positive z coord is bigger than temp
           z.unshift(posZ);
         } else {
+          //if this node's negative z coord is smaller than temp
           z.push(posZ);
         }
       } else {
         if (z[0] > posZ) {
+          //if this node's positive z coord is bigger than temp
           z[0] = posZ;
         } else if (z[1] < posZ) {
+          //if this node's negative z coord is smaller than temp
           z[1] = posZ;
         }
       }
     });
 
+    //First index [0] is positive coordinate
+    //Second index [1] is negative coordinate
     x[0] -= 0.2;
     x[1] += 0.2;
     y[0] -= 0.2;
@@ -447,6 +480,8 @@ export class GroupedGraphScene {
     z[0] -= 0.2;
     z[1] += 0.2;
 
+    //Updating x and y coordinate of every vertex of the group's
+    //bounding box
     let g = find.meshes.box.geometry;
     g.verticesNeedUpdate = true;
     g.vertices[0].x = x[1];
@@ -480,13 +515,19 @@ export class GroupedGraphScene {
    */
   focusOn(group) {
     let find = this.structure.find(el => el.id == group);
-    find.visible = !find.visible;
-    let v = find.visible;
+
+    find.visible = !find.visible; //reverse the current state (open -> closed) / (closed -> open)
+
+    let v = find.visible; //smaller var name looks better
+
     find.content.forEach(el => {
       el.visible = !v;
     });
-    find.meshes.node.visible = v;
-    find.meshes.box.visible = !v;
+
+    find.meshes.node.visible = v; //group node
+    find.meshes.box.visible = !v; //bounding box
+
+    //ingoing individual edges
     find.meshes.arrowsIn.forEach(el => {
       if (v) {
         this.changeArrowWithNode(el.arrow, find.meshes.node.userData.id, false);
@@ -494,6 +535,8 @@ export class GroupedGraphScene {
         this.changeArrowWithNode(el.arrow, el.origin, false);
       }
     });
+
+    //outgoing individual edges
     find.meshes.arrowsOut.forEach(el => {
       if (v) {
         this.changeArrowWithNode(el.arrow, find.meshes.node.userData.id, true);
@@ -501,11 +544,16 @@ export class GroupedGraphScene {
         this.changeArrowWithNode(el.arrow, el.origin, true);
       }
     });
+
+    //inner edges (inside nodes in group)
     find.meshes.arrowsInside.forEach(el => {
       el.arrow.line.visible = !v;
       el.arrow.cone.visible = !v;
     });
+
     let temp;
+
+    //label at the top
     this.structure.forEach(el => {
       temp = el.id;
       if (el.id == group) {
@@ -590,6 +638,7 @@ export class GroupedGraphScene {
       mesh.name = node.name;
       mesh.userData = { id: node.id, isGroup: false, group: '' };
       this.meshes.push(mesh);
+
       //Right now the position is set randomly in 3D space
       //This can be tweak to allow for any layout algorithm right here
       mesh.position.set(
@@ -635,8 +684,9 @@ export class GroupedGraphScene {
     destination = this.meshes.find(el => el.userData.id == target).position;
     dir = new THREE.Vector3().subVectors(destination, origin);
     length = dir.length() - 0.2;
-    arrowLink.position.copy(origin);
-    arrowLink.setDirection(dir.normalize());
+
+    arrowLink.position.copy(origin); //set new origin of line
+    arrowLink.setDirection(dir.normalize()); //set new direction (towards destination) of line
     arrowLink.setLength(length, 0.4, 0.1);
   }
 
@@ -647,8 +697,10 @@ export class GroupedGraphScene {
     let id = this.meshes.find(el => el == mesh).userData.id;
     this.arrows.forEach(el => {
       if (el.source == id) {
+        //Either the edge points away from this node
         this.updateLink(el.arrow, id, el.target);
       } else if (el.target == id) {
+        //Or it points toward this node
         this.updateLink(el.arrow, el.source, id);
       }
     });
@@ -657,9 +709,12 @@ export class GroupedGraphScene {
   /*
    * This is an intermediate function to change an edge that points into / out of a group
    * because than it has to point to the centroid of the group instead (or in the case of
-   * an open group to the individual nodes)
+   * an open group to the individual node)
    */
   changeArrowWithNode(arrow, id, changeSource) {
+    //changeSource decides if updateLink() should reveice id param as 2nd or 3rd parameter
+    //to change either the source (changeSource=true) or the target (changeSource=false)
+    //of an edge
     if (changeSource) {
       this.updateLink(arrow.arrow, id, arrow.target);
       arrow.source = id;
