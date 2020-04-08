@@ -30,13 +30,18 @@ export class Visualization4 extends LayeredGraphScene {
     this.structure = [];
     let matrix = translatedToMatrix(dataset);
     let levels = [];
+
+    //this function call actually does most of the job
+    //which means traversing through the whole graph beginning at
+    //the starting node
+    //but may visit nodes multiple times (to get nearest distance for every node)
     this.recursiveGraphCheck(
       matrix,
       levels,
-      dataset,
       0,
       dataset.nodes.findIndex(el => el.id == this.startNode)
     );
+
     let created = false;
     let depth = 0;
     let temp;
@@ -45,135 +50,125 @@ export class Visualization4 extends LayeredGraphScene {
         depth = el.depth;
       }
     });
+
+    //because of possible multi-visiting of nodes some more stuff
+    //has to happen now to get the final result:
+
+    //all the nodes that haven't been visited yet belong in the "Unreachable" state
     depth /= this.layerStepSize;
     depth++;
     this.meshes.forEach(el => {
       if (el.userData.level == undefined) {
+        //check if nodes doesn't haven "step count" yet which means it can't be reach
+        //from Starting node
         if (!created) {
           this.addToStructure('Unreachable');
           created = true;
         }
+
         this.setLevelDepth('Unreachable', this.layerStepSize * depth);
+
         temp = this.structure.find(el2 => el2.id == 'Unreachable');
-        temp.content.push(el);
+
+        temp.content.push(el); //fill "Unreachable" layer with all leftover nodes
+
         el.material.color.set(temp.color);
         this.moveTo(el, this.layerStepSize * depth);
+
         el.userData.level = 'Unreachable';
       }
     });
+
+    //now clear up all of the nodes that have been visited multiple times
+    //every node's layer is  set to the one with the minimal amount of steps
+    //so clear this node from all the other layers' contents
+    //and just leave it in the one where it actually belongs
     let del = [];
     this.structure.forEach(el => {
-      temp = [];
+      //go through every "X amounts of steps"-layer
+
+      temp = []; //arraya of nodes who have to be cut from the current layer
+      //because they don't belong there (becaue there is a shorter way)
+
       el.content.forEach(el2 => {
+        //go through every node on that layer
         if (el2.userData.level != el.id) {
+          //only if this node's designated layer isn't the same
+          //as this one
           temp.push(el2);
         }
       });
+
+      //now delete all the nodes that don't belong on this layer
       temp.forEach(el2 => {
         el.content.splice(
           el.content.findIndex(el3 => el3.userData.level == el2.userData.level),
           1
         );
       });
+
+      //if by deleting nodes this layer becomes obsolete -> put it in delete array
       if (el.content.length == 0) {
         del.push(el.id);
       }
     });
+
+    //go through delete array (all layers that became obsolete after previous step)
+    //and delete these layer
+    //cannot be done in the same steps as above because cannot splice in array
+    //while traversing it
     del.forEach(el => {
       let find = this.structure.find(el2 => el2.id == el);
       this.scene.remove(find.plane.p);
+
+      //delete all border lines
       find.plane.b.forEach(el2 => {
         this.scene.remove(el2);
       });
+
+      //delete all grid lines
       find.plane.g.forEach(el2 => {
         this.scene.remove(el2);
       });
+
       temp = this.structure.findIndex(el2 => el2.id == el);
       this.structure.splice(temp, 1);
     });
 
-    //All the stuff from here on in this method is just to position all the layers
-    //relative to the center (z-coord=0)
-    let tempStr = {};
-    let temp1 = 1,
-      temp2 = 0;
-
-    let addToTemp = (id, counter) => {
-      if (!(id in tempStr)) {
-        tempStr[id] = counter;
-      }
-    };
-
-    //Find out how many layers there are (n) and count them from 0 to n
-    //The order here reflects the layers' order on the z-axis
-    this.structure.forEach(el => {
-      if (el.id in tempStr) {
-        return;
-      }
-      if (el.id == 'Unreachable') {
-        temp2 = 0;
-      } else {
-        temp2 = temp1;
-        temp1++;
-      }
-      addToTemp(el.id, temp2);
-    });
-
-    if (!('Unreachable' in tempStr)) {
-      Object.keys(tempStr).forEach(el => {
-        tempStr[el]--;
-      });
-    }
-
-    //Now calc temp1 which decides how far back each layer gets shifted
-    temp2 = Object.keys(tempStr).length;
-    if (temp2 % 2 == 0) {
-      //with an even number of layers they have to be shifted unevenly (no layer can be at z-coord=0)
-      temp1 = this.layerStepSize / 2 + (temp2 / 2 - 1) * this.layerStepSize;
-    } else {
-      //with an uneven number of layers they have to be shifted evenly (one layer can be at z-coord=0)
-      temp1 = Math.floor(temp2 / 2) * this.layerStepSize;
-    }
-
-    temp1 *= -1;
-
-    //actually put every layer on it's real depth (z-coord)
-    this.structure.forEach(el => {
-      temp2 = tempStr[el.id] * this.layerStepSize + temp1; //Shift each layer back by it's index and
-      //the space in between each layer
-
-      this.meshes.forEach(el2 => {
-        if (el2.userData.level == el.id) {
-          this.setLevelDepth(el.id, temp2);
-          this.moveTo(el2, temp2);
-          el2.material.color.set(el.color);
-        }
-      });
-    });
+    this.centerLayersIn3D(false, 'Unreachable'); //this centers all layer on z-axis
   }
 
-  recursiveGraphCheck(matrix, levels, dataset, counter, index) {
+  /*
+   * Intermediate function to call on every node while traversing the array
+   */
+  recursiveGraphCheck(matrix, levels, counter, index) {
     let level = counter + ' step' + (counter == 1 ? '' : 's');
     if (level == '0 steps') {
       level += ' (start)';
     }
     if (!levels.includes(level)) {
+      //if layer with this amounts of steps doesn't exist yet create it
       levels.push(level);
       this.addToStructure(level);
     }
+
     this.meshes[index].userData.level = level;
     let l = this.structure.find(el => el.id == level);
     let found = l.content.find(
       el => el.userData.id == this.meshes[index].userData.id
     );
+
     if (found == undefined) {
       l.content.push(this.meshes[index]);
     }
+
     let temp = counter + 1;
     this.meshes[index].material.color.set(l.color);
+
+    //calling method on every node kinda like BFS
     matrix[index].forEach((el, index2) => {
       if (el) {
-        this.recursiveGraphCheck(matrix, levels, dataset, temp, index2);
+        this.recursiveGraphCheck(matrix, levels, temp, index2);
       }
     });
   }

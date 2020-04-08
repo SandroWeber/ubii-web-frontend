@@ -27,59 +27,86 @@ export class Visualization3 extends LayeredGraphScene {
    */
   setupStructure(dataset) {
     this.structure = [];
-    let matrix = translatedToMatrix(dataset);
+
+    let matrix = translatedToMatrix(dataset); //use intermediary adjacency matrix because it's easier for counting
+
     let levels = [],
       level = '',
       temp = 0;
+
     if (this.show == 0) {
+      //sort by number of incoming edges
+
+      //traverse through all nodes
       dataset.nodes.forEach((el1, index) => {
         temp = 0;
+
+        //count entries in column of adjacency matrix
         matrix.forEach(el2 => {
           if (el2[index]) {
             temp++;
           }
         });
+
         level = temp + ' incoming Edge' + (temp == 1 ? '' : 's');
+
         if (!levels.includes(level)) {
           this.addToStructure(level);
           levels.push(level);
         }
+
         this.meshes.find(
           node => node.userData.id == dataset.nodes[index].id
         ).userData.level = level;
       });
     } else if (this.show == 1) {
+      //sort by number of outgoing edges
+
+      //traverse through rows of adjacency matrix
       matrix.forEach((el1, index) => {
         temp = 0;
+
+        //count entries in row of adjacency matrix
         el1.forEach(el2 => {
           if (el2) {
             temp++;
           }
         });
+
         level = temp + ' outgoing Edge' + (temp == 1 ? '' : 's');
+
         if (!levels.includes(level)) {
           this.addToStructure(level);
           levels.push(level);
         }
+
         this.meshes.find(
           node => node.userData.id == dataset.nodes[index].id
         ).userData.level = level;
       });
     } else if (this.show == 2) {
+      //sort by combination of number of incoming and outgoing edges
+
       dataset.nodes.forEach((el1, index) => {
         temp = 0;
+
+        //count entries in column of adjacency matrix
         matrix.forEach(el2 => {
           if (el2[index]) {
             temp++;
           }
         });
+
         level = temp + ' incoming Edge' + (temp == 1 ? '' : 's');
         temp = 0;
+
+        //count entries in row of adjacency matrix
         matrix[index].forEach(el2 => {
           if (el2) {
             temp++;
           }
         });
+
         level =
           level + ' | ' + temp + ' outgoing Edge' + (temp == 1 ? '' : 's');
 
@@ -87,62 +114,14 @@ export class Visualization3 extends LayeredGraphScene {
           this.addToStructure(level);
           levels.push(level);
         }
+
         this.meshes.find(
           node => node.userData.id == dataset.nodes[index].id
         ).userData.level = level;
       });
     }
 
-    //All the stuff from here on in this method is just to position all the layers
-    //relative to the center (z-coord=0)
-    let tempStr = {};
-    let temp1 = 0,
-      temp2 = 0;
-
-    let addToTemp = (id, counter) => {
-      if (!(id in tempStr)) {
-        tempStr[id] = counter;
-      }
-    };
-
-    //Find out how many layers there are (n) and count them from 0 to n
-    //The order here reflects the layers' order on the z-axis
-    this.structure.forEach(el => {
-      if (el.id in tempStr) {
-        return;
-      }
-      temp2 = temp1;
-      temp1++;
-
-      addToTemp(el.id, temp2);
-    });
-
-    //Now calc temp1 which decides how far back each layer gets shifted
-    temp2 = Object.keys(tempStr).length;
-    if (temp2 % 2 == 0) {
-      //with an even number of layers they have to be shifted unevenly (no layer can be at z-coord=0)
-      temp1 = this.layerStepSize / 2 + (temp2 / 2 - 1) * this.layerStepSize;
-    } else {
-      //with an uneven number of layers they have to be shifted evenly (one layer can be at z-coord=0)
-      temp1 = Math.floor(temp2 / 2) * this.layerStepSize;
-    }
-
-    temp1 *= -1;
-
-    //actually put every layer on it's real depth (z-coord)
-    this.structure.forEach(el => {
-      temp2 = tempStr[el.id] * this.layerStepSize + temp1; //Shift each layer back by it's index and
-      //the space in between each layer
-
-      this.meshes.forEach(el2 => {
-        if (el2.userData.level == el.id) {
-          el.content.push(el2);
-          this.setLevelDepth(el.id, temp2);
-          this.moveTo(el2, temp2);
-          el2.material.color.set(el.color);
-        }
-      });
-    });
+    this.centerLayersIn3D(true); //this centers all layer on z-axis
   }
 
   /*

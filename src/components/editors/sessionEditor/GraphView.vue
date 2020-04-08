@@ -40,11 +40,32 @@
             auto-hide-delay="3000"
             static
           >
-            <p v-if="settings.mode == 0 && settings.view == 2">
+            <p
+              v-if="
+                settings.graphType == 'LAYERED' &&
+                  settings.sceneId == 'EXPLORATION'
+              "
+            >
               <Numeric1BoxIcon />
               <span class="text">to</span>
               <Numeric9BoxIcon />
               <span class="text">: Set node to Level 1 to 9</span>
+            </p>
+            <p
+              v-if="
+                settings.graphType == 'GROUPED' && settings.sceneId == 'BASIC'
+              "
+            >
+              <AlphaMBoxIcon />
+              <span class="text">: Merge selected nodes together</span>
+            </p>
+            <p
+              v-if="
+                settings.graphType == 'GROUPED' && settings.sceneId == 'BASIC'
+              "
+            >
+              <AlphaRBoxIcon />
+              <span class="text">: Remove the selected group</span>
             </p>
             <p>
               <AlphaWBoxIcon />
@@ -78,8 +99,9 @@
       </div>
       <div id="warning">
         This graph contains cycles!<br />
-        Showing the number of steps from one node to all others requires an
-        acylclic graph.
+        But in order to show the number of steps from a starting node to all
+        other nodes an acyclic graph is required. <br />
+        Please consider using another Mode or Graph Type.
       </div>
     </div>
   </div>
@@ -95,10 +117,8 @@ import { BToast, BButton, BBadge } from 'bootstrap-vue';
 
 import 'vue-material-design-icons/styles.css';
 import KeyboardIcon from 'vue-material-design-icons/Keyboard.vue';
+import MouseIcon from 'vue-material-design-icons/Mouse.vue';
 import Numeric1BoxIcon from 'vue-material-design-icons/Numeric1Box.vue';
-import Numeric4BoxIcon from 'vue-material-design-icons/Numeric4Box.vue';
-import Numeric5BoxIcon from 'vue-material-design-icons/Numeric5Box.vue';
-import Numeric6BoxIcon from 'vue-material-design-icons/Numeric6Box.vue';
 import Numeric9BoxIcon from 'vue-material-design-icons/Numeric9Box.vue';
 import AlphaWBoxIcon from 'vue-material-design-icons/AlphaWBox.vue';
 import AlphaABoxIcon from 'vue-material-design-icons/AlphaABox.vue';
@@ -106,6 +126,8 @@ import AlphaSBoxIcon from 'vue-material-design-icons/AlphaSBox.vue';
 import AlphaDBoxIcon from 'vue-material-design-icons/AlphaDBox.vue';
 import AlphaXBoxIcon from 'vue-material-design-icons/AlphaXBox.vue';
 import AlphaYBoxIcon from 'vue-material-design-icons/AlphaYBox.vue';
+import AlphaMBoxIcon from 'vue-material-design-icons/AlphaMBox.vue';
+import AlphaRBoxIcon from 'vue-material-design-icons/AlphaRBox.vue';
 import VideoIcon from 'vue-material-design-icons/Video.vue';
 
 export default {
@@ -123,10 +145,8 @@ export default {
     'b-button': BButton,
     'b-badge': BBadge,
     KeyboardIcon,
+    MouseIcon,
     Numeric1BoxIcon,
-    Numeric4BoxIcon,
-    Numeric5BoxIcon,
-    Numeric6BoxIcon,
     Numeric9BoxIcon,
     AlphaWBoxIcon,
     AlphaABoxIcon,
@@ -134,6 +154,8 @@ export default {
     AlphaDBoxIcon,
     AlphaXBoxIcon,
     AlphaYBoxIcon,
+    AlphaMBoxIcon,
+    AlphaRBoxIcon,
     VideoIcon
   },
   data: () => {
@@ -349,5 +371,6 @@ export default {
   background-color: black;
   font-size: 1.2em;
   display: none;
+  text-align: center;
 }
 </style>

@@ -54,23 +54,41 @@
       <div class="settings-row">
         <div class="help-container">
           <font-awesome-icon icon="question-circle" class="icon" />
-          <span v-if="selectedSceneId == 'EXPLORATION'"
+          <span v-if="selectedGraphType == '2D-FORCE'"
+            >A two-dimensional force directed graph.</span
+          >
+          <span v-if="selectedGraphType == '3D-FORCE'"
+            >A three-dimensional force directed graph.</span
+          >
+          <span
+            v-if="
+              selectedGraphType == 'LAYERED' && selectedSceneId == 'EXPLORATION'
+            "
             >Explore the graph freely with 9 individually usable Layers.</span
           >
-          <span v-if="selectedSceneId == 'TAGS'">
+          <span
+            v-if="selectedGraphType == 'LAYERED' && selectedSceneId == 'TAGS'"
+          >
             Sort your Nodes in Layers depending on which tags (or combination of
             tags) they reference.
           </span>
-          <span v-if="selectedSceneId == 'DEGREE'">
+          <span
+            v-if="selectedGraphType == 'LAYERED' && selectedSceneId == 'DEGREE'"
+          >
             Sort your Nodes in Layers depending on how many edges flow into a
             node / out of a node (node degree).
           </span>
-          <span v-if="selectedSceneId == 'STEPS'">
+          <span
+            v-if="selectedGraphType == 'LAYERED' && selectedSceneId == 'STEPS'"
+          >
             Sort your Nodes in Layers depending on how many steps they are away
             from your Starting Node
           </span>
-          <span v-if="selectedSceneId == 'BASIC'">
-            Structure the graph by merging nodes together to form groups.
+          <span
+            v-if="selectedGraphType == 'GROUPED' && selectedSceneId == 'BASIC'"
+          >
+            Structure the graph by merging nodes together to form groups. Open
+            or close groups to reveal the individual nodes inside.
           </span>
         </div>
       </div>

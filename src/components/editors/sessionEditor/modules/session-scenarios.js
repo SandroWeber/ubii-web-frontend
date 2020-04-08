@@ -3,7 +3,7 @@ import uuidv4 from 'uuid/v4';
 let scenarios = [
   {
     id: '0001',
-    name: 'Dataset 1',
+    name: 'Dataset 1 (Small Graph)',
     test: true,
     nodes: [
       {
@@ -78,7 +78,7 @@ let scenarios = [
   },
   {
     id: '0002',
-    name: 'Dataset 2',
+    name: 'Dataset 2 (Big Graph)',
     test: true,
     nodes: [
       {
@@ -195,7 +195,7 @@ let scenarios = [
   },
   {
     id: '0003',
-    name: 'Dataset 3',
+    name: 'Dataset 3 (Cyclic Graph)',
     test: true,
     nodes: [
       {

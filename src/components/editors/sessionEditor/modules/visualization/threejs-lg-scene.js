@@ -370,6 +370,80 @@ export class LayeredGraphScene {
   }
 
   /*
+   * This methods is called after the structure (all layers) has been created
+   * to center the layers on the z-axis so that the center of rotation of the camera
+   * is directly in the middle
+   */
+  centerLayersIn3D(pushNodes, specialState) {
+    let tempStr = {}; //temporary structure to count up
+    let temp1 = specialState == undefined ? 0 : 1; //reserve first layer for special state (like "Unreachable" or "No Tags")
+    let temp2 = 0;
+
+    let addToTemp = (id, counter) => {
+      if (!(id in tempStr)) {
+        tempStr[id] = counter;
+      }
+    };
+
+    //Find out how many layers there are (n) and count them from 0 to n
+    //The order here reflects the layers' order on the z-axis
+    this.structure.forEach(el => {
+      if (el.id in tempStr) {
+        return;
+      }
+      if (specialState != undefined && el.id == specialState) {
+        temp2 = 0;
+      } else {
+        temp2 = temp1;
+        temp1++;
+      }
+      addToTemp(el.id, temp2);
+    });
+
+    if (specialState != undefined && !(specialState in tempStr)) {
+      Object.keys(tempStr).forEach(el => {
+        tempStr[el]--;
+      });
+    }
+
+    //Now calc temp1 which decides how far back each layer gets shifted
+    temp2 = Object.keys(tempStr).length;
+    if (temp2 % 2 == 0) {
+      //with an even number of layers they have to be shifted unevenly (no layer can be at z-coord=0)
+      temp1 = this.layerStepSize / 2 + (temp2 / 2 - 1) * this.layerStepSize;
+    } else {
+      //with an uneven number of layers they have to be shifted evenly (one layer can be at z-coord=0)
+      temp1 = Math.floor(temp2 / 2) * this.layerStepSize;
+    }
+
+    temp1 *= -1;
+
+    //actually put every layer on it's real depth (z-coord)
+    this.structure.forEach(el => {
+      temp2 = tempStr[el.id] * this.layerStepSize + temp1; //Shift each layer back by it's index and
+      //the space in between each layer
+
+      this.meshes.forEach(el2 => {
+        if (el2.userData.level == el.id) {
+          if (pushNodes) {
+            el.content.push(el2);
+          }
+          this.setLevelDepth(el.id, temp2);
+          this.moveTo(el2, temp2);
+          el2.material.color.set(el.color);
+        }
+      });
+    });
+
+    if (specialState != undefined && specialState in tempStr) {
+      temp1 = this.structure.findIndex(el => el.id == specialState);
+      temp2 = this.structure.find(el => el.id == specialState);
+      this.structure.splice(temp1, 1);
+      this.structure.unshift(temp2);
+    }
+  }
+
+  /*
    * Intermediate function to create all the meshes for a layer
    */
   createLayerPlane(color) {
