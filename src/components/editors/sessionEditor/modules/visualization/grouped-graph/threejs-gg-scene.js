@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import $ from 'jquery';
-import { randomHexColor } from '../utils';
+import { randomHexColor } from '../../utils';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import DragControls from 'three-dragcontrols';
 import { RenderPass, EffectComposer, OutlinePass } from 'three-outlinepass';
@@ -41,7 +41,6 @@ export class GroupedGraphScene {
     this.delete = null;
 
     this.change = null;
-    this.showViewLabel = () => {};
     this.camera = camera;
 
     this.orbitControls = orbitControls;

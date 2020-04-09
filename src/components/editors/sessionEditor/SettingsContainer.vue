@@ -64,28 +64,29 @@
             v-if="
               selectedGraphType == 'LAYERED' && selectedSceneId == 'EXPLORATION'
             "
-            >Explore the graph freely with 9 individually usable Layers.</span
+            >Explore the graph freely with 9 individually usable layers. These
+            layers can be filled however you want.</span
           >
           <span
             v-if="selectedGraphType == 'LAYERED' && selectedSceneId == 'TAGS'"
           >
-            Sort your Nodes in Layers depending on which tags (or combination of
+            Sort your Nodes in layers depending on which tags (or combination of
             tags) they reference.
           </span>
           <span
             v-if="selectedGraphType == 'LAYERED' && selectedSceneId == 'DEGREE'"
           >
-            Sort your Nodes in Layers depending on how many edges flow into a
+            Sort your Nodes in layers depending on how many edges flow into a
             node / out of a node (node degree).
           </span>
           <span
             v-if="selectedGraphType == 'LAYERED' && selectedSceneId == 'STEPS'"
           >
-            Sort your Nodes in Layers depending on how many steps they are away
+            Sort your Nodes in layers depending on how many steps they are away
             from your Starting Node
           </span>
           <span
-            v-if="selectedGraphType == 'GROUPED' && selectedSceneId == 'BASIC'"
+            v-if="selectedGraphType == 'GROUPED' && selectedSceneId == 'MANUAL'"
           >
             Structure the graph by merging nodes together to form groups. Open
             or close groups to reveal the individual nodes inside.
@@ -225,10 +226,14 @@ export default {
       ],
       sceneIdOptions: [
         { value: 'EXPLORATION', text: 'Exploration', graphType: 'LAYERED' },
-        { value: 'TAGS', text: 'Tags', graphType: 'LAYERED' },
-        { value: 'DEGREE', text: 'Node Degree', graphType: 'LAYERED' },
-        { value: 'STEPS', text: 'Steps', graphType: 'LAYERED' },
-        { value: 'BASIC', text: 'Manual', graphType: 'GROUPED' }
+        { value: 'TAGS', text: 'Layers by Tags', graphType: 'LAYERED' },
+        {
+          value: 'DEGREE',
+          text: 'Layers by Node Degree',
+          graphType: 'LAYERED'
+        },
+        { value: 'STEPS', text: 'Layers by Steps', graphType: 'LAYERED' },
+        { value: 'MANUAL', text: 'Manual Grouping', graphType: 'GROUPED' }
       ],
       sortingOptions: [
         { value: 0, text: 'Incoming Edges' },

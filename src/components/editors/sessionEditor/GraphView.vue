@@ -53,7 +53,7 @@
             </p>
             <p
               v-if="
-                settings.graphType == 'GROUPED' && settings.sceneId == 'BASIC'
+                settings.graphType == 'GROUPED' && settings.sceneId == 'MANUAL'
               "
             >
               <AlphaMBoxIcon />
@@ -61,11 +61,13 @@
             </p>
             <p
               v-if="
-                settings.graphType == 'GROUPED' && settings.sceneId == 'BASIC'
+                settings.graphType == 'GROUPED' && settings.sceneId == 'MANUAL'
               "
             >
               <AlphaRBoxIcon />
-              <span class="text">: Remove the selected group</span>
+              <span class="text"
+                >: Remove the selected group while dragging its node</span
+              >
             </p>
             <p>
               <AlphaWBoxIcon />
@@ -93,7 +95,7 @@
             ><span class="focus-icon"><KeyboardIcon fillColor="#FF0000"/></span
           ></span>
           <span id="view-badge" class="ui-box ui-item"
-            >View: X-Axis (Main)</span
+            >View: X-Axis (Front)</span
           >
         </div>
       </div>
@@ -372,5 +374,10 @@ export default {
   font-size: 1.2em;
   display: none;
   text-align: center;
+}
+
+#threejs-container >>> .toast,
+#threejs-container >>> .b-toast {
+  max-width: 500px !important;
 }
 </style>

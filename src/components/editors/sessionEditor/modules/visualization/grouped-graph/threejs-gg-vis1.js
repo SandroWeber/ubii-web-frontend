@@ -5,7 +5,7 @@ import { GroupedGraphScene } from './threejs-gg-scene';
 export class GGVisualization1 extends GroupedGraphScene {
   constructor(dataset, settings, renderer, camera, orbitControls) {
     super(dataset, settings, renderer, camera, orbitControls);
-    this.id = 'BASIC';
+    this.id = 'MANUAL';
     this.geometry = new THREE.SphereGeometry(0.2, 64, 64);
     this.material = new THREE.MeshLambertMaterial({
       transparent: true,
@@ -119,17 +119,17 @@ export class GGVisualization1 extends GroupedGraphScene {
   /*
    * Method for handling keypresses
    */
-  onKeyDown(event, showViewLabel) {
+  onKeyDown(event) {
     let keyCode = event.which;
     if (keyCode == 88) {
       //X-button for front view
       this.orbitControls.reset();
-      showViewLabel('X');
+      this.showViewLabel('X');
     } else if (keyCode == 89) {
       //Y-button for side view
       this.camera.position.set(-8, 0, 0);
       this.orbitControls.update();
-      showViewLabel('Y');
+      this.showViewLabel('Y');
     } else if (keyCode == 17) {
       this.selectKeyPressed = true;
     } else if (keyCode == 77) {

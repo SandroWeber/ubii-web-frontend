@@ -54,7 +54,7 @@ export class VisualizationManager {
     this.orbitControls.addEventListener(
       'change',
       event => {
-        this.showViewLabel.bind(this, '');
+        this.showViewLabel('');
       },
       false
     );
@@ -99,7 +99,7 @@ export class VisualizationManager {
 
   onKeyDown(event) {
     if (!this.stop) {
-      this.scene.onKeyDown(event, this.showViewLabel());
+      this.scene.onKeyDown(event);
     }
   }
 
@@ -301,9 +301,9 @@ export class VisualizationManager {
         visualization = Visualizations.find(
           el => el.type == this.settings.graphType
         );
-        //Next line always searches for sceneId='BASIC' for Grouped Graph because
+        //Next line always searches for sceneId='MANUAL' for Grouped Graph because
         //that's the only one realized right now
-        scene = visualization.scenes.find(el => el.id == 'BASIC');
+        scene = visualization.scenes.find(el => el.id == 'MANUAL');
         this.scene = new scene.scene(
           this.dataset,
           this.settings,
@@ -316,7 +316,7 @@ export class VisualizationManager {
     }
     this.changeSetting('viewZeroMarker');
     this.scene.setChange(this.change); //These have to be changed after constructor of scene
-    this.scene.setShowViewLabel(this.showViewLabel()); //These have to be changed after constructor of scene
+    this.scene.setShowViewLabel(this.showViewLabel.bind(this)); //These have to be changed after constructor of scene
     this.stop = false; //stop would otherwise halt the animate function
   }
 
@@ -402,16 +402,18 @@ export class VisualizationManager {
   }
 
   showViewLabel(view) {
-    return () => {
-      if (view == '') {
-        $('#view-badge').html('View: 3D');
+    if (view == '') {
+      $('#view-badge').html('View: 3D');
+    } else {
+      if (view == 'X') {
+        $('#view-badge').html('View: X-Axis (Front)');
       } else {
-        if (view == 'X') {
-          $('#view-badge').html('View: X-Axis (Main)');
-        } else {
+        if (this.settings.graphType == 'LAYERED') {
           $('#view-badge').html('View: Y-Axis (Layers)');
+        } else {
+          $('#view-badge').html('View: Y-Axis (Side)');
         }
       }
-    };
+    }
   }
 }

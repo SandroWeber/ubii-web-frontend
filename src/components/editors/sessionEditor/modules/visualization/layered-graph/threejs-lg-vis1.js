@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import $ from 'jquery';
 import { LayeredGraphScene } from './threejs-lg-scene';
 
-export class Visualization1 extends LayeredGraphScene {
+export class LGVisualization1 extends LayeredGraphScene {
   constructor(dataset, settings, renderer, camera, orbitControls) {
     super(dataset, settings, renderer, camera, orbitControls);
     this.id = 'EXPLORATION';
@@ -115,7 +115,7 @@ export class Visualization1 extends LayeredGraphScene {
   /*
    * Method for handling keypresses
    */
-  onKeyDown(event, showViewLabel) {
+  onKeyDown(event) {
     let keyCode = event.which;
 
     let move = (layer, pos, obj) => {
@@ -150,12 +150,12 @@ export class Visualization1 extends LayeredGraphScene {
     if (keyCode == 88) {
       //X-button for front view
       this.orbitControls.reset();
-      showViewLabel('X');
+      this.showViewLabel('X');
     } else if (keyCode == 89) {
       //Y-button for side view on layers
       this.camera.position.set(-8, 0, 0);
       this.orbitControls.update();
-      showViewLabel('Y');
+      this.showViewLabel('Y');
     } else if (keyCode == 49) {
       move('Layer 1', -4, this);
     } else if (keyCode == 50) {

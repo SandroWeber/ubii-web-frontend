@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import $ from 'jquery';
-import { randomHexColor } from '../utils';
+import { randomHexColor } from '../../utils';
 import DragControls from 'three-dragcontrols';
 import { RenderPass, EffectComposer, OutlinePass } from 'three-outlinepass';
 
@@ -42,7 +42,6 @@ export class LayeredGraphScene {
     this.gridPositions = [];
     this.snapToGrid = settings.snapToGrid;
     this.change = null;
-    this.showViewLabel = () => {};
     this.camera = camera;
 
     this.orbitControls = orbitControls;
