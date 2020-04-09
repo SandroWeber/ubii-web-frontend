@@ -7,6 +7,8 @@
         @change="onFullScreenChange"
         style="overflow: hidden;"
       >
+      <!-- JOYCON mode for Controller -->
+      <template  v-if="controllerMode === controllerModes.JOYCON">
         <div class="debug-log">{{ textOutput }}</div>
         <button class="button-fullscreen" @click="toggleFullScreen()">
           <font-awesome-icon
@@ -73,6 +75,22 @@
         <div id="ubii-controller-touch-display-area" class="touch-area">
           <canvas id="canvas-display-area" class="canvas-display-area"></canvas>
         </div>
+      </template>
+      <!-- CAMERA mode for Controller -->
+      <template v-else-if="controllerMode === controllerModes.CAMERA">
+          <div class="interface-wrapper">
+            <div class="debug-log">{{ textOutput }}</div>
+            <video id="video" class="camera-image" autoplay></video>
+            <div id="video-overlay" class="video-overlay"></div>
+            <button
+             @click="onButtonCoCoSSD"
+              :class="{'toggle-active': cocoSsdActive, 'toggle-inactive': !cocoSsdActive}"
+            >toggle coco-ssd object detection</button>
+          </div>
+      </template>
+      <template v-else>
+        DEFAULT MODE
+      </template>
       </fullscreen>
     </div>
   </UbiiClientContent>
@@ -81,11 +99,13 @@
 <script>
 import Vue from 'vue';
 import Fullscreen from 'vue-fullscreen';
+import uuidv4 from 'uuid/v4';
 
 import UbiiClientContent from '../applications/sharedModules/UbiiClientContent';
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import UbiiEventBus from '../../services/ubiiClient/ubiiEventBus';
+import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -93,6 +113,12 @@ import { faExpand, faCompress } from '@fortawesome/free-solid-svg-icons';
 import { setTimeout } from 'timers';
 
 const ImageDataFormats = ProtobufLibrary.ubii.dataStructure.Image2D.DataFormat;
+
+// enum for controller modes, default shall be joycon
+const controllerModes = {
+  JOYCON: 'joycon',
+  CAMERA: 'camera'
+}
 
 library.add([faExpand, faCompress]);
 
@@ -120,6 +146,30 @@ export default {
       this.registerUbiiSpecs();
     });
 
+    // For CAMERA
+    let video = document.getElementById('video');
+    this.videoOverlayElement = document.getElementById('video-overlay');
+    this.publishFrequency = 500; // ms
+    // Get access to the camera!
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      // Not adding `{ audio: true }` since we only want video now
+      navigator.mediaDevices.getUserMedia({ video: true }).then(
+        //resolved
+        stream => {
+          //video.src = window.URL.createObjectURL(stream);
+          video.srcObject = stream;
+          video.play();
+
+          this.videoElement = video;
+          this.start();
+        },
+        //rejected
+        error => {
+          console.warn(error);
+        }
+      );
+    }
+
     this.toggleFullScreen();
   },
   beforeDestroy: function() {
@@ -138,16 +188,21 @@ export default {
       publishFrequency: 0.01,
       fullscreen: false,
       stickPosition: stickPos,
-      textOutput: 'have fun :)'
+      textOutput: 'have fun :)',
+      controllerMode: controllerModes.JOYCON,
+      controllerModes,
+      cocoSsdActive: false,
     };
   },
   methods: {
     stopInterface: function() {
+      this.cocoSsdActive = false;
+      this.stopCoCoSSDObjectDetection();
       this.unregisterEventListeners();
       this.unregisterUbiiSpecs();
     },
     /* ubii methods */
-    createUbiiSpecs: function() {
+    createUbiiSpecs: async function() {
       if (this.clientId) {
         console.warn('tried to create ubii specs, but are already present');
         return;
@@ -211,7 +266,22 @@ export default {
             topic: topicPrefix + '/set_text',
             messageFormat: 'string',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
-          }
+          },
+          {
+            topic: topicPrefix + '/set_controllerMode',
+            messageFormat: 'string',
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+          },
+          {
+            topic: topicPrefix + '/camera_image',
+            messageFormat: 'ubii.dataStructure.Image2D',
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+          },
+          {
+            topic: topicPrefix + '/objects',
+            messageFormat: 'ubii.dataStructure.Object2DList',
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+          },
           //TODO: clear image topic
         ]
       };
@@ -242,6 +312,49 @@ export default {
       this.componentSetImage = this.ubiiDevice.components[7];
       this.componentClearImage = this.ubiiDevice.components[8];
       this.componentTextOutput = this.ubiiDevice.components[9];
+      this.componentSetControllerMode = this.ubiiDevice.components[10];
+      this.componentCameraImage = this.ubiiDevice.components[11];
+      this.componentCameraObjects = this.ubiiDevice.components[12];
+
+      // For CocoSSD
+      let interactionCocoSsdID = 'b74761e9-3cd3-400c-8144-23669e951c2c';
+      let getInteractionResponse = await UbiiClientService.callService({
+        topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_GET,
+        interaction: {
+          id: interactionCocoSsdID
+        }
+      });
+      if (getInteractionResponse.error) {
+        console.warn(getInteractionResponse.error);
+      } else {
+        this.interactionCocoSsdSpecs = getInteractionResponse.interaction;
+      }
+      this.ubiiSessionCoCoSSD = {
+        id: uuidv4(),
+        name: 'UbiiControllerCamera - Session CoCoSSD',
+        processMode:
+          ProtobufLibrary.ubii.sessions.ProcessMode
+            .INDIVIDUAL_PROCESS_FREQUENCIES,
+        interactions: [this.interactionCocoSsdSpecs],
+        ioMappings: [
+          {
+            interactionId: this.interactionCocoSsdSpecs.id,
+            inputMappings: [
+              {
+                name: this.interactionCocoSsdSpecs.inputFormats[0].internalName,
+                topicSource: this.componentCameraImage
+              }
+            ],
+            outputMappings: [
+              {
+                name: this.interactionCocoSsdSpecs.outputFormats[0]
+                  .internalName,
+                topicDestination: this.componentCameraObjects
+              }
+            ]
+          }
+        ]
+      };
     },
     registerUbiiSpecs: function() {
       if (this.initializing || this.hasRegisteredUbiiDevice) {
@@ -251,6 +364,7 @@ export default {
         return;
       }
       this.initializing = true;
+      this.cocoSSDLabels = [];
 
       // register the mouse pointer device
       UbiiClientService.isConnected().then(() => {
@@ -282,6 +396,13 @@ export default {
                 this.textOutput = text;
               }
             );
+
+            UbiiClientService.subscribe(
+              this.componentSetControllerMode.topic,
+              controllerMode => { 
+                this.controllerMode = controllerMode;
+              }
+            )
 
             if (this.componentVibration) {
               UbiiClientService.subscribe(
@@ -590,6 +711,150 @@ export default {
       if (this.deviceData.currentOrientation) {
         this.deviceData.calibratedOrientation = this.deviceData.currentOrientation;
       }
+    },
+    // interface methods for cocoSSD / camera mode
+    onButtonCoCoSSD: function() {
+      this.cocoSsdActive = !this.cocoSsdActive;
+
+      if (this.cocoSsdActive) {
+        this.startCoCoSSDObjectDetection();
+      } else {
+        this.stopCoCoSSDObjectDetection();
+      }
+    },
+    startCoCoSSDObjectDetection: function() {
+      UbiiClientService.subscribe(
+        this.ubiiDevice.components[1].topic,
+        predictedObjectsList => {
+          this.drawCoCoSSDLabels(predictedObjectsList.elements);
+        }
+      );
+
+      UbiiClientService.callService({
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+        session: this.ubiiSessionCoCoSSD
+      }).then(response => {
+        if (response.error) {
+          console.warn(response.error);
+        } else {
+          console.info(response);
+        }
+      });
+
+      let continuousPublish = () => {
+        this.publishImage();
+
+        if (this.cocoSsdActive) {
+          setTimeout(continuousPublish.bind(this), this.publishFrequency);
+        }
+      };
+      continuousPublish();
+    },
+    stopCoCoSSDObjectDetection: function() {
+      UbiiClientService.unsubscribe(this.ubiiDevice.components[1].topic);
+
+      this.cocoSSDLabels.forEach(div => {
+        div.style.visibility = 'hidden';
+      });
+
+      this.ubiiSessionCoCoSSD &&
+        UbiiClientService.callService({
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+          session: this.ubiiSessionCoCoSSD
+        });
+    },
+    publishImage: function() {
+      let img = this.captureImage();
+      // reduce from RGBA8 to RGB8, fitting tensorflow model
+      let data = img.data.filter((element, index, array) => {
+        print(array);
+        return (index + 1) % 4 !== 0;
+      });
+
+      let tSeconds = Date.now() / 1000;
+      let seconds = Math.floor(tSeconds);
+      let nanos = Math.floor((tSeconds - seconds) * 1000000000);
+      UbiiClientService.publishRecord({
+        topic: this.ubiiDevice.components[0].topic,
+        timestamp: {
+          seconds: seconds,
+          nanos: nanos
+        },
+        image2D: {
+          width: img.width,
+          height: img.height,
+          data: data,
+          dataFormat:
+            ProtobufLibrary.ubii.dataStructure.Image2D.DataFormat.RGBA8
+        }
+      });
+    },
+    captureImage: function() {
+      var canvas = document.createElement('canvas');
+      canvas.height = this.videoElement.videoHeight;
+      canvas.width = this.videoElement.videoWidth;
+
+      let videoRatio = canvas.width / canvas.height;
+      let displayRatio =
+        this.videoElement.clientWidth / this.videoElement.clientHeight;
+
+      if (displayRatio > videoRatio) {
+        this.videoOverlayElement.style.width =
+          videoRatio * this.videoOverlayElement.clientHeight + 'px';
+      } else if (displayRatio < videoRatio) {
+        this.videoOverlayElement.style.height =
+          videoRatio * this.videoOverlayElement.clientWidth + 'px';
+      }
+
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(this.videoElement, 0, 0, canvas.width, canvas.height);
+
+      return ctx.getImageData(0, 0, canvas.width, canvas.height);
+    },
+    drawCoCoSSDLabels: function(predictionsList) {
+      if (!this.cocoSsdActive) {
+        return;
+      }
+
+      while (this.cocoSSDLabels.length < predictionsList.length) {
+        let divElement = document.createElement('div');
+        divElement.style.color = 'black';
+        divElement.style.border = '5px solid rgba(255, 255, 0, 0.4)';
+        divElement.style.position = 'relative';
+        divElement.style.textAlign = 'left';
+        divElement.style.fontWeight = 'bold';
+        this.videoOverlayElement.appendChild(divElement);
+        this.cocoSSDLabels.push(divElement);
+      }
+
+      let overlayBoundings = this.videoOverlayElement.getBoundingClientRect();
+      this.cocoSSDLabels.forEach((div, index) => {
+        if (index < predictionsList.length) {
+          div.innerHTML = predictionsList[index].id;
+          // set position
+          div.style.left =
+            Math.floor(
+              predictionsList[index].pose.position.x * overlayBoundings.width
+            ) + 'px';
+          div.style.top =
+            Math.floor(
+              predictionsList[index].pose.position.y * overlayBoundings.height
+            ) + 'px';
+          // set size
+          div.style.width =
+            Math.floor(predictionsList[index].size.x * overlayBoundings.width) +
+            'px';
+          div.style.height =
+            Math.floor(
+              predictionsList[index].size.y * overlayBoundings.height
+            ) + 'px';
+          div.style.textShadow = '0px 0px 10px yellow';
+
+          div.style.visibility = 'visible';
+        } else {
+          div.style.visibility = 'hidden';
+        }
+      });
     }
   }
 };
@@ -738,5 +1003,45 @@ export default {
 .canvas-display-area {
   width: 100%;
   height: 100%;
+}
+
+/* For Camera Template */
+.interface-wrapper {
+  display: grid;
+  grid-gap: 5px;
+  padding: 5px;
+  grid-template-rows: auto 30px;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-areas:
+    'debug-log debug-log debug-log'
+    'camera-image camera-image camera-image'
+    'button-coco-ssd placeholder-a placeholder-b';
+}
+
+.camera-image {
+  grid-area: camera-image;
+  width: 100%;
+  height: 100%;
+}
+
+.video-overlay {
+  grid-area: camera-image;
+  width: 100%;
+  justify-self: center;
+  overflow: hidden;
+}
+
+.object-detection-label {
+  position: relative;
+  background-color: yellow;
+  color: black;
+}
+
+.toggle-active {
+  background-color: green;
+}
+
+.toggle-inactive {
+  background-color: grey;
 }
 </style>

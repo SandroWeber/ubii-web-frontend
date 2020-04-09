@@ -130,7 +130,7 @@ export default {
 
       this.ubiiSessionCoCoSSD = {
         id: uuidv4(),
-        name: 'CameraUbiiParty - Session CoCoSSD',
+        name: 'UbiiControllerCamera - Session CoCoSSD',
         processMode:
           ProtobufLibrary.ubii.sessions.ProcessMode
             .INDIVIDUAL_PROCESS_FREQUENCIES,
