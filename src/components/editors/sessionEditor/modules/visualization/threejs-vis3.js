@@ -30,8 +30,8 @@ export class Visualization3 extends LayeredGraphScene {
 
     let matrix = translatedToMatrix(dataset); //use intermediary adjacency matrix because it's easier for counting
 
-    let levels = [],
-      level = '',
+    let layers = [],
+      layer = '',
       temp = 0;
 
     if (this.show == 0) {
@@ -48,16 +48,16 @@ export class Visualization3 extends LayeredGraphScene {
           }
         });
 
-        level = temp + ' incoming Edge' + (temp == 1 ? '' : 's');
+        layer = temp + ' incoming Edge' + (temp == 1 ? '' : 's');
 
-        if (!levels.includes(level)) {
-          this.addToStructure(level);
-          levels.push(level);
+        if (!layers.includes(layer)) {
+          this.addToStructure(layer);
+          layers.push(layer);
         }
 
         this.meshes.find(
           node => node.userData.id == dataset.nodes[index].id
-        ).userData.level = level;
+        ).userData.layer = layer;
       });
     } else if (this.show == 1) {
       //sort by number of outgoing edges
@@ -73,16 +73,16 @@ export class Visualization3 extends LayeredGraphScene {
           }
         });
 
-        level = temp + ' outgoing Edge' + (temp == 1 ? '' : 's');
+        layer = temp + ' outgoing Edge' + (temp == 1 ? '' : 's');
 
-        if (!levels.includes(level)) {
-          this.addToStructure(level);
-          levels.push(level);
+        if (!layers.includes(layer)) {
+          this.addToStructure(layer);
+          layers.push(layer);
         }
 
         this.meshes.find(
           node => node.userData.id == dataset.nodes[index].id
-        ).userData.level = level;
+        ).userData.layer = layer;
       });
     } else if (this.show == 2) {
       //sort by combination of number of incoming and outgoing edges
@@ -97,7 +97,7 @@ export class Visualization3 extends LayeredGraphScene {
           }
         });
 
-        level = temp + ' incoming Edge' + (temp == 1 ? '' : 's');
+        layer = temp + ' incoming Edge' + (temp == 1 ? '' : 's');
         temp = 0;
 
         //count entries in row of adjacency matrix
@@ -107,17 +107,17 @@ export class Visualization3 extends LayeredGraphScene {
           }
         });
 
-        level =
-          level + ' | ' + temp + ' outgoing Edge' + (temp == 1 ? '' : 's');
+        layer =
+          layer + ' | ' + temp + ' outgoing Edge' + (temp == 1 ? '' : 's');
 
-        if (!levels.includes(level)) {
-          this.addToStructure(level);
-          levels.push(level);
+        if (!layers.includes(layer)) {
+          this.addToStructure(layer);
+          layers.push(layer);
         }
 
         this.meshes.find(
           node => node.userData.id == dataset.nodes[index].id
-        ).userData.level = level;
+        ).userData.layer = layer;
       });
     }
 

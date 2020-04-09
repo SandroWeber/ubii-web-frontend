@@ -49,7 +49,7 @@
               <Numeric1BoxIcon />
               <span class="text">to</span>
               <Numeric9BoxIcon />
-              <span class="text">: Set node to Level 1 to 9</span>
+              <span class="text">: Set node to Layer 1 to 9</span>
             </p>
             <p
               v-if="
@@ -83,7 +83,7 @@
             <p>
               <AlphaYBoxIcon />
               <span class="text"
-                >: Reset Camera to Level View (Y-Axis/2D/Side)</span
+                >: Reset Camera to Layer View (Y-Axis/2D/Side)</span
               >
             </p>
           </b-toast>

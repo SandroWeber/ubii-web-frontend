@@ -29,7 +29,7 @@ export class Visualization4 extends LayeredGraphScene {
   setupStructure(dataset) {
     this.structure = [];
     let matrix = translatedToMatrix(dataset);
-    let levels = [];
+    let layers = [];
 
     //this function call actually does most of the job
     //which means traversing through the whole graph beginning at
@@ -37,7 +37,7 @@ export class Visualization4 extends LayeredGraphScene {
     //but may visit nodes multiple times (to get nearest distance for every node)
     this.recursiveGraphCheck(
       matrix,
-      levels,
+      layers,
       0,
       dataset.nodes.findIndex(el => el.id == this.startNode)
     );
@@ -58,7 +58,7 @@ export class Visualization4 extends LayeredGraphScene {
     depth /= this.layerStepSize;
     depth++;
     this.meshes.forEach(el => {
-      if (el.userData.level == undefined) {
+      if (el.userData.layer == undefined) {
         //check if nodes doesn't haven "step count" yet which means it can't be reach
         //from Starting node
         if (!created) {
@@ -66,7 +66,7 @@ export class Visualization4 extends LayeredGraphScene {
           created = true;
         }
 
-        this.setLevelDepth('Unreachable', this.layerStepSize * depth);
+        this.setLayerDepth('Unreachable', this.layerStepSize * depth);
 
         temp = this.structure.find(el2 => el2.id == 'Unreachable');
 
@@ -75,7 +75,7 @@ export class Visualization4 extends LayeredGraphScene {
         el.material.color.set(temp.color);
         this.moveTo(el, this.layerStepSize * depth);
 
-        el.userData.level = 'Unreachable';
+        el.userData.layer = 'Unreachable';
       }
     });
 
@@ -92,7 +92,7 @@ export class Visualization4 extends LayeredGraphScene {
 
       el.content.forEach(el2 => {
         //go through every node on that layer
-        if (el2.userData.level != el.id) {
+        if (el2.userData.layer != el.id) {
           //only if this node's designated layer isn't the same
           //as this one
           temp.push(el2);
@@ -102,7 +102,7 @@ export class Visualization4 extends LayeredGraphScene {
       //now delete all the nodes that don't belong on this layer
       temp.forEach(el2 => {
         el.content.splice(
-          el.content.findIndex(el3 => el3.userData.level == el2.userData.level),
+          el.content.findIndex(el3 => el3.userData.layer == el2.userData.layer),
           1
         );
       });
@@ -141,19 +141,19 @@ export class Visualization4 extends LayeredGraphScene {
   /*
    * Intermediate function to call on every node while traversing the array
    */
-  recursiveGraphCheck(matrix, levels, counter, index) {
-    let level = counter + ' step' + (counter == 1 ? '' : 's');
-    if (level == '0 steps') {
-      level += ' (start)';
+  recursiveGraphCheck(matrix, layers, counter, index) {
+    let layer = counter + ' step' + (counter == 1 ? '' : 's');
+    if (layer == '0 steps') {
+      layer += ' (start)';
     }
-    if (!levels.includes(level)) {
+    if (!layers.includes(layer)) {
       //if layer with this amounts of steps doesn't exist yet create it
-      levels.push(level);
-      this.addToStructure(level);
+      layers.push(layer);
+      this.addToStructure(layer);
     }
 
-    this.meshes[index].userData.level = level;
-    let l = this.structure.find(el => el.id == level);
+    this.meshes[index].userData.layer = layer;
+    let l = this.structure.find(el => el.id == layer);
     let found = l.content.find(
       el => el.userData.id == this.meshes[index].userData.id
     );
@@ -168,7 +168,7 @@ export class Visualization4 extends LayeredGraphScene {
     //calling method on every node kinda like BFS
     matrix[index].forEach((el, index2) => {
       if (el) {
-        this.recursiveGraphCheck(matrix, levels, temp, index2);
+        this.recursiveGraphCheck(matrix, layers, temp, index2);
       }
     });
   }

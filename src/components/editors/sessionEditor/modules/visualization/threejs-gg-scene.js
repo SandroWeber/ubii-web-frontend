@@ -22,7 +22,6 @@ export class GroupedGraphScene {
     this.materials = [];
     this.selectedNode = null; //the currently selected nodes (with strg pressed)
     this.selected = []; //the currently selected node (settings.viewNode)
-    this.levels = [];
     this.intersects = null;
     this.planeIntersects = null;
     this.same = false;

@@ -20,7 +20,7 @@ export class LayeredGraphScene {
     this.arrows = [];
     this.materials = [];
     this.selected = null; //the currently selected node (settings.viewNode)
-    this.levels = [];
+    this.layers = [];
     this.intersects = null;
     this.planeIntersects = null;
     this.same = false;
@@ -164,8 +164,8 @@ export class LayeredGraphScene {
   /*
    * move node to layer physically (z-axis)
    */
-  moveTo(node, level) {
-    node.position.set(node.position.x, node.position.y, level);
+  moveTo(node, layer) {
+    node.position.set(node.position.x, node.position.y, layer);
     this.changeArrow(node);
   }
 
@@ -175,7 +175,7 @@ export class LayeredGraphScene {
   dragBehaviour() {
     this.point = null;
     this.point = this.planeIntersects.find(
-      el => el.object.userData.id == this.selected.userData.level
+      el => el.object.userData.id == this.selected.userData.layer
     );
     if (this.point != null) {
       //if mouse ray intersects with layer of selected node put node on intersection point
@@ -212,13 +212,13 @@ export class LayeredGraphScene {
       this.hover = obj;
       this.nodeLabel.show(); //this is the label that shows the nodes name and follows the mouse
       this.nodeLabel.html('Name: ' + obj.name);
-      if (this.hover.userData.level != '') {
+      if (this.hover.userData.layer != '') {
         //if node is on layer (normally the case) highlight layer (and grid of layer)
-        this.showLayer(obj.userData.level, true);
+        this.showLayer(obj.userData.layer, true);
       }
     } else if (this.hover != null) {
       //start=false and hover object (set from first firing of this function) is existent
-      let layer = this.hover.userData.level;
+      let layer = this.hover.userData.layer;
       this.hover = null;
       this.nodeLabel.hide();
       this.showLayer(layer, false);
@@ -424,11 +424,11 @@ export class LayeredGraphScene {
       //the space in between each layer
 
       this.meshes.forEach(el2 => {
-        if (el2.userData.level == el.id) {
+        if (el2.userData.layer == el.id) {
           if (pushNodes) {
             el.content.push(el2);
           }
-          this.setLevelDepth(el.id, temp2);
+          this.setLayerDepth(el.id, temp2);
           this.moveTo(el2, temp2);
           el2.material.color.set(el.color);
         }
@@ -472,7 +472,7 @@ export class LayeredGraphScene {
 
     plane.renderOrder = 1; //this is needed because otherwise layers sometimes occlude nodes
 
-    if (!this.showAllLevels) {
+    if (!this.showAllLayers) {
       //don't show a layer initially if not meant to (so only on hover over node)
       plane.visible = false;
     }
@@ -644,7 +644,7 @@ export class LayeredGraphScene {
   /*
    * Sets the z-axis depth of a layer
    */
-  setLevelDepth(id, depth) {
+  setLayerDepth(id, depth) {
     let find = this.structure.find(str => str.id == id);
     find.depth = depth;
     find.plane.p.position.z = depth; //z-depth of actual layer plane
@@ -662,10 +662,10 @@ export class LayeredGraphScene {
    * These are the dimensions for a layer which are either full (distance ? this.steps * this.stepSize)
    * or slim (only using as much place as the nodes on that layer need (minimum 1 * this.stepSize for empty layer))
    */
-  calculateLayerDimensions(level) {
+  calculateLayerDimensions(layer) {
     let x = [0, 0];
     let y = [0, 0];
-    let structure = this.structure.find(el => el.id == level);
+    let structure = this.structure.find(el => el.id == layer);
     structure.content.forEach(el => {
       if (el.position.x > 0) {
         //Get positive x-coordinate of the node "farthest to the right"
@@ -707,9 +707,9 @@ export class LayeredGraphScene {
   /*
    * Applies dimensions to a layer, either full size of slim size calculated by calculateLayerDimensions()
    */
-  setLayerDimensions(level) {
+  setLayerDimensions(layer) {
     let distance = this.steps * this.stepSize;
-    let s = this.structure.find(el => el.id == level);
+    let s = this.structure.find(el => el.id == layer);
     let g = s.plane.p.geometry;
     let bs = s.plane.b;
     g.verticesNeedUpdate = true;
@@ -791,7 +791,7 @@ export class LayeredGraphScene {
 
       //Hide all nodes that are on other layers than the currently highlighted one
       this.meshes.forEach(el => {
-        if (el.userData.level != layer) {
+        if (el.userData.layer != layer) {
           el.visible = false;
         }
       });
@@ -800,10 +800,10 @@ export class LayeredGraphScene {
       this.arrows.forEach(el => {
         temp =
           this.meshes.find(el2 => el2.userData.id == el.source).userData
-            .level == layer;
+            .layer == layer;
         temp2 =
           this.meshes.find(el2 => el2.userData.id == el.target).userData
-            .level == layer;
+            .layer == layer;
         if (!temp || !temp2) {
           el.arrow.line.visible = false;
           el.arrow.cone.visible = false;
@@ -1093,7 +1093,7 @@ export class LayeredGraphScene {
 
     if (search) {
       //If search=true do a clockwise check for all 8 positons around the current one
-      if (this.checkGridPosition(pos.x, pos.y, node.userData.level) < 0) {
+      if (this.checkGridPosition(pos.x, pos.y, node.userData.layer) < 0) {
         //If the current position is free, no clockwise check needed, just put the node there
         node.position.x = pos.x;
         node.position.y = pos.y;
@@ -1137,7 +1137,7 @@ export class LayeredGraphScene {
       }
     } else {
       //If search=false just check if the current position is free and if it is, place the node there
-      if (this.checkGridPosition(pos.x, pos.y, node.userData.level) < 0) {
+      if (this.checkGridPosition(pos.x, pos.y, node.userData.layer) < 0) {
         node.position.x = pos.x;
         node.position.y = pos.y;
         node.userData.onGrid = true;
@@ -1154,10 +1154,10 @@ export class LayeredGraphScene {
    * Check if the position on the grid defined by params x and y
    * is free or not and if it is return the index of this position in the gridPositions array
    */
-  checkGridPosition(x, y, level) {
+  checkGridPosition(x, y, layer) {
     for (let i = 0; i < this.gridPositions.length; i++) {
       if (
-        this.gridPositions[i].userData.level == level &&
+        this.gridPositions[i].userData.layer == layer &&
         this.gridPositions[i].position.x == x &&
         this.gridPositions[i].position.y == y
       ) {

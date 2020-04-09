@@ -409,7 +409,7 @@ export class VisualizationManager {
         if (view == 'X') {
           $('#view-badge').html('View: X-Axis (Main)');
         } else {
-          $('#view-badge').html('View: Y-Axis (Levels)');
+          $('#view-badge').html('View: Y-Axis (Layers)');
         }
       }
     };

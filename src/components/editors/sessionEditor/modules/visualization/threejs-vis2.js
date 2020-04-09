@@ -61,7 +61,7 @@ export class Visualization2 extends LayeredGraphScene {
         tags.push(tag);
       }
 
-      this.meshes.find(el => el.userData.id == node.id).userData.level = tag;
+      this.meshes.find(el => el.userData.id == node.id).userData.layer = tag;
     });
 
     this.centerLayersIn3D(true, 'No Tags'); //this centers all layer on z-axis

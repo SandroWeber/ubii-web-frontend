@@ -118,9 +118,9 @@
           :width="90"
           :color="{ unchecked: '#406184', checked: '#388DE8' }"
           :font-size="15"
-          :value="selectedSlimLevels"
+          :value="selectedSlimLayers"
           :labels="{ checked: 'Slim', unchecked: 'Wide' }"
-          @change="changeSlimLevels"
+          @change="changeSlimLayers"
         ></toggle-button>
       </div>
       <div class="settings-row" v-if="selectedGraphType == 'LAYERED'">
@@ -213,7 +213,7 @@ export default {
       selectedSceneId: this.settings.sceneId,
       selectedSorting: this.settings.sorting,
       selectedStartNode: this.settings.startNode,
-      selectedSlimLevels: this.settings.slimLevels,
+      selectedSlimLayers: this.settings.slimLayers,
       selectedShowAll: this.settings.showAll,
       selectedZeroMarker: this.settings.viewZeroMarker,
       selectedSnapToGrid: this.settings.snapToGrid,
@@ -284,7 +284,7 @@ export default {
     changeStartNode: function(value) {
       this.$emit('change', 'startNode', value);
     },
-    changeSlimLevels: function(value) {
+    changeSlimLayers: function(value) {
       this.$emit('change', 'slimLayers', value.value);
     },
     changeShowAll: function(value) {
