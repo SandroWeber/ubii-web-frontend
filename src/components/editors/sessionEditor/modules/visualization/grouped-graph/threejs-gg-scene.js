@@ -650,7 +650,9 @@ export class GroupedGraphScene {
 
   createLinks() {
     this.dataset.links.forEach(link => {
-      this.createLink(link);
+      if (link.source != link.target) {
+        this.createLink(link);
+      }
     });
   }
 

@@ -7,49 +7,53 @@ let scenarios = [
     test: true,
     nodes: [
       {
-        id: 1,
+        id: 0,
         name: 'Node 1',
         tags: ['Tag 1', 'Tag 2', 'Tag 3'],
         links: []
       },
       {
-        id: 2,
+        id: 1,
         name: 'Node 2',
         tags: ['Tag 1', 'Tag 2', 'Tag 3'],
         links: []
       },
       {
-        id: 3,
+        id: 2,
         name: 'Node 3',
         tags: ['Tag 1'],
         links: []
       },
       {
-        id: 4,
+        id: 3,
         name: 'Node 4',
         tags: ['Tag 1'],
         links: []
       },
       {
-        id: 5,
+        id: 4,
         name: 'Node 5',
         tags: ['No Tags'],
         links: []
       },
       {
-        id: 6,
+        id: 5,
         name: 'Node 6',
         tags: ['Tag 1'],
         links: []
       },
       {
-        id: 7,
+        id: 6,
         name: 'Node 7',
         tags: ['No Tags'],
         links: []
       }
     ],
     links: [
+      {
+        source: 0,
+        target: 1
+      },
       {
         source: 1,
         target: 2
@@ -63,16 +67,12 @@ let scenarios = [
         target: 4
       },
       {
-        source: 4,
+        source: 0,
         target: 5
       },
       {
-        source: 1,
+        source: 0,
         target: 6
-      },
-      {
-        source: 1,
-        target: 7
       }
     ]
   },
@@ -82,61 +82,61 @@ let scenarios = [
     test: true,
     nodes: [
       {
-        id: 1,
+        id: 0,
         name: 'Node 1',
         tags: ['Tag 1', 'Tag 2', 'Tag 3'],
         links: []
       },
       {
-        id: 2,
+        id: 1,
         name: 'Node 2',
         tags: ['No Tags'],
         links: []
       },
       {
-        id: 3,
+        id: 2,
         name: 'Node 3',
         tags: ['Tag 2'],
         links: []
       },
       {
-        id: 4,
+        id: 3,
         name: 'Node 4',
         tags: ['Tag 1'],
         links: []
       },
       {
-        id: 5,
+        id: 4,
         name: 'Node 5',
         tags: ['Tag 1', 'Tag 6'],
         links: []
       },
       {
-        id: 6,
+        id: 5,
         name: 'Node 6',
         tags: ['Tag 2', 'Tag 3'],
         links: []
       },
       {
-        id: 7,
+        id: 6,
         name: 'Node 7',
         tags: ['Tag 5', 'Tag 6'],
         links: []
       },
       {
-        id: 8,
+        id: 7,
         name: 'Node 8',
         tags: ['No Tags'],
         links: []
       },
       {
-        id: 9,
+        id: 8,
         name: 'Node 9',
         tags: ['Tag 6'],
         links: []
       },
       {
-        id: 10,
+        id: 9,
         name: 'Node 10',
         tags: ['No Tags'],
         links: []
@@ -144,7 +144,15 @@ let scenarios = [
     ],
     links: [
       {
+        source: 0,
+        target: 1
+      },
+      {
         source: 1,
+        target: 2
+      },
+      {
+        source: 0,
         target: 2
       },
       {
@@ -157,15 +165,11 @@ let scenarios = [
       },
       {
         source: 3,
-        target: 4
+        target: 5
       },
       {
-        source: 2,
+        source: 3,
         target: 4
-      },
-      {
-        source: 4,
-        target: 6
       },
       {
         source: 4,
@@ -186,10 +190,6 @@ let scenarios = [
       {
         source: 8,
         target: 9
-      },
-      {
-        source: 9,
-        target: 10
       }
     ]
   },
@@ -199,43 +199,47 @@ let scenarios = [
     test: true,
     nodes: [
       {
-        id: 1,
+        id: 0,
         name: 'Node 1',
         tags: ['Tag 1'],
         links: []
       },
       {
-        id: 2,
+        id: 1,
         name: 'Node 2',
         tags: ['No Tags'],
         links: []
       },
       {
-        id: 3,
+        id: 2,
         name: 'Node 3',
         tags: ['Tag 1', 'Tag 2'],
         links: []
       },
       {
-        id: 4,
+        id: 3,
         name: 'Node 4',
         tags: ['Tag 2'],
         links: []
       },
       {
-        id: 5,
+        id: 4,
         name: 'Node 5',
         tags: ['Tag 1'],
         links: []
       },
       {
-        id: 6,
+        id: 5,
         name: 'Node 6',
         tags: ['No Tags'],
         links: []
       }
     ],
     links: [
+      {
+        source: 0,
+        target: 1
+      },
       {
         source: 1,
         target: 2
@@ -254,11 +258,7 @@ let scenarios = [
       },
       {
         source: 5,
-        target: 6
-      },
-      {
-        source: 6,
-        target: 1
+        target: 0
       }
     ]
   }

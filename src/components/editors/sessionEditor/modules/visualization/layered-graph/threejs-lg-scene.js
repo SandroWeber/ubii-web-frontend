@@ -417,18 +417,19 @@ export class LayeredGraphScene {
 
     temp1 *= -1;
 
+    let self = this;
     //actually put every layer on it's real depth (z-coord)
     this.structure.forEach(el => {
       temp2 = tempStr[el.id] * this.layerStepSize + temp1; //Shift each layer back by it's index and
       //the space in between each layer
 
-      this.meshes.forEach(el2 => {
+      self.meshes.forEach(el2 => {
         if (el2.userData.layer == el.id) {
           if (pushNodes) {
             el.content.push(el2);
           }
-          this.setLayerDepth(el.id, temp2);
-          this.moveTo(el2, temp2);
+          self.setLayerDepth(el.id, temp2);
+          self.moveTo(el2, temp2);
           el2.material.color.set(el.color);
         }
       });

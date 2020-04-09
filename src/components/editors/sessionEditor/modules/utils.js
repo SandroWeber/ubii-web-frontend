@@ -61,7 +61,11 @@ export class DataTranslator {
     });
     rightLinks.forEach(rLink => {
       leftLinks.forEach(lLink => {
-        if (rLink.to == lLink.from && rLink.how == lLink.how) {
+        if (
+          rLink.to == lLink.from &&
+          rLink.how == lLink.how &&
+          rLink.to != ''
+        ) {
           links.push({ source: rLink.from, target: lLink.to });
         }
       });
