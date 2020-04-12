@@ -4,6 +4,12 @@ import { randomHexColor } from '../../utils';
 import DragControls from 'three-dragcontrols';
 import { RenderPass, EffectComposer, OutlinePass } from 'three-outlinepass';
 
+/*
+ * This is the super-class for the Layered Graph
+ * The reason this and the Grouped Graph class aren't combined into one super-class
+ * is because in the future it should be possible for a graph type to differ in the
+ * way it builds its internal structure
+ */
 export class LayeredGraphScene {
   constructor(dataset, settings, renderer, camera, orbitControls) {
     this.scene = new THREE.Scene();
@@ -14,7 +20,6 @@ export class LayeredGraphScene {
     this.dataset = dataset;
     this.structure = []; //The "interal structure" of a graph, can be whatever the current visualization / graphType chooses to focus on (e.g. layers, groups etc.)
     this.locked = { x: false, y: false, z: true };
-    this.guideline = null;
     this.oldPos; //needed to check if selected node was actually dragged or only just clicked on to deselect it
     this.meshes = [];
     this.arrows = [];
@@ -399,6 +404,7 @@ export class LayeredGraphScene {
       addToTemp(el.id, temp2);
     });
 
+    //If there is no special state delete the reserve place at the beginning and shift all layer down by one
     if (specialState != undefined && !(specialState in tempStr)) {
       Object.keys(tempStr).forEach(el => {
         tempStr[el]--;
@@ -415,7 +421,7 @@ export class LayeredGraphScene {
       temp1 = Math.floor(temp2 / 2) * this.layerStepSize;
     }
 
-    temp1 *= -1;
+    temp1 *= -1; //layers have to be pushed backwards (towards negative z)
 
     let self = this;
     //actually put every layer on it's real depth (z-coord)
@@ -426,6 +432,7 @@ export class LayeredGraphScene {
       self.meshes.forEach(el2 => {
         if (el2.userData.layer == el.id) {
           if (pushNodes) {
+            //vis4 for example doesn't need the nodes pushed to the right layer, it already does that
             el.content.push(el2);
           }
           self.setLayerDepth(el.id, temp2);
@@ -436,6 +443,9 @@ export class LayeredGraphScene {
     });
 
     if (specialState != undefined && specialState in tempStr) {
+      //sometimes the special state has a different position in the actual structure in comparison
+      //to the temp structure for ordering, so it has to be shifted to the beginning of the structure
+      //bsp. would be "Unreachable" which might not be the first layer getting created
       temp1 = this.structure.findIndex(el => el.id == specialState);
       temp2 = this.structure.find(el => el.id == specialState);
       this.structure.splice(temp1, 1);

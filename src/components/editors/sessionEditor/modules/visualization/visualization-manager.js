@@ -23,8 +23,8 @@ export class VisualizationManager {
     $('#threejs-container').append(this.renderer.domElement);
     this.renderer.setClearColor(0x19181a, 1);
 
-    this.resizeRenderer()();
-    $(window).resize(this.resizeRenderer());
+    this.resizeRenderer();
+    $(window).resize(() => this.resizeRenderer());
 
     this.camera = new THREE.OrthographicCamera(
       window.innerWidth / -50,
@@ -352,10 +352,6 @@ export class VisualizationManager {
     this.scenes.splice(index, 1);
   }
 
-  test() {
-    console.log('a');
-  }
-
   pauseDragControls() {
     this.scenes.forEach(el => {
       el.dragControls.enabled = false;
@@ -363,30 +359,31 @@ export class VisualizationManager {
   }
 
   resizeRenderer() {
-    return () => {
-      let width =
-        parseInt($(window).width()) - parseInt($('#side-bar').css('width'));
-      let height = parseInt($('#side-bar').css('height')) - 200;
-      $('#threejs-container')
-        .first()
-        .css('width', width);
-      $('#threejs-container')
-        .first()
-        .css('height', height);
-      if (width < 1800) {
-        $('.main').css('width', width);
-      } else {
-        $('.main').css('width', '100%');
-      }
-      if (this.scene == null) {
-        return;
-      }
-      this.renderer.setSize(width, height);
-      this.scene.composer.setSize(width, height);
-      this.camera.aspect =
-        $('#threejs-container').width() / $('#threejs-container').height();
-      this.camera.updateProjectionMatrix();
-    };
+    let width =
+      parseInt($(window).width()) - parseInt($('#side-bar').css('width'));
+    let height =
+      parseInt($('#side-bar').css('height')) -
+      parseInt($('#settings-container').css('height'));
+    $('#threejs-container')
+      .first()
+      .css('width', width);
+    $('#threejs-container')
+      .first()
+      .css('height', height);
+
+    if (width < 1800) {
+      $('.main').css('width', width);
+    } else {
+      $('.main').css('width', '100%');
+    }
+    if (this.scene == null) {
+      return;
+    }
+
+    this.renderer.setSize(width, height);
+    this.scene.composer.setSize(width, height);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
   }
   /*
    * Animates the currently selected scene (gets selected in showScene())

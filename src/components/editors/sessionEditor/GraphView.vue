@@ -220,7 +220,7 @@ export default {
       );
       this.visManager.showScene();
       this.visManager.animate();
-      this.visManager.resizeRenderer()();
+      this.visManager.resizeRenderer();
       this.$forceUpdate();
     },
     change: function(setting, value) {

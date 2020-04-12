@@ -5,6 +5,12 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import DragControls from 'three-dragcontrols';
 import { RenderPass, EffectComposer, OutlinePass } from 'three-outlinepass';
 
+/*
+ * This is the super-class for the Grouped Graph
+ * The reason this and the Layered Graph class aren't combined into one super-class
+ * is because in the future it should be possible for a graph type to differ in the
+ * way it builds its internal structure
+ */
 export class GroupedGraphScene {
   constructor(dataset, settings, renderer, camera, orbitControls) {
     this.scene = new THREE.Scene();
@@ -14,8 +20,6 @@ export class GroupedGraphScene {
     this.type = 'GROUPED';
     this.dataset = dataset;
     this.structure = []; //The "interal structure" of a graph, can be whatever the current visualization / graphType chooses to focus on (e.g. layers, groups etc.)
-    this.locked = { x: false, y: false, z: true };
-    this.guideline = null;
     this.oldPos; //needed to check if selected node was actually dragged or only just clicked on to deselect it
     this.meshes = [];
     this.arrows = [];
@@ -23,20 +27,13 @@ export class GroupedGraphScene {
     this.selectedNode = null; //the currently selected nodes (with strg pressed)
     this.selected = []; //the currently selected node (settings.viewNode)
     this.intersects = null;
-    this.planeIntersects = null;
     this.same = false;
     this.raycaster = new THREE.Raycaster();
     this.nodeLabel = $('#node-label');
-    this.stepSize = 1;
     this.steps = 4;
-    this.layerStepSize = 3;
     this.hover = null;
     this.zero = {};
     this.createZeroMarker();
-    this.showAllLayers = false;
-    this.slimLayers = false;
-    this.focusedLayer = '';
-    this.gridPositions = [];
     this.selectKeyPressed = false;
     this.delete = null;
 
@@ -780,6 +777,7 @@ export class GroupedGraphScene {
     this.intersects = this.raycaster.intersectObjects(this.meshes);
 
     if (this.delete != null && !this.isDragging) {
+      //Group gets deleted when dropping the group node after dragging
       this.scene.remove(this.delete[0]);
       let find = this.meshes.findIndex(
         el => el.userData.id == this.delete[0].userData.id
