@@ -6,7 +6,11 @@
         :interactions="interactions"
         @select="onSelectInteractions"
       />
-      <interaction-mirror v-if="selectedInteraction !== undefined" v-model="selectedInteraction" />
+      <interaction-mirror
+        v-if="selectedInteraction !== undefined"
+        v-model="selectedInteraction"
+        :isEditable="selectedInteractionEditable"
+      />
     </div>
   </div>
 </template>
@@ -40,6 +44,11 @@ export default {
         this.updateInteraction({
           interaction: newValue
         });
+      }
+    },
+    selectedInteractionEditable: {
+      get: function() {
+        return this.selectedInteractions[0].editable;
       }
     },
     ...mapGetters('interactions', {
