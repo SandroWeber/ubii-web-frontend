@@ -2,12 +2,12 @@ import * as THREE from 'three';
 import $ from 'jquery';
 import { Visualizations } from './graph-scenes';
 import { checkIfCylic } from '../utils';
-import { twoDForceGraphVis } from './2d-force-graph';
+import { ForceGraphVis2D } from './2d-force-graph';
 import { threeDForceGraphVis } from './3d-force-graph';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 export class VisualizationManager {
-  constructor(dataset, settings, change) {
+  constructor(dataset, settings, change, renderContainer) {
     this.render = null;
     this.scene = null;
     this.scenes = [];
@@ -19,12 +19,15 @@ export class VisualizationManager {
     this.settings = settings;
     this.change = change;
 
+    this.renderContainer = renderContainer;
+
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    $('#threejs-container').append(this.renderer.domElement);
+    this.renderContainer.append(this.renderer.domElement);
     this.renderer.setClearColor(0x19181a, 1);
 
     this.resizeRenderer();
     $(window).resize(() => this.resizeRenderer());
+    this.renderContainer[0].addEventListener('resize', () => this.resizeRenderer());
 
     this.camera = new THREE.OrthographicCamera(
       window.innerWidth / -50,
@@ -53,7 +56,7 @@ export class VisualizationManager {
 
     this.orbitControls.addEventListener(
       'change',
-      event => {
+      () => {
         this.showViewLabel('');
       },
       false
@@ -86,7 +89,7 @@ export class VisualizationManager {
     document.addEventListener(
       'click',
       event => {
-        if (!this.stop && event.toElement.nodeName == 'CANVAS') {
+        if (!this.stop && event.target.nodeName == 'CANVAS') {
           //Only send event when click happens on canvas
           this.scene.switchSelect();
         }
@@ -111,10 +114,10 @@ export class VisualizationManager {
 
   onMouseMove(event) {
     if (!this.stop && this.scene != null) {
-      let actualX = event.clientX - $('#threejs-container').offset().left;
-      let actualY = event.clientY - $('#threejs-container').offset().top;
-      this.mouse.x = (actualX / $('#threejs-container').width()) * 2 - 1;
-      this.mouse.y = -(actualY / $('#threejs-container').height()) * 2 + 1;
+      let actualX = event.clientX - this.renderContainer.offset().left;
+      let actualY = event.clientY - this.renderContainer.offset().top;
+      this.mouse.x = (actualX / this.renderContainer.width()) * 2 - 1;
+      this.mouse.y = -(actualY / this.renderContainer.height()) * 2 + 1;
 
       this.scene.updateLabelSpritePosition(actualX, actualY);
     }
@@ -214,10 +217,10 @@ export class VisualizationManager {
       case '2D-FORCE':
         $('#force-graph-container-2d').show();
         $('#force-graph-container-3d').hide();
-        $('#threejs-container').hide();
+        this.renderContainer.hide();
         if (this.force_2d == null) {
           //Initialize new 2d-force-graph
-          this.force_2d = twoDForceGraphVis(
+          this.force_2d = ForceGraphVis2D(
             $('#force-graph-container-2d'),
             this.change
           )(JSON.parse(JSON.stringify(this.dataset)));
@@ -229,7 +232,7 @@ export class VisualizationManager {
       case '3D-FORCE':
         $('#force-graph-container-3d').show();
         $('#force-graph-container-2d').hide();
-        $('#threejs-container').hide();
+        this.renderContainer.hide();
         if (this.force_3d == null) {
           //Initialize new 3d-force-graph
           this.force_3d = threeDForceGraphVis(
@@ -257,7 +260,7 @@ export class VisualizationManager {
         }
         $('#force-graph-container-2d').hide();
         $('#force-graph-container-3d').hide();
-        $('#threejs-container').show();
+        this.renderContainer.show();
 
         if (this.scene == undefined) {
           //If a scene relating to this graphType and sceneId
@@ -364,12 +367,8 @@ export class VisualizationManager {
     let height =
       parseInt($('#side-bar').css('height')) -
       parseInt($('#settings-container').css('height'));
-    $('#threejs-container')
-      .first()
-      .css('width', width);
-    $('#threejs-container')
-      .first()
-      .css('height', height);
+    this.renderContainer.first().css('width', width);
+    this.renderContainer.first().css('height', height);
 
     if (width < 1800) {
       $('.main').css('width', width);

@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import ForceGraph from 'force-graph';
 
-export function twoDForceGraphVis(domElement, change) {
+export function ForceGraphVis2D(domElement, change) {
   let graph = ForceGraph({ width: 500 });
   graph(domElement[0]);
   graph.d3Force('charge').strength(-800);
@@ -10,7 +10,7 @@ export function twoDForceGraphVis(domElement, change) {
   );
   graph.backgroundColor('#19181A');
 
-  let resizeForceGraph = function() {
+  let resizeForceGraph = function () {
     let width =
       parseInt($(window).width()) - parseInt($('#side-bar').css('width'));
     let height =
@@ -22,7 +22,7 @@ export function twoDForceGraphVis(domElement, change) {
   $(window).resize(resizeForceGraph);
   resizeForceGraph();
 
-  return function(dataset) {
+  return function (dataset) {
     dataset.nodes.forEach(node => {
       node.val = 0;
     });

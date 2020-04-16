@@ -65,9 +65,7 @@
               "
             >
               <AlphaRBoxIcon />
-              <span class="text"
-                >: Remove the selected group while dragging its node</span
-              >
+              <span class="text">: Remove the selected group while dragging its node</span>
             </p>
             <p>
               <AlphaWBoxIcon />
@@ -78,32 +76,28 @@
             </p>
             <p>
               <AlphaXBoxIcon />
-              <span class="text"
-                >: Reset Camera to Main View (X-Axis/2D/Front)</span
-              >
+              <span class="text">: Reset Camera to Main View (X-Axis/2D/Front)</span>
             </p>
             <p>
               <AlphaYBoxIcon />
-              <span class="text"
-                >: Reset Camera to Layer View (Y-Axis/2D/Side)</span
-              >
+              <span class="text">: Reset Camera to Layer View (Y-Axis/2D/Side)</span>
             </p>
           </b-toast>
         </div>
         <div class="row">
-          <span @click="$bvToast.show('controls-toast')" class="ui-box ui-item"
-            ><span class="focus-icon"><KeyboardIcon fillColor="#FF0000"/></span
-          ></span>
-          <span id="view-badge" class="ui-box ui-item"
-            >View: X-Axis (Front)</span
-          >
+          <span @click="$bvToast.show('controls-toast')" class="ui-box ui-item">
+            <span class="focus-icon">
+              <KeyboardIcon fillColor="#FF0000" />
+            </span>
+          </span>
+          <span id="view-badge" class="ui-box ui-item">View: X-Axis (Front)</span>
         </div>
       </div>
       <div id="warning">
-        This graph contains cycles!<br />
-        But in order to show the number of steps from a starting node to all
-        other nodes an acyclic graph is required. <br />
-        Please consider using another Mode or Graph Type.
+        This graph contains cycles!
+        <br />But in order to show the number of steps from a starting node to all
+        other nodes an acyclic graph is required.
+        <br />Please consider using another Mode or Graph Type.
       </div>
     </div>
   </div>
@@ -115,11 +109,10 @@ import { VisualizationManager } from './modules/visualization/visualization-mana
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
-import { BToast, BButton, BBadge } from 'bootstrap-vue';
+import { BBadge } from 'bootstrap-vue';
 
 import 'vue-material-design-icons/styles.css';
 import KeyboardIcon from 'vue-material-design-icons/Keyboard.vue';
-import MouseIcon from 'vue-material-design-icons/Mouse.vue';
 import Numeric1BoxIcon from 'vue-material-design-icons/Numeric1Box.vue';
 import Numeric9BoxIcon from 'vue-material-design-icons/Numeric9Box.vue';
 import AlphaWBoxIcon from 'vue-material-design-icons/AlphaWBox.vue';
@@ -143,11 +136,8 @@ export default {
     }
   },
   components: {
-    'b-toast': BToast,
-    'b-button': BButton,
     'b-badge': BBadge,
     KeyboardIcon,
-    MouseIcon,
     Numeric1BoxIcon,
     Numeric9BoxIcon,
     AlphaWBoxIcon,
@@ -180,7 +170,7 @@ export default {
     }
   },
   watch: {
-    'settings.graphType': function(view) {
+    'settings.graphType': function() {
       this.visManager.showScene();
     },
     'settings.sceneId': function() {
@@ -189,13 +179,13 @@ export default {
     'settings.dataset': function() {
       this.visManager.changeSetting('dataset', this.dataset);
     },
-    'settings.viewZeroMarker': function(value) {
+    'settings.viewZeroMarker': function() {
       this.visManager.changeSetting('viewZeroMarker');
     },
-    'settings.startNode': function(value) {
+    'settings.startNode': function() {
       this.visManager.changeSetting('startNode');
     },
-    'settings.sorting': function(value) {
+    'settings.sorting': function() {
       this.visManager.changeSetting('sorting');
     },
     'settings.viewNode': function(value) {
@@ -216,7 +206,8 @@ export default {
       this.visManager = new VisualizationManager(
         this.dataset,
         this.settings,
-        this.change
+        this.change,
+        $('#threejs-container')
       );
       this.visManager.showScene();
       this.visManager.animate();
