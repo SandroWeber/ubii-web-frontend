@@ -1,7 +1,7 @@
 <template>
   <div id="graph-view" v-if="datasets.length > 0">
-    <!--<div id="force-graph-container-2d" class="render-container"></div>-->
-    <!--<div id="force-graph-container-3d" class="render-container"></div>-->
+    <div id="force-graph-container-2d" class="render-container"></div>
+    <div id="force-graph-container-3d" class="render-container"></div>
     <div id="threejs-container" class="render-container">
       <div id="threejs-ui-container-top" class="ui-container top">
         <div class="row">
