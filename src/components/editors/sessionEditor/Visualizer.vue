@@ -8,28 +8,20 @@
         @change="change"
         @addDataset="addDataset"
       ></side-bar>
-      <div class="main">
-        <graph-view
-          :datasets="datasets"
-          :settings="settings"
-          @change="change"
-        ></graph-view>
-        <settings-container
-          id="settings-container"
-          class="settings-container-instance"
-          :dataset="dataset"
-          :settings="settings"
-          @change="change"
-          @addDataset="addDataset"
-        ></settings-container>
-      </div>
+      <graph-view class="graph-display" :datasets="datasets" :settings="settings" @change="change"></graph-view>
+      <settings-container
+        id="settings-container"
+        class="settings-container-instance"
+        :dataset="dataset"
+        :settings="settings"
+        @change="change"
+        @addDataset="addDataset"
+      ></settings-container>
     </div>
   </div>
 </template>
 
 <script>
-import Vue from 'vue';
-
 import SettingsContainer from './SettingsContainer.vue';
 import SideBar from './SideBar.vue';
 import GraphView from './GraphView.vue';
@@ -94,28 +86,29 @@ export default {
 };
 </script>
 
-<style scoped lang="stylus">
+<style scoped>
 .session-editor {
+  display: grid;
+  grid-gap: 10px;
+  grid-template-columns: 300px 1fr;
+  grid-template-rows: 1fr 240px;
+  grid-template-areas:
+    'sidebar graph-display'
+    'sidebar settings';
+
   height: 100%;
   width: 100%;
-  display: flex;
-  flex-direction: row;
 }
 
-.main {
-  box-shadow: -1px 1px 10px 0px #101010;
-  display: flex;
-  flex: 0 0 auto;
-  flex-direction: column;
+.graph-display {
+  grid-area: graph-display;
 }
-
 
 .side-bar-instance {
-  display: flex;
-  flex: 0 0 300px;
+  grid-area: sidebar;
 }
 
 .settings-container-instance {
-  height: 240px;
+  grid-area: settings;
 }
 </style>
