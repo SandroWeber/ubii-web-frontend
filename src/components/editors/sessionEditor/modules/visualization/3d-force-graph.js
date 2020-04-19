@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import ForceGraph3D from '3d-force-graph';
 
-export function threeDForceGraphVis(domElement, change) {
+export function ForceGraphVis3D(domElement, change) {
   let graph = ForceGraph3D({ width: 500 });
   graph(domElement[0]);
   graph.d3Force('charge').strength(-150);
@@ -10,7 +10,7 @@ export function threeDForceGraphVis(domElement, change) {
   );
   graph.backgroundColor('#19181A');
 
-  let resizeForceGraph = function() {
+  let resizeForceGraph = function () {
     let width =
       parseInt($(window).width()) - parseInt($('#side-bar').css('width'));
     let height =
@@ -22,7 +22,7 @@ export function threeDForceGraphVis(domElement, change) {
   $(window).resize(resizeForceGraph);
   resizeForceGraph();
 
-  return function(dataset) {
+  return function (dataset) {
     dataset.nodes.forEach(node => {
       node.val = 0;
     });

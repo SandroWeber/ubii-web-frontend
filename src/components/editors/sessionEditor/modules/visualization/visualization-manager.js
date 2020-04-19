@@ -3,7 +3,7 @@ import $ from 'jquery';
 import { Visualizations } from './graph-scenes';
 import { checkIfCylic } from '../utils';
 import { ForceGraphVis2D } from './2d-force-graph';
-import { threeDForceGraphVis } from './3d-force-graph';
+import { ForceGraphVis3D } from './3d-force-graph';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 export class VisualizationManager {
@@ -235,7 +235,7 @@ export class VisualizationManager {
         this.renderContainer.hide();
         if (this.force_3d == null) {
           //Initialize new 3d-force-graph
-          this.force_3d = threeDForceGraphVis(
+          this.force_3d = ForceGraphVis3D(
             $('#force-graph-container-3d'),
             this.change
           )(JSON.parse(JSON.stringify(this.dataset)));
