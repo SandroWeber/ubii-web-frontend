@@ -362,13 +362,8 @@ export class VisualizationManager {
   }
 
   resizeRenderer() {
-    let width =
-      parseInt($(window).width()) - parseInt($('#side-bar').css('width'));
-    let height =
-      parseInt($('#side-bar').css('height')) -
-      parseInt($('#settings-container').css('height'));
-    this.renderContainer.first().css('width', width);
-    this.renderContainer.first().css('height', height);
+    let width = parseInt(this.renderContainer.width());
+    let height = parseInt(this.renderContainer.height());
 
     if (width < 1800) {
       $('.main').css('width', width);
