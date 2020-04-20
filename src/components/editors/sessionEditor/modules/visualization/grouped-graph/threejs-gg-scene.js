@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import $ from 'jquery';
 import { randomHexColor } from '../../utils';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import DragControls from 'three-dragcontrols';
 import { RenderPass, EffectComposer, OutlinePass } from 'three-outlinepass';
 
@@ -12,7 +11,7 @@ import { RenderPass, EffectComposer, OutlinePass } from 'three-outlinepass';
  * way it builds its internal structure
  */
 export class GroupedGraphScene {
-  constructor(dataset, settings, renderer, camera, orbitControls) {
+  constructor(dataset, renderer, camera) {
     this.scene = new THREE.Scene();
     let light = new THREE.AmbientLight(0xadadad);
     this.scene.add(new THREE.DirectionalLight(0xffffff, 1));
@@ -25,7 +24,7 @@ export class GroupedGraphScene {
     this.arrows = [];
     this.materials = [];
     this.selectedNode = null; //the currently selected nodes (with strg pressed)
-    this.selected = []; //the currently selected node (settings.viewNode)
+    this.selected = []; //the currently selected node
     this.intersects = null;
     this.same = false;
     this.raycaster = new THREE.Raycaster();
@@ -39,8 +38,6 @@ export class GroupedGraphScene {
 
     this.change = null;
     this.camera = camera;
-
-    this.orbitControls = orbitControls;
 
     this.dragControls = new DragControls(
       this.meshes,
@@ -89,15 +86,15 @@ export class GroupedGraphScene {
     return this.scene;
   }
 
-  drag(event) {
+  drag() {
     throw new Error('Cannot call abstract method');
   }
 
-  dragstart(event) {
+  dragstart() {
     throw new Error('Cannot call abstract method');
   }
 
-  dragend(event) {
+  dragend() {
     throw new Error('Cannot call abstract method');
   }
 
@@ -772,7 +769,7 @@ export class GroupedGraphScene {
   }
 
   update(mouse) {
-    let obj, node;
+    let obj;
     this.raycaster.setFromCamera(mouse, this.camera);
     this.intersects = this.raycaster.intersectObjects(this.meshes);
 

@@ -11,11 +11,8 @@ export function ForceGraphVis2D(domElement, change) {
   graph.backgroundColor('#19181A');
 
   let resizeForceGraph = function () {
-    let width =
-      parseInt($(window).width()) - parseInt($('#side-bar').css('width'));
-    let height =
-      parseInt($('#side-bar').css('height')) -
-      parseInt($('#settings-container').css('height'));
+    let width = parseInt(domElement.width());
+    let height = parseInt(domElement.height());
     graph.width(width).height(height);
   };
 

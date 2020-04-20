@@ -3,8 +3,8 @@ import $ from 'jquery';
 import { GroupedGraphScene } from './threejs-gg-scene';
 
 export class GGVisualization1 extends GroupedGraphScene {
-  constructor(dataset, settings, renderer, camera, orbitControls) {
-    super(dataset, settings, renderer, camera, orbitControls);
+  constructor(dataset, renderer, camera, orbitControls) {
+    super(dataset, renderer, camera);
     this.id = 'MANUAL';
     this.geometry = new THREE.SphereGeometry(0.2, 64, 64);
     this.material = new THREE.MeshLambertMaterial({
@@ -15,6 +15,8 @@ export class GGVisualization1 extends GroupedGraphScene {
     //because in the future the bahavior of this visualization might need tweaking
     this.createDataPoints();
     this.createLinks();
+
+    this.orbitControls = orbitControls;
   }
 
   /*

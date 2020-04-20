@@ -41,10 +41,7 @@ export class VisualizationManager {
 
     this.camera.position.z = 14;
 
-    this.orbitControls = new OrbitControls(
-      this.camera,
-      document.getElementById('threejs-container')
-    );
+    this.orbitControls = new OrbitControls(this.camera, this.renderContainer[0]);
     this.orbitControls.keyPanSpeed = 20;
     this.orbitControls.keys = {
       LEFT: 65,
@@ -309,7 +306,6 @@ export class VisualizationManager {
         scene = visualization.scenes.find(el => el.id == 'MANUAL');
         this.scene = new scene.scene(
           this.dataset,
-          this.settings,
           this.renderer,
           this.camera,
           this.orbitControls

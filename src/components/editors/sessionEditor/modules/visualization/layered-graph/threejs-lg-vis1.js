@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import $ from 'jquery';
 import { LayeredGraphScene } from './threejs-lg-scene';
 
 export class LGVisualization1 extends LayeredGraphScene {
