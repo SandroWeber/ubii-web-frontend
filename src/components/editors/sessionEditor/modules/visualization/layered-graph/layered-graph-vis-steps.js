@@ -1,9 +1,8 @@
 import * as THREE from 'three';
-import $ from 'jquery';
-import { LayeredGraphScene } from './threejs-lg-scene';
-import { translatedToMatrix, randomHexColor } from '../../utils';
+import { LayeredGraphScene } from './layered-graph-scene';
+import { translatedToMatrix } from '../../utils';
 
-export class LGVisualization4 extends LayeredGraphScene {
+export class LayeredGraphVisSteps extends LayeredGraphScene {
   constructor(dataset, settings, renderer, camera, orbitControls) {
     super(dataset, settings, renderer, camera, orbitControls);
     this.id = 'STEPS';

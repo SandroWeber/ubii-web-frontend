@@ -146,7 +146,7 @@ export class LayeredGraphScene {
     throw new Error('Cannot call abstract method');
   }
 
-  onKeyUp(event) {}
+  onKeyUp(event) { }
 
   setOutlinePass(outlinePass) {
     this.outlinePassReference = outlinePass;

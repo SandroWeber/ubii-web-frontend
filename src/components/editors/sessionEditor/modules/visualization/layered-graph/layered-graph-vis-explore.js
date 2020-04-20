@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { LayeredGraphScene } from './threejs-lg-scene';
+import { LayeredGraphScene } from './layered-graph-scene';
 
-export class LGVisualization1 extends LayeredGraphScene {
+export class LayeredGraphVisExplore extends LayeredGraphScene {
   constructor(dataset, settings, renderer, camera, orbitControls) {
     super(dataset, settings, renderer, camera, orbitControls);
     this.id = 'EXPLORATION';
@@ -22,7 +22,7 @@ export class LGVisualization1 extends LayeredGraphScene {
   /*
    * This creates all the layers. In this case always 9. All nodes stay on Layer 5 at first.
    */
-  setupStructure(dataset) {
+  setupStructure() {
     this.addToStructure('Layer 1', '#CC0000');
     this.addToStructure('Layer 2', '#D52E2E');
     this.addToStructure('Layer 3', '#DC5454');
@@ -106,7 +106,7 @@ export class LGVisualization1 extends LayeredGraphScene {
    * Method for handling the behavior during a dragging operation
    * This method is purposely not put in the super classes because in the future a visualization might be needing a different behavior while dragging
    */
-  drag(event) {
+  drag() {
     this.dragBehaviour();
     //If visualization-specific stuff has to happend during drag, put it here
   }
