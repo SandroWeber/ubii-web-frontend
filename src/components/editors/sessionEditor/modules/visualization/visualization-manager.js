@@ -7,7 +7,7 @@ import { ForceGraphVis3D } from './3d-force-graph';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 export class VisualizationManager {
-  constructor(dataset, settings, change, renderContainer) {
+  constructor(dataset, settings, change, renderDOMLayeredGrouped, renderDOMForce2D, renderDOMForce3D) {
     this.render = null;
     this.scene = null;
     this.scenes = [];
@@ -19,15 +19,17 @@ export class VisualizationManager {
     this.settings = settings;
     this.change = change;
 
-    this.renderContainer = renderContainer;
+    this.renderDOMLayeredGrouped = renderDOMLayeredGrouped;
+    this.renderDOMForce2D = renderDOMForce2D;
+    this.renderDOMForce3D = renderDOMForce3D;
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    this.renderContainer.append(this.renderer.domElement);
+    this.renderDOMLayeredGrouped.append(this.renderer.domElement);
     this.renderer.setClearColor(0x19181a, 1);
 
     this.resizeRenderer();
     $(window).resize(() => this.resizeRenderer());
-    this.renderContainer[0].addEventListener('resize', () => this.resizeRenderer());
+    this.renderDOMLayeredGrouped[0].addEventListener('resize', () => this.resizeRenderer());
 
     this.camera = new THREE.OrthographicCamera(
       window.innerWidth / -50,
@@ -41,7 +43,7 @@ export class VisualizationManager {
 
     this.camera.position.z = 14;
 
-    this.orbitControls = new OrbitControls(this.camera, this.renderContainer[0]);
+    this.orbitControls = new OrbitControls(this.camera, this.renderDOMLayeredGrouped[0]);
     this.orbitControls.keyPanSpeed = 20;
     this.orbitControls.keys = {
       LEFT: 65,
@@ -111,10 +113,10 @@ export class VisualizationManager {
 
   onMouseMove(event) {
     if (!this.stop && this.scene != null) {
-      let actualX = event.clientX - this.renderContainer.offset().left;
-      let actualY = event.clientY - this.renderContainer.offset().top;
-      this.mouse.x = (actualX / this.renderContainer.width()) * 2 - 1;
-      this.mouse.y = -(actualY / this.renderContainer.height()) * 2 + 1;
+      let actualX = event.clientX - this.renderDOMLayeredGrouped.offset().left;
+      let actualY = event.clientY - this.renderDOMLayeredGrouped.offset().top;
+      this.mouse.x = (actualX / this.renderDOMLayeredGrouped.width()) * 2 - 1;
+      this.mouse.y = -(actualY / this.renderDOMLayeredGrouped.height()) * 2 + 1;
 
       this.scene.updateLabelSpritePosition(actualX, actualY);
     }
@@ -212,13 +214,13 @@ export class VisualizationManager {
     $('#warning').hide();
     switch (this.settings.graphType) {
       case '2D-FORCE':
-        $('#force-graph-container-2d').show();
-        $('#force-graph-container-3d').hide();
-        this.renderContainer.hide();
+        this.renderDOMForce2D.show();
+        this.renderDOMForce3D.hide();
+        this.renderDOMLayeredGrouped.hide();
         if (this.force_2d == null) {
           //Initialize new 2d-force-graph
           this.force_2d = ForceGraphVis2D(
-            $('#force-graph-container-2d'),
+            this.renderDOMForce2D,
             this.change
           )(JSON.parse(JSON.stringify(this.dataset)));
         } else {
@@ -227,13 +229,13 @@ export class VisualizationManager {
         this.stop = true; //Pause other scenes
         break;
       case '3D-FORCE':
-        $('#force-graph-container-3d').show();
-        $('#force-graph-container-2d').hide();
-        this.renderContainer.hide();
+        this.renderDOMForce3D.show();
+        this.renderDOMForce2D.hide();
+        this.renderDOMLayeredGrouped.hide();
         if (this.force_3d == null) {
           //Initialize new 3d-force-graph
           this.force_3d = ForceGraphVis3D(
-            $('#force-graph-container-3d'),
+            this.renderDOMForce3D,
             this.change
           )(JSON.parse(JSON.stringify(this.dataset)));
         } else {
@@ -255,9 +257,9 @@ export class VisualizationManager {
         if (this.force_3d != null) {
           this.force_3d.pauseAnimation();
         }
-        $('#force-graph-container-2d').hide();
-        $('#force-graph-container-3d').hide();
-        this.renderContainer.show();
+        this.renderDOMForce2D.hide();
+        this.renderDOMForce3D.hide();
+        this.renderDOMLayeredGrouped.show();
 
         if (this.scene == undefined) {
           //If a scene relating to this graphType and sceneId
@@ -358,8 +360,8 @@ export class VisualizationManager {
   }
 
   resizeRenderer() {
-    let width = parseInt(this.renderContainer.width());
-    let height = parseInt(this.renderContainer.height());
+    let width = parseInt(this.renderDOMLayeredGrouped.width());
+    let height = parseInt(this.renderDOMLayeredGrouped.height());
 
     if (width < 1800) {
       $('.main').css('width', width);

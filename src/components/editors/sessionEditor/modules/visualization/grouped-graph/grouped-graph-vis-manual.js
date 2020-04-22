@@ -1,8 +1,7 @@
 import * as THREE from 'three';
-import $ from 'jquery';
 import { GroupedGraphScene } from './threejs-gg-scene';
 
-export class GGVisualization1 extends GroupedGraphScene {
+export class GroupedGrahVisManual extends GroupedGraphScene {
   constructor(dataset, renderer, camera, orbitControls) {
     super(dataset, renderer, camera);
     this.id = 'MANUAL';
@@ -114,7 +113,7 @@ export class GGVisualization1 extends GroupedGraphScene {
    * Method for handling the behavior during a dragging operation
    * This method is purposely not put in the super classes because in the future a visualization might be needing a different behavior while dragging
    */
-  drag(event) {
+  drag() {
     this.dragBehaviour();
   }
 

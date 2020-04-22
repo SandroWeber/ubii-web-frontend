@@ -3,7 +3,7 @@ import { LayeredGraphVisTags } from './layered-graph/layered-graph-vis-tags';
 import { LayeredGraphVisDegree } from './layered-graph/layered-graph-vis-degree';
 import { LayeredGraphVisSteps } from './layered-graph/layered-graph-vis-steps';
 
-import { GGVisualization1 } from './grouped-graph/threejs-gg-vis1';
+import { GroupedGrahVisManual } from './grouped-graph/grouped-graph-vis-manual';
 
 let Visualizations = [
   {
@@ -15,7 +15,7 @@ let Visualizations = [
       { id: 'STEPS', scene: LayeredGraphVisSteps }
     ]
   },
-  { type: 'GROUPED', scenes: [{ id: 'MANUAL', scene: GGVisualization1 }] }
+  { type: 'GROUPED', scenes: [{ id: 'MANUAL', scene: GroupedGrahVisManual }] }
 ];
 
 export { Visualizations };

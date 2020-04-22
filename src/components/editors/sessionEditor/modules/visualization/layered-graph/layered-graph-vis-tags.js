@@ -104,7 +104,7 @@ export class LayeredGraphVisTags extends LayeredGraphScene {
    * Method for handling the behavior during a dragging operation
    * This method is purposely not put in the super classes because in the future a visualization might be needing a different behavior while dragging
    */
-  drag(event) {
+  drag() {
     this.dragBehaviour();
     //If visualization-specific stuff has to happend during drag, put it here
   }

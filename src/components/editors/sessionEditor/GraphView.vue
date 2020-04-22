@@ -207,7 +207,9 @@ export default {
         this.dataset,
         this.settings,
         this.change,
-        $('#threejs-container')
+        $('#threejs-container'),
+        $('#force-graph-container-2d'),
+        $('#force-graph-container-3d')
       );
       this.visManager.showScene();
       this.visManager.animate();
