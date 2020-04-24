@@ -1,64 +1,31 @@
-import * as THREE from 'three';
 import $ from 'jquery';
-import { Visualizations } from './graph-scenes';
-import { checkIfCylic } from '../utils';
 import { ForceGraphVis2D } from './2d-force-graph';
 import { ForceGraphVis3D } from './3d-force-graph';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { LayeredGroupedGraphVis } from './layered-grouped-graph';
 
 export class VisualizationManager {
-  constructor(dataset, settings, change, renderDOMLayeredGrouped, renderDOMForce2D, renderDOMForce3D) {
-    this.render = null;
-    this.scene = null;
-    this.scenes = [];
-    this.mouse = { x: 0, y: 0 };
+  constructor(
+    dataset,
+    settings,
+    change,
+    domLayeredGrouped,
+    domForce2D,
+    domForce3D
+  ) {
     this.force_2d = null;
     this.force_3d = null;
-    this.stop = true;
     this.dataset = dataset;
     this.settings = settings;
     this.change = change;
 
-    this.renderDOMLayeredGrouped = renderDOMLayeredGrouped;
-    this.renderDOMForce2D = renderDOMForce2D;
-    this.renderDOMForce3D = renderDOMForce3D;
+    this.renderDOMLayeredGrouped = domLayeredGrouped;
+    this.renderDOMForce2D = domForce2D;
+    this.renderDOMForce3D = domForce3D;
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    this.renderDOMLayeredGrouped.append(this.renderer.domElement);
-    this.renderer.setClearColor(0x19181a, 1);
-
-    this.resizeRenderer();
-    $(window).resize(() => this.resizeRenderer());
-    this.renderDOMLayeredGrouped[0].addEventListener('resize', () => this.resizeRenderer());
-
-    this.camera = new THREE.OrthographicCamera(
-      window.innerWidth / -50,
-      window.innerWidth / 50,
-      window.innerHeight / 50,
-      window.innerHeight / -50,
-      0.1,
-      1000
-    );
-    this.camera.zoom = 4;
-
-    this.camera.position.z = 14;
-
-    this.orbitControls = new OrbitControls(this.camera, this.renderDOMLayeredGrouped[0]);
-    this.orbitControls.keyPanSpeed = 20;
-    this.orbitControls.keys = {
-      LEFT: 65,
-      RIGHT: 68,
-      UP: 87,
-      BOTTOM: 83
-    };
-    this.orbitControls.screenSpacePanning = true;
-
-    this.orbitControls.addEventListener(
-      'change',
-      () => {
-        this.showViewLabel('');
-      },
-      false
+    this.layeredGroupedGraphVis = new LayeredGroupedGraphVis(
+      this.renderDOMLayeredGrouped,
+      change,
+      dataset
     );
 
     document.addEventListener(
@@ -69,68 +36,24 @@ export class VisualizationManager {
       false
     );
 
-    document.addEventListener(
-      'keyup',
-      event => {
-        this.onKeyUp.call(this, event);
+    this.layeredGroupedGraphVis.orbitControls.addEventListener(
+      'change',
+      () => {
+        this.showViewLabel('');
       },
       false
     );
-
-    document.addEventListener(
-      'mousemove',
-      event => {
-        this.onMouseMove.call(this, event);
-      },
-      false
-    );
-
-    document.addEventListener(
-      'click',
-      event => {
-        if (!this.stop && event.target.nodeName == 'CANVAS') {
-          //Only send event when click happens on canvas
-          this.scene.switchSelect();
-        }
-      },
-      false
-    );
-
-    this.animate();
-  }
-
-  onKeyDown(event) {
-    if (!this.stop) {
-      this.scene.onKeyDown(event);
-    }
-  }
-
-  onKeyUp(event) {
-    if (!this.stop) {
-      this.scene.onKeyUp(event);
-    }
-  }
-
-  onMouseMove(event) {
-    if (!this.stop && this.scene != null) {
-      let actualX = event.clientX - this.renderDOMLayeredGrouped.offset().left;
-      let actualY = event.clientY - this.renderDOMLayeredGrouped.offset().top;
-      this.mouse.x = (actualX / this.renderDOMLayeredGrouped.width()) * 2 - 1;
-      this.mouse.y = -(actualY / this.renderDOMLayeredGrouped.height()) * 2 + 1;
-
-      this.scene.updateLabelSpritePosition(actualX, actualY);
-    }
   }
 
   changeSetting(setting, value) {
-    let scene = this.scenes.find(
+    let scene = this.layeredGroupedGraphVis.visualizations.find(
       el => el.id == this.settings.sceneId && el.type == this.settings.graphType
     );
     if (
       scene == undefined &&
       this.settings.graphType != '2D-FORCE' &&
       this.settings.graphType != '3D-FORCE' &&
-      !this.stop
+      !this.layeredGroupedGraphVis.stop
     ) {
       return;
     }
@@ -186,10 +109,14 @@ export class VisualizationManager {
         //This change cannot be done in the scene, the scene has to be built from scratch
         //Furthermore delete all scenes because they all have to be provided with the new dataset
         this.dataset = value;
-        for (let i = 0; i < this.scenes.length; i++) {
-          this.deleteScene(this.scenes[i]);
+        for (
+          let i = 0;
+          i < this.layeredGroupedGraphVis.visualizations.length;
+          i++
+        ) {
+          this.deleteScene(this.layeredGroupedGraphVis.visualizations[i]);
         }
-        this.scenes = [];
+        this.layeredGroupedGraphVis.visualizations = [];
         if (this.settings.graphType == '2D-FORCE' && this.force_2d != null) {
           //For the force-graph just call grahData() with new dataset
           this.force_2d.graphData(JSON.parse(JSON.stringify(this.dataset)));
@@ -219,14 +146,13 @@ export class VisualizationManager {
         this.renderDOMLayeredGrouped.hide();
         if (this.force_2d == null) {
           //Initialize new 2d-force-graph
-          this.force_2d = ForceGraphVis2D(
-            this.renderDOMForce2D,
-            this.change
-          )(JSON.parse(JSON.stringify(this.dataset)));
+          this.force_2d = ForceGraphVis2D(this.renderDOMForce2D, this.change)(
+            JSON.parse(JSON.stringify(this.dataset))
+          );
         } else {
           this.force_2d.resumeAnimation();
         }
-        this.stop = true; //Pause other scenes
+        this.layeredGroupedGraphVis.stop = true; //Pause other scenes
         break;
       case '3D-FORCE':
         this.renderDOMForce3D.show();
@@ -234,22 +160,16 @@ export class VisualizationManager {
         this.renderDOMLayeredGrouped.hide();
         if (this.force_3d == null) {
           //Initialize new 3d-force-graph
-          this.force_3d = ForceGraphVis3D(
-            this.renderDOMForce3D,
-            this.change
-          )(JSON.parse(JSON.stringify(this.dataset)));
+          this.force_3d = ForceGraphVis3D(this.renderDOMForce3D, this.change)(
+            JSON.parse(JSON.stringify(this.dataset))
+          );
         } else {
           this.force_3d.resumeAnimation();
         }
-        this.stop = true; //Pause other scenes
+        this.layeredGroupedGraphVis.stop = true; //Pause other scenes
         break;
       default:
-        this.stop = false;
-        this.pauseDragControls();
-        this.scene = this.scenes.find(
-          el =>
-            el.id == this.settings.sceneId && el.type == this.settings.graphType
-        ); //switches to the right scene based on graphType and sceneId
+        this.layeredGroupedGraphVis.showScene(this.settings); //switches to the right scene based on graphType and sceneId
 
         if (this.force_2d != null) {
           this.force_2d.pauseAnimation();
@@ -261,133 +181,8 @@ export class VisualizationManager {
         this.renderDOMForce3D.hide();
         this.renderDOMLayeredGrouped.show();
 
-        if (this.scene == undefined) {
-          //If a scene relating to this graphType and sceneId
-          //hasn't been created yet, do that now
-          this.addScene();
-        }
-        if (!this.stop) {
-          this.scene.dragControls.enabled = true;
-        }
         break;
     }
-  }
-
-  addScene() {
-    let visualization, scene;
-    switch (this.settings.graphType) {
-      case 'LAYERED':
-        if (this.settings.sceneId == 'STEPS' && checkIfCylic(this.dataset)) {
-          //Check if acylic graph for steps mode
-          $('#warning').show();
-          this.stop = true;
-          this.structure = [];
-          return;
-        }
-        visualization = Visualizations.find(
-          el => (el.type = this.settings.graphType)
-        );
-        scene = visualization.scenes.find(el => el.id == this.settings.sceneId);
-        this.scene = new scene.scene(
-          this.dataset,
-          this.settings,
-          this.renderer,
-          this.camera,
-          this.orbitControls
-        );
-        this.scenes.push(this.scene);
-        this.changeSetting('showAll'); //These have to be changed after constructor of scene
-        this.changeSetting('slimLayers'); //These have to be changed after constructor of scene
-        break;
-      case 'GROUPED':
-        visualization = Visualizations.find(
-          el => el.type == this.settings.graphType
-        );
-        //Next line always searches for sceneId='MANUAL' for Grouped Graph because
-        //that's the only one realized right now
-        scene = visualization.scenes.find(el => el.id == 'MANUAL');
-        this.scene = new scene.scene(
-          this.dataset,
-          this.renderer,
-          this.camera,
-          this.orbitControls
-        );
-        this.scenes.push(this.scene);
-        break;
-    }
-    this.changeSetting('viewZeroMarker');
-    this.scene.setChange(this.change); //These have to be changed after constructor of scene
-    this.scene.setShowViewLabel(this.showViewLabel.bind(this)); //These have to be changed after constructor of scene
-    this.stop = false; //stop would otherwise halt the animate function
-  }
-
-  /* 
-  This function either deletes a parameter-given scene or deletes the one that is currently 
-  selected via sceneId and graphType in settings object
-  */
-  deleteScene(scene) {
-    let index;
-    if (scene == undefined) {
-      scene = this.scenes.find((el, ind) => {
-        if (
-          el.id == this.settings.sceneId &&
-          el.type == this.settings.graphType
-        ) {
-          index = ind;
-          return true;
-        } else {
-          return false;
-        }
-      });
-    }
-
-    scene.camera = null;
-    scene.dragControls = null;
-    scene.raycaster = null;
-    scene.composer = null;
-    scene.scene = null;
-    return index;
-  }
-
-  removeScene(index) {
-    this.scenes.splice(index, 1);
-  }
-
-  pauseDragControls() {
-    this.scenes.forEach(el => {
-      el.dragControls.enabled = false;
-    });
-  }
-
-  resizeRenderer() {
-    let width = parseInt(this.renderDOMLayeredGrouped.width());
-    let height = parseInt(this.renderDOMLayeredGrouped.height());
-
-    if (width < 1800) {
-      $('.main').css('width', width);
-    } else {
-      $('.main').css('width', '100%');
-    }
-    if (this.scene == null) {
-      return;
-    }
-
-    this.renderer.setSize(width, height);
-    this.scene.composer.setSize(width, height);
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
-  }
-  /*
-   * Animates the currently selected scene (gets selected in showScene())
-   */
-  animate() {
-    requestAnimationFrame(() => this.animate());
-    if (this.stop) {
-      //The animation of a normal threejs scene(right now from Layered or Grouped Graph) can be stopped
-      return; //Stopping the animation for example when one of the force-graphs is selected
-    }
-    this.scene.update(this.mouse);
-    this.scene.composer.render(this.scene.scene, this.camera); //this.scene.scene always render the selected scene
   }
 
   showViewLabel(view) {
@@ -403,6 +198,17 @@ export class VisualizationManager {
           $('#view-badge').html('View: Y-Axis (Side)');
         }
       }
+    }
+  }
+
+  onKeyDown(event) {
+    let keyCode = event.which;
+    if (keyCode == 88) {
+      //X-button for front view
+      this.showViewLabel('X');
+    } else if (keyCode == 89) {
+      //Y-button for side view on layers
+      this.showViewLabel('Y');
     }
   }
 }

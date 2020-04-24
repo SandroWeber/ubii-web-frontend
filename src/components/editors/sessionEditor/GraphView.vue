@@ -211,9 +211,9 @@ export default {
         $('#force-graph-container-2d'),
         $('#force-graph-container-3d')
       );
-      this.visManager.showScene();
-      this.visManager.animate();
-      this.visManager.resizeRenderer();
+      this.visManager.showScene(this.settings);
+      //this.visManager.animate();
+      this.visManager.layeredGroupedGraphVis.resizeRenderer();
       this.$forceUpdate();
     },
     change: function(setting, value) {

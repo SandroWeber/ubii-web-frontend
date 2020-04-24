@@ -224,12 +224,10 @@ export class LayeredGraphVisSteps extends LayeredGraphScene {
     if (keyCode == 88) {
       //X-button for front view
       this.orbitControls.reset();
-      this.showViewLabel('X');
     } else if (keyCode == 89) {
       //Y-button for side view on layers
       this.camera.position.set(-8, 0, 0);
       this.orbitControls.update();
-      this.showViewLabel('Y');
     }
   }
 }
