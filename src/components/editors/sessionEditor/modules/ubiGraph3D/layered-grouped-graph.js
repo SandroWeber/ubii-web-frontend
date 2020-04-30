@@ -21,7 +21,6 @@ export class LayeredGroupedGraphVis {
     this.renderer.setClearColor(0x19181a, 1);
 
     this.resizeRenderer();
-    //$(window).resize(() => this.resizeRenderer());
     window.addEventListener('resize', () => this.resizeRenderer());
     this.domElement[0].addEventListener('resize', () => this.resizeRenderer());
 
@@ -91,12 +90,6 @@ export class LayeredGroupedGraphVis {
     }
     let width = parseInt(this.domElement.width());
     let height = parseInt(this.domElement.height());
-
-    /*if (width < 1800) {
-            $('.main').css('width', width);
-        } else {
-            $('.main').css('width', '100%');
-        }*/
 
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;

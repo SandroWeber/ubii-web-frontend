@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import { ForceGraphVis2D } from './2d-force-graph';
 import { ForceGraphVis3D } from './3d-force-graph';
-import { LayeredGroupedGraphVis } from './layered-grouped-graph';
+import { LayeredGroupedGraphVis } from '../ubiGraph3D/layered-grouped-graph';
 
 export class VisualizationManager {
   constructor(
