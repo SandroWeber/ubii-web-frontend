@@ -20,7 +20,7 @@
             <span
               @click="
                 () => {
-                  visManager.scene.focusOn(tag.id);
+                  visManager.layeredGroupedGraphVis.scene.focusOn(tag.id);
                 }
               "
               class="focus-icon"
@@ -162,8 +162,12 @@ export default {
     },
     structure: function() {
       //The internal structure of the graph (either layers or groups or what ever else come to mind)
-      if (this.visManager != null && this.visManager.scene != null) {
-        return this.visManager.scene.structure;
+      if (
+        this.visManager &&
+        this.visManager.layeredGroupedGraphVis &&
+        this.visManager.layeredGroupedGraphVis.scene
+      ) {
+        return this.visManager.layeredGroupedGraphVis.scene.structure;
       } else {
         return [];
       }

@@ -172,7 +172,7 @@ export class GroupedGraphScene {
    * this adds a new group to the structure of a visualization
    */
   addToStructure() {
-    let c = randomHexColor(); //right now only random colors are choosen
+    let c = randomHexColor(); //right now only random colors are chosen
 
     let id; //group-id is negative to put them into this.meshes
     //and still be able to differentiate them (group node) from normal meshes
