@@ -14,6 +14,9 @@ export class Dataset {
     this.links.push(link);
   }
 
+  /*
+   * Create adjacency matrix from dataset
+   */
   toMatrix() {
     let result = [],
       temp1,
@@ -75,7 +78,7 @@ export class Dataset {
       visited.push(false);
       recStack.push(false);
     });
-    let matrix = this.toMatrix(); //translatedToMatrix(dataset);
+    let matrix = this.toMatrix();
     for (let i = 0; i < this.nodes.length; i++) {
       if (recursiveCheck(i, visited, recStack, matrix)) {
         return true;
