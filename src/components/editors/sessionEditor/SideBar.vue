@@ -41,14 +41,9 @@
         :normal="true"
         :list_item="1"
         @change="change('viewNode', node.id)"
-        >{{ node.name }}</list-item
-      >
+      >{{ node.name }}</list-item>
     </side-bar-item>
-    <side-bar-item
-      :id="'2'"
-      :desc="'Inspect the data of a node.'"
-      :title="'Node Inspector'"
-    >
+    <side-bar-item :id="'2'" :desc="'Inspect the data of a node.'" :title="'Node Inspector'">
       <NodeInspector :dataset="dataset" :settings="settings"></NodeInspector>
     </side-bar-item>
     <side-bar-item
@@ -71,8 +66,7 @@
           v-if="!isSelected(ds)"
           @click="change('dataset', ds.id)"
           variant="outline-primary"
-          >Show</b-button
-        >
+        >Show</b-button>
       </list-item>
     </side-bar-item>
   </div>

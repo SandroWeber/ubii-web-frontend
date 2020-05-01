@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { LayeredGraphScene } from './layered-graph-scene';
-import { translatedToMatrix } from '../../utils';
+//import { translatedToMatrix } from '../../utils';
 
 export class LayeredGraphVisDegree extends LayeredGraphScene {
   constructor(dataset, settings, renderer, camera, orbitControls) {
@@ -27,7 +27,7 @@ export class LayeredGraphVisDegree extends LayeredGraphScene {
   setupStructure(dataset) {
     this.structure = [];
 
-    let matrix = translatedToMatrix(dataset); //use intermediary adjacency matrix because it's easier for counting
+    let matrix = dataset.toMatrix(); //translatedToMatrix(dataset); //use intermediary adjacency matrix because it's easier for counting
 
     let layers = [],
       layer = '',
@@ -162,7 +162,7 @@ export class LayeredGraphVisDegree extends LayeredGraphScene {
    * Method for handling the behavior during a dragging operation
    * This method is purposely not put in the super classes because in the future a visualization might be needing a different behavior while dragging
    */
-  drag(event) {
+  drag() {
     this.dragBehaviour();
     //If visualization-specific stuff has to happend during drag, put it here
   }

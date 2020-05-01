@@ -31,6 +31,7 @@ import { faPlay } from '@fortawesome/free-solid-svg-icons';
 import { scenarios } from './modules/session-scenarios';
 
 import { DataTranslator } from './modules/utils';
+import { Dataset } from './modules/ubiGraph3D/dataset';
 
 library.add(faPlay);
 
@@ -64,7 +65,9 @@ export default {
   beforeMount: function() {
     this.translator = new DataTranslator();
     scenarios.forEach(scenario => {
-      this.datasets.push(scenario);
+      let dataset = new Dataset(scenario.id, scenario.name);
+      Object.assign(dataset, scenario);
+      this.datasets.push(dataset);
     });
   },
   computed: {

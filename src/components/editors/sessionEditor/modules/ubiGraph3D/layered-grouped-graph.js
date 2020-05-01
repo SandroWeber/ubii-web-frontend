@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import $ from 'jquery';
 
 import { Visualizations } from './graph-visualizations';
-import { checkIfCylic } from '../utils';
+//import { checkIfCylic } from '../utils';
 
 export class LayeredGroupedGraphVis {
   constructor(domElement, change, dataset) {
@@ -132,7 +132,10 @@ export class LayeredGroupedGraphVis {
     let visualization, scene;
     switch (settings.graphType) {
       case 'LAYERED':
-        if (settings.sceneId == 'STEPS' && checkIfCylic(this.dataset)) {
+        if (
+          settings.sceneId == 'STEPS' &&
+          this.dataset.isCyclic() /*checkIfCylic(this.dataset)*/
+        ) {
           //Check if acylic graph for steps mode
           $('#warning').show();
           this.stop = true;

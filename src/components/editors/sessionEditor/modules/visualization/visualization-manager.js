@@ -25,7 +25,7 @@ export class VisualizationManager {
     this.layeredGroupedGraphVis = new LayeredGroupedGraphVis(
       this.renderDOMLayeredGrouped,
       change,
-      dataset
+      this.dataset
     );
 
     document.addEventListener(
@@ -109,14 +109,19 @@ export class VisualizationManager {
         //This change cannot be done in the scene, the scene has to be built from scratch
         //Furthermore delete all scenes because they all have to be provided with the new dataset
         this.dataset = value;
+
         for (
           let i = 0;
           i < this.layeredGroupedGraphVis.visualizations.length;
           i++
         ) {
-          this.deleteScene(this.layeredGroupedGraphVis.visualizations[i]);
+          this.layeredGroupedGraphVis.deleteScene(
+            this.layeredGroupedGraphVis.visualizations[i]
+          );
         }
         this.layeredGroupedGraphVis.visualizations = [];
+        this.layeredGroupedGraphVis.dataset = this.dataset;
+
         if (this.settings.graphType == '2D-FORCE' && this.force_2d != null) {
           //For the force-graph just call grahData() with new dataset
           this.force_2d.graphData(JSON.parse(JSON.stringify(this.dataset)));

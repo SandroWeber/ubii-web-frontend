@@ -1,3 +1,5 @@
+import { Dataset } from './ubiGraph3D/dataset';
+
 export class DataTranslator {
   constructor() {}
 
@@ -5,11 +7,13 @@ export class DataTranslator {
     let copy = Object.assign({}, session);
     let interactionIds = [];
     let idCounter = 0;
-    let nodes = [];
-    let links = [],
+    //let nodes = [];
+    let //links = [],
       leftLinks = [],
       rightLinks = [];
     let temp = [];
+
+    let dataset = new Dataset(copy.id, copy.name);
 
     let getTopicToFormatName = (name, id, inputFlag) => {
       let result = '';
@@ -35,7 +39,8 @@ export class DataTranslator {
       }
       interactionIds.push(interaction.id);
       copy.interactions[index].id = idCounter++;
-      nodes.push({
+      //nodes.push({
+      dataset.addNode({
         id: idCounter - 1,
         name: interaction.name,
         tags:
@@ -66,18 +71,19 @@ export class DataTranslator {
           rLink.how == lLink.how &&
           rLink.to != ''
         ) {
-          links.push({ source: rLink.from, target: lLink.to });
+          //links.push({ source: rLink.from, target: lLink.to });
+          dataset.addLink({ source: rLink.from, target: lLink.to });
         }
       });
     });
-    return { id: copy.id, name: copy.name, nodes: nodes, links: links };
+    return dataset; //{ id: copy.id, name: copy.name, nodes: nodes, links: links };
   }
 }
 
 /*
  * Create adjacency matrix from dataset
  */
-export function translatedToMatrix(dataset) {
+/*export function translatedToMatrix(dataset) {
   let result = [],
     temp1,
     temp2;
@@ -103,9 +109,9 @@ export function translatedToMatrix(dataset) {
     result.push(temp1);
   });
   return result;
-}
+}*/
 
-export function randomHexColor(hex) {
+export function randomHexColor() {
   let part = [
     '1',
     '2',
@@ -128,46 +134,4 @@ export function randomHexColor(hex) {
     result = result + part[Math.floor(Math.random() * 6)];
   }
   return '#' + result;
-}
-
-export function checkIfCylic(dataset) {
-  //Got this algorithm from here https://www.geeksforgeeks.org/detect-cycle-in-a-graph/
-  let recursiveCheck = (i, visited, recStack, matrix) => {
-    if (recStack[i]) {
-      return true;
-    }
-
-    if (visited[i]) {
-      return false;
-    }
-
-    visited[i] = true;
-    recStack[i] = true;
-
-    for (let j = 0; j < matrix[i].length; j++) {
-      if (matrix[i][j]) {
-        if (recursiveCheck(j, visited, recStack, matrix)) {
-          return true;
-        }
-      }
-    }
-
-    recStack[i] = false;
-
-    return false;
-  };
-
-  let visited = [];
-  let recStack = [];
-  dataset.nodes.forEach(el => {
-    visited.push(false);
-    recStack.push(false);
-  });
-  let matrix = translatedToMatrix(dataset);
-  for (let i = 0; i < dataset.nodes.length; i++) {
-    if (recursiveCheck(i, visited, recStack, matrix)) {
-      return true;
-    }
-  }
-  return false;
 }

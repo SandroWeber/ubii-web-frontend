@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { LayeredGraphScene } from './layered-graph-scene';
-import { translatedToMatrix } from '../../utils';
+//import { translatedToMatrix } from '../../utils';
 
 export class LayeredGraphVisSteps extends LayeredGraphScene {
   constructor(dataset, settings, renderer, camera, orbitControls) {
@@ -27,7 +27,7 @@ export class LayeredGraphVisSteps extends LayeredGraphScene {
    */
   setupStructure(dataset) {
     this.structure = [];
-    let matrix = translatedToMatrix(dataset);
+    let matrix = dataset.toMatrix(); //translatedToMatrix(dataset);
     let layers = [];
 
     //this function call actually does most of the job
