@@ -9,30 +9,25 @@
       @filter="filter"
     />
     <div>
-      <div class="records-section-header">editable</div>
-      <app-explorer-item
-        v-for="record in filteredAndSortedRecordsEditable"
-        :key="record.id"
-        :id="record.id"
-        :label="record.label"
-        :selected="isSelected(record)"
-        @select="select(record)"
-        @select-ctrl="selectControl(record)"
-        @select-shift="selectShift(record)"
-      />
-    </div>
-    <div>
-      <div class="records-section-header">non-editable</div>
-      <app-explorer-item
-        v-for="record in filteredAndSortedRecordsStatic"
-        :key="record.id"
-        :id="record.id"
-        :label="record.label"
-        :selected="isSelected(record)"
-        @select="select(record)"
-        @select-ctrl="selectControl(record)"
-        @select-shift="selectShift(record)"
-      />
+      <div v-for="category in categories" :key="category.title">
+        <AppCollapseSectionHeader
+          :title="category.title"
+          :targetID="'explorer-items-' + category.title"
+          :initiallyCollapsed="false"
+        />
+        <div :id="'explorer-items-' + category.title">
+          <app-explorer-item
+            v-for="record in records.filter(category.filter).sort(category.sorting)"
+            :key="record.name"
+            :id="record.id"
+            :label="record.label"
+            :selected="isSelected(record)"
+            @select="select(record)"
+            @select-ctrl="selectControl(record)"
+            @select-shift="selectShift(record)"
+          />
+        </div>
+      </div>
     </div>
   </app-layer>
 </template>
@@ -41,6 +36,7 @@
 import AppExplorerItem from './AppExplorerItem.vue';
 import AppExplorerToolbar from './AppExplorerToolbar.vue';
 import AppLayer from './../AppLayer.vue';
+import AppCollapseSectionHeader from '../AppCollapseSectionHeader.vue';
 
 /**
  * Implementation of a general explorer as app component that...
@@ -61,12 +57,28 @@ export default {
   components: {
     AppExplorerItem,
     AppExplorerToolbar,
-    AppLayer
+    AppLayer,
+    AppCollapseSectionHeader
   },
   props: {
     records: {
       type: Array,
       required: true
+    },
+    categories: {
+      type: Array,
+      required: false,
+      default: function() {
+        return [
+          {
+            title: 'All',
+            filter: () => {
+              return true;
+            },
+            sorting: undefined
+          }
+        ];
+      }
     },
     options: {
       type: Object,

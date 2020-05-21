@@ -2,8 +2,10 @@
   <app-layer class="interaction-explorer layer-two background shadow">
     <app-explorer
       :records="interactions"
+      :categories="categories"
       :options="options"
       @add="addDefaultInteraction"
+      @save="saveInteractions"
       @remove="removeInteractions"
       @refresh="pull"
       @select="onSelect"
@@ -26,10 +28,25 @@ export default {
   },
   data: function() {
     return {
+      categories: [
+        {
+          title: 'Editable',
+          filter: record => {
+            return record.editable;
+          }
+        },
+        {
+          title: 'Non-Editable',
+          filter: record => {
+            return !record.editable;
+          }
+        }
+      ],
       options: {
         sort: 'alphabetically',
         tools: {
           add: true,
+          save: true,
           remove: true,
           refresh: true,
           filter: true
@@ -53,7 +70,8 @@ export default {
       addDefaultInteraction: 'addDefault',
       deleteInteraction: 'deleteInteraction',
       pull: 'pull'
-    })
+    }),
+    saveInteractions: function() {}
   }
 };
 </script>
