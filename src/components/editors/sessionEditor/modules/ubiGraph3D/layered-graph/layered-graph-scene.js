@@ -126,27 +126,27 @@ export class LayeredGraphScene {
     return this.scene;
   }
 
-  setupStructure(dataset) {
+  setupStructure() {
     throw new Error('Cannot call abstract method');
   }
 
-  moveTo(position) {
+  moveTo() {
     throw new Error('Cannot call abstract method');
   }
 
-  drag(event) {
+  drag() {
     throw new Error('Cannot call abstract method');
   }
 
-  dragstart(event) {
+  dragstart() {
     throw new Error('Cannot call abstract method');
   }
 
-  dragend(event) {
+  dragend() {
     throw new Error('Cannot call abstract method');
   }
 
-  onKeyUp(event) { }
+  onKeyUp() {}
 
   setOutlinePass(outlinePass) {
     this.outlinePassReference = outlinePass;

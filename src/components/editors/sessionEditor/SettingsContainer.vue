@@ -1,10 +1,8 @@
 <template>
   <div class="settings-container">
     <div class="settings-group">
+      <div class="settings-row">Import:</div>
       <div class="settings-row">
-        Import:
-      </div>
-      <div <div class="settings-row">
         <b-form-file
           size="sm"
           v-model="file"
@@ -16,10 +14,8 @@
         ></b-form-file>
         <b-button @click="upload" variant="outline-primary">Import</b-button>
       </div>
+      <div class="settings-row">Graph:</div>
       <div class="settings-row">
-        Graph:
-      </div>
-      <div <div class="settings-row">
         <b-form-select
           v-model="selectedGraphType"
           :options="graphTypeOptions"
@@ -33,9 +29,7 @@
         v-if="
           selectedGraphType != '2D-FORCE' && selectedGraphType != '3D-FORCE'
         "
-      >
-        Mode:
-      </div>
+      >Mode:</div>
       <div
         class="settings-row"
         v-if="
@@ -48,46 +42,33 @@
           @input="changeSceneId"
         ></b-form-select>
       </div>
-      <div class="settings-row">
-        Explanation:
-      </div>
+      <div class="settings-row">Explanation:</div>
       <div class="settings-row">
         <div class="help-container">
           <font-awesome-icon icon="question-circle" class="icon" />
-          <span v-if="selectedGraphType == '2D-FORCE'"
-            >A two-dimensional force directed graph.</span
-          >
-          <span v-if="selectedGraphType == '3D-FORCE'"
-            >A three-dimensional force directed graph.</span
-          >
+          <span v-if="selectedGraphType == '2D-FORCE'">A two-dimensional force directed graph.</span>
+          <span v-if="selectedGraphType == '3D-FORCE'">A three-dimensional force directed graph.</span>
           <span
             v-if="
               selectedGraphType == 'LAYERED' && selectedSceneId == 'EXPLORATION'
             "
-            >Explore the graph freely with 9 individually usable layers. These
-            layers can be filled however you want.</span
           >
-          <span
-            v-if="selectedGraphType == 'LAYERED' && selectedSceneId == 'TAGS'"
-          >
+            Explore the graph freely with 9 individually usable layers. These
+            layers can be filled however you want.
+          </span>
+          <span v-if="selectedGraphType == 'LAYERED' && selectedSceneId == 'TAGS'">
             Sort your Nodes in layers depending on which tags (or combination of
             tags) they reference.
           </span>
-          <span
-            v-if="selectedGraphType == 'LAYERED' && selectedSceneId == 'DEGREE'"
-          >
+          <span v-if="selectedGraphType == 'LAYERED' && selectedSceneId == 'DEGREE'">
             Sort your Nodes in layers depending on how many edges flow into a
             node / out of a node (node degree).
           </span>
-          <span
-            v-if="selectedGraphType == 'LAYERED' && selectedSceneId == 'STEPS'"
-          >
+          <span v-if="selectedGraphType == 'LAYERED' && selectedSceneId == 'STEPS'">
             Sort your Nodes in layers depending on how many steps they are away
             from your Starting Node
           </span>
-          <span
-            v-if="selectedGraphType == 'GROUPED' && selectedSceneId == 'MANUAL'"
-          >
+          <span v-if="selectedGraphType == 'GROUPED' && selectedSceneId == 'MANUAL'">
             Structure the graph by merging nodes together to form groups. Open
             or close groups to reveal the individual nodes inside.
           </span>
@@ -183,7 +164,7 @@
 <script>
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
-import { BFormSelect, BFormGroup, BButton, BFormFile } from 'bootstrap-vue';
+import { BFormSelect, BButton, BFormFile } from 'bootstrap-vue';
 
 import { ToggleButton } from 'vue-js-toggle-button';
 
@@ -195,7 +176,6 @@ export default {
   name: 'SettingsContainer',
   components: {
     'b-form-select': BFormSelect,
-    'b-form-group': BFormGroup,
     'b-button': BButton,
     'b-form-file': BFormFile,
     'toggle-button': ToggleButton
@@ -254,7 +234,7 @@ export default {
   watch: {
     dataset: function(ds) {
       this.startNodeOptions = [];
-      ds.nodes.forEach((node, index) =>
+      ds.nodes.forEach(node =>
         this.startNodeOptions.push({ value: node.id, text: node.name })
       );
     },
@@ -264,7 +244,7 @@ export default {
   },
   methods: {
     init: function() {
-      this.dataset.nodes.forEach((node, index) =>
+      this.dataset.nodes.forEach(node =>
         this.startNodeOptions.push({ value: node.id, text: node.name })
       );
     },
