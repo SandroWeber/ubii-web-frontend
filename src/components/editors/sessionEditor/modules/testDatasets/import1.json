@@ -1,0 +1,60 @@
+{
+    "id": "01",
+    "name": "Dataset 1",
+    "nodes": [
+        {
+            "id": 0,
+            "name": "Node 1",
+            "tags": [
+                "Tag 1",
+                "Tag 2",
+                "Tag 3"
+            ],
+            "links": [
+                "https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Array/join",
+                "https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Array/map"
+            ],
+            "data": {
+                "field1": "value1",
+                "field2": "value2",
+                "field3": "value3",
+                "field4": "value4",
+                "field5": "value5",
+                "field6": "value6"
+            }
+        },
+        {
+            "id": 1,
+            "name": "Node 2",
+            "tags": [
+                "No Tags"
+            ],
+            "links": []
+        },
+        {
+            "id": 2,
+            "name": "Node 3",
+            "tags": [
+                "No Tags"
+            ],
+            "links": []
+        }
+    ],
+    "links": [
+        {
+            "source": 0,
+            "target": 1,
+            "how": "a"
+        },
+        {
+            "source": 1,
+            "target": 2,
+            "how": "a"
+        },
+        {
+            "source": 0,
+            "target": 2,
+            "how": "a"
+        }
+    ]
+}

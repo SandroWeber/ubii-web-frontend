@@ -19,6 +19,25 @@
         <app-tile class="layer-three background round shadow green-accent">
           <font-awesome-icon icon="microchip" class="grid-icon" />
           <p>Interaction Editor</p>
+          <font-awesome-icon
+            icon="exclamation-triangle"
+            class="under-construction-icon"
+            v-b-tooltip.hover
+            title="Under Construction"
+          />
+        </app-tile>
+      </router-link>
+
+      <router-link to="/administration/sessionEditor" class="grid-link" tag="div">
+        <app-tile class="layer-three background round shadow green-accent">
+          <font-awesome-icon icon="project-diagram" class="grid-icon" />
+          <p>Session Editor</p>
+          <font-awesome-icon
+            icon="exclamation-triangle"
+            class="under-construction-icon"
+            v-b-tooltip.hover
+            title="Under Construction"
+          />
         </app-tile>
       </router-link>
     </div>
@@ -34,8 +53,13 @@ import '@riophae/vue-treeselect/dist/vue-treeselect.css';
 
 // Fontawesome.
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faRandom, faMicrochip } from '@fortawesome/free-solid-svg-icons';
-library.add(faRandom, faMicrochip);
+import {
+  faRandom,
+  faMicrochip,
+  faProjectDiagram,
+  faExclamationTriangle
+} from '@fortawesome/free-solid-svg-icons';
+library.add(faRandom, faMicrochip, faProjectDiagram, faExclamationTriangle);
 
 /*let dummyTreeselectOptions = [
   {
@@ -92,7 +116,7 @@ export default {
 };
 </script>
 
-<style scoped lang="stylus">
+<style scoped>
 .tree-select {
   margin: 10px;
 }
@@ -112,5 +136,14 @@ export default {
 .grid-icon {
   width: 50px;
   height: 50px;
+}
+
+.under-construction-icon {
+  position: relative;
+  top: 5px;
+  right: 5px;
+  width: 10%;
+  height: 10%;
+  color: yellow;
 }
 </style>
