@@ -3,11 +3,13 @@ import { CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 // import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
 
 import ThreeWebContentCanvas from './ThreeWebContentCanvas';
+import { MeshNormalMaterial } from 'three';
 
 class XRHub {
   constructor(container, camera) {
     this.container = container;
     this.perspCamera = camera;
+    this.perspCamera.position.set(0, 0, 5);
     this.initVRScene();
     this.initWebContentScene();
     this.raycaster = new THREE.Raycaster();
@@ -24,6 +26,7 @@ class XRHub {
 
     this.createGroundPlane();
     this.createDemoCube();
+    this.createMouseSphere();
 
     this.webGLRenderer = new THREE.WebGLRenderer({
       alpha: true /*, antialias: true*/
@@ -98,60 +101,9 @@ class XRHub {
   }
   */
 
-  initMouseControls(){
-    this.handleMouseEvent = this.handleMouseEvent.bind(this);
-    this.updateMouse = this.updateMouse.bind(this);
-    this.container.addEventListener('mousemove', this.updateMouse);
-    this.container.addEventListener('click', this.handleMouseEvent);
-    this.container.addEventListener('contextmenu', this.handleMouseEvent);
-    this.container.addEventListener('wheel', this.handleMouseEvent);
-  }
-
-  updateMouse(event){
-    this.mouse = {
-      x: event.x,
-      y: event.y
-    };
-  }
-
-  handleMouseEvent(event) {
-    const intersectedObjects = event.x ? this.getRaycastIntersectionsFromScreenPos(event.x, event.y): this.getRaycastIntersectionsFromScreenPos(this.mouse.x, this.mouse.y);
-    if (intersectedObjects.length) {
-      const closestIntersection = intersectedObjects[0];
-      if (closestIntersection.object.custom) {
-        if(event.type === "wheel"){
-          this.dispatchScroll(closestIntersection, event);
-        } else {
-          this.dispatchClick(closestIntersection);
-        }
-
-      }
-    }
-  }
-
-  dispatchClick(intersection){
-    const localIntersection = intersection.object.worldToLocal(intersection.point);
-    const clientX = (localIntersection.x+0.5)*intersection.object.custom.res.x;
-    const clientY = (localIntersection.y+0.5)*intersection.object.custom.res.y;
-    const mouseEvent = new MouseEvent(event.type, {
-      bubbles: true,
-      cancelable: true,
-      clientX,
-      clientY
-    });
-    const domElement = intersection.object.custom.website.contentWindow.document.elementFromPoint(clientX, clientY);
-    if(domElement){
-      domElement.dispatchEvent(mouseEvent);
-    }
-  }
-
-  dispatchScroll(closestIntersection, event){
-    closestIntersection.object.custom.website.contentWindow.scroll(event.deltaX, event.deltaY);
-  }
-
-  getRaycastIntersectionsFromScreenPos(screenPosX, screenPosY){
+  raycastFromScreenCoordinates(screenPosX, screenPosY){
     const eventXPosFromCenter = ((screenPosX-this.container.offsetLeft)/this.container.clientWidth)*2-1;
-    const eventYPosFromCenter = ((screenPosY-this.container.offsetTop)/this.container.clientHeight)*2-1;
+    const eventYPosFromCenter = -((screenPosY-this.container.offsetTop)/this.container.clientHeight)*2+1;
     const positionRelativeToContainer = new THREE.Vector3(eventXPosFromCenter, eventYPosFromCenter, 0);
     this.raycaster.setFromCamera(positionRelativeToContainer, this.perspCamera);
     return this.raycaster.intersectObjects(
@@ -159,14 +111,50 @@ class XRHub {
     );
   }
 
-  onSelectStart(event){
-    this.webGLRenderer.domElement.ownerDocument.alert("hey i selected something");
-    return event;
+  initMouseControls(){
+    this.container.addEventListener('mousemove', this.updateMouse.bind(this));
+    this.container.addEventListener('mousedown', this.handleMouseDown.bind(this));
+    this.container.addEventListener('mouseup', this.handleMouseUp.bind(this));
   }
 
-  onSelectEnd(event){
-    // TODO: implement
-    return event;
+  updateMouse(event){
+    this.mouse = {
+      x: event.x,
+      y: event.y
+    };
+    const xNDC = ((event.x-this.container.offsetLeft)/this.container.clientWidth)*2-1;
+    const yNDC = -((event.y-this.container.offsetTop)/this.container.clientHeight)*2+1;
+    const mouseVector = new THREE.Vector3(xNDC, yNDC, 0);
+    mouseVector.unproject(this.perspCamera);
+    mouseVector.sub(this.perspCamera.position).normalize();
+    const distance = - this.perspCamera.position.z / mouseVector.z;
+    this.mouseSphere.position.copy(this.perspCamera.position.clone().add(mouseVector.multiplyScalar(distance)));
+  }
+
+  handleMouseDown(event){
+    const intersectedObjects = this.raycastFromScreenCoordinates(event.x, event.y);
+    if(intersectedObjects.length > 0 && event.button === 1){
+      const matrix = new THREE.Matrix4;
+      matrix.getInverse( this.mouseSphere.matrixWorld );
+      var object = intersectedObjects[0].object;
+      object.matrix.premultiply( matrix );
+      object.matrix.decompose( object.position, object.quaternion, object.scale );
+      //object.material.emissive.b = 1;
+      this.mouseSphere.add( object );
+
+      this.mouseSphere.userData.selected = object;
+    }
+  }
+
+  handleMouseUp(event){
+    if(this.mouseSphere.userData.selected !== undefined && event.button === 1){
+      const object = this.mouseSphere.userData.selected;
+      object.matrix.premultiply( this.mouseSphere.matrixWorld );
+      object.matrix.decompose( object.position, object.quaternion, object.scale );
+      this.webGLScene.add( object );
+
+      this.mouseSphere.userData.selected = undefined;
+    }
   }
 
   update(delta) {
@@ -194,6 +182,16 @@ class XRHub {
     this.mesh.position.y = 1;
     this.mesh.name = "demoCube";
     this.webGLScene.add(this.mesh);
+  }
+
+  createMouseSphere() {
+    const geometry = new THREE.SphereGeometry(0.01);
+    const material = new MeshNormalMaterial();
+
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.name = "mouseSphere";
+    this.webGLScene.add(mesh);
+    this.mouseSphere = mesh;
   }
 }
 
