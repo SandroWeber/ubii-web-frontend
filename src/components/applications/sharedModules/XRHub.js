@@ -16,6 +16,7 @@ class XRHub {
     this.spawnWebContent('https://threejs.org/');
     this.raycaster = new THREE.Raycaster();
     this.initMouseControls();
+    this.createInteractionToggleButton();
     // this.controllers = [];
     // this.initControls();
   }
@@ -39,6 +40,11 @@ class XRHub {
     this.webGLRenderer.domElement.style.zIndex = '1'; // required
     // this.webGLRenderer.domElement.style.pointerEvents = "none"; // required
     this.container.appendChild(this.webGLRenderer.domElement);
+  }
+
+  togglePointerEvents(){
+    const current = this.webGLRenderer.domElement.style.pointerEvents;
+    this.webGLRenderer.domElement.style.pointerEvents = current === "none" && current.length > 0 ? "all": "none";
   }
 
   initWebContentScene() {
@@ -209,6 +215,22 @@ class XRHub {
     this.css3DMouseSpehre.name = "css3DMouseSpehre";
     this.webGLScene.add(this.webGLMouseSphere);
     this.css3DScene.add(this.css3DMouseSpehre);
+  }
+
+  createInteractionToggleButton(){
+    const button = document.createElement("button");
+    button.style.width = 200+"px";
+    button.style.height = 20+"px";
+    button.style.position = "absolute";
+    button.style.top = 100+"px";
+    button.style.right = 10+"px";
+    button.style.textAlign=  "center";
+    button.style.zIndex = 100;
+    button.style.display = "block";
+    button.innerText = "Toggle Website Interaction";
+    button.addEventListener("click", this.togglePointerEvents.bind(this));
+    // button.addEventListener("mousedown", this.togglePointerEvents.bind(this));
+    document.documentElement.appendChild(button);
   }
 }
 
