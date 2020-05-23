@@ -46,9 +46,10 @@ class ThreeWebContentCanvas {
     let geometry = new THREE.PlaneGeometry(1, 1);
     let webglPlaneMesh = new THREE.Mesh(geometry, material);
     webglPlaneMesh.name = this.name;
-    webglPlaneMesh.custom = {
-      website: css3DCannvas.custom.website,
+    webglPlaneMesh.userData = {
+      website: css3DCannvas.userData.website,
       res: {x: this.resolution[0], y: this.resolution[1]},
+      css3DObject: css3DCannvas
     };
 
     return webglPlaneMesh;
@@ -69,7 +70,7 @@ class ThreeWebContentCanvas {
 
     var object = new CSS3DObject(div);
     object.name = this.name;
-    object.custom = {website: iframe};
+    object.userData = {website: iframe};
 
     return object;
   }

@@ -12,9 +12,9 @@ class XRHub {
     this.perspCamera.position.set(0, 0, 5);
     this.initVRScene();
     this.initWebContentScene();
+    this.createMouseSphere();
+    this.spawnWebContent('https://threejs.org/');
     this.raycaster = new THREE.Raycaster();
-
-    this.mouse = {x: -1, y: -1};
     this.initMouseControls();
     // this.controllers = [];
     // this.initControls();
@@ -26,7 +26,6 @@ class XRHub {
 
     this.createGroundPlane();
     this.createDemoCube();
-    this.createMouseSphere();
 
     this.webGLRenderer = new THREE.WebGLRenderer({
       alpha: true /*, antialias: true*/
@@ -51,7 +50,11 @@ class XRHub {
     );
     this.container.appendChild(this.css3DRenderer.domElement);
 
-    let url = 'https://threejs.org/'; // 'http://localhost:8080'; // 'https://threejs.org/examples/?q=css#css3d_youtube';
+
+  }
+
+  spawnWebContent(url){
+    // let url = 'https://threejs.org/'; // 'http://localhost:8080'; // 'https://threejs.org/examples/?q=css#css3d_youtube';
     const webContent = new ThreeWebContentCanvas(
       url,
       1024,
@@ -118,42 +121,53 @@ class XRHub {
   }
 
   updateMouse(event){
-    this.mouse = {
-      x: event.x,
-      y: event.y
-    };
     const xNDC = ((event.x-this.container.offsetLeft)/this.container.clientWidth)*2-1;
     const yNDC = -((event.y-this.container.offsetTop)/this.container.clientHeight)*2+1;
     const mouseVector = new THREE.Vector3(xNDC, yNDC, 0);
     mouseVector.unproject(this.perspCamera);
     mouseVector.sub(this.perspCamera.position).normalize();
-    const distance = - this.perspCamera.position.z / mouseVector.z;
-    this.mouseSphere.position.copy(this.perspCamera.position.clone().add(mouseVector.multiplyScalar(distance)));
+    const distance = this.webGLMouseSphere.position.distanceTo(this.perspCamera.position);
+    this.webGLMouseSphere.position.copy(this.perspCamera.position.clone().add(mouseVector.multiplyScalar(distance)));
+    this.css3DMouseSpehre.position.copy(this.perspCamera.position.clone().add(mouseVector.multiplyScalar(distance)));
   }
 
   handleMouseDown(event){
     const intersectedObjects = this.raycastFromScreenCoordinates(event.x, event.y);
-    if(intersectedObjects.length > 0 && event.button === 1){
-      const matrix = new THREE.Matrix4;
-      matrix.getInverse( this.mouseSphere.matrixWorld );
-      var object = intersectedObjects[0].object;
-      object.matrix.premultiply( matrix );
-      object.matrix.decompose( object.position, object.quaternion, object.scale );
-      //object.material.emissive.b = 1;
-      this.mouseSphere.add( object );
+    if (intersectedObjects.length > 0 && event.button === 1) {
+      let object = intersectedObjects[0].object;
+      if (object.name === this.webGLMouseSphere.name && intersectedObjects.length > 1) {
+        object = intersectedObjects[1].object;
+      }
+      this.addFollowerToParent(this.webGLMouseSphere, object);
+      if (object.userData.website !== undefined) {
+        this.addFollowerToParent(this.css3DMouseSpehre, object.userData.css3DObject);
+      }
+    }
+  }
 
-      this.mouseSphere.userData.selected = object;
+  addFollowerToParent(parent, follower){
+    const matrix = new THREE.Matrix4;
+    matrix.getInverse( parent.matrixWorld );
+    follower.matrix.premultiply( matrix );
+    follower.matrix.decompose( follower.position, follower.quaternion, follower.scale );
+    parent.add( follower );
+    parent.userData.selected = follower;
+  }
+
+  removeFollower(parent, scene){
+    if(parent.userData.selected !== undefined){
+      const object = parent.userData.selected;
+      object.matrix.premultiply( parent.matrixWorld );
+      object.matrix.decompose( object.position, object.quaternion, object.scale );
+      scene.add( object );
+      parent.userData.selected = undefined;
     }
   }
 
   handleMouseUp(event){
-    if(this.mouseSphere.userData.selected !== undefined && event.button === 1){
-      const object = this.mouseSphere.userData.selected;
-      object.matrix.premultiply( this.mouseSphere.matrixWorld );
-      object.matrix.decompose( object.position, object.quaternion, object.scale );
-      this.webGLScene.add( object );
-
-      this.mouseSphere.userData.selected = undefined;
+    if(event.button === 1){
+      this.removeFollower(this.webGLMouseSphere, this.webGLScene);
+      this.removeFollower(this.css3DMouseSpehre, this.css3DScene);
     }
   }
 
@@ -189,9 +203,12 @@ class XRHub {
     const material = new MeshNormalMaterial();
 
     const mesh = new THREE.Mesh(geometry, material);
-    mesh.name = "mouseSphere";
-    this.webGLScene.add(mesh);
-    this.mouseSphere = mesh;
+    mesh.name = "webGLmouseSphere";
+    this.webGLMouseSphere = mesh;
+    this.css3DMouseSpehre = mesh.clone();
+    this.css3DMouseSpehre.name = "css3DMouseSpehre";
+    this.webGLScene.add(this.webGLMouseSphere);
+    this.css3DScene.add(this.css3DMouseSpehre);
   }
 }
 
