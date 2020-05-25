@@ -69,9 +69,16 @@ export default {
     ...mapActions('interactions', {
       addDefaultInteraction: 'addDefault',
       deleteInteraction: 'deleteInteraction',
-      pull: 'pull'
+      pull: 'pull',
+      saveInteraction: 'updateImmediately'
     }),
-    saveInteractions: function() {}
+    saveInteractions: function(payload) {
+      for (let i = 0; i < payload.records.length; i++) {
+        this.saveInteraction({
+          interaction: payload.records[i].data.interaction
+        });
+      }
+    }
   }
 };
 </script>
