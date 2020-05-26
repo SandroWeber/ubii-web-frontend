@@ -68,7 +68,7 @@ export default {
   },
   mounted: async function() {
     await this.pull();
-    //await this.startSynchronizationService();
+    await this.startSynchronizationService();
   }
 };
 </script>
