@@ -9,7 +9,7 @@
       @remove="remove()"
       @filter="onFilterChange"
     />
-    <div>
+    <div class="app-explorer-items-list">
       <div v-for="category in categories" :key="category.title">
         <AppCollapseSectionHeader
           :title="category.title"
@@ -234,6 +234,10 @@ export default {
   flex-direction: column;
   flex-grow: 1;
   overflow-y: auto;
+}
+
+.app-explorer-items-list {
+  padding: 0.5em;
 }
 
 .records-section-header {

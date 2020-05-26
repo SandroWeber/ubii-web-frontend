@@ -1,49 +1,53 @@
 <template>
   <div class="app-explorer-toolbar">
-    <app-button
-      v-if="options.tools.add"
-      :class="'tool-button round low-contrast'"
-      :contentSizePercentage="70"
-      @click="add()"
-    >
-      <font-awesome-icon icon="plus" class="tool-icon" />
-    </app-button>
+    <div class="app-explorer-toolbar-buttons">
+      <app-button
+        v-if="options.tools.add"
+        :class="'tool-button round low-contrast'"
+        :contentSizePercentage="70"
+        @click="add()"
+      >
+        <font-awesome-icon icon="plus" class="tool-icon" />
+      </app-button>
 
-    <app-button
-      v-if="options.tools.save && allSeletedEditable()"
-      :class="'tool-button round low-contrast'"
-      :contentSizePercentage="70"
-      @click="save()"
-    >
-      <font-awesome-icon icon="save" class="tool-icon" />
-    </app-button>
+      <app-button
+        v-if="options.tools.save && allSeletedEditable()"
+        :class="'tool-button round low-contrast'"
+        :contentSizePercentage="70"
+        @click="save()"
+      >
+        <font-awesome-icon icon="save" class="tool-icon" />
+      </app-button>
 
-    <app-button
-      v-if="options.tools.remove && allSeletedEditable()"
-      :class="'tool-button round low-contrast'"
-      :contentSizePercentage="60"
-      @click="remove()"
-    >
-      <font-awesome-icon icon="trash-alt" class="tool-icon" />
-    </app-button>
+      <app-button
+        v-if="options.tools.remove && allSeletedEditable()"
+        :class="'tool-button round low-contrast'"
+        :contentSizePercentage="60"
+        @click="remove()"
+      >
+        <font-awesome-icon icon="trash-alt" class="tool-icon" />
+      </app-button>
 
-    <app-button
-      v-if="options.tools.refresh"
-      :class="'tool-button round low-contrast'"
-      :contentSizePercentage="65"
-      @click="refresh()"
-    >
-      <font-awesome-icon icon="sync-alt" class="tool-icon" />
-    </app-button>
+      <app-button
+        v-if="options.tools.refresh"
+        :class="'tool-button round low-contrast'"
+        :contentSizePercentage="65"
+        @click="refresh()"
+      >
+        <font-awesome-icon icon="sync-alt" class="tool-icon" />
+      </app-button>
+    </div>
 
-    <app-input
-      v-if="options.tools.filter"
-      v-model="filter"
-      :id="'app-explorer-input'"
-      class="filter-input layer-one round low-contrast low-contrast-border"
-      :class="filterInputClasses"
-      placeholder="filter"
-    ></app-input>
+    <div>
+      <app-input
+        v-if="options.tools.filter"
+        v-model="filter"
+        :id="'app-explorer-input'"
+        class="filter-input layer-one round low-contrast low-contrast-border"
+        :class="filterInputClasses"
+        placeholder="filter"
+      ></app-input>
+    </div>
   </div>
 </template>
 
@@ -120,11 +124,17 @@ export default {
 };
 </script> 
 
-<style scoped lang="stylus">.app-explorer-toolbar {
+<style scoped lang="stylus">
+.app-explorer-toolbar {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   flex-wrap: wrap;
   padding: 0.5em;
+}
+
+.app-explorer-toolbar-buttons {
+  display: flex;
+  flex-direction: row;
 }
 
 .tool-button {
@@ -141,8 +151,8 @@ export default {
 
 .filter-input {
   flex-grow: 1;
-  min-width: 6em;
-  width: 6em;
+  min-width: 8em;
+  width: 8em;
   height: 1.8em;
 }
 </style>
