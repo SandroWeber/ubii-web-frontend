@@ -9,7 +9,7 @@ let interactionsToSync = new Map();
 
 // Backend data helper:
 const backendData = {
-  pull: async function (context) {
+  pull: async function(context) {
     return new Promise(async (resolve, reject) => {
       try {
         // clear all ...
@@ -59,7 +59,7 @@ const backendData = {
       }
     });
   },
-  register: async function (context, interaction) {
+  register: async function(context, interaction) {
     return await new Promise(async (resolve, reject) => {
       try {
         // register new interaction at the backend
@@ -85,7 +85,7 @@ const backendData = {
       }
     });
   },
-  delete: async function (context, interaction) {
+  delete: async function(context, interaction) {
     return await new Promise(async (resolve, reject) => {
       try {
         // delete interaction at the backend
@@ -111,7 +111,7 @@ const backendData = {
       }
     });
   },
-  update: async function (context, interaction) {
+  update: async function(context, interaction) {
     return await new Promise(async (resolve, reject) => {
       try {
         await UbiiClientService.client
@@ -211,6 +211,15 @@ const actions = {
     // ... and add it to the toSync list.
     interactionsToSync.set(payload.interaction.id, payload.interaction);
   },
+  async updateImmediately(context, payload) {
+    console.info('updateImmediately');
+    console.info(payload);
+    // Update immediately locally ...
+    context.commit('setInteraction', payload);
+
+    // ... and call backend service.
+    await backendData.update(context, payload.interaction);
+  },
   async pull(context) {
     await backendData.pull(context);
   },
@@ -246,7 +255,7 @@ const mutations = {
   },
   setInteraction(state, payload) {
     let id = payload.interaction.id;
-    let index = state.recordTree.findIndex(function (element) {
+    let index = state.recordTree.findIndex(function(element) {
       return element.id === id;
     });
     if (index !== -1) {
@@ -257,7 +266,7 @@ const mutations = {
   removeInteraction(state, payload) {
     let id = payload.currentInteractionId;
     // TODO Add recursive find
-    let index = state.recordTree.findIndex(function (element) {
+    let index = state.recordTree.findIndex(function(element) {
       return element.id === id;
     });
     if (index !== -1) {

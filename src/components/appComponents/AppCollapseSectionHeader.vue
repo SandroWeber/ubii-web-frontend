@@ -57,25 +57,33 @@ export default {
 </script> 
 
 <style scoped lang="stylus">
-@import "./../../styles/main/color"
+@import './../../styles/main/color';
 
-.collapse-header 
+.collapse-header {
   display: flex;
   flex-direction: row;
   align-items: center;
-  
-  &.layer-one
-    background-color: layerOneSecondaryColor
-    border-color: layerOneBorderColor
-  &.layer-two
-    background-color: layerTwoSecondaryColor
-    border-color: layerTwoBorderColor
-  &.layer-three
-    background-color: layerThreeSecondaryColor
-    border-color: layerThreeBorderColor
-  &.layer-four
-    background-color: layerFourSecondaryColor
-    border-color: layerFourBorderColor
+
+  &.layer-one {
+    background-color: layerOneSecondaryColor;
+    border-color: layerOneBorderColor;
+  }
+
+  &.layer-two {
+    background-color: layerTwoSecondaryColor;
+    border-color: layerTwoBorderColor;
+  }
+
+  &.layer-three {
+    background-color: layerThreeSecondaryColor;
+    border-color: layerThreeBorderColor;
+  }
+
+  &.layer-four {
+    background-color: layerFourSecondaryColor;
+    border-color: layerFourBorderColor;
+  }
+}
 
 .button-collapse {
   width: 25px;
@@ -84,6 +92,7 @@ export default {
   justify-content: center;
   align-items: center;
   border: 1px solid layerFourBorderColor;
+  color: white;
   background-color: layerFourSecondaryColor;
   cursor: pointer;
 }

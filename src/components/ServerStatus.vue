@@ -5,7 +5,7 @@
     <label for="server-port">Server Port</label>
     <app-input :id="'server-port'" :type="'text'" v-model="ubiiClientService.serverPort" />
     <app-button :class="buttonClassObject" @click="onButtonConnect" :contentSizePercentage="60">
-      <font-awesome-icon icon="sync-alt" class="connect-icon" />
+      <font-awesome-icon icon="plug" class="connect-icon" />
     </app-button>
   </app-layer>
 </template>
@@ -20,8 +20,8 @@ import {
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faSyncAlt } from '@fortawesome/free-solid-svg-icons';
-library.add(faSyncAlt);
+import { faPlug } from '@fortawesome/free-solid-svg-icons';
+library.add(faPlug);
 
 export default {
   name: 'ServerStatus',
