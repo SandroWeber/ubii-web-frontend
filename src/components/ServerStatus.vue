@@ -4,9 +4,11 @@
     <app-input :id="'server-ip'" :type="'text'" v-model="ubiiClientService.serverIP" />
     <label for="server-port">Server Port</label>
     <app-input :id="'server-port'" :type="'text'" v-model="ubiiClientService.serverPort" />
-    <app-button :class="buttonClassObject" @click="onButtonConnect" :contentSizePercentage="60">
-      <font-awesome-icon icon="plug" class="connect-icon" />
-    </app-button>
+    <app-button
+      :class="buttonClassObject"
+      @click="onButtonConnect"
+      :contentSizePercentage="60"
+    >connect</app-button>
   </app-layer>
 </template>
 

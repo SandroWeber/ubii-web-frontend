@@ -1,7 +1,8 @@
 <template>
   <app-layer id="app" class="layer-one background">
-    <div class="server-status-wrapper">
+    <div class="page-header-wrapper">
       <server-status id="server-status" />
+      <page-header />
     </div>
     <app-layer class="navigation-wrapper layer-one background border shadow">
       <nav class="navigation-bar">
@@ -22,13 +23,15 @@
 <script>
 import ClientNode from './services/ubiiClient/ubiiClientService';
 import ServerStatus from './components/ServerStatus.vue';
+import PageHeader from './components/PageHeader.vue';
 import { AppLayer } from './components/appComponents/appComponents.js';
 
 export default {
   name: 'app',
   components: {
     ServerStatus,
-    AppLayer
+    AppLayer,
+    PageHeader
   },
   data: () => {
     return {
@@ -83,7 +86,7 @@ html, body {
   flex-grow: 0;
 }
 
-.server-status-wrapper {
+.page-header-wrapper {
   flex-grow: 0;
 }
 
