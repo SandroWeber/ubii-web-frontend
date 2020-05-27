@@ -4,35 +4,30 @@
       :options="options"
       :selectedRecords="selectedRecords"
       @add="add()"
+      @save="save()"
       @refresh="refresh()"
       @remove="remove()"
-      @filter="filter"
+      @filter="onFilterChange"
     />
-    <div>
-      <div class="records-section-header">editable</div>
-      <app-explorer-item
-        v-for="record in filteredAndSortedRecordsEditable"
-        :key="record.id"
-        :id="record.id"
-        :label="record.label"
-        :selected="isSelected(record)"
-        @select="select(record)"
-        @select-ctrl="selectControl(record)"
-        @select-shift="selectShift(record)"
-      />
-    </div>
-    <div>
-      <div class="records-section-header">non-editable</div>
-      <app-explorer-item
-        v-for="record in filteredAndSortedRecordsStatic"
-        :key="record.id"
-        :id="record.id"
-        :label="record.label"
-        :selected="isSelected(record)"
-        @select="select(record)"
-        @select-ctrl="selectControl(record)"
-        @select-shift="selectShift(record)"
-      />
+    <div class="app-explorer-items-list">
+      <div v-for="category in categories" :key="category.title">
+        <AppCollapseSectionHeader
+          :title="category.title"
+          :targetID="'explorer-items-' + category.title"
+          :initiallyCollapsed="false"
+        />
+        <div :id="'explorer-items-' + category.title">
+          <app-explorer-item
+            v-for="record in records.filter(filterByUserInput).filter(category.filter).sort(globalSorting)"
+            :key="record.name"
+            :id="record.id"
+            :label="record.label"
+            :selected="isSelected(record)"
+            @select="select(record)"
+            @select-ctrl="selectControl(record)"
+          />
+        </div>
+      </div>
     </div>
   </app-layer>
 </template>
@@ -41,6 +36,7 @@
 import AppExplorerItem from './AppExplorerItem.vue';
 import AppExplorerToolbar from './AppExplorerToolbar.vue';
 import AppLayer from './../AppLayer.vue';
+import AppCollapseSectionHeader from '../AppCollapseSectionHeader.vue';
 
 /**
  * Implementation of a general explorer as app component that...
@@ -61,12 +57,27 @@ export default {
   components: {
     AppExplorerItem,
     AppExplorerToolbar,
-    AppLayer
+    AppLayer,
+    AppCollapseSectionHeader
   },
   props: {
     records: {
       type: Array,
       required: true
+    },
+    categories: {
+      type: Array,
+      required: false,
+      default: function() {
+        return [
+          {
+            title: 'All',
+            filter: () => {
+              return true;
+            }
+          }
+        ];
+      }
     },
     options: {
       type: Object,
@@ -76,6 +87,7 @@ export default {
           sort: 'alphabetically',
           tools: {
             add: true,
+            save: true,
             remove: true,
             refresh: true,
             filter: true
@@ -93,70 +105,6 @@ export default {
   },
   computed: {
     /**
-     * The records filtered and sorted.
-     * @return {Object[]}
-     */
-    filteredAndSortedRecordsEditable: function() {
-      // Get all relevant records:
-      let recordsCopy;
-      if (this.filterValue !== '') {
-        // Get the filtered records if the filter value is non-empty...
-        recordsCopy = this.records.filter(record =>
-          record.label.includes(this.filterValue)
-        );
-      } else {
-        // ... or get them all otherwise.
-        recordsCopy = [...this.records];
-      }
-
-      // Sort the records.
-      if (this.options.sort === 'byDate') {
-        // Todo. Currently no date is required in the records data structure -> not possible to sort by date.
-        recordsCopy = recordsCopy.sort((a, b) => {
-          return a.label.localeCompare(b.label);
-        });
-      } else {
-        // Default sort mode is alphabetically.
-        recordsCopy = recordsCopy.sort((a, b) => {
-          return a.label.localeCompare(b.label);
-        });
-      }
-
-      recordsCopy = recordsCopy.filter(record => record.editable);
-
-      return recordsCopy;
-    },
-    filteredAndSortedRecordsStatic: function() {
-      // Get all relevant records:
-      let recordsCopy;
-      if (this.filterValue !== '') {
-        // Get the filtered records if the filter value is non-empty...
-        recordsCopy = this.records.filter(record =>
-          record.label.includes(this.filterValue)
-        );
-      } else {
-        // ... or get them all otherwise.
-        recordsCopy = [...this.records];
-      }
-
-      // Sort the records.
-      if (this.options.sort === 'byDate') {
-        // Todo. Currently no date is required in the records data structure -> not possible to sort by date.
-        recordsCopy = recordsCopy.sort((a, b) => {
-          return a.label.localeCompare(b.label);
-        });
-      } else {
-        // Default sort mode is alphabetically.
-        recordsCopy = recordsCopy.sort((a, b) => {
-          return a.label.localeCompare(b.label);
-        });
-      }
-
-      recordsCopy = recordsCopy.filter(record => !record.editable);
-
-      return recordsCopy;
-    },
-    /**
      * All selected records.
      * @return {Object[]}
      */
@@ -170,23 +118,9 @@ export default {
       this.selected = this.selected.filter(value => {
         return this.records.some(record => record.id === value.id);
       });
-
-      this.enforceSelectionRequirements();
     },
     selected: function() {
-      this.enforceSelectionRequirements();
-
       this.emitSelectEvent();
-    },
-    filteredAndSortedRecordsEditable: function() {
-      // Clean up selected when records changes.
-      this.selected = this.selected.filter(value => {
-        return this.filteredAndSortedRecordsEditable.some(
-          record => record.id === value.id
-        );
-      });
-
-      this.enforceSelectionRequirements();
     }
   },
   methods: {
@@ -195,6 +129,14 @@ export default {
      */
     add: function() {
       this.$emit('add');
+    },
+    /**
+     * Triggers a Save event. This is emitted to the external and solved internally.
+     */
+    save: function() {
+      this.$emit('save', {
+        records: this.selectedRecords
+      });
     },
     /**
      * Triggers a Remove event. This is emitted to the external and solved internally.
@@ -240,37 +182,6 @@ export default {
       }
     },
     /**
-     * A shift select action. This is solved internally and emitted to the external.
-     */
-    selectShift: function(record) {
-      // The shift select does only work if there is already an element selected.
-      if (this.selected.length > 0) {
-        // Get the currently rendered array of records in the correct order.
-        let currentlyRenderedRecords = this.filteredAndSortedRecordsEditable;
-
-        // Get the index from the first element of the selected records in the currently rendered list.
-        let indexFirst = currentlyRenderedRecords.findIndex(
-          value => value.id === this.selected[0].id
-        );
-        // Get the index from the current element in the currently rendered list.
-        let indexCurrent = currentlyRenderedRecords.findIndex(
-          value => value.id === record.id
-        );
-
-        // Iterate from first to current and select each entry if it is not already selected.
-        for (
-          let i = indexFirst;
-          (indexFirst <= indexCurrent && i <= indexCurrent) ||
-          (indexFirst > indexCurrent && i >= indexCurrent);
-          indexFirst <= indexCurrent ? i++ : i--
-        ) {
-          if (this.isSelected(currentlyRenderedRecords[i]) !== true) {
-            this.selected.push(currentlyRenderedRecords[i]);
-          }
-        }
-      }
-    },
-    /**
      * Determines if the passed record is currently selected.
      * @return {boolean}
      */
@@ -286,23 +197,27 @@ export default {
     clearSelected: function() {
       this.selected = [];
     },
-    enforceSelectionRequirements: function() {
-      // Select a record if the alwaysSelected option is set to true.
-      if (
-        this.selected.length === 0 &&
-        this.filteredAndSortedRecordsEditable.length > 0 &&
-        this.options.alwaysSelected
-      ) {
-        this.selected.push(this.filteredAndSortedRecordsEditable[0]);
-      }
-    },
     emitSelectEvent: function() {
       this.$emit('select', {
         records: this.selectedRecords
       });
     },
-    filter: function(value) {
+    onFilterChange: function(value) {
       this.filterValue = value;
+    },
+    filterByUserInput: function(record) {
+      if (this.filterValue === '') {
+        return true;
+      }
+
+      return record.label.includes(this.filterValue);
+    },
+    globalSorting: function() {
+      if (this.sort === 'alphabetically') {
+        return undefined; // default sorting is aphabetical
+      }
+
+      return undefined;
     }
   },
   mounted: function() {
@@ -319,6 +234,10 @@ export default {
   flex-direction: column;
   flex-grow: 1;
   overflow-y: auto;
+}
+
+.app-explorer-items-list {
+  padding: 0.5em;
 }
 
 .records-section-header {
