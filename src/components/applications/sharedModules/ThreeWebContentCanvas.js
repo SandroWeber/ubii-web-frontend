@@ -1,13 +1,10 @@
 import * as THREE from 'three';
-import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 
 class ThreeWebContentCanvas {
-  constructor(url, resolutionWidth, resolutionHeight, name) {
-    this.url = url;
+  constructor(resolutionWidth, resolutionHeight, name) {
     this.name = name;
 
     this.resolution = [resolutionWidth, resolutionHeight];
-
     this.css3DCanvas = this.createCSS3DCanvas();
     this.webGLCanvas = this.createWebGLCanvas(this.css3DCanvas);
   }
@@ -47,33 +44,18 @@ class ThreeWebContentCanvas {
     let webglPlaneMesh = new THREE.Mesh(geometry, material);
     webglPlaneMesh.name = this.name;
     webglPlaneMesh.userData = {
-      website: css3DCannvas.userData.website,
       res: {x: this.resolution[0], y: this.resolution[1]},
-      css3DObject: css3DCannvas
+      css3DObject: css3DCannvas,
     };
 
     return webglPlaneMesh;
   }
 
   createCSS3DCanvas() {
-    var div = document.createElement('div');
-    div.style.width = this.resolution[0] + 'px';
-    div.style.height = this.resolution[1] + 'px';
-    div.style.backgroundColor = '#000';
+    throw new Error("The method createCSS3DCanvas has to be implemented in the child class!");
+    }
 
-    var iframe = document.createElement('iframe');
-    iframe.style.width = this.resolution[0] + 'px';
-    iframe.style.height = this.resolution[1] + 'px';
-    iframe.style.border = '0px';
-    iframe.src = this.url;
-    div.appendChild(iframe);
 
-    var object = new CSS3DObject(div);
-    object.name = this.name;
-    object.userData = {website: iframe};
-
-    return object;
-  }
 }
 
 export default ThreeWebContentCanvas;

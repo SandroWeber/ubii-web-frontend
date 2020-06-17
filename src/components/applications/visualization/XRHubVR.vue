@@ -22,7 +22,7 @@ export default {
       this.camera = new THREE.PerspectiveCamera(
         70,
         this.container.clientWidth / this.container.clientHeight,
-        0.01,
+        0.1,
         10
       );
       this.xrHub = new XRHub(this.container, this.camera);
