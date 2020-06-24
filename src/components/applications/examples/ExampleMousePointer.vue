@@ -328,7 +328,8 @@ export default {
                 session: this.$data.ubiiSession
               })
               .then(response => {
-                if (response.success) {
+                if (response.session) {
+                  this.$data.ubiiSession = response.session;
                   this.$data.exampleStarted = true;
                 }
               });
