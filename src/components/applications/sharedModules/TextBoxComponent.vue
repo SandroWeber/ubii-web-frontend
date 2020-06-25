@@ -1,5 +1,8 @@
 <template>
-    <input class="textbox-component" type="url" placeholder="Enter a new URL">
+    <p>
+    <input class="textbox-component" type="url" v-model="url" placeholder="Enter a new URL">
+    {{url}}
+    </p>
 </template>
 
 <script>

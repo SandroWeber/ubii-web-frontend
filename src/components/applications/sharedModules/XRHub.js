@@ -13,7 +13,6 @@ class XRHub {
     this.perspCamera.position.set(0, 0, 5);
     this.initVRScene();
     this.initWebContentScene();
-    this.createMouseSphere();
     this.spawnWebContent('https://threejs.org/');
     this.raycaster = new THREE.Raycaster();
     this.initMouseControls();
@@ -35,7 +34,7 @@ class XRHub {
     this.createDemoCube();
 
     this.webGLRenderer = new THREE.WebGLRenderer({
-      alpha: true /*, antialias: true*/
+      alpha: true , antialias: false
     });
     this.webGLRenderer.domElement.style.position = 'absolute'; // required (??)
     this.webGLRenderer.setClearColor(0x000000, 0); // required
@@ -48,9 +47,11 @@ class XRHub {
     this.container.appendChild(this.webGLRenderer.domElement);
   }
 
-  togglePointerEvents(){
-    const current = this.webGLRenderer.domElement.style.pointerEvents;
-    this.webGLRenderer.domElement.style.pointerEvents = current === "none" && current.length > 0 ? "all": "none";
+  initMouseControls(){
+    this.container.addEventListener('mousemove', this.updateMouse.bind(this));
+    this.container.addEventListener('mousedown', this.handleMouseDown.bind(this));
+    this.container.addEventListener('mouseup', this.handleMouseUp.bind(this));
+    this.createMouseSpheres();
   }
 
   initWebContentScene() {
@@ -73,10 +74,10 @@ class XRHub {
       'threejsorg',
       url
     );
+    webContent.addToScenes(this.webGLScene, this.css3DScene);
     webContent.setPosition(-1, 1, -1);
     webContent.setRotationQuaternion(new THREE.Quaternion());
     webContent.setSize(1, 0.75);
-    webContent.addToScenes(this.webGLScene, this.css3DScene);
   }
 
   /*
@@ -120,15 +121,20 @@ class XRHub {
     const positionRelativeToContainer = new THREE.Vector3(eventXPosFromCenter, eventYPosFromCenter, 0);
     this.raycaster.setFromCamera(positionRelativeToContainer, this.perspCamera);
     return this.raycaster.intersectObjects(
-      this.webGLScene.children
+      this.getChildrenRecursive(this.webGLScene)
     );
   }
 
-  initMouseControls(){
-    this.container.addEventListener('mousemove', this.updateMouse.bind(this));
-    this.container.addEventListener('mousedown', this.handleMouseDown.bind(this));
-    this.container.addEventListener('mouseup', this.handleMouseUp.bind(this));
+  getChildrenRecursive (object3D) {
+    let children = [];
+    object3D.children.forEach(child =>{
+      children.push(child);
+      children = children.concat(this.getChildrenRecursive(child));
+    });
+    return children;
   }
+
+
 
   updateMouse(event){
     const xNDC = ((event.x-this.container.offsetLeft)/this.container.clientWidth)*2-1;
@@ -141,21 +147,36 @@ class XRHub {
     this.webGLMouseSphere.rotation.copy(this.perspCamera.rotation);
     this.css3DMouseSpehre.position.copy(this.perspCamera.position.clone().add(mouseVector.multiplyScalar(distance)));
     this.css3DMouseSpehre.rotation.copy(this.perspCamera.rotation);
+    const toRotate = this.webGLMouseSphere.userData.toRotate;
+    if(toRotate){
+      toRotate.rotateOnAxis(new THREE.Vector3(0,1,0), event.movementX*0.1);
+      if(toRotate.userData.css3DObject){
+        toRotate.userData.css3DObject.rotateOnAxis(new THREE.Vector3(0,1,0), event.movementX*0.1);
+      }
+    }
   }
 
   handleMouseDown(event){
-    const intersectedObjects = this.raycastFromScreenCoordinates(event.x, event.y);
+    const intersectedObjects = this.raycastFromScreenCoordinates(event.x, event.y).filter(it => it.object.name !== this.webGLMouseSphere.name);
     if (intersectedObjects.length > 0) {
-      let object = intersectedObjects[0].object;
-      if (object.name === this.webGLMouseSphere.name && intersectedObjects.length > 1) {
-        object = intersectedObjects[1].object;
-      }
+      const object = intersectedObjects[0].object;
       switch (event.button) {
+        case 0:
+          if(object.userData.updateUrl){
+            // const iframe = object.userData.css3DObject.userData.website;
+            // const element = iframe.elementFromPoint(100, 100);
+            // element.click();
+          }
+          break;
         case 1:
           if(object.name !== "configCanvas"){
-            this.addFollowerToParent(this.webGLMouseSphere, object);
-            if (object.userData.updateUrl) {
-              this.addFollowerToParent(this.css3DMouseSpehre, object.userData.css3DObject);
+            if (object.name === "websiteMoveHandle") {
+              this.addFollowerToParent(this.webGLMouseSphere, object.parent);
+              this.addFollowerToParent(this.css3DMouseSpehre, object.parent.userData.css3DObject);
+            } else if (object.name === "websiteRotationHandle"){
+              this.webGLMouseSphere.userData.toRotate = object.parent;
+            } else {
+              this.addFollowerToParent(this.webGLMouseSphere, object);
             }
           }
           break;
@@ -163,11 +184,17 @@ class XRHub {
           // this.configHUD.toggle();
           if (object.userData.updateUrl || object.name === "configCanvas") {
             this.configHUD.toggle(object);
+            this.togglePointerEvents();
           }
           break;
       }
 
     }
+  }
+
+  togglePointerEvents(){
+    const current = this.webGLRenderer.domElement.style.pointerEvents;
+    this.webGLRenderer.domElement.style.pointerEvents = current === "none" && current.length > 0 ? "all": "none";
   }
 
   addFollowerToParent(parent, follower){
@@ -193,6 +220,7 @@ class XRHub {
     if(event.button === 1){
       this.removeFollower(this.webGLMouseSphere, this.webGLScene);
       this.removeFollower(this.css3DMouseSpehre, this.css3DScene);
+      this.webGLMouseSphere.userData.toRotate = undefined;
     }
   }
 
@@ -223,7 +251,7 @@ class XRHub {
     this.webGLScene.add(this.mesh);
   }
 
-  createMouseSphere() {
+  createMouseSpheres() {
     const geometry = new THREE.SphereGeometry(0.01);
     const material = new MeshNormalMaterial();
 
@@ -234,8 +262,6 @@ class XRHub {
     this.css3DMouseSpehre.name = "css3DMouseSpehre";
     this.webGLScene.add(this.webGLMouseSphere);
     this.css3DScene.add(this.css3DMouseSpehre);
-    // this.perspCamera.add(this.webGLMouseSphere);
-    // this.perspCamera.add(this.css3DMouseSpehre);
   }
 
   createInteractionToggleButton(){
