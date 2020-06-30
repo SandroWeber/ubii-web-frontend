@@ -243,7 +243,6 @@ export default {
       // specification of a ubii.sessions.Session
       // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/sessions/session.proto
       let ubiiSession = {
-        id: uuidv4(),
         name: 'web-mouse-example-session',
         interactions: [ubiiInteraction],
         ioMappings: [
