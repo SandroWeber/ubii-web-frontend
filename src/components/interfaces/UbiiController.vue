@@ -489,7 +489,6 @@ export default {
       });
     },
     publishAnalogStickPosition: function(stickPosition) {
-      console.log("Trying Publishing analog stick value: " + stickPosition);
       UbiiClientService.publishRecord({
         topic: this.componentAnalogstickLeft.topic,
         vector2: stickPosition
