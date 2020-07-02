@@ -109,8 +109,9 @@ export default {
       this.stopInterface();
     });
 
-    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.registerUbiiSpecs);
-    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.unregisterUbiiSpecs);
+    // Better variant with UbiiEventBus Events, but caused problems / race condition when reloading the page
+    //UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.registerUbiiSpecs);
+    //UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.unregisterUbiiSpecs);
 
     this.deviceData = {};
     this.canvasDisplayArea = document.getElementById('canvas-display-area');
@@ -314,7 +315,7 @@ export default {
         });
       }
 
-      this.hasRegisteredUbiiDevice = null;
+      this.hasRegisteredUbiiDevice = false;
 
       //TODO: this should not happen here, move to interaction
       UbiiClientService.publishRecord({
@@ -488,6 +489,7 @@ export default {
       });
     },
     publishAnalogStickPosition: function(stickPosition) {
+      console.log("Trying Publishing analog stick value: " + stickPosition);
       UbiiClientService.publishRecord({
         topic: this.componentAnalogstickLeft.topic,
         vector2: stickPosition
