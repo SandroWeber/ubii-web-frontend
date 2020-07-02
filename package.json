@@ -30,7 +30,7 @@
     "rete-connection-plugin": "^0.4.3",
     "rete-context-menu-plugin": "^0.3.6",
     "rete-vue-render-plugin": "^0.3.0",
-    "three": "0.103.0",
+    "three": "0.118.3",
     "three-orbit-controls": "^82.1.0",
     "three-outlinepass": "^1.0.7",
     "uuid": "3.3.2",
