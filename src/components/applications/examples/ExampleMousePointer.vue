@@ -7,19 +7,31 @@
 
       <div class="options">
         <!-- a checkbox to toggle showing the client side pointer -->
-        <input id="checkboxClientPointer" type="checkbox" v-model="showClientPointer" />
+        <input
+          id="checkboxClientPointer"
+          type="checkbox"
+          v-model="showClientPointer"
+        />
         <label for="checkboxClientPointer">Show Client Pointer</label>
 
         <br />
 
         <!-- a checkbox to toggle showing the server side pointer -->
-        <input id="checkboxServerPointer" type="checkbox" v-model="showServerPointer" />
+        <input
+          id="checkboxServerPointer"
+          type="checkbox"
+          v-model="showServerPointer"
+        />
         <label for="checkboxServerPointer">Show Server Pointer</label>
 
         <br />
 
         <!-- a checkbox to toggle inverting the pointer position at the server before sending it back to client -->
-        <input id="checkboxMirrorPointer" type="checkbox" v-model="mirrorPointer" />
+        <input
+          id="checkboxMirrorPointer"
+          type="checkbox"
+          v-model="mirrorPointer"
+        />
         <label for="checkboxMirrorPointer">Mirror Pointer</label>
       </div>
 
@@ -30,17 +42,20 @@
         class="mouse-pointer-area"
         v-bind:class="{ hideCursor: !showClientPointer }"
         v-on:mousemove="onMouseMove($event)"
-        v-on:mouseenter="clientPointerInside = true;"
-        v-on:mouseleave="clientPointerInside = false;"
+        v-on:mouseenter="clientPointerInside = true"
+        v-on:mouseleave="clientPointerInside = false"
         v-on:touchstart="onTouchStart($event)"
-        v-on:touchend="clientPointerInside = false;"
+        v-on:touchend="clientPointerInside = false"
         v-on:touchmove="onTouchMove($event)"
       >
         <!-- this is the red square indicator of the pointer position sent back to us by the server
         you can see its position via style - top/left being linked to the data variable "serverMousePosition"-->
         <div
           class="server-mouse-position-indicator"
-          :style="{top: serverMousePosition.y + 'px', left: serverMousePosition.x + 'px' }"
+          :style="{
+            top: serverMousePosition.y + 'px',
+            left: serverMousePosition.x + 'px'
+          }"
           v-show="showServerPointer && clientPointerInside"
         ></div>
       </div>
@@ -50,25 +65,34 @@
       </div>
 
       <div class="description-general">
-        Placing your mouse inside the above area will show your mouse indicator (arrow) as well as a red square.
-        The basic idea of this demo is to send the mouse position to the Ubi-Interact backend, which will send
-        it back to us so we can display it (red square).
-        <br />Reading the code of this example will show your how to register a device with Ubi-Interact defining the topics for data communication.
-        It also shows you how to publish (send) and subcribe (receive) to topics.
-        A small session+interaction is also specified and communicated to Ubi-Interact that can manipulate the communicated mouse position.
-        You can see in the code how to specify this interaction on the client side, link it to the topics of our device and start it.
+        Placing your mouse inside the above area will show your mouse indicator
+        (arrow) as well as a red square. The basic idea of this demo is to send
+        the mouse position to the Ubi-Interact backend, which will send it back
+        to us so we can display it (red square).
+        <br />Reading the code of this example will show your how to register a
+        device with Ubi-Interact defining the topics for data communication. It
+        also shows you how to publish (send) and subcribe (receive) to topics. A
+        small session+interaction is also specified and communicated to
+        Ubi-Interact that can manipulate the communicated mouse position. You
+        can see in the code how to specify this interaction on the client side,
+        link it to the topics of our device and start it.
       </div>
 
       <div class="description-options">
-        You can toggle whether the client/server side mouse indicator should be shown.
-        "Mirror Pointer" will tell the interaction to invert your client mouse position in X and Y.
+        You can toggle whether the client/server side mouse indicator should be
+        shown. "Mirror Pointer" will tell the interaction to invert your client
+        mouse position in X and Y.
       </div>
 
       <div class="description-mouse-area">
-        Moving your mouse inside this area will publish its current position normalized to ([0;1] , [0;1]) on the topic ".../mouse_client_position".
-        An interaction in the backend will read this client position. If the flag "mirror pointer" is set, the interaction
-        will invert the client position. The interaction will then write the new position to the topic ".../mouse_server_position", which we subscribe to.
-        Once we receive data on the ".../mouse_server_position" topic, the position of the server pointer indicator (red square) will be updated.
+        Moving your mouse inside this area will publish its current position
+        normalized to ([0;1] , [0;1]) on the topic ".../mouse_client_position".
+        An interaction in the backend will read this client position. If the
+        flag "mirror pointer" is set, the interaction will invert the client
+        position. The interaction will then write the new position to the topic
+        ".../mouse_server_position", which we subscribe to. Once we receive data
+        on the ".../mouse_server_position" topic, the position of the server
+        pointer indicator (red square) will be updated.
       </div>
     </div>
   </UbiiClientContent>
@@ -182,17 +206,17 @@ export default {
           {
             topic: inputClientPointer.topic,
             messageFormat: inputClientPointer.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: inputMirror.topic,
             messageFormat: inputMirror.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: outputServerPointer.topic,
             messageFormat: outputServerPointer.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           }
         ]
       };

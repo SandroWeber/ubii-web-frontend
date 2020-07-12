@@ -4,8 +4,13 @@
     <div id="video-overlay" class="video-overlay"></div>
     <button
       @click="onButtonCoCoSSD"
-      :class="{'toggle-active': cocoSsdActive, 'toggle-inactive': !cocoSsdActive}"
-    >toggle coco-ssd object detection</button>
+      :class="{
+        'toggle-active': cocoSsdActive,
+        'toggle-inactive': !cocoSsdActive
+      }"
+    >
+      toggle coco-ssd object detection
+    </button>
   </div>
 </template>
 
@@ -89,12 +94,12 @@ export default {
           {
             topic: topicPrefix + '/camera_image',
             messageFormat: 'ubii.dataStructure.Image',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/objects',
             messageFormat: 'ubii.dataStructure.Object2DList',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           }
         ]
       };

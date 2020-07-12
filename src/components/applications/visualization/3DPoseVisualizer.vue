@@ -1,7 +1,12 @@
 <template>
   <div>
-    <button id="button-send-testdata" @click="toggleTestData()">Toggle sending test data</button>
-    <div id="example-threejs-webvr-render-container" class="render-container"></div>
+    <button id="button-send-testdata" @click="toggleTestData()">
+      Toggle sending test data
+    </button>
+    <div
+      id="example-threejs-webvr-render-container"
+      class="render-container"
+    ></div>
   </div>
 </template>
 
@@ -59,17 +64,17 @@ export default {
           {
             topic: this.topicBoundingBox,
             messageFormat: 'vector3',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: this.topicGenerateNumberOfObjects,
             messageFormat: 'double',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: this.topicObjects,
             messageFormat: 'ubii.dataStructure.Object3D',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           }
         ]
       };

@@ -5,8 +5,13 @@
     <canvas id="canvas-opencv" class="canvas-opencv"></canvas>
     <button
       @click="onButtonOpenCVTest"
-      :class="{'toggle-active': openCVTestActive, 'toggle-inactive': !openCVTestActive}"
-    >OpenCV Test</button>
+      :class="{
+        'toggle-active': openCVTestActive,
+        'toggle-inactive': !openCVTestActive
+      }"
+    >
+      OpenCV Test
+    </button>
   </div>
 </template>
 
@@ -93,12 +98,12 @@ export default {
           {
             topic: topicPrefix + '/camera_image',
             messageFormat: 'ubii.dataStructure.Image2D',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/opencv_image',
             messageFormat: 'ubii.dataStructure.Image2D',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           }
         ]
       };

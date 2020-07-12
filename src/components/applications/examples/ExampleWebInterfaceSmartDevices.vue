@@ -1,6 +1,9 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
-    <div id="example-web-smart-devices-touch-positions" class="touch-position-area"></div>
+    <div
+      id="example-web-smart-devices-touch-positions"
+      class="touch-position-area"
+    ></div>
   </UbiiClientContent>
 </template>
 
@@ -162,12 +165,12 @@ export default {
           {
             topic: this.topicVibrationDistanceThreshold,
             messageFormat: 'double',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: this.topicTouchObjects,
             messageFormat: 'ubii.dataStructure.Object2DList',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           }
         ]
       };
