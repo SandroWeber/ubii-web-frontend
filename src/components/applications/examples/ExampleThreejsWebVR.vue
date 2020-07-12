@@ -21,7 +21,7 @@ export default {
     };
   },
   methods: {
-    init: function() {
+    init: async function() {
       let container = document.getElementById(
         'example-threejs-webvr-render-container'
       );
@@ -45,10 +45,15 @@ export default {
 
       this.renderer = new Three.WebGLRenderer({ antialias: true });
       this.renderer.setSize(container.clientWidth, container.clientHeight);
+      this.renderer.outputEncoding = Three.sRGBEncoding;
+      this.renderer.xr.enabled = true;
+
+      //let context = this.renderer.domElement.getContext('webgl');
+      //await context.makeXRCompatible();
+
       container.appendChild(this.renderer.domElement);
 
       container.appendChild(VRButton.createButton(this.renderer));
-      this.renderer.xr.enabled = true;
     },
     animate: function() {
       const renderer = this.renderer;
