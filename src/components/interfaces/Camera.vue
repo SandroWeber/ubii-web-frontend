@@ -4,7 +4,10 @@
     <div id="video-overlay" class="video-overlay"></div>
     <button
       @click="onButtonCoCoSSD"
-      :class="{'toggle-active': cocoSsdActive, 'toggle-inactive': !cocoSsdActive}"
+      :class="{
+        'toggle-active': cocoSsdActive,
+        'toggle-inactive': !cocoSsdActive
+      }"
     >toggle coco-ssd object detection</button>
   </div>
 </template>
@@ -89,12 +92,12 @@ export default {
           {
             topic: topicPrefix + '/camera_image',
             messageFormat: 'ubii.dataStructure.Image',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/objects',
             messageFormat: 'ubii.dataStructure.Object2DList',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           }
         ]
       };
@@ -158,7 +161,7 @@ export default {
       );
 
       UbiiClientService.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
         session: this.ubiiSessionCoCoSSD
       }).then(response => {
         if (response.error) {
@@ -186,7 +189,7 @@ export default {
 
       this.ubiiSessionCoCoSSD &&
         UbiiClientService.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: this.ubiiSessionCoCoSSD
         });
     },

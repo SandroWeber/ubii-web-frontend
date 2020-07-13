@@ -64,7 +64,7 @@ export default {
       // unsubscribe and stop session
       UbiiClientService.unsubscribe(this.$data.outputServerPointer.topic);
       UbiiClientService.client.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
         session: this.$data.ubiiSession
       });
 

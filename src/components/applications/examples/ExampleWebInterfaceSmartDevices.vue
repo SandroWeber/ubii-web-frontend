@@ -119,7 +119,7 @@ export default {
             /* we start the session with the specs created in createUbiiSpecs() */
             UbiiClientService.client
               .callService({
-                topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+                topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
                 session: this.session
               })
               .then(response => {
@@ -136,7 +136,7 @@ export default {
 
       if (this.session) {
         await UbiiClientService.client.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: this.session
         });
       }
@@ -162,12 +162,12 @@ export default {
           {
             topic: this.topicVibrationDistanceThreshold,
             messageFormat: 'double',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: this.topicTouchObjects,
             messageFormat: 'ubii.dataStructure.Object2DList',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           }
         ]
       };

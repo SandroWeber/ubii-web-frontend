@@ -166,52 +166,52 @@ export default {
           {
             topic: topicPrefix + '/orientation',
             messageFormat: 'ubii.dataStructure.Vector3',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/linear_acceleration',
             messageFormat: 'ubii.dataStructure.Vector3',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/analog_stick_left',
             messageFormat: 'ubii.dataStructure.Vector2',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/button_a',
             messageFormat: 'ubii.dataStructure.KeyEvent',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/button_b',
             messageFormat: 'ubii.dataStructure.KeyEvent',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/button_start',
             messageFormat: 'ubii.dataStructure.KeyEvent',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/set_color',
             messageFormat: 'ubii.dataStructure.Color',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           },
           {
             topic: topicPrefix + '/set_image',
             messageFormat: 'ubii.dataStructure.Image2D',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           },
           {
             topic: topicPrefix + '/clear_image',
             messageFormat: 'boolean',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           },
           {
             topic: topicPrefix + '/set_text',
             messageFormat: 'string',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           }
           //TODO: clear image topic
         ]
@@ -226,7 +226,7 @@ export default {
         this.componentVibration = {
           topic: topicPrefix + '/vibration_pattern',
           messageFormat: 'double',
-          ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+          ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
         };
         this.ubiiDevice.components.push(this.componentVibration);
         this.tNextVibrate = Date.now();
@@ -379,22 +379,43 @@ export default {
       let resizeDimensions = [imgData.width, imgData.height];
       if (imgData.width > imgData.height) {
         resizeDimensions[0] = displayDimensions[0];
-        resizeDimensions[1] = imgData.height * (displayDimensions[0] / imgData.width);
+        resizeDimensions[1] =
+          imgData.height * (displayDimensions[0] / imgData.width);
       } else {
-        resizeDimensions[0] = imgData.width * (displayDimensions[1] / imgData.height);
+        resizeDimensions[0] =
+          imgData.width * (displayDimensions[1] / imgData.height);
         resizeDimensions[1] = displayDimensions[1];
       }
 
-      createImageBitmap(imgData, 0, 0, imgData.width, imgData.height).then(imgBitmap => {
-        let startX = displayDimensions[0] > resizeDimensions[0] ? ((displayDimensions[0] - resizeDimensions[0]) / 2) : 0;
-        let startY = displayDimensions[1] > resizeDimensions[1] ? ((displayDimensions[1] - resizeDimensions[1]) / 2) : 0;
-        ctx.drawImage(imgBitmap, startX, startY, resizeDimensions[0], resizeDimensions[1]);
-      });
+      createImageBitmap(imgData, 0, 0, imgData.width, imgData.height).then(
+        imgBitmap => {
+          let startX =
+            displayDimensions[0] > resizeDimensions[0]
+              ? (displayDimensions[0] - resizeDimensions[0]) / 2
+              : 0;
+          let startY =
+            displayDimensions[1] > resizeDimensions[1]
+              ? (displayDimensions[1] - resizeDimensions[1]) / 2
+              : 0;
+          ctx.drawImage(
+            imgBitmap,
+            startX,
+            startY,
+            resizeDimensions[0],
+            resizeDimensions[1]
+          );
+        }
+      );
     },
     clearImage: function() {
       const ctx = this.canvasDisplayArea.getContext('2d');
 
-      ctx.clearRect(0, 0, this.canvasDisplayArea.width, this.canvasDisplayArea.height);
+      ctx.clearRect(
+        0,
+        0,
+        this.canvasDisplayArea.width,
+        this.canvasDisplayArea.height
+      );
     },
     publishContinuousDeviceData: function() {
       this.deviceData['analog-stick-left'] &&

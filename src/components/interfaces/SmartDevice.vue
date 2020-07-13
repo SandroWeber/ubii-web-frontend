@@ -7,12 +7,20 @@
         @change="onFullScreenChange"
         style="overflow: hidden;"
       >
-        <span v-show="clientId">Client ID: {{clientId}}</span>
+        <span v-show="clientId">Client ID: {{ clientId }}</span>
         <br />
 
         <button class="button-fullscreen" @click="toggleFullScreen()">
-          <font-awesome-icon icon="compress" class="interface-icon" v-show="fullscreen" />
-          <font-awesome-icon icon="expand" class="interface-icon" v-show="!fullscreen" />
+          <font-awesome-icon
+            icon="compress"
+            class="interface-icon"
+            v-show="fullscreen"
+          />
+          <font-awesome-icon
+            icon="expand"
+            class="interface-icon"
+            v-show="!fullscreen"
+          />
         </button>
         <br />
         <button v-show="!fullscreen" @click="calibrate()">Calibrate</button>
@@ -139,22 +147,22 @@ export default {
           {
             topic: topicPrefix + '/touch_position',
             messageFormat: 'ubii.dataStructure.Vector2',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/orientation',
             messageFormat: 'ubii.dataStructure.Vector3',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/linear_acceleration',
             messageFormat: 'ubii.dataStructure.Vector3',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/touch_events',
             messageFormat: 'ubii.dataStructure.TouchEvent',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           }
         ]
       };
@@ -168,7 +176,7 @@ export default {
         ubiiDevice.components.push({
           topic: topicPrefix + '/vibration_pattern',
           messageFormat: 'double',
-          ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+          ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
         });
         this.tNextVibrate = Date.now();
         navigator.vibrate(100);

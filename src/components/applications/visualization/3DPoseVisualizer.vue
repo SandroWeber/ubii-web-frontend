@@ -33,7 +33,7 @@ export default {
 
     if (this.ubiiSessionGeneratePoseMovements) {
       UbiiClientService.client.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
         session: this.ubiiSessionGeneratePoseMovements
       });
     }
@@ -59,17 +59,17 @@ export default {
           {
             topic: this.topicBoundingBox,
             messageFormat: 'vector3',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: this.topicGenerateNumberOfObjects,
             messageFormat: 'double',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: this.topicObjects,
             messageFormat: 'ubii.dataStructure.Object3D',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           }
         ]
       };
@@ -311,13 +311,13 @@ export default {
       if (this.sendTestData) {
         UbiiClientService.isConnected().then(() => {
           UbiiClientService.client.callService({
-            topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+            topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
             session: this.ubiiSessionGeneratePoseMovements
           });
         });
       } else {
         UbiiClientService.client.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: this.ubiiSessionGeneratePoseMovements
         });
         this.scene.remove(this.visualizedObjects);
