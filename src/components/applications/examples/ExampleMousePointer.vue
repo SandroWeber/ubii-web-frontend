@@ -292,7 +292,6 @@ export default {
     },
     /* STEP 2: making all calls related to ubi-interact backend */
     startExample: function() {
-      console.info(DEFAULT_TOPICS);
       // make sure we're connected, then continue
       UbiiClientService.isConnected().then(() => {
         // create all the specifications we need to define our example application
