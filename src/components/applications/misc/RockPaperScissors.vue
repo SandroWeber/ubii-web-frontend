@@ -70,21 +70,15 @@
             <br />
             <div class="bottom-line">
               <button class="pure-button" @click="startGame()">Retry</button>
-              <span class="text-field"
-                ><b> {{ winLoseMsg }}</b></span
-              >
+              <span class="text-field">
+                <b>{{ winLoseMsg }}</b>
+              </span>
             </div>
           </div>
           <div class="in-the-middle" id="text-area">
             <div id="message-text">{{ msgText }}</div>
             <br />
-            <button
-              class="pure-button"
-              id="optional-retry-btn"
-              @click="startGame()"
-            >
-              Retry
-            </button>
+            <button class="pure-button" id="optional-retry-btn" @click="startGame()">Retry</button>
           </div>
           <div class="in-the-middle" id="ready-area">
             <button class="pure-button" @click="startGame()">Ready</button>
@@ -92,7 +86,7 @@
         </div>
         <br />
         <input id="checkboxInput" type="checkbox" v-model="useGestureInput" />
-        <label for="checkboxInput"> Myo Gesture Input</label>
+        <label for="checkboxInput">Myo Gesture Input</label>
         <br />
         <br />
         <div class="pure-button-group" role="group" aria-label="...">
@@ -368,7 +362,7 @@ export default {
               // start our session (registering not necessary as we do not want to save it permanently)
               UbiiClientService.client
                 .callService({
-                  topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+                  topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
                   session: this.$data.ubiiSession
                 })
                 .then(response => {
@@ -390,7 +384,7 @@ export default {
     stopSession: function() {
       UbiiClientService.client.unsubscribe(this.$data.outputGestureData.topic);
       UbiiClientService.client.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
         session: this.$data.ubiiSession
       });
     },
@@ -732,6 +726,7 @@ export default {
 div.c {
   text-align: center;
 }
+
 .box-area {
   padding-top: 30px;
   padding-bottom: 50px;
@@ -745,30 +740,35 @@ div.c {
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
+
 .bottom-line {
-  padding 10px;
+  padding: 10px;
   text-align: left;
   background-color: layerFourSecondaryColor;
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
 }
+
 .text-field {
   padding-left: 130px;
   text-align: center;
 }
+
 .gesture-field {
   height: 100%;
   width: 150px;
   height: 100px;
-  margin:auto;
+  margin: auto;
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
+
 .bigger-icon {
-    font-size: 250%;
+  font-size: 250%;
 }
+
 .in-the-middle {
   padding-top: 140px;
 }
@@ -777,20 +777,23 @@ table {
   margin: 15px 0;
   table-layout: fixed;
   width: 150px;
-  margin-left:auto;
-  margin-right:auto;
+  margin-left: auto;
+  margin-right: auto;
 }
+
 table, th, td {
   border-collapse: collapse;
   padding: 8px;
 }
-td{
+
+td {
   text-align: middle;
   background-color: layerThreeSecondaryColor;
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
 }
-th{
+
+th {
   text-align: middle;
   background-color: layerFourSecondaryColor;
   border-bottom: 1px solid layerThreeSecondaryColor;
@@ -798,6 +801,7 @@ th{
   border-top-right-radius: 8px;
   border-top-left-radius: 8px;
 }
+
 .rock-line {
   width: 32px;
   height: 60%;
@@ -805,6 +809,7 @@ th{
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
 }
+
 .paper-line {
   width: 32px;
   height: 10%;
@@ -812,6 +817,7 @@ th{
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
 }
+
 .scissors-line {
   width: 32px;
   height: 30%;
@@ -819,6 +825,7 @@ th{
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
 }
+
 .otherTable {
   border-collapse: collapse;
   background-color: layerThreeSecondaryColor;
@@ -826,19 +833,22 @@ th{
   table-layout: fixed;
   width: 144px;
   height: 100px;
-  margin-left:auto;
-  margin-right:auto;
+  margin-left: auto;
+  margin-right: auto;
 }
-.otherTable td{
+
+.otherTable td {
   text-align: center;
   vertical-align: top;
   border-bottom-right-radius: 0px;
   border-bottom-left-radius: 0px;
 }
-.otherTable td:last-child{
+
+.otherTable td:last-child {
   border-bottom-right-radius: 8px;
 }
-.otherTable td:first-child{
+
+.otherTable td:first-child {
   border-bottom-left-radius: 8px;
 }
 </style>

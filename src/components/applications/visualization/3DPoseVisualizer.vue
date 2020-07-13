@@ -1,12 +1,7 @@
 <template>
   <div>
-    <button id="button-send-testdata" @click="toggleTestData()">
-      Toggle sending test data
-    </button>
-    <div
-      id="example-threejs-webvr-render-container"
-      class="render-container"
-    ></div>
+    <button id="button-send-testdata" @click="toggleTestData()">Toggle sending test data</button>
+    <div id="example-threejs-webvr-render-container" class="render-container"></div>
   </div>
 </template>
 
@@ -38,7 +33,7 @@ export default {
 
     if (this.ubiiSessionGeneratePoseMovements) {
       UbiiClientService.client.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
         session: this.ubiiSessionGeneratePoseMovements
       });
     }
@@ -316,13 +311,13 @@ export default {
       if (this.sendTestData) {
         UbiiClientService.isConnected().then(() => {
           UbiiClientService.client.callService({
-            topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+            topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
             session: this.ubiiSessionGeneratePoseMovements
           });
         });
       } else {
         UbiiClientService.client.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: this.ubiiSessionGeneratePoseMovements
         });
         this.scene.remove(this.visualizedObjects);

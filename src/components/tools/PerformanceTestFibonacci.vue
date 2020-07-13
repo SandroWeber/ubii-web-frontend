@@ -179,7 +179,7 @@ export default {
 
       this.testData.allSessionsSpecs.forEach(session => {
         UbiiClientService.client.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
           session: session
         });
       });
@@ -195,7 +195,7 @@ export default {
       this.testData.statistics.stopTime = Date.now();
       this.testData.allSessionsSpecs.forEach(session => {
         UbiiClientService.client.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: session
         });
       });

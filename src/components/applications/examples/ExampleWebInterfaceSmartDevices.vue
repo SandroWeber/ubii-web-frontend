@@ -1,9 +1,6 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
-    <div
-      id="example-web-smart-devices-touch-positions"
-      class="touch-position-area"
-    ></div>
+    <div id="example-web-smart-devices-touch-positions" class="touch-position-area"></div>
   </UbiiClientContent>
 </template>
 
@@ -122,7 +119,7 @@ export default {
             /* we start the session with the specs created in createUbiiSpecs() */
             UbiiClientService.client
               .callService({
-                topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+                topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
                 session: this.session
               })
               .then(response => {
@@ -139,7 +136,7 @@ export default {
 
       if (this.session) {
         await UbiiClientService.client.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: this.session
         });
       }

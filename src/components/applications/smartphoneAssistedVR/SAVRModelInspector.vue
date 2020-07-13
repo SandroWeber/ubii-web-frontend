@@ -152,7 +152,7 @@ export default {
       // start our session (registering not necessary as we do not want to save it permanently)
       client.subscribe = (createModel = false) =>
         UbiiClientService.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
           session: client.session
         }).then(() => {
           // subscribe the topic
@@ -205,7 +205,7 @@ export default {
         UbiiClientService.unsubscribe(v.topic);
 
         UbiiClientService.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: v.session
         });
       });

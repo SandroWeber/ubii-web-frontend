@@ -9,9 +9,7 @@
         'toggle-active': openCVTestActive,
         'toggle-inactive': !openCVTestActive
       }"
-    >
-      OpenCV Test
-    </button>
+    >OpenCV Test</button>
   </div>
 </template>
 
@@ -200,7 +198,7 @@ export default {
       );
 
       UbiiClientService.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
         session: this.ubiiSessionOpenCVTest
       }).then(response => {
         if (response.error) {
@@ -222,7 +220,7 @@ export default {
 
       this.ubiiSessionOpenCVTest &&
         UbiiClientService.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: this.ubiiSessionOpenCVTest
         });
     },

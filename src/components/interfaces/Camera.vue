@@ -8,9 +8,7 @@
         'toggle-active': cocoSsdActive,
         'toggle-inactive': !cocoSsdActive
       }"
-    >
-      toggle coco-ssd object detection
-    </button>
+    >toggle coco-ssd object detection</button>
   </div>
 </template>
 
@@ -163,7 +161,7 @@ export default {
       );
 
       UbiiClientService.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
         session: this.ubiiSessionCoCoSSD
       }).then(response => {
         if (response.error) {
@@ -191,7 +189,7 @@ export default {
 
       this.ubiiSessionCoCoSSD &&
         UbiiClientService.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: this.ubiiSessionCoCoSSD
         });
     },

@@ -7,31 +7,19 @@
 
       <div class="options">
         <!-- a checkbox to toggle showing the client side pointer -->
-        <input
-          id="checkboxClientPointer"
-          type="checkbox"
-          v-model="showClientPointer"
-        />
+        <input id="checkboxClientPointer" type="checkbox" v-model="showClientPointer" />
         <label for="checkboxClientPointer">Show Client Pointer</label>
 
         <br />
 
         <!-- a checkbox to toggle showing the server side pointer -->
-        <input
-          id="checkboxServerPointer"
-          type="checkbox"
-          v-model="showServerPointer"
-        />
+        <input id="checkboxServerPointer" type="checkbox" v-model="showServerPointer" />
         <label for="checkboxServerPointer">Show Server Pointer</label>
 
         <br />
 
         <!-- a checkbox to toggle inverting the pointer position at the server before sending it back to client -->
-        <input
-          id="checkboxMirrorPointer"
-          type="checkbox"
-          v-model="mirrorPointer"
-        />
+        <input id="checkboxMirrorPointer" type="checkbox" v-model="mirrorPointer" />
         <label for="checkboxMirrorPointer">Mirror Pointer</label>
       </div>
 
@@ -304,6 +292,7 @@ export default {
     },
     /* STEP 2: making all calls related to ubi-interact backend */
     startExample: function() {
+      console.info(DEFAULT_TOPICS);
       // make sure we're connected, then continue
       UbiiClientService.isConnected().then(() => {
         // create all the specifications we need to define our example application
@@ -347,7 +336,7 @@ export default {
             // start our session (registering not necessary as we do not want to save it permanently)
             UbiiClientService.client
               .callService({
-                topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+                topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
                 session: this.$data.ubiiSession
               })
               .then(response => {
@@ -367,7 +356,7 @@ export default {
       // unsubscribe and stop session
       UbiiClientService.unsubscribe(this.$data.outputServerPointer.topic);
       UbiiClientService.client.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
         session: this.$data.ubiiSession
       });
 
