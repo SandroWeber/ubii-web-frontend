@@ -86,9 +86,16 @@ export default new Router({
     component: () => import('./components/applications/visualization/XRHub.vue')
   },
   {
-    path: '/applications/visualization/xr-hub-vr',
-    name: 'Application - XR Hub VR',
-    component: () => import('./components/applications/visualization/XRHubVR.vue')
+    path: '/applications/visualization/xr-hub-vr/',
+      name: 'Application - XR Hub VR',
+      props: true,
+      component: () => import('./components/applications/visualization/XRHubVR.vue')
+  },
+  {
+    path: '/applications/visualization/xr-hub-vr/:roomId?',
+      name: 'Application - XR Hub VR',
+      props: true,
+      component: () => import('./components/applications/visualization/XRHubVR.vue')
   },
   {
     path: '/applications/visualization/3d_pose_visualizer',

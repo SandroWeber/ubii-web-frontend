@@ -1,6 +1,7 @@
 import ThreeWebContentCanvas from './ThreeWebContentCanvas';
 import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer';
 import * as THREE from 'three';
+
 export class ThreeWebsiteCanvas extends ThreeWebContentCanvas{
   constructor(resolutionWidth, resolutionHeight, name, url) {
     super(resolutionWidth, resolutionHeight, name);

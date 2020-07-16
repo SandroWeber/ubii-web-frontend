@@ -12,6 +12,12 @@ import FirstPersonControls from '../sharedModules/FirstPersonControls';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 
 export default {
+  props: {
+    roomId: {
+      type: String,
+      default: undefined
+    }
+  },
   name: 'XR-Hub-VR',
   data() {
     return {};
@@ -25,7 +31,7 @@ export default {
         0.1,
         10
       );
-      this.xrHub = new XRHub(this.container, this.camera);
+      this.xrHub = new XRHub(this.container, this.camera, this.$props.roomId);
       this.camera.position.y = 1;
       this.camera.position.z = 1;
       this.xrHub.webGLScene.add(this.camera);

@@ -5,12 +5,20 @@ import { CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import { MeshNormalMaterial } from 'three';
 import { ThreeConfigCanvas } from './ThreeConfigCanvas';
 import { ThreeWebsiteCanvas } from './ThreeWebsiteCanvas';
+import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
+import uuidv4 from 'uuid/v4';
+import Dispatcher, { registerDevice, rotateOnAxis, subscribeToRoom } from './AsyncXRHubActionCreators';
+/* eslint-disable no-console */
 
 class XRHub {
-  constructor(container, camera) {
+  constructor(container, camera, roomId = uuidv4()) {
+    this.roomId = roomId;
     this.container = container;
     this.perspCamera = camera;
     this.perspCamera.position.set(0, 0, 5);
+    this.acceptActions = this.acceptActions.bind(this);
+    Dispatcher.subscribe(this.acceptActions);
+    this.registerAndSubscribe();
     this.initVRScene();
     this.initWebContentScene();
     this.spawnWebContent('https://threejs.org/');
@@ -62,8 +70,33 @@ class XRHub {
       this.container.clientHeight
     );
     this.container.appendChild(this.css3DRenderer.domElement);
+  }
 
+  registerAndSubscribe(){
+    this.device = {
+      name: 'XR-Hub',
+      deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
+      components: [
+      {
+        topic: 'web-xr-hub/'+ this.roomId,
+        messageFormat: 'string',
+        ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+      }]
+    };
 
+    return registerDevice(this.device).then(device => {
+      this.device = device;
+      return subscribeToRoom(this.roomId);
+    });
+  }
+
+  acceptActions(action){
+    console.log("accepting action", action);
+    const scene = action.scene === "WebGL" ? this.webGLScene : this.css3DScene;
+    if(action.type === "RotateOnAxis"){
+      const object = scene.getObjectByName(action.objectId);
+      object.rotateOnAxis(action.axis, action.angle);
+    }
   }
 
   spawnWebContent(url){
@@ -144,14 +177,14 @@ class XRHub {
     mouseVector.sub(this.perspCamera.position).normalize();
     const distance = this.webGLMouseSphere.position.distanceTo(this.perspCamera.position);
     this.webGLMouseSphere.position.copy(this.perspCamera.position.clone().add(mouseVector.multiplyScalar(distance)));
-    this.webGLMouseSphere.rotation.copy(this.perspCamera.rotation);
     this.css3DMouseSpehre.position.copy(this.perspCamera.position.clone().add(mouseVector.multiplyScalar(distance)));
-    this.css3DMouseSpehre.rotation.copy(this.perspCamera.rotation);
     const toRotate = this.webGLMouseSphere.userData.toRotate;
     if(toRotate){
-      toRotate.rotateOnAxis(new THREE.Vector3(0,1,0), event.movementX*0.1);
+      rotateOnAxis("WebGL", toRotate.name, new THREE.Vector3(0,1,0), event.movementX*0.1, this.roomId, true);
+      // toRotate.rotateOnAxis(new THREE.Vector3(0,1,0), event.movementX*0.1);
       if(toRotate.userData.css3DObject){
-        toRotate.userData.css3DObject.rotateOnAxis(new THREE.Vector3(0,1,0), event.movementX*0.1);
+        rotateOnAxis("CSS3D", toRotate.userData.css3DObject.name, new THREE.Vector3(0,1,0), event.movementX*0.1, this.roomId, true);
+        // toRotate.userData.css3DObject.rotateOnAxis(new THREE.Vector3(0,1,0), event.movementX*0.1);
       }
     }
   }
