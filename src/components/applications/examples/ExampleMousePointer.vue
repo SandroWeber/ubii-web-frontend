@@ -316,20 +316,10 @@ export default {
           })
           .then(() => {
             // subscribe to the device topics so we are notified when new data arrives on the topic
-            UbiiClientService.subscribe(
+            UbiiClientService.subscribeTopic(
               this.$data.outputServerPointer.topic,
               // a callback to be called when new data on this topic arrives
-              mousePosition => {
-                // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
-                // interaction area and set our red square indicator
-                let boundingRect = document
-                  .getElementById('mouse-pointer-area')
-                  .getBoundingClientRect();
-                this.$data.serverMousePosition = {
-                  x: mousePosition.x * boundingRect.width,
-                  y: mousePosition.y * boundingRect.height
-                };
-              }
+              this.handleServerPointerPos
             );
 
             // start our session (registering not necessary as we do not want to save it permanently)
@@ -353,7 +343,10 @@ export default {
       this.exampleStarted = false;
 
       // unsubscribe and stop session
-      UbiiClientService.unsubscribe(this.$data.outputServerPointer.topic);
+      UbiiClientService.unsubscribeTopic(
+        this.$data.outputServerPointer.topic,
+        this.handleServerPointerPos
+      );
       UbiiClientService.client.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
         session: this.$data.ubiiSession
@@ -362,6 +355,17 @@ export default {
       if (this.$data.ubiiDevice) {
         await UbiiClientService.deregisterDevice(this.$data.ubiiDevice);
       }
+    },
+    handleServerPointerPos: function(position) {
+      // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
+      // interaction area and set our red square indicator
+      let boundingRect = document
+        .getElementById('mouse-pointer-area')
+        .getBoundingClientRect();
+      this.$data.serverMousePosition = {
+        x: position.x * boundingRect.width,
+        y: position.y * boundingRect.height
+      };
     },
     onMouseMove: function(event) {
       if (!this.exampleStarted) {

@@ -163,7 +163,7 @@ export default {
                 ioMapping.interactionId +
                 '/' +
                 PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX;
-              UbiiClientService.subscribe(
+              UbiiClientService.subscribeTopic(
                 subscriptionTopic,
                 this.onProcessingFinishedCallback
               );

@@ -11,16 +11,8 @@
         <br />
 
         <button class="button-fullscreen" @click="toggleFullScreen()">
-          <font-awesome-icon
-            icon="compress"
-            class="interface-icon"
-            v-show="fullscreen"
-          />
-          <font-awesome-icon
-            icon="expand"
-            class="interface-icon"
-            v-show="!fullscreen"
-          />
+          <font-awesome-icon icon="compress" class="interface-icon" v-show="fullscreen" />
+          <font-awesome-icon icon="expand" class="interface-icon" v-show="!fullscreen" />
         </button>
         <br />
         <button v-show="!fullscreen" @click="calibrate()">Calibrate</button>
@@ -221,14 +213,9 @@ export default {
                 }
               );
               if (vibrationComponent) {
-                UbiiClientService.subscribe(
+                UbiiClientService.subscribeTopic(
                   vibrationComponent.topic,
-                  vibrationPattern => {
-                    if (Date.now() >= this.tNextVibrate) {
-                      navigator.vibrate(vibrationPattern);
-                      this.tNextVibrate = Date.now() + 2 * vibrationPattern;
-                    }
-                  }
+                  this.handleVibrationPattern
                 );
               }
             });
@@ -250,12 +237,17 @@ export default {
       }
 
       if (this.$data.ubiiDevice && this.$data.ubiiDevice.components) {
-        this.$data.ubiiDevice.components.forEach(component => {
-          // eslint-disable-next-line no-console
-          console.log('unsubscribed to ' + component.topic);
-
-          UbiiClientService.unsubscribe(component.topic);
-        });
+        let vibrationComponent = this.$data.ubiiDevice.components.find(
+          element => {
+            return element.topic.indexOf('/vibration_pattern') !== -1;
+          }
+        );
+        if (vibrationComponent) {
+          UbiiClientService.unsubscribeTopic(
+            vibrationComponent.topic,
+            this.handleVibrationPattern
+          );
+        }
 
         return UbiiClientService.deregisterDevice(this.$data.ubiiDevice).then(
           () => {
@@ -342,6 +334,12 @@ export default {
           }
         }
       });
+    },
+    handleVibrationPattern: function(vibrationPattern) {
+      if (Date.now() >= this.tNextVibrate) {
+        navigator.vibrate(vibrationPattern);
+        this.tNextVibrate = Date.now() + 2 * vibrationPattern;
+      }
     },
     /* event methods */
     registerEventListeners: function() {
