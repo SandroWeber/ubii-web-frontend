@@ -101,7 +101,7 @@ export default {
       let counter = 0;
       let maxMessages = parseInt(this.$data.testRTT.messageCount);
 
-      UbiiClientService.subscribe(this.$data.testRTT.topic, () => {
+      UbiiClientService.subscribeTopic(this.$data.testRTT.topic, () => {
         this.$data.testRTT.timings.push(Date.now() - this.$data.testRTT.tSent);
         counter++;
         if (counter < maxMessages) {
@@ -120,7 +120,7 @@ export default {
     stopTestRTT: function() {
       if (this.$data.testRTT && this.$data.testRTT.avgRTT) {
         this.$data.testRTT.status = this.$data.testRTT.avgRTT.toString() + 'ms';
-        UbiiClientService.unsubscribe(this.$data.testRTT.topic);
+        UbiiClientService.unsubscribeTopic(this.$data.testRTT.topic);
       }
     },
     rttSendPackage: function() {

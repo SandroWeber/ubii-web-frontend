@@ -61,7 +61,7 @@ function subscribeSpecs(specs, callback) {
     session: specs.session
   }).then(() => {
     // subscribe the topic
-    UbiiClientService.subscribe(specs.topic, callback);
+    UbiiClientService.subscribeTopic(specs.topic, callback);
   });
 }
 
@@ -69,7 +69,7 @@ function unsubscribeSpecs(specs) {
   // eslint-disable-next-line no-console
   console.log('unsubscribed to ' + specs.topic);
 
-  UbiiClientService.unsubscribe(specs.topic);
+  UbiiClientService.unsubscribeTopic(specs.topic);
 
   UbiiClientService.callService({
     topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
@@ -82,7 +82,7 @@ function subscribe(topic, callback) {
   console.log('subscribed to ' + topic);
 
   // subscribe the topic
-  UbiiClientService.subscribe(topic, callback);
+  UbiiClientService.subscribeTopic(topic, callback);
 }
 
 function unsubscribe(topics, sessions) {
@@ -90,7 +90,7 @@ function unsubscribe(topics, sessions) {
     // eslint-disable-next-line no-console
     console.log('unsubscribed to ' + topic);
 
-    UbiiClientService.unsubscribe(topic);
+    UbiiClientService.unsubscribeTopic(topic);
   });
   sessions.forEach(session => {
     UbiiClientService.callService({

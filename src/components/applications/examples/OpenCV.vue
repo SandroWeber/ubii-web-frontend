@@ -190,7 +190,7 @@ export default {
       }
     },
     startOpenCVTest: function() {
-      UbiiClientService.subscribe(
+      UbiiClientService.subscribeTopic(
         this.ubiiDevice.components[1].topic,
         image => {
           this.drawImageOpenCV(image);
@@ -216,7 +216,7 @@ export default {
       continuousPublish();
     },
     stopOpenCVTest: function() {
-      UbiiClientService.unsubscribe(this.ubiiDevice.components[1].topic);
+      UbiiClientService.unsubscribeTopic(this.ubiiDevice.components[1].topic);
 
       this.ubiiSessionOpenCVTest &&
         UbiiClientService.callService({

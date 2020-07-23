@@ -369,11 +369,9 @@ export default {
                   console.info(response);
                 });
               //subscribe to our classied output gesture topic
-              UbiiClientService.client.subscribe(
+              UbiiClientService.client.subscribeTopic(
                 this.$data.outputGestureData.topic,
-                gestureData => {
-                  this.pushGestureData(gestureData);
-                }
+                this.handleGestureData
               );
             });
         });
@@ -382,11 +380,18 @@ export default {
 
     //unsubscribe and stop session
     stopSession: function() {
-      UbiiClientService.client.unsubscribe(this.$data.outputGestureData.topic);
+      UbiiClientService.client.unsubscribeTopic(
+        this.$data.outputGestureData.topic,
+        this.handleGestureData
+      );
       UbiiClientService.client.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
         session: this.$data.ubiiSession
       });
+    },
+
+    handleGestureData: function(gestureData) {
+      this.pushGestureData(gestureData);
     },
 
     resolveAfter2Seconds: function() {

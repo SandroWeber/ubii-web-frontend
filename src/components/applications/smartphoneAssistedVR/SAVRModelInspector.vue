@@ -156,7 +156,7 @@ export default {
           session: client.session
         }).then(() => {
           // subscribe the topic
-          UbiiClientService.subscribe(specs.topic, orientation => {
+          UbiiClientService.subscribeTopic(specs.topic, orientation => {
             client.orientation = orientation;
           }).then(() => {
             if (createModel) checkForPrefab();
@@ -202,7 +202,7 @@ export default {
     onDisconnectToUbii: function() {
       // unsubscribe and stop all sessions
       this.clients.forEach((v, k) => {
-        UbiiClientService.unsubscribe(v.topic);
+        UbiiClientService.unsubscribeTopic(v.topic);
 
         UbiiClientService.callService({
           topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,

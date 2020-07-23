@@ -153,11 +153,9 @@ export default {
       }
     },
     startCoCoSSDObjectDetection: function() {
-      UbiiClientService.subscribe(
+      UbiiClientService.subscribeTopic(
         this.ubiiDevice.components[1].topic,
-        predictedObjectsList => {
-          this.drawCoCoSSDLabels(predictedObjectsList.elements);
-        }
+        this.handleObjectPredictions
       );
 
       UbiiClientService.callService({
@@ -181,7 +179,10 @@ export default {
       continuousPublish();
     },
     stopCoCoSSDObjectDetection: function() {
-      UbiiClientService.unsubscribe(this.ubiiDevice.components[1].topic);
+      UbiiClientService.unsubscribeTopic(
+        this.ubiiDevice.components[1].topic,
+        this.handleObjectPredictions
+      );
 
       this.cocoSSDLabels.forEach(div => {
         div.style.visibility = 'hidden';
@@ -217,6 +218,9 @@ export default {
             ProtobufLibrary.ubii.dataStructure.Image2D.DataFormat.RGBA8
         }
       });
+    },
+    handleObjectPredictions: function(predictedObjectsList) {
+      this.drawCoCoSSDLabels(predictedObjectsList.elements);
     },
     captureImage: function() {
       var canvas = document.createElement('canvas');

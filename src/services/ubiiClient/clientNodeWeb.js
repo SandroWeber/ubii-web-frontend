@@ -248,7 +248,7 @@ class ClientNodeWeb {
    * @param {*} topic
    * @param {*} callback
    */
-  async subscribe(topic, callback) {
+  async subscribeTopic(topic, callback) {
     let message = {
       topic: DEFAULT_TOPICS.SERVICES.TOPIC_SUBSCRIPTION,
       topicSubscription: {
@@ -278,18 +278,29 @@ class ClientNodeWeb {
     );
   }
 
-  async unsubscribe(topic) {
-    this.topicDataCallbacks.delete(topic);
-
-    let message = {
-      topic: DEFAULT_TOPICS.SERVICES.TOPIC_SUBSCRIPTION,
-      topicSubscription: {
-        clientId: this.clientSpecification.id,
-        unsubscribeTopics: [topic]
+  async unsubscribeTopic(topic, callback = undefined) {
+    let currentCallbacks = this.topicDataCallbacks.get(topic);
+    if (currentCallbacks && currentCallbacks.length > 0) {
+      if (!callback) {
+        this.topicDataCallbacks.delete(topic);
+      } else {
+        let index = currentCallbacks.indexOf(callback);
+        if (index !== -1) currentCallbacks.splice(index, 1);
       }
-    };
+    }
 
-    return this.callService(message);
+    if (currentCallbacks && currentCallbacks.length === 0) {
+      this.topicDataCallbacks.delete(topic);
+
+      let message = {
+        topic: DEFAULT_TOPICS.SERVICES.TOPIC_SUBSCRIPTION,
+        topicSubscription: {
+          clientId: this.clientSpecification.id,
+          unsubscribeTopics: [topic]
+        }
+      };
+      this.callService(message);
+    }
   }
 
   /**
@@ -301,7 +312,10 @@ class ClientNodeWeb {
     // already subscribed to regexString, add callback to list
     let registeredRegex = this.topicDataRegexCallbacks.get(regexString);
     if (registeredRegex) {
-      if (registeredRegex.callbacks && Array.isArray(registeredRegex.callbacks)) {
+      if (
+        registeredRegex.callbacks &&
+        Array.isArray(registeredRegex.callbacks)
+      ) {
         registeredRegex.callbacks.push(callback);
       } else {
         registeredRegex.callbacks = [callback];
@@ -330,18 +344,22 @@ class ClientNodeWeb {
           let registeredRegex = this.topicDataRegexCallbacks.get(regexString);
           if (registeredRegex && registeredRegex.callbacks.length > 0) {
             registeredRegex.callbacks.push(callback);
-          }
-          else {
+          } else {
             console.error(
-              'ClientNodeWeb - could not subscribe to regex ' + regexString + ', response:\n' + reply
+              'ClientNodeWeb - could not subscribe to regex ' +
+                regexString +
+                ', response:\n' +
+                reply
             );
             return false;
           }
         }
-      }
-      catch (error) {
+      } catch (error) {
         console.error(
-          'ClientNodeWeb - subscribeRegex(' + regexString + ') failed: \n' + error
+          'ClientNodeWeb - subscribeRegex(' +
+            regexString +
+            ') failed: \n' +
+            error
         );
         return false;
       }
@@ -383,14 +401,19 @@ class ClientNodeWeb {
           this.topicDataRegexCallbacks.delete(regexString);
         } else {
           console.error(
-            'ClientNodeWeb - could not unsubscribe from regex ' + regexString + ', response:\n' + reply
+            'ClientNodeWeb - could not unsubscribe from regex ' +
+              regexString +
+              ', response:\n' +
+              reply
           );
           return false;
         }
-      }
-      catch (error) {
+      } catch (error) {
         console.error(
-          'ClientNodeWeb - unsubscribeRegex(' + regexString + ') failed: \n' + error
+          'ClientNodeWeb - unsubscribeRegex(' +
+            regexString +
+            ') failed: \n' +
+            error
         );
         return false;
       }
@@ -466,7 +489,7 @@ class ClientNodeWeb {
     if (record && record.topic) {
       let callbacks = this.topicDataCallbacks.get(record.topic);
       if (!callbacks) {
-        this.topicDataRegexCallbacks.forEach((value) => {
+        this.topicDataRegexCallbacks.forEach(value => {
           let regex = value.regex;
           if (regex.test(record.topic)) {
             callbacks = value.callbacks;

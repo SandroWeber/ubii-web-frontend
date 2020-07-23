@@ -41,7 +41,7 @@ class UbiiClientService {
         if (this.client.isInitialized()) {
           console.info(
             'UbiiClientService - client connected with ID:\n' +
-            this.client.clientSpecification.id
+              this.client.clientSpecification.id
           );
           this.connected = true;
           this.connecting = false;
@@ -161,12 +161,12 @@ class UbiiClientService {
       });
   }
 
-  async subscribe(topic, callback) {
-    return this.client && this.client.subscribe(topic, callback);
+  async subscribeTopic(topic, callback) {
+    return this.client && this.client.subscribeTopic(topic, callback);
   }
 
-  async unsubscribe(topic) {
-    return this.client && this.client.unsubscribe(topic);
+  async unsubscribeTopic(topic, callback) {
+    return this.client && this.client.unsubscribeTopic(topic, callback);
   }
 
   subscribeRegex(regex, callback) {
