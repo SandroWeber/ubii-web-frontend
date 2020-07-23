@@ -140,6 +140,7 @@ export default {
       mirrorPointer: false,
       ubiiClientService: UbiiClientService,
       exampleStarted: false,
+      clientMousePosition: { x: 0, y: 0 },
       serverMousePosition: { x: 0, y: 0 },
       clientPointerInside: false
     };
@@ -149,83 +150,54 @@ export default {
       if (
         !UbiiClientService.isConnected ||
         !this.$data.ubiiDevice.name ||
-        !this.$data.inputMirror.topic
+        !this.$data.componentMirrorPointer.topic
       ) {
         return;
       }
 
-      // if the checkbox is changed, we publish this info on the related topic
-      UbiiClientService.publishRecord({
-        topic: this.$data.inputMirror.topic,
-        bool: value
-      });
+      this.ubiiDevice.componentMirrorPointer.publish(value);
     }
   },
   methods: {
     createUbiiSpecs: function() {
-      // create specifications for the protobuf messages
+      // create specifications for ubi-interact
 
       // helper definitions that we can reference later
       let deviceName = 'web-example-mouse-pointer';
       let topicPrefix =
         '/' + UbiiClientService.getClientID() + '/' + deviceName;
-      let inputClientPointer = {
-        internalName: 'clientPointer',
-        messageFormat: 'ubii.dataStructure.Vector2',
-        topic: topicPrefix + '/' + 'mouse_client_position'
-      };
-      let inputMirror = {
-        internalName: 'mirrorPointer',
-        messageFormat: 'bool',
-        topic: topicPrefix + '/' + 'mirror_mouse'
-      };
-      let componentServerPointer = {
-        internalName: 'serverPointer',
-        messageFormat: 'ubii.dataStructure.Vector2',
-        topic: topicPrefix + '/' + 'mouse_server_position',
-        callback: position => {
-          // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
-          // interaction area and set our red square indicator
-          let boundingRect = document
-            .getElementById('mouse-pointer-area')
-            .getBoundingClientRect();
-          this.$data.serverMousePosition = {
-            x: position.x * boundingRect.width,
-            y: position.y * boundingRect.height
-          };
-        }
-      };
+
+      // define our abstract device and its components
 
       // specification of a ubii.devices.Device
       // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/devices/device.proto
-      let ubiiDevice = {
+      this.ubiiDevice = {
         name: deviceName,
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
         components: [
+          // component publishing our mouse pointer position
           {
-            topic: inputClientPointer.topic,
-            messageFormat: inputClientPointer.messageFormat,
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
-            publish: () => {
-              // publish our normalized client mouse position
-              UbiiClientService.publishRecord({
-                topic: this.$data.inputClientPointer.topic,
-                vector2: this.$data.clientMousePosition
-              });
-            }
+            topic: topicPrefix + '/mouse_client_position',
+            messageFormat: 'ubii.dataStructure.Vector2'
           },
+          // component publishing the flag to invert the pointer position
           {
-            topic: inputMirror.topic,
-            messageFormat: inputMirror.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
+            topic: topicPrefix + '/mirror_mouse',
+            messageFormat: 'bool'
           },
+          // component subscribing to the pointer position returned by the server interaction
           {
-            topic: componentServerPointer.topic,
-            messageFormat: componentServerPointer.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER,
+            topic: topicPrefix + '/mouse_server_position',
+            messageFormat: 'ubii.dataStructure.Vector2'
           }
         ]
       };
+      this.ubiiComponentClientPointer = this.ubiiDevice.components[0];
+      this.ubiiComponentMirrorPointer = this.ubiiDevice.components[1];
+      this.ubiiComponentServerPointer = this.ubiiDevice.components[2];
 
       // specification of a ubii.interactions.Interaction
       // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/interactions/interaction.proto
@@ -247,66 +219,59 @@ export default {
         }
       };
 
-      let ubiiInteraction = {
+      this.ubiiInteraction = {
         id: uuidv4(),
         name: 'mirror-mouse-pointer',
         processingCallback: processingCallback.toString(),
         processFrequency: 60,
         inputFormats: [
           {
-            internalName: inputClientPointer.internalName,
-            messageFormat: inputClientPointer.messageFormat
+            internalName: 'clientPointer',
+            messageFormat: this.ubiiComponentClientPointer.messageFormat
           },
           {
-            internalName: inputMirror.internalName,
-            messageFormat: inputMirror.messageFormat
+            internalName: 'mirrorPointer',
+            messageFormat: this.ubiiComponentMirrorPointer.messageFormat
           }
         ],
         outputFormats: [
           {
-            internalName: componentServerPointer.internalName,
-            messageFormat: componentServerPointer.messageFormat
+            internalName: 'serverPointer',
+            messageFormat: this.ubiiComponentServerPointer.messageFormat
           }
         ]
       };
+      this.ubiiInteraction.inputClientPointer = this.ubiiInteraction.inputFormats[0];
+      this.ubiiInteraction.inputMirrorPointer = this.ubiiInteraction.inputFormats[1];
+      this.ubiiInteraction.outputServerPointer = this.ubiiInteraction.outputFormats[0];
 
       // specification of a ubii.sessions.Session
       // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/sessions/session.proto
-      let ubiiSession = {
+      this.ubiiSession = {
         name: 'web-mouse-example-session',
-        interactions: [ubiiInteraction],
+        interactions: [this.ubiiInteraction],
         ioMappings: [
           {
-            interactionId: ubiiInteraction.id,
+            interactionId: this.ubiiInteraction.id,
             inputMappings: [
               {
-                name: inputClientPointer.internalName,
-                topicSource: inputClientPointer.topic
+                name: this.ubiiInteraction.inputClientPointer.internalName,
+                topic: this.ubiiComponentClientPointer.topic
               },
               {
-                name: inputMirror.internalName,
-                topicSource: inputMirror.topic
+                name: this.ubiiInteraction.inputMirrorPointer.internalName,
+                topic: this.ubiiComponentMirrorPointer.topic
               }
             ],
             outputMappings: [
               {
-                name: componentServerPointer.internalName,
-                topicDestination: componentServerPointer.topic
+                name: this.ubiiInteraction.outputServerPointer.internalName,
+                topic: this.ubiiComponentServerPointer.topic
               }
             ]
           }
         ]
       };
-
-      // assign to local state for future reference
-      this.$data.deviceName = deviceName;
-      this.$data.inputClientPointer = inputClientPointer;
-      this.$data.inputMirror = inputMirror;
-      this.$data.componentServerPointer = componentServerPointer;
-      this.$data.ubiiDevice = ubiiDevice;
-      this.$data.ubiiInteraction = ubiiInteraction;
-
-      this.$data.ubiiSession = ubiiSession;
     },
     /* STEP 2: making all calls related to ubi-interact backend */
     startExample: function() {
@@ -317,7 +282,7 @@ export default {
         this.createUbiiSpecs();
 
         // register the mouse pointer device
-        UbiiClientService.registerDevice(this.$data.ubiiDevice)
+        UbiiClientService.registerDevice(this.ubiiDevice)
           .then(response => {
             // the device specs we send to backend intentionally left out the device ID
             // if the backend accepts the device registration, it will send back our specs
@@ -325,26 +290,27 @@ export default {
             // that way we make sure the ID is created by the backend and valid
             if (response.id) {
               // success, we accept the device specs sent back to us as the final specs
-              this.$data.ubiiDevice = response;
-              return this.$data.ubiiDevice;
+              this.ubiiDevice = response;
+              return this.ubiiDevice;
             } else {
               // something went wrong, print to console
+              console.error(response);
               return undefined;
             }
           })
           .then(() => {
             // subscribe to the device topics so we are notified when new data arrives on the topic
             UbiiClientService.subscribeTopic(
-              this.$data.componentServerPointer.topic,
+              this.ubiiComponentServerPointer.topic,
               // a callback to be called when new data on this topic arrives
-              this.handleServerPointerPos
+              this.subscriptionServerPointerPosition
             );
 
             // start our session (registering not necessary as we do not want to save it permanently)
             UbiiClientService.client
               .callService({
                 topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
-                session: this.$data.ubiiSession
+                session: this.ubiiSession
               })
               .then(response => {
                 if (response.session) {
@@ -362,19 +328,20 @@ export default {
 
       // unsubscribe and stop session
       UbiiClientService.unsubscribeTopic(
-        this.$data.componentServerPointer.topic,
-        this.handleServerPointerPos
+        this.ubiiDevice.componentServerPointer.topic,
+        this.subscriptionServerPointerPosition
       );
       UbiiClientService.client.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
-        session: this.$data.ubiiSession
+        session: this.ubiiSession
       });
 
-      if (this.$data.ubiiDevice) {
-        await UbiiClientService.deregisterDevice(this.$data.ubiiDevice);
+      if (this.ubiiDevice) {
+        await UbiiClientService.deregisterDevice(this.ubiiDevice);
       }
     },
-    handleServerPointerPos: function(position) {
+    /* publishing and subscribing */
+    subscriptionServerPointerPosition: function(position) {
       // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
       // interaction area and set our red square indicator
       let boundingRect = document
@@ -385,6 +352,21 @@ export default {
         y: position.y * boundingRect.height
       };
     },
+    publishClientPointerPosition: function(vec2) {
+      // publish our normalized client mouse position
+      UbiiClientService.publishRecord({
+        topic: this.ubiiDevice.componentClientPointer.topic,
+        vector2: vec2
+      });
+    },
+    publishMirrorPointer: function(boolean) {
+      // if the checkbox is changed, we publish this info on the related topic
+      UbiiClientService.publishRecord({
+        topic: this.ubiiDevice.componentMirrorPointer.topic,
+        bool: boolean
+      });
+    },
+    /* UI events */
     onMouseMove: function(event) {
       if (!this.exampleStarted) {
         return;
@@ -402,7 +384,7 @@ export default {
       this.$data.clientMousePosition = relativeMousePosition;
       // publish our normalized client mouse position
       /*UbiiClientService.publishRecord({
-        topic: this.$data.inputClientPointer.topic,
+        topic: this.$data.componentClientPointer.topic,
         vector2: this.$data.clientMousePosition
       });*/
     },
@@ -438,7 +420,7 @@ export default {
       this.$data.clientMousePosition = relativeMousePosition;
       // publish our normalized client touch position
       UbiiClientService.publishRecord({
-        topic: this.$data.inputClientPointer.topic,
+        topic: this.$data.componentClientPointer.topic,
         vector2: this.$data.clientMousePosition
       });
     },
