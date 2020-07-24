@@ -149,13 +149,13 @@ export default {
     mirrorPointer: function(value) {
       if (
         !UbiiClientService.isConnected ||
-        !this.$data.ubiiDevice.name ||
-        !this.$data.componentMirrorPointer.topic
+        !this.ubiiDevice.name ||
+        !this.ubiiComponentMirrorPointer.topic
       ) {
         return;
       }
 
-      this.ubiiDevice.componentMirrorPointer.publish(value);
+      this.publishMirrorPointer(value);
     }
   },
   methods: {
@@ -227,17 +227,17 @@ export default {
         inputFormats: [
           {
             internalName: 'clientPointer',
-            messageFormat: this.ubiiComponentClientPointer.messageFormat
+            messageFormat: 'ubii.dataStructure.Vector2'
           },
           {
             internalName: 'mirrorPointer',
-            messageFormat: this.ubiiComponentMirrorPointer.messageFormat
+            messageFormat: 'bool'
           }
         ],
         outputFormats: [
           {
             internalName: 'serverPointer',
-            messageFormat: this.ubiiComponentServerPointer.messageFormat
+            messageFormat: 'ubii.dataStructure.Vector2'
           }
         ]
       };
@@ -256,17 +256,17 @@ export default {
             inputMappings: [
               {
                 name: this.ubiiInteraction.inputClientPointer.internalName,
-                topic: this.ubiiComponentClientPointer.topic
+                topicSource: this.ubiiComponentClientPointer.topic
               },
               {
                 name: this.ubiiInteraction.inputMirrorPointer.internalName,
-                topic: this.ubiiComponentMirrorPointer.topic
+                topicSource: this.ubiiComponentMirrorPointer.topic
               }
             ],
             outputMappings: [
               {
                 name: this.ubiiInteraction.outputServerPointer.internalName,
-                topic: this.ubiiComponentServerPointer.topic
+                topicDestination: this.ubiiComponentServerPointer.topic
               }
             ]
           }
@@ -314,7 +314,7 @@ export default {
               })
               .then(response => {
                 if (response.session) {
-                  this.$data.ubiiSession = response.session;
+                  this.ubiiSession = response.session;
                   this.$data.exampleStarted = true;
                 }
               });
@@ -328,7 +328,7 @@ export default {
 
       // unsubscribe and stop session
       UbiiClientService.unsubscribeTopic(
-        this.ubiiDevice.componentServerPointer.topic,
+        this.ubiiComponentServerPointer.topic,
         this.subscriptionServerPointerPosition
       );
       UbiiClientService.client.callService({
@@ -341,28 +341,28 @@ export default {
       }
     },
     /* publishing and subscribing */
-    subscriptionServerPointerPosition: function(position) {
+    subscriptionServerPointerPosition: function(vec2) {
       // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
       // interaction area and set our red square indicator
       let boundingRect = document
         .getElementById('mouse-pointer-area')
         .getBoundingClientRect();
       this.$data.serverMousePosition = {
-        x: position.x * boundingRect.width,
-        y: position.y * boundingRect.height
+        x: vec2.x * boundingRect.width,
+        y: vec2.y * boundingRect.height
       };
     },
     publishClientPointerPosition: function(vec2) {
       // publish our normalized client mouse position
       UbiiClientService.publishRecord({
-        topic: this.ubiiDevice.componentClientPointer.topic,
+        topic: this.ubiiComponentClientPointer.topic,
         vector2: vec2
       });
     },
     publishMirrorPointer: function(boolean) {
       // if the checkbox is changed, we publish this info on the related topic
       UbiiClientService.publishRecord({
-        topic: this.ubiiDevice.componentMirrorPointer.topic,
+        topic: this.ubiiComponentMirrorPointer.topic,
         bool: boolean
       });
     },
@@ -383,10 +383,7 @@ export default {
 
       this.$data.clientMousePosition = relativeMousePosition;
       // publish our normalized client mouse position
-      /*UbiiClientService.publishRecord({
-        topic: this.$data.componentClientPointer.topic,
-        vector2: this.$data.clientMousePosition
-      });*/
+      this.publishClientPointerPosition(this.$data.clientMousePosition);
     },
     onTouchStart: function(event) {
       this.$data.clientPointerInside = true;
@@ -419,10 +416,7 @@ export default {
 
       this.$data.clientMousePosition = relativeMousePosition;
       // publish our normalized client touch position
-      UbiiClientService.publishRecord({
-        topic: this.$data.componentClientPointer.topic,
-        vector2: this.$data.clientMousePosition
-      });
+      this.publishClientPointerPosition(this.$data.clientMousePosition);
     },
     ...mapActions('interactions', {
       addInteraction: 'add'
