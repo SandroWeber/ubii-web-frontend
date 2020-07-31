@@ -1,14 +1,9 @@
 <template>
   <div class="topic-list-grid">
     <div class="category-header header-services orange-accent">Services</div>
-    <div class="category-header header-topicdata orange-accent">Topic Data</div>
 
     <div class="category-content content-services" v-show="serviceList">
-      <div
-        class="list-element"
-        v-for="service in serviceList"
-        :key="service.topic"
-      >
+      <div class="list-element" v-for="service in serviceList" :key="service.topic">
         <service-viewer
           :topic="service.topic"
           :requestMessageFormat="service.requestMessageFormat"
@@ -16,6 +11,8 @@
         />
       </div>
     </div>
+
+    <div class="category-header header-topicdata orange-accent">Topic Data</div>
 
     <div class="category-content content-device-topicdata" v-show="topicData">
       <div class="list-element" v-for="(data, topic) in topicData" :key="topic">
@@ -36,7 +33,7 @@ import TopicDataViewer from './TopicDataViewer.vue';
 import ServiceViewer from './ServiceViewer.vue';
 
 export default {
-  name: 'TopicInspector',
+  name: 'ServiceTopicInspector',
   components: {
     TopicDataViewer,
     ServiceViewer

@@ -12,7 +12,7 @@
       icon="chevron-down"
       @click="toggleTopicDataDisplay(topic)"
     />
-    {{topic}}
+    <div class="topic-title">{{topic}}</div>
     <div class="topic-data green-accent" v-show="expanded && topicData">{{topicData}}</div>
     <div class="topic-data red-accent" v-show="expanded && !topicData">received empty data</div>
   </div>
@@ -50,7 +50,13 @@ export default {
   cursor: pointer;
 }
 
+.topic-title {
+  font-size: 1.2em;
+  display: inline;
+  margin: 10px;
+}
+
 .topic-data {
-  padding-left: 30px;
+  padding-left: 40px;
 }
 </style>

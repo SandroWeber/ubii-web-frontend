@@ -12,13 +12,13 @@
       icon="chevron-down"
       @click="toggleServiceDetails()"
     />
-    {{ topic }}
+    <div class="topic-title">{{ topic }}</div>
     <div class="service-detail" v-show="expanded && requestMessageFormat">
-      request format:
+      ubii.services.ServiceRequest:
       <div class="green-accent">{{ requestMessageFormat }}</div>
     </div>
     <div class="service-detail" v-show="expanded && responseMessageFormat">
-      reply format:
+      ubii.services.ServiceReply:
       <div class="green-accent">{{ responseMessageFormat }}</div>
     </div>
   </div>
@@ -66,7 +66,13 @@ export default {
   cursor: pointer;
 }
 
+.topic-title {
+  font-size: 1.2em;
+  display: inline;
+  margin: 10px;
+}
+
 .service-detail {
-  padding-left: 30px;
+  padding-left: 40px;
 }
 </style>
