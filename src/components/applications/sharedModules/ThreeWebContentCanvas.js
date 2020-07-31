@@ -1,8 +1,10 @@
 import * as THREE from 'three';
+import uuidv4 from 'uuid/v4';
 
 class ThreeWebContentCanvas {
   constructor(resolutionWidth, resolutionHeight, name) {
     this.name = name;
+    this.canvasId = webGLCanvas ? webGLCanvas.userData.canvasId : uuidv4();
 
     this.resolution = [resolutionWidth, resolutionHeight];
     this.css3DCanvas = this.createCSS3DCanvas();
@@ -40,13 +42,15 @@ class ThreeWebContentCanvas {
     material.opacity = 0;
     material.blending = THREE.NoBlending;
 
-    let geometry = new THREE.PlaneGeometry(1, 1);
-    let webglPlaneMesh = new THREE.Mesh(geometry, material);
-    webglPlaneMesh.name = this.name;
-    webglPlaneMesh.userData = {
-      res: {x: this.resolution[0], y: this.resolution[1]},
-      css3DObject: css3DCannvas,
-    };
+      let geometry = new THREE.PlaneGeometry(1, 1);
+      webglPlaneMesh = new THREE.Mesh(geometry, material);
+      webglPlaneMesh.name = this.name;
+      webglPlaneMesh.userData.res= {x: this.resolution[0], y: this.resolution[1]};
+      webglPlaneMesh.userData.objectId = uuidv4();
+      webglPlaneMesh.userData.canvasId = this.canvasId;
+    }
+
+    webglPlaneMesh.userData.css3DObject = this.css3DCanvas;
 
     return webglPlaneMesh;
   }

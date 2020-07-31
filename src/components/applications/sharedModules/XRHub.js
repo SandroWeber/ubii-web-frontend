@@ -84,19 +84,28 @@ class XRHub {
       }]
     };
 
-    return registerDevice(this.device).then(device => {
-      this.device = device;
-      return subscribeToRoom(this.roomId);
-    });
+  updateObject3D(object3DString){
+    const loader = new THREE.ObjectLoader();
+    const object3D = loader.parse(JSON.parse(object3DString));
+    let scene = this.webGLScene;
+    if(object3D.userData.url){
+      scene = this.css3DScene;
+    }
+    const objectInScene = this.getObjectByUserDataProperty(scene, "objectId", object3D.userData.objectId);
+    if(objectInScene){
+      objectInScene.position.copy(object3D.position);
+      objectInScene.rotation.copy(object3D.rotation);
+      objectInScene.scale.copy(object3D.scale);
+    }
   }
 
-  acceptActions(action){
-    console.log("accepting action", action);
-    const scene = action.scene === "WebGL" ? this.webGLScene : this.css3DScene;
-    if(action.type === "RotateOnAxis"){
-      const object = scene.getObjectByName(action.objectId);
-      object.rotateOnAxis(action.axis, action.angle);
+  getObjectByUserDataProperty(scene, property, value){
+    for(const child of scene.children){
+      if(child.userData[property] && child.userData[property] === value){
+        return child
+      }
     }
+    return undefined;
   }
 
   spawnWebContent(url){
@@ -112,41 +121,6 @@ class XRHub {
     webContent.setRotationQuaternion(new THREE.Quaternion());
     webContent.setSize(1, 0.75);
   }
-
-  /*
-  initControls(){
-    // const controllerModelFactory = new XRControllerModelFactory();
-    for(let i = 0; i < 2; i++){
-      // init controllers
-      const controller = this.webGLRenderer.xr.getController(i);
-      if(controller){
-        this.controllers.push(controller);
-        controller.addEventListener('selectstart', this.onSelectStart);
-        controller.addEventListener('selectend', this.onSelectEnd);
-        this.webGLScene.add(controller);
-        const controllerGrip = this.webGLRenderer.xr.getControllerGrip(i);
-        if(controllerGrip){
-          const geometry = new THREE.BoxGeometry(0.01, 0.01, 0.01);
-          const material = new THREE.MeshNormalMaterial();
-
-          const mesh = new THREE.Mesh(geometry, material);
-          // controllerGrip.add(controllerModelFactory.createControllerModel(controllerGrip));
-          controllerGrip.add(mesh);
-          this.webGLScene.add(controllerGrip);
-        }
-
-        // add selection line
-        const geometry = new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, - 1 ) ] );
-
-        const line = new THREE.Line( geometry );
-        line.name = 'line';
-        line.scale.z = 5;
-
-        controller.add(line.clone());
-      }
-    }
-  }
-  */
 
   raycastFromScreenCoordinates(screenPosX, screenPosY){
     const eventXPosFromCenter = ((screenPosX-this.container.offsetLeft)/this.container.clientWidth)*2-1;

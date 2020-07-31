@@ -27,6 +27,11 @@ export class ThreeWebsiteCanvas extends ThreeWebContentCanvas{
     this.rotationHandle.position.set(0, -this.webGLCanvas.scale.y/2-0.1, 0);
   }
 
+  toggleMovementHandles(){
+    this.moveHandle.visible = !this.moveHandle.visible;
+    this.rotationHandle.visible = !this.rotationHandle.visible;
+  }
+
   setPosition(x, y, z) {
     super.setPosition(x, y, z);
   }
@@ -40,12 +45,7 @@ export class ThreeWebsiteCanvas extends ThreeWebContentCanvas{
     // this.handle.add(this.webGLCanvas);
   }
 
-  createCSS3DCanvas() {
-    // const div = document.createElement('div');
-    // div.style.width = this.resolution[0] + 'px';
-    // div.style.height = this.resolution[1] + 'px';
-    // div.style.backgroundColor = '#000';
-
+  createCSS3DCanvas(css3DObject) {
     const iframe = document.createElement('iframe');
     iframe.style.width = this.resolution[0] + 'px';
     iframe.style.height = this.resolution[1] + 'px';

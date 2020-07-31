@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div class="xr-hub">
+    <x-r-hub-headerbar v-bind:xrHub=this.$data.xrHub></x-r-hub-headerbar>
     <div id="xrhub-render-container" class="render-container"></div>
   </div>
 </template>
@@ -10,8 +11,10 @@ import * as THREE from 'three';
 import XRHub from '../sharedModules/XRHub';
 import FirstPersonControls from '../sharedModules/FirstPersonControls';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
+import XRHubHeaderbar from '../sharedModules/XRHubHeaderbar';
 
 export default {
+  components: { XRHubHeaderbar },
   props: {
     roomId: {
       type: String,
@@ -20,7 +23,9 @@ export default {
   },
   name: 'XR-Hub-VR',
   data() {
-    return {};
+    return {
+      xrHub: {},
+    };
   },
   methods: {
     init: function() {
@@ -32,6 +37,7 @@ export default {
         10
       );
       this.xrHub = new XRHub(this.container, this.camera, this.$props.roomId);
+      this.$data.xrHub = this.xrHub;
       this.camera.position.y = 1;
       this.camera.position.z = 1;
       this.xrHub.webGLScene.add(this.camera);
@@ -44,6 +50,9 @@ export default {
         VRButton.createButton(this.xrHub.webGLRenderer)
       );
       this.xrHub.webGLRenderer.xr.enabled = true;
+    },
+    getXRHub: function() {
+      return this.xrHub;
     },
     animate: function() {
       const xrHub = this.xrHub;
@@ -89,7 +98,7 @@ export default {
           this.container.clientWidth,
           this.container.clientHeight
         );
-        this.xrHub.webContentRenderer.setSize(
+        this.xrHub.css3DRenderer.setSize(
           this.container.clientWidth,
           this.container.clientHeight
         );
@@ -110,5 +119,9 @@ export default {
 <style scoped lang="stylus">
 .render-container {
   height: 100%;
+}
+.xr-hub {
+  display: flex;
+  flex-direction: column;
 }
 </style>
