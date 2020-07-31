@@ -69,7 +69,7 @@ export default new Router({
     {
       path: '/tools/topic-inspector',
       name: 'Topic Inspector',
-      component: () => import('./components/tools/TopicInspector.vue')
+      component: () => import('./components/tools/ServiceTopicInspector.vue')
     },
     {
       path: '/tools/performance_tests',
