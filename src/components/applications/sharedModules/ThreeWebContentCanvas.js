@@ -2,18 +2,23 @@ import * as THREE from 'three';
 import uuidv4 from 'uuid/v4';
 
 class ThreeWebContentCanvas {
-  constructor(resolutionWidth, resolutionHeight, name) {
+  constructor(resolutionWidth, resolutionHeight, name, webGLCanvas, css3DObject) {
     this.name = name;
     this.canvasId = webGLCanvas ? webGLCanvas.userData.canvasId : uuidv4();
 
     this.resolution = [resolutionWidth, resolutionHeight];
-    this.css3DCanvas = this.createCSS3DCanvas();
-    this.webGLCanvas = this.createWebGLCanvas(this.css3DCanvas);
+
+    this.css3DCanvas = this.createCSS3DCanvas(css3DObject);
+    this.webGLCanvas = this.createWebGLCanvas(webGLCanvas);
   }
 
   addToScenes(webGLScene, css3DScene) {
-    webGLScene.add(this.webGLCanvas);
-    css3DScene.add(this.css3DCanvas);
+    if(!this.webGLCanvas.parent){
+      webGLScene.add(this.webGLCanvas);
+    }
+    if(!this.css3DCanvas.parent){
+      css3DScene.add(this.css3DCanvas);
+    }
   }
 
   setPosition(x, y, z) {
@@ -34,13 +39,17 @@ class ThreeWebContentCanvas {
     this.css3DCanvas.scale.set(factorX * x, factorY * y, 1);
   }
 
-  createWebGLCanvas(css3DCannvas) {
-    let material = new THREE.MeshBasicMaterial({
-      side: THREE.DoubleSide
-    });
-    material.color.set('black');
-    material.opacity = 0;
-    material.blending = THREE.NoBlending;
+  createWebGLCanvas(webGLCanvas) {
+    let webglPlaneMesh;
+    if(webGLCanvas){
+      webglPlaneMesh = webGLCanvas;
+    } else {
+      let material = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide
+      });
+      material.color.set('black');
+      material.opacity = 0;
+      material.blending = THREE.NoBlending;
 
       let geometry = new THREE.PlaneGeometry(1, 1);
       webglPlaneMesh = new THREE.Mesh(geometry, material);

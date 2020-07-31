@@ -1,28 +1,27 @@
+/* eslint-disable no-console */
 import * as THREE from 'three';
 import { CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
-// import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
-
-import { MeshNormalMaterial } from 'three';
-import { ThreeConfigCanvas } from './ThreeConfigCanvas';
 import { ThreeWebsiteCanvas } from './ThreeWebsiteCanvas';
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
-import uuidv4 from 'uuid/v4';
-import Dispatcher, { registerDevice, rotateOnAxis, subscribeToRoom } from './AsyncXRHubActionCreators';
-/* eslint-disable no-console */
+import {XRHubRoomService} from './XRHubRoomService';
+import { GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
+import { XRHubMouseControls } from './XRHubMouseControls';
+import { CSS3D_MOUSE_SPHERE_NAME, WEB_GL_MOUSE_SPHERE_NAME} from './XRHubConstants';
+
 
 class XRHub {
-  constructor(container, camera, roomId = uuidv4()) {
+  constructor(container, camera, roomId) {
     this.roomId = roomId;
     this.container = container;
     this.perspCamera = camera;
     this.perspCamera.position.set(0, 0, 5);
-    this.acceptActions = this.acceptActions.bind(this);
+    this.togglePointerEvents = this.togglePointerEvents.bind(this);
+    this.initRoom();
+/*    this.acceptActions = this.acceptActions.bind(this);
     Dispatcher.subscribe(this.acceptActions);
     this.registerAndSubscribe();
     this.initVRScene();
     this.initWebContentScene();
     this.spawnWebContent('https://threejs.org/');
-    this.raycaster = new THREE.Raycaster();
     this.initMouseControls();
     this.createInteractionToggleButton();
     // this.controllers = [];
@@ -32,15 +31,51 @@ class XRHub {
     this.configHUD.setPosition(-1, 1, 0);
     this.configHUD.setRotationQuaternion(new THREE.Quaternion());
     this.configHUD.setSize(0.3, 0.25);
+
+
+    //////////////////////////////
+    const exporter = new GLTFExporter();
+    exporter.parse(this.css3DScene,  function (exportObj, exportName = "gltfOutput") {
+        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+        var downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href",     dataStr);
+        downloadAnchorNode.setAttribute("download", exportName + ".json");
+        document.body.appendChild(downloadAnchorNode); // required for firefox
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+      },{});*/
   }
 
-  initVRScene() {
+  async initRoom(){
     this.webGLScene = new THREE.Scene();
     this.webGLScene.background = new THREE.Color('skyblue');
+    this.css3DScene = new THREE.Scene();
+    this.initWebGLRenderer();
+    this.initCSS3DRenderer();
+    this.roomService = new XRHubRoomService();
+    const roomData = await this.roomService.getRoomData(this.roomId);
+    if(roomData.error){
+      console.info("Error loading room data", roomData.error);
+    } else {
+      this.roomId = roomData.success.id !== this.roomId ? roomData.success.id : this.roomId;
+      await this.roomService.registerAndSubscribe(this.roomId, this.updateObject3D.bind(this));
+      const loader = new GLTFLoader();
+      const webGLString = JSON.stringify(roomData.success["webGL"]);
+      loader.parse(webGLString, "", function (gltf){
+        this.webGLScene.add(...gltf.scene.children);
+        const css3DString = JSON.stringify(roomData.success["css3D"]);
+        loader.parse(css3DString, "",function (gltf){
+          this.css3DScene.add(...gltf.scene.children);
+          this.initWebContent();
+          const webGLMouseSphere = this.webGLScene.getObjectByName(WEB_GL_MOUSE_SPHERE_NAME);
+          const css3DMouseSphere = this.css3DScene.getObjectByName(CSS3D_MOUSE_SPHERE_NAME);
+          this.mouseControls = new XRHubMouseControls(this.container, this.roomId, this.perspCamera, this.webGLScene, webGLMouseSphere, this.css3DScene, css3DMouseSphere, this.roomService);
+        }.bind(this));
+      }.bind(this));
+    }
+  }
 
-    this.createGroundPlane();
-    this.createDemoCube();
-
+  initWebGLRenderer(){
     this.webGLRenderer = new THREE.WebGLRenderer({
       alpha: true , antialias: false
     });
@@ -55,15 +90,7 @@ class XRHub {
     this.container.appendChild(this.webGLRenderer.domElement);
   }
 
-  initMouseControls(){
-    this.container.addEventListener('mousemove', this.updateMouse.bind(this));
-    this.container.addEventListener('mousedown', this.handleMouseDown.bind(this));
-    this.container.addEventListener('mouseup', this.handleMouseUp.bind(this));
-    this.createMouseSpheres();
-  }
-
-  initWebContentScene() {
-    this.css3DScene = new THREE.Scene();
+  initCSS3DRenderer(){
     this.css3DRenderer = new CSS3DRenderer();
     this.css3DRenderer.setSize(
       this.container.clientWidth,
@@ -72,17 +99,18 @@ class XRHub {
     this.container.appendChild(this.css3DRenderer.domElement);
   }
 
-  registerAndSubscribe(){
-    this.device = {
-      name: 'XR-Hub',
-      deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
-      components: [
-      {
-        topic: 'web-xr-hub/'+ this.roomId,
-        messageFormat: 'string',
-        ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
-      }]
-    };
+  initWebContent(){
+    for(const child of this.webGLScene.children){
+     if(child.userData.canvasId){
+       const css3DObject = this.getObjectByUserDataProperty(this.css3DScene, "canvasId", child.userData.canvasId);
+       const websiteCanvas = new ThreeWebsiteCanvas(child.userData.res.x, child.userData.res.y, css3DObject.userData.url, child);
+       websiteCanvas.addToScenes(this.webGLScene, this.css3DScene);
+       websiteCanvas.setPosition(-1, 1, -1);
+       websiteCanvas.setRotationQuaternion(new THREE.Quaternion());
+       websiteCanvas.setSize(1, 0.75);
+     }
+    }
+  }
 
   updateObject3D(object3DString){
     const loader = new THREE.ObjectLoader();
@@ -122,118 +150,14 @@ class XRHub {
     webContent.setSize(1, 0.75);
   }
 
-  raycastFromScreenCoordinates(screenPosX, screenPosY){
-    const eventXPosFromCenter = ((screenPosX-this.container.offsetLeft)/this.container.clientWidth)*2-1;
-    const eventYPosFromCenter = -((screenPosY-this.container.offsetTop)/this.container.clientHeight)*2+1;
-    const positionRelativeToContainer = new THREE.Vector3(eventXPosFromCenter, eventYPosFromCenter, 0);
-    this.raycaster.setFromCamera(positionRelativeToContainer, this.perspCamera);
-    return this.raycaster.intersectObjects(
-      this.getChildrenRecursive(this.webGLScene)
-    );
-  }
-
-  getChildrenRecursive (object3D) {
-    let children = [];
-    object3D.children.forEach(child =>{
-      children.push(child);
-      children = children.concat(this.getChildrenRecursive(child));
-    });
-    return children;
-  }
-
-
-
-  updateMouse(event){
-    const xNDC = ((event.x-this.container.offsetLeft)/this.container.clientWidth)*2-1;
-    const yNDC = -((event.y-this.container.offsetTop)/this.container.clientHeight)*2+1;
-    const mouseVector = new THREE.Vector3(xNDC, yNDC, 0);
-    mouseVector.unproject(this.perspCamera);
-    mouseVector.sub(this.perspCamera.position).normalize();
-    const distance = this.webGLMouseSphere.position.distanceTo(this.perspCamera.position);
-    this.webGLMouseSphere.position.copy(this.perspCamera.position.clone().add(mouseVector.multiplyScalar(distance)));
-    this.css3DMouseSpehre.position.copy(this.perspCamera.position.clone().add(mouseVector.multiplyScalar(distance)));
-    const toRotate = this.webGLMouseSphere.userData.toRotate;
-    if(toRotate){
-      rotateOnAxis("WebGL", toRotate.name, new THREE.Vector3(0,1,0), event.movementX*0.1, this.roomId, true);
-      // toRotate.rotateOnAxis(new THREE.Vector3(0,1,0), event.movementX*0.1);
-      if(toRotate.userData.css3DObject){
-        rotateOnAxis("CSS3D", toRotate.userData.css3DObject.name, new THREE.Vector3(0,1,0), event.movementX*0.1, this.roomId, true);
-        // toRotate.userData.css3DObject.rotateOnAxis(new THREE.Vector3(0,1,0), event.movementX*0.1);
-      }
-    }
-  }
-
-  handleMouseDown(event){
-    const intersectedObjects = this.raycastFromScreenCoordinates(event.x, event.y).filter(it => it.object.name !== this.webGLMouseSphere.name);
-    if (intersectedObjects.length > 0) {
-      const object = intersectedObjects[0].object;
-      switch (event.button) {
-        case 0:
-          if(object.userData.updateUrl){
-            // const iframe = object.userData.css3DObject.userData.website;
-            // const element = iframe.elementFromPoint(100, 100);
-            // element.click();
-          }
-          break;
-        case 1:
-          if(object.name !== "configCanvas"){
-            if (object.name === "websiteMoveHandle") {
-              this.addFollowerToParent(this.webGLMouseSphere, object.parent);
-              this.addFollowerToParent(this.css3DMouseSpehre, object.parent.userData.css3DObject);
-            } else if (object.name === "websiteRotationHandle"){
-              this.webGLMouseSphere.userData.toRotate = object.parent;
-            } else {
-              this.addFollowerToParent(this.webGLMouseSphere, object);
-            }
-          }
-          break;
-        case 2:
-          // this.configHUD.toggle();
-          if (object.userData.updateUrl || object.name === "configCanvas") {
-            this.configHUD.toggle(object);
-            this.togglePointerEvents();
-          }
-          break;
-      }
-
-    }
-  }
-
   togglePointerEvents(){
     const current = this.webGLRenderer.domElement.style.pointerEvents;
     this.webGLRenderer.domElement.style.pointerEvents = current === "none" && current.length > 0 ? "all": "none";
   }
 
-  addFollowerToParent(parent, follower){
-    const matrix = new THREE.Matrix4;
-    matrix.getInverse( parent.matrixWorld );
-    follower.matrix.premultiply( matrix );
-    follower.matrix.decompose( follower.position, follower.quaternion, follower.scale );
-    parent.add( follower );
-    parent.userData.selected = follower;
-  }
-
-  removeFollower(parent, scene){
-    if(parent.userData.selected !== undefined){
-      const child = parent.userData.selected;
-      child.matrix.premultiply( parent.matrixWorld );
-      child.matrix.decompose( child.position, child.quaternion, child.scale );
-      scene.add( child );
-      parent.userData.selected = undefined;
-    }
-  }
-
-  handleMouseUp(event){
-    if(event.button === 1){
-      this.removeFollower(this.webGLMouseSphere, this.webGLScene);
-      this.removeFollower(this.css3DMouseSpehre, this.css3DScene);
-      this.webGLMouseSphere.userData.toRotate = undefined;
-    }
-  }
-
   update(delta) {
-    this.mesh.rotation.x += delta;
-    this.mesh.rotation.y += delta;
+    // this.mesh.rotation.x += delta;
+    // this.mesh.rotation.y += delta;
   }
 
   createGroundPlane() {
@@ -250,7 +174,7 @@ class XRHub {
 
   createDemoCube() {
     let geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-    let material = new THREE.MeshNormalMaterial();
+    let material = new THREE.MeshBasicMaterial({color: "green"});
 
     this.mesh = new THREE.Mesh(geometry, material);
     this.mesh.position.y = 1;
@@ -258,18 +182,7 @@ class XRHub {
     this.webGLScene.add(this.mesh);
   }
 
-  createMouseSpheres() {
-    const geometry = new THREE.SphereGeometry(0.01);
-    const material = new MeshNormalMaterial();
 
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.name = "webGLmouseSphere";
-    this.webGLMouseSphere = mesh;
-    this.css3DMouseSpehre = mesh.clone();
-    this.css3DMouseSpehre.name = "css3DMouseSpehre";
-    this.webGLScene.add(this.webGLMouseSphere);
-    this.css3DScene.add(this.css3DMouseSpehre);
-  }
 
   createInteractionToggleButton(){
     const button = document.createElement("button");
