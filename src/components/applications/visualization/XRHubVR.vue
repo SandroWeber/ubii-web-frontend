@@ -36,14 +36,13 @@ export default {
         0.1,
         10
       );
-      this.xrHub = new XRHub(this.container, this.camera, this.$props.roomId);
+      this.controls = new FirstPersonControls(this.camera, this.container);
+      this.xrHub = new XRHub(this.container, this.camera, this.$props.roomId, this.controls);
       this.$data.xrHub = this.xrHub;
       this.camera.position.y = 1;
       this.camera.position.z = 1;
       this.xrHub.webGLScene.add(this.camera);
       this.xrHub.css3DScene.add(this.camera);
-
-      this.controls = new FirstPersonControls(this.camera, this.container);
 
       //this.container.appendChild(WebVR.createButton(this.xrHub.webGLRenderer));
       this.container.appendChild(

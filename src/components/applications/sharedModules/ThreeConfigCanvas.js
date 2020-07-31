@@ -25,14 +25,28 @@ export class ThreeConfigCanvas extends ThreeWebContentCanvas{
     const css3DCanvas = new CSS3DObject(container);
     css3DCanvas.userData.container = container;
 
-    const textboxClass = Vue.extend(TextBoxComponent);
-    const textbox = new textboxClass();
+    const TextboxClass = Vue.extend(TextBoxComponent);
+    const dataObject = {
+      urlObject: this,
+    };
+    const textbox = new TextboxClass({
+      data() {
+        return dataObject;
+      }
+    });
+    textbox.$props.onReload = this.onReload.bind(this);
     textbox.$mount();
     container.appendChild(textbox.$el);
     return css3DCanvas;
   }
 
+  onReload(){
+    this.websiteObject.userData.updateUrl(this.url);
+  }
+
   toggle(webGLWebsiteObject){
+    this.url = webGLWebsiteObject.userData.css3DObject.userData.url;
+    this.websiteObject = webGLWebsiteObject;
     const position = new THREE.Vector3();
     webGLWebsiteObject.getWorldPosition(position);
     const cameraPosition = new THREE.Vector3();
@@ -49,7 +63,5 @@ export class ThreeConfigCanvas extends ThreeWebContentCanvas{
     } else {
       this.css3DCanvas.userData.container.style.visibility = "hidden";
     }
-
   }
-
 }

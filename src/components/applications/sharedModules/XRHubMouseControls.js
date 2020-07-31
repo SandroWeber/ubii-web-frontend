@@ -3,7 +3,7 @@ import * as THREE from 'three';
 
 export class XRHubMouseControls {
 
-  constructor(container, roomId, camera, webGLScene, webGLMouseSphere, css3DScene, css3DMouseSpehre, roomService) {
+  constructor(container, roomId, camera, webGLScene, webGLMouseSphere, css3DScene, css3DMouseSpehre, roomService, toggleConfigCanvas) {
     this.container = container;
     this.roomId = roomId;
     this.camera = camera;
@@ -12,6 +12,7 @@ export class XRHubMouseControls {
     this.css3DScene = css3DScene;
     this.css3DMouseSphere = css3DMouseSpehre;
     this.roomService = roomService;
+    this.toggleConfigCanvas = toggleConfigCanvas;
 
     this.raycaster = new THREE.Raycaster();
 
@@ -95,10 +96,8 @@ export class XRHubMouseControls {
           }
           break;
         case 2:
-          // this.configHUD.toggle();
           if (object.userData.updateUrl || object.name === "configCanvas") {
-            this.configHUD.toggle(object);
-            this.togglePointerEvents();
+            this.toggleConfigCanvas(object);
           }
           break;
       }

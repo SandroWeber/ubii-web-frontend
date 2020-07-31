@@ -1,6 +1,6 @@
 <template>
-    <div class="xr-hub-headerbar">
-        <a class="xr-hub-url" v-bind:href=url>Room URL</a>
+    <div class='xr-hub-headerbar'>
+        <a class='xr-hub-url' v-bind:href=url>Room URL</a>
         <button v-on:click=this.$props.xrHub.togglePointerEvents class="toggle-website-interaction-button">Toggle Website Interaction</button>
     </div>
 </template>

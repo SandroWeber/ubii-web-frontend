@@ -6,15 +6,18 @@ import {XRHubRoomService} from './XRHubRoomService';
 import { GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import { XRHubMouseControls } from './XRHubMouseControls';
 import { CSS3D_MOUSE_SPHERE_NAME, WEB_GL_MOUSE_SPHERE_NAME} from './XRHubConstants';
+import { ThreeConfigCanvas } from './ThreeConfigCanvas';
 
 
 class XRHub {
-  constructor(container, camera, roomId) {
+  constructor(container, camera, roomId, controls) {
     this.roomId = roomId;
     this.container = container;
     this.perspCamera = camera;
+    this.controls = controls;
     this.perspCamera.position.set(0, 0, 5);
     this.togglePointerEvents = this.togglePointerEvents.bind(this);
+    this.toggleConfigCanvas = this.toggleConfigCanvas.bind(this);
     this.initRoom();
 /*    this.acceptActions = this.acceptActions.bind(this);
     Dispatcher.subscribe(this.acceptActions);
@@ -26,11 +29,7 @@ class XRHub {
     this.createInteractionToggleButton();
     // this.controllers = [];
     // this.initControls();
-    this.configHUD = new ThreeConfigCanvas(1024, 768, "configCanvas", this.perspCamera, this.togglePointerEvents);
-    this.configHUD.addToScenes(this.webGLScene, this.css3DScene);
-    this.configHUD.setPosition(-1, 1, 0);
-    this.configHUD.setRotationQuaternion(new THREE.Quaternion());
-    this.configHUD.setSize(0.3, 0.25);
+
 
 
     //////////////////////////////
@@ -67,9 +66,10 @@ class XRHub {
         loader.parse(css3DString, "",function (gltf){
           this.css3DScene.add(...gltf.scene.children);
           this.initWebContent();
+          this.initConfigCanvas();
           const webGLMouseSphere = this.webGLScene.getObjectByName(WEB_GL_MOUSE_SPHERE_NAME);
           const css3DMouseSphere = this.css3DScene.getObjectByName(CSS3D_MOUSE_SPHERE_NAME);
-          this.mouseControls = new XRHubMouseControls(this.container, this.roomId, this.perspCamera, this.webGLScene, webGLMouseSphere, this.css3DScene, css3DMouseSphere, this.roomService);
+          this.mouseControls = new XRHubMouseControls(this.container, this.roomId, this.perspCamera, this.webGLScene, webGLMouseSphere, this.css3DScene, css3DMouseSphere, this.roomService, this.toggleConfigCanvas);
         }.bind(this));
       }.bind(this));
     }
@@ -110,6 +110,14 @@ class XRHub {
        websiteCanvas.setSize(1, 0.75);
      }
     }
+  }
+
+  initConfigCanvas(){
+    this.configCanvas = new ThreeConfigCanvas(1024, 768, "configCanvas", this.perspCamera, this.togglePointerEvents);
+    this.configCanvas.addToScenes(this.webGLScene, this.css3DScene);
+    this.configCanvas.setPosition(-1, 1, 0);
+    this.configCanvas.setRotationQuaternion(new THREE.Quaternion());
+    this.configCanvas.setSize(0.3, 0.25);
   }
 
   updateObject3D(object3DString){
@@ -153,6 +161,12 @@ class XRHub {
   togglePointerEvents(){
     const current = this.webGLRenderer.domElement.style.pointerEvents;
     this.webGLRenderer.domElement.style.pointerEvents = current === "none" && current.length > 0 ? "all": "none";
+  }
+
+  toggleConfigCanvas(websiteCanvas){
+    this.controls.enabled = !this.controls.enabled;
+    this.configCanvas.toggle(websiteCanvas);
+    this.togglePointerEvents();
   }
 
   update(delta) {
