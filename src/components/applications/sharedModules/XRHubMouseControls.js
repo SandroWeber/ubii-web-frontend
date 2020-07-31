@@ -42,8 +42,9 @@ export class XRHubMouseControls {
     mouseVector.unproject(this.camera);
     mouseVector.sub(this.camera.position).normalize();
     const distance = this.webGLMouseSphere.position.distanceTo(this.camera.position);
-    this.webGLMouseSphere.position.copy(this.camera.position.clone().add(mouseVector.multiplyScalar(distance)));
-    this.css3DMouseSphere.position.copy(this.camera.position.clone().add(mouseVector.multiplyScalar(distance)));
+    mouseVector.multiplyScalar(distance);
+    this.webGLMouseSphere.position.copy(this.camera.position.clone().add(mouseVector));
+    this.css3DMouseSphere.position.copy(this.camera.position.clone().add(mouseVector));
     const toRotate = this.webGLMouseSphere.userData.toRotate;
     if(toRotate){
       // rotateOnAxis("WebGL", toRotate.name, new THREE.Vector3(0,1,0), event.movementX*0.1, this.roomId, true);
