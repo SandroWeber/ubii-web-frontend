@@ -3,6 +3,8 @@ import * as THREE from 'three';
 
 export class XRHubMouseControls {
 
+  DISTANCE_TO_CAMERA = 1.5;
+
   constructor(container, roomId, camera, webGLScene, webGLMouseSphere, css3DScene, css3DMouseSpehre, roomService, toggleConfigCanvas) {
     this.container = container;
     this.roomId = roomId;
@@ -41,8 +43,7 @@ export class XRHubMouseControls {
     const mouseVector = new THREE.Vector3(xNDC, yNDC, 0);
     mouseVector.unproject(this.camera);
     mouseVector.sub(this.camera.position).normalize();
-    const distance = this.webGLMouseSphere.position.distanceTo(this.camera.position);
-    mouseVector.multiplyScalar(distance);
+    mouseVector.multiplyScalar(this.DISTANCE_TO_CAMERA);
     this.webGLMouseSphere.position.copy(this.camera.position.clone().add(mouseVector));
     this.css3DMouseSphere.position.copy(this.camera.position.clone().add(mouseVector));
     const toRotate = this.webGLMouseSphere.userData.toRotate;
@@ -147,10 +148,12 @@ export class XRHubMouseControls {
 
   raycastFromMousePosition(){
     const mouseWorldPosition = new THREE.Vector3();
-    const cameraWorldDirection = new THREE.Vector3();
+    const cameraWorldPosition = new THREE.Vector3();
     this.webGLMouseSphere.getWorldPosition(mouseWorldPosition);
-    this.camera.getWorldDirection(cameraWorldDirection);
-    this.raycaster.set(mouseWorldPosition, cameraWorldDirection);
+    this.camera.getWorldPosition(cameraWorldPosition);
+    const direction = mouseWorldPosition.clone();
+    direction.sub(cameraWorldPosition);
+    this.raycaster.set(mouseWorldPosition, direction.normalize());
     return this.raycaster.intersectObjects(
       this.getChildrenRecursive(this.webGLScene)
     );
