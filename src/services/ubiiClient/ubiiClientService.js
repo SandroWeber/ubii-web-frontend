@@ -12,21 +12,18 @@ class UbiiClientService {
     this.serverPort = '8102';
 
     this.client = undefined;
-    this.connected = undefined;
     this.connecting = false;
 
     this.onDisconnectCallbacks = [];
   }
 
   async connect() {
-    if (this.connected || this.connecting) {
-      return this.isConnected();
+    if (this.isConnected() || this.connecting) {
+      return this.waitForConnection();
     }
-    this.connecting = true;
 
-    console.info(
-      'connecting to backend ' + this.serverIP + ':' + this.serverPort
-    );
+    console.info('UbiiClientService - connecting ...');
+    this.connecting = true;
 
     if (!this.client) {
       this.client = new ClientNodeWeb(
@@ -43,7 +40,6 @@ class UbiiClientService {
             'UbiiClientService - client connected with ID:\n' +
               this.client.clientSpecification.id
           );
-          this.connected = true;
           this.connecting = false;
 
           UbiiEventBus.$emit(UbiiEventBus.CONNECT_EVENT);
@@ -56,7 +52,8 @@ class UbiiClientService {
   }
 
   async disconnect() {
-    if (!this.connected) {
+    console.info('UbiiClientService - disconnecting ...');
+    if (!this.isConnected()) {
       console.warn('Client tried to disconnect without beeing connected.');
       return;
     }
@@ -69,7 +66,6 @@ class UbiiClientService {
     });
 
     return this.client.deinitialize().then(() => {
-      this.connected = false;
       this.connecting = false;
       this.client = undefined;
       console.info('client disconnected with ID: ' + id);
@@ -77,24 +73,33 @@ class UbiiClientService {
   }
 
   async reconnect() {
+    console.info('UbiiClientService - reconnecting ...');
     await this.client.reinitialize();
   }
 
-  isConnected() {
+  waitForConnection() {
+    console.info('UbiiClientService.waitForConnection');
     return new Promise((resolve, reject) => {
-      let maxRetries = 1000;
+      let maxRetries = 10;
       let retry = 0;
 
       let checkConnection = () => {
         retry += 1;
+        console.info('UbiiClientService.checkConnection: retry=', retry);
+
+        if (retry > maxRetries) {
+          reject(false);
+          return;
+        }
+
         if (this.client && this.client.isConnected()) {
+          console.info(
+            'UbiiClientService.checkConnection: ',
+            this.client.isConnected()
+          );
           resolve(this.client.isConnected());
           return;
         } else {
-          if (retry > maxRetries) {
-            reject();
-            return;
-          }
           setTimeout(() => {
             checkConnection();
           }, 100);
@@ -102,6 +107,10 @@ class UbiiClientService {
       };
       checkConnection();
     });
+  }
+
+  isConnected() {
+    return this.client && this.client.isConnected();
   }
 
   onDisconnect(callback) {

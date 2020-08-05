@@ -11,8 +11,16 @@
         <br />
 
         <button class="button-fullscreen" @click="toggleFullScreen()">
-          <font-awesome-icon icon="compress" class="interface-icon" v-show="fullscreen" />
-          <font-awesome-icon icon="expand" class="interface-icon" v-show="!fullscreen" />
+          <font-awesome-icon
+            icon="compress"
+            class="interface-icon"
+            v-show="fullscreen"
+          />
+          <font-awesome-icon
+            icon="expand"
+            class="interface-icon"
+            v-show="!fullscreen"
+          />
         </button>
         <br />
         <button v-show="!fullscreen" @click="calibrate()">Calibrate</button>
@@ -92,7 +100,7 @@ export default {
 
     this.deviceData = {};
     this.registerEventListeners();
-    UbiiClientService.isConnected().then(() => {
+    UbiiClientService.waitForConnection().then(() => {
       this.startInterface();
     });
     UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
@@ -193,7 +201,7 @@ export default {
       this.initializing = true;
 
       // register the mouse pointer device
-      UbiiClientService.isConnected().then(
+      UbiiClientService.waitForConnection().then(
         () => {
           UbiiClientService.registerDevice(this.$data.ubiiDevice)
             .then(device => {

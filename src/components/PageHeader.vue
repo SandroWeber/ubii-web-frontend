@@ -1,10 +1,20 @@
 <template>
-  <app-layer class="header-wrapper layer-two background low-contrast horizontal-shadow">
+  <app-layer
+    class="header-wrapper layer-two background low-contrast horizontal-shadow"
+  >
     <h3>Ubi-Interact Web Frontend</h3>
-    <app-button :class="connectionStatusClass" @click="onButtonConnectionStatus">
-      <font-awesome-icon icon="plug" class="icon" />
-      <server-status v-if="showConnectionSettings" class="connection-settings" />
+    <app-button
+      :class="connectionStatusClass"
+      @click="onButtonConnectionStatus"
+    >
+      <font-awesome-icon
+        icon="plug"
+        class="icon"
+        v-b-tooltip.hover
+        title="Server Connection Config"
+      />
     </app-button>
+    <server-status v-if="showConnectionSettings" class="connection-settings" />
   </app-layer>
 </template>
 
@@ -33,17 +43,17 @@ export default {
   },
   computed: {
     connectionStatusClass: function() {
+      let connected = UbiiClientService.isConnected();
       return {
         button: true,
         round: true,
-        'green-accent': this.ubiiClientService.connected,
-        'red-accent': !this.ubiiClientService.connected
+        'green-accent': connected,
+        'red-accent': !connected
       };
     }
   },
   methods: {
     onButtonConnectionStatus: function() {
-      console.info('onButtonConnectionStatus');
       this.showConnectionSettings = !this.showConnectionSettings;
     }
   }
@@ -75,9 +85,7 @@ export default {
 
 .connection-settings {
   position: absolute;
-  top: 2em;
-  left: calc(2em - 500px);
-  width: 500px;
-  height: 500px;
+  top: 3em;
+  right: 0.1em;
 }
 </style>

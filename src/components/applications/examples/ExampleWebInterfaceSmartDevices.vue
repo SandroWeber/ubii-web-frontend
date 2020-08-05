@@ -1,6 +1,9 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
-    <div id="example-web-smart-devices-touch-positions" class="touch-position-area"></div>
+    <div
+      id="example-web-smart-devices-touch-positions"
+      class="touch-position-area"
+    ></div>
   </UbiiClientContent>
 </template>
 
@@ -31,7 +34,7 @@ export default {
     });
 
     this.createUbiiSpecs();
-    UbiiClientService.isConnected().then(() => {
+    UbiiClientService.waitForConnection().then(() => {
       this.startExample();
     });
     UbiiClientService.onDisconnect(async () => {
@@ -53,7 +56,7 @@ export default {
 
       this.running = true;
 
-      await UbiiClientService.isConnected().then(() => {
+      await UbiiClientService.waitForConnection().then(() => {
         /* we register our device needed to publish the vibration distance threshold */
         UbiiClientService.registerDevice(this.device)
           .then(response => {

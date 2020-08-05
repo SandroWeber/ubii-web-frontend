@@ -33,7 +33,6 @@ class WebsocketClient {
     try {
       let url = this.useHTTPS ? 'wss://' : 'ws://';
       url += `${this.host}:${this.port}?clientID=${this.identity}`;
-      console.info(url);
       this.websocket = new WebSocket(url);
     } catch (error) {
       console.error(error);
@@ -52,10 +51,10 @@ class WebsocketClient {
       if (!this.processMessage) {
         console.warn(
           '[' +
-          new Date() +
-          '] WebsocketClient.onMessageReceived() has not been set!' +
-          '\nMessage received:\n' +
-          message
+            new Date() +
+            '] WebsocketClient.onMessageReceived() has not been set!' +
+            '\nMessage received:\n' +
+            message
         );
       } else {
         this.processMessage(message);

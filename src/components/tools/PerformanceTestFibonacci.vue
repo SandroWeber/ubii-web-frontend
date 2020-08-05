@@ -5,10 +5,16 @@
     <app-button
       class="start-button"
       @click="startTest()"
-      :disabled="!ubiiClientService.isConnected"
+      :disabled="!ubiiClientService.isConnected()"
     >
-      <font-awesome-icon icon="play" v-show="this.testData.status !== 'running'" />
-      <font-awesome-icon icon="spinner" v-show="this.testData.status === 'running'" />
+      <font-awesome-icon
+        icon="play"
+        v-show="this.testData.status !== 'running'"
+      />
+      <font-awesome-icon
+        icon="spinner"
+        v-show="this.testData.status === 'running'"
+      />
     </app-button>
 
     <div class="statistics-grid">
@@ -17,48 +23,54 @@
       <span class="test-status">{{ this.testData.status }}</span>
       <!-- time -->
       <span>Test duration (ms):</span>
-      <span class="test-status">{{ this.testData.statistics.processingTime }}</span>
+      <span class="test-status">{{
+        this.testData.statistics.processingTime
+      }}</span>
       <!-- number of iterations processed -->
       <span>Number of processed iterations:</span>
       <span class="test-status">
-        {{
-        this.testData.statistics.processingIterations
-        }}
+        {{ this.testData.statistics.processingIterations }}
       </span>
       <!-- iterations per seconds -->
       <span>Iterations per second:</span>
       <span class="test-status">
-        {{
-        this.testData.statistics.processingPerSecond
-        }}
+        {{ this.testData.statistics.processingPerSecond }}
       </span>
     </div>
 
     <div class="separator"></div>
 
     <div class="settings-grid">
-      <label for="fibonacci-session-count" class="setting-label"># sessions:</label>
+      <label for="fibonacci-session-count" class="setting-label"
+        ># sessions:</label
+      >
       <app-input
         :id="'fibonacci-session-count'"
         :type="'# sessions'"
         v-model="testData.settings.sessionCount"
       />
 
-      <label for="fibonacci-interaction-count" class="setting-label"># interactions:</label>
+      <label for="fibonacci-interaction-count" class="setting-label"
+        ># interactions:</label
+      >
       <app-input
         :id="'fibonacci-interaction-count'"
         :type="'# interactions'"
         v-model="testData.settings.interactionCountPerSession"
       />
 
-      <label for="fibonacci-sequence-length" class="setting-label">fib sequence length (n):</label>
+      <label for="fibonacci-sequence-length" class="setting-label"
+        >fib sequence length (n):</label
+      >
       <app-input
         :id="'fibonacci-sequence-length'"
         :type="'# interactions'"
         v-model="testData.settings.fibSequenceLength"
       />
 
-      <label for="test-duration" class="setting-label">test duration (seconds):</label>
+      <label for="test-duration" class="setting-label"
+        >test duration (seconds):</label
+      >
       <app-input
         :id="'test-duration'"
         :type="'test duration'"

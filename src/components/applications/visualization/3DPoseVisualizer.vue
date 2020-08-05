@@ -1,7 +1,12 @@
 <template>
   <div>
-    <button id="button-send-testdata" @click="toggleTestData()">Toggle sending test data</button>
-    <div id="example-threejs-webvr-render-container" class="render-container"></div>
+    <button id="button-send-testdata" @click="toggleTestData()">
+      Toggle sending test data
+    </button>
+    <div
+      id="example-threejs-webvr-render-container"
+      class="render-container"
+    ></div>
   </div>
 </template>
 
@@ -240,7 +245,7 @@ export default {
       this.visualizedObjects = new Three.Object3D();
       this.scene.add(this.visualizedObjects);
 
-      UbiiClientService.isConnected().then(() => {
+      UbiiClientService.waitForConnection().then(() => {
         this.createUbiiSpecs();
 
         UbiiClientService.subscribeTopic(
@@ -291,7 +296,7 @@ export default {
       this.sendTestData = !this.sendTestData;
 
       if (this.sendTestData) {
-        UbiiClientService.isConnected().then(() => {
+        UbiiClientService.waitForConnection().then(() => {
           UbiiClientService.client.callService({
             topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
             session: this.ubiiSessionGeneratePoseMovements

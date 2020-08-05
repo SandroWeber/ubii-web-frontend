@@ -1,10 +1,12 @@
 <template>
   <div class="full-height">
-    <div v-show="!ubiiClientService.connected">
-      <span class="notification">Please connect to backend before starting the application.</span>
+    <div v-show="!ubiiClientService.isConnected()">
+      <span class="notification"
+        >Please connect to backend before starting the application.</span
+      >
     </div>
 
-    <div v-show="ubiiClientService.connected" class="full-height">
+    <div v-show="ubiiClientService.isConnected()" class="full-height">
       <slot></slot>
     </div>
   </div>

@@ -1,14 +1,29 @@
 <template>
-  <app-layer class="backend-info layer-two background low-contrast horizontal-shadow">
-    <label for="server-ip">Server IP</label>
-    <app-input :id="'server-ip'" :type="'text'" v-model="ubiiClientService.serverIP" />
-    <label for="server-port">Server Port</label>
-    <app-input :id="'server-port'" :type="'text'" v-model="ubiiClientService.serverPort" />
+  <app-layer
+    class="backend-info layer-two background low-contrast horizontal-shadow"
+  >
+    <label for="server-ip" class="label-server-ip">Server IP</label>
+    <app-input
+      :id="'server-ip'"
+      class="input-server-ip"
+      :type="'text'"
+      v-model="ubiiClientService.serverIP"
+    />
+    <label for="server-port" class="label-server-port">Server Port</label>
+    <app-input
+      :id="'server-port'"
+      class="input-server-port"
+      :type="'text'"
+      v-model="ubiiClientService.serverPort"
+    />
     <app-button
-      :class="buttonClassObject"
-      @click="onButtonConnect"
+      :class="buttonConnectClass"
       :contentSizePercentage="60"
-    >connect</app-button>
+      :disabled="ubiiClientService.isConnected()"
+      @click="onButtonConnect"
+    >
+      {{ buttonConnectActionString }}
+    </app-button>
   </app-layer>
 </template>
 
@@ -32,59 +47,74 @@ export default {
     AppLayer,
     AppInput
   },
-  beforeMount: function() {
-    UbiiClientService.connect();
-    window.addEventListener('beforeunload', () => {
-      UbiiClientService.disconnect();
-    });
-  },
-  beforeDestroy: function() {
-    UbiiClientService.disconnect();
-  },
   data: () => {
     return {
       ubiiClientService: UbiiClientService
     };
   },
   computed: {
-    buttonClassObject: function() {
+    buttonConnectClass: function() {
+      let connected = UbiiClientService.isConnected();
       return {
         'button-connect': true,
         round: true,
-        'green-accent': this.ubiiClientService.connected,
-        'red-accent': !this.ubiiClientService.connected
+        'green-accent': connected,
+        'red-accent': !connected
       };
+    },
+    buttonConnectActionString: function() {
+      let connected = UbiiClientService.isConnected();
+      if (connected) {
+        return 'reconnect';
+      } else {
+        return 'connect';
+      }
     }
   },
   methods: {
     onButtonConnect: function() {
-      UbiiClientService.isConnected().then(connected => {
-        if (connected) {
-          UbiiClientService.disconnect().then(() => {
-            UbiiClientService.connect();
-          });
+      if (!UbiiClientService.isConnected()) {
+        let id = UbiiClientService.getClientID();
+        if (id && id.length > 0) {
+          UbiiClientService.reconnect();
         } else {
-          if (UbiiClientService.client.clientSpecification) {
-            UbiiClientService.reconnect();
-          } else {
-            UbiiClientService.connect();
-          }
+          UbiiClientService.connect();
         }
-      });
+      }
     }
   }
 };
 </script>
 
-<style scoped lang="stylus">
+<style scoped>
 .backend-info {
   padding: 8px;
   display: grid;
+  grid-gap: 5px;
+  padding: 5px;
   align-items: center;
+  grid-template-rows: 30px 30px 30px;
+  grid-template-columns: 100px 1fr;
+  grid-template-areas:
+    'label-server-ip input-server-ip'
+    'label-server-port input-server-port'
+    'none button-connect';
+}
 
-  @media (min-width: 600px) {
-    grid-template-columns: auto auto auto auto 1fr;
-  }
+.label-server-ip {
+  grid-area: label-server-ip;
+}
+
+.label-server-port {
+  grid-area: label-server-port;
+}
+
+.input-server-ip {
+  grid-area: input-server-ip;
+}
+
+.input-server-port {
+  grid-area: input-server-port;
 }
 
 label {
@@ -96,13 +126,9 @@ input {
 }
 
 .button-connect {
+  grid-area: button-connect;
   height: 1.8em;
-  width: 1.8em;
+  width: 8em;
   margin: 2px 10px 2px 10px;
-}
-
-.connect-icon {
-  width: 100%;
-  height: 100%;
 }
 </style>
