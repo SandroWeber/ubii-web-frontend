@@ -71,55 +71,15 @@ export default {
               double: 0.03
             });
 
-            UbiiClientService.subscribe(
+            UbiiClientService.subscribeTopic(
               this.topicTouchObjects,
-              object2DList => {
-                if (object2DList.elements) {
-                  let touchPosAreaBoundingRect = document
-                    .getElementById('example-web-smart-devices-touch-positions')
-                    .getBoundingClientRect();
-
-                  // go through all transmitted objects
-                  object2DList.elements.forEach(obj2D => {
-                    // add if not part of the list
-                    if (!this.$data.clients.has(obj2D.id)) {
-                      this.addClient(obj2D.id);
-                    }
-
-                    let client = this.$data.clients.get(obj2D.id);
-                    // update position
-                    client.touchPosition.x = Math.floor(
-                      obj2D.pose.position.x * touchPosAreaBoundingRect.width
-                    );
-                    client.touchPosition.y = Math.floor(
-                      obj2D.pose.position.y * touchPosAreaBoundingRect.height
-                    );
-
-                    // update indicator
-                    client.touchPosIndicator.style.left =
-                      client.touchPosition.x.toString() + 'px';
-                    client.touchPosIndicator.style.top =
-                      client.touchPosition.y.toString() + 'px';
-                  });
-
-                  // remove all that are gone since last update
-                  this.$data.clients.forEach((client, id) => {
-                    if (
-                      !object2DList.elements.find(obj => {
-                        return obj.id === id;
-                      })
-                    ) {
-                      this.removeClient(id);
-                    }
-                  });
-                }
-              }
+              this.handleTouchObjects
             );
 
             /* we start the session with the specs created in createUbiiSpecs() */
             UbiiClientService.client
               .callService({
-                topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+                topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
                 session: this.session
               })
               .then(response => {
@@ -134,9 +94,14 @@ export default {
     stopExample: async function() {
       this.running = false;
 
+      UbiiClientService.unsubscribeTopic(
+        this.topicTouchObjects,
+        this.handleTouchObjects
+      );
+
       if (this.session) {
         await UbiiClientService.client.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: this.session
         });
       }
@@ -162,12 +127,12 @@ export default {
           {
             topic: this.topicVibrationDistanceThreshold,
             messageFormat: 'double',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: this.topicTouchObjects,
             messageFormat: 'ubii.dataStructure.Object2DList',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           }
         ]
       };
@@ -319,6 +284,47 @@ export default {
           }
         ]
       };
+    },
+    handleTouchObjects: function(object2DList) {
+      if (object2DList.elements) {
+        let touchPosAreaBoundingRect = document
+          .getElementById('example-web-smart-devices-touch-positions')
+          .getBoundingClientRect();
+
+        // go through all transmitted objects
+        object2DList.elements.forEach(obj2D => {
+          // add if not part of the list
+          if (!this.$data.clients.has(obj2D.id)) {
+            this.addClient(obj2D.id);
+          }
+
+          let client = this.$data.clients.get(obj2D.id);
+          // update position
+          client.touchPosition.x = Math.floor(
+            obj2D.pose.position.x * touchPosAreaBoundingRect.width
+          );
+          client.touchPosition.y = Math.floor(
+            obj2D.pose.position.y * touchPosAreaBoundingRect.height
+          );
+
+          // update indicator
+          client.touchPosIndicator.style.left =
+            client.touchPosition.x.toString() + 'px';
+          client.touchPosIndicator.style.top =
+            client.touchPosition.y.toString() + 'px';
+        });
+
+        // remove all that are gone since last update
+        this.$data.clients.forEach((client, id) => {
+          if (
+            !object2DList.elements.find(obj => {
+              return obj.id === id;
+            })
+          ) {
+            this.removeClient(id);
+          }
+        });
+      }
     },
     getRandomColor: function() {
       let letters = '0123456789ABCDEF';

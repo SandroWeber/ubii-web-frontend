@@ -53,24 +53,28 @@ export default {
   methods: {
     startEditor: function() {
       // subscribe to session info topic
-      UbiiClientService.subscribe(
+      UbiiClientService.subscribeTopic(
         DEFAULT_TOPICS.INFO_TOPICS.NEW_SESSION,
-        sessionInfo => {
-          this.$refs.visualizer.update(sessionInfo);
-        }
+        this.handleSessionInfo
       );
     },
     stopEditor: async function() {
       // unsubscribe and stop session
-      UbiiClientService.unsubscribe(this.$data.outputServerPointer.topic);
+      UbiiClientService.unsubscribeTopic(
+        DEFAULT_TOPICS.INFO_TOPICS.NEW_SESSION,
+        this.handleSessionInfo
+      );
       UbiiClientService.client.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
         session: this.$data.ubiiSession
       });
 
       if (this.$data.ubiiDevice) {
         await UbiiClientService.deregisterDevice(this.$data.ubiiDevice);
       }
+    },
+    handleSessionInfo: function(sessionInfo) {
+      this.$refs.visualizer.update(sessionInfo);
     }
   }
 };

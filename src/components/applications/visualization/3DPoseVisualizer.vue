@@ -31,9 +31,11 @@ export default {
     this.scene = null;
     this.renderer = null;
 
+    UbiiClientService.unsubscribeTopic(this.topicObjects, this.handle3DObjects);
+
     if (this.ubiiSessionGeneratePoseMovements) {
       UbiiClientService.client.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
         session: this.ubiiSessionGeneratePoseMovements
       });
     }
@@ -59,17 +61,17 @@ export default {
           {
             topic: this.topicBoundingBox,
             messageFormat: 'vector3',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: this.topicGenerateNumberOfObjects,
             messageFormat: 'double',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: this.topicObjects,
             messageFormat: 'ubii.dataStructure.Object3D',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           }
         ]
       };
@@ -241,30 +243,10 @@ export default {
       UbiiClientService.isConnected().then(() => {
         this.createUbiiSpecs();
 
-        UbiiClientService.subscribe(this.topicObjects, topicObject => {
-          let found = false;
-          this.scene.traverseVisible(sceneObject => {
-            if (found) return;
-            if (sceneObject.name === topicObject.id) {
-              sceneObject.position.set(
-                topicObject.pose.position.x,
-                topicObject.pose.position.y,
-                topicObject.pose.position.z
-              );
-              sceneObject.quaternion.set(
-                topicObject.pose.quaternion.x,
-                topicObject.pose.quaternion.y,
-                topicObject.pose.quaternion.z,
-                topicObject.pose.quaternion.w
-              );
-              found = true;
-            }
-          });
-
-          if (!found) {
-            this.addObject(topicObject);
-          }
-        });
+        UbiiClientService.subscribeTopic(
+          this.topicObjects,
+          this.handle3DObjects
+        );
 
         UbiiClientService.registerDevice(this.ubiiDevice).then(response => {
           if (!response.id) {
@@ -311,18 +293,42 @@ export default {
       if (this.sendTestData) {
         UbiiClientService.isConnected().then(() => {
           UbiiClientService.client.callService({
-            topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+            topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
             session: this.ubiiSessionGeneratePoseMovements
           });
         });
       } else {
         UbiiClientService.client.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: this.ubiiSessionGeneratePoseMovements
         });
         this.scene.remove(this.visualizedObjects);
         this.visualizedObjects = new Three.Object3D();
         this.scene.add(this.visualizedObjects);
+      }
+    },
+    handle3DObjects: function(object) {
+      let found = false;
+      this.scene.traverseVisible(sceneObject => {
+        if (found) return;
+        if (sceneObject.name === object.id) {
+          sceneObject.position.set(
+            object.pose.position.x,
+            object.pose.position.y,
+            object.pose.position.z
+          );
+          sceneObject.quaternion.set(
+            object.pose.quaternion.x,
+            object.pose.quaternion.y,
+            object.pose.quaternion.z,
+            object.pose.quaternion.w
+          );
+          found = true;
+        }
+      });
+
+      if (!found) {
+        this.addObject(object);
       }
     }
   },

@@ -8,7 +8,7 @@
 /* eslint-disable no-console */
 
 import * as Three from 'three';
-import WebVR from '../sharedModules/WebVR';
+import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 
 export default {
   name: 'ExampleTHREEjsWebVR',
@@ -21,7 +21,7 @@ export default {
     };
   },
   methods: {
-    init: function() {
+    init: async function() {
       let container = document.getElementById(
         'example-threejs-webvr-render-container'
       );
@@ -45,10 +45,15 @@ export default {
 
       this.renderer = new Three.WebGLRenderer({ antialias: true });
       this.renderer.setSize(container.clientWidth, container.clientHeight);
+      this.renderer.outputEncoding = Three.sRGBEncoding;
+      this.renderer.xr.enabled = true;
+
+      //let context = this.renderer.domElement.getContext('webgl');
+      //await context.makeXRCompatible();
+
       container.appendChild(this.renderer.domElement);
 
-      container.appendChild(WebVR.createButton(this.renderer));
-      this.renderer.vr.enabled = true;
+      container.appendChild(VRButton.createButton(this.renderer));
     },
     animate: function() {
       const renderer = this.renderer;
