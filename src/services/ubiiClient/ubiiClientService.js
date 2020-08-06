@@ -1,13 +1,23 @@
 /* eslint-disable no-console */
 
+import EventEmitter from 'events';
+
 import ClientNodeWeb from './clientNodeWeb';
 import UbiiEventBus from './ubiiEventBus';
 
 const uuidv4Regex =
   '[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}';
 
-class UbiiClientService {
+class UbiiClientService extends EventEmitter {
+  EVENTS = {
+    CONNECT: 'CONNECT',
+    DISCONNECT: 'DISCONNECT',
+    RECONNECT: 'RECONNECT'
+  };
+
   constructor() {
+    super();
+
     this.serverIP = window.location.hostname;
     this.serverPort = '8102';
 
@@ -43,6 +53,7 @@ class UbiiClientService {
           this.connecting = false;
 
           UbiiEventBus.$emit(UbiiEventBus.CONNECT_EVENT);
+          this.emit(this.EVENTS.CONNECT);
         }
       },
       error => {
@@ -190,5 +201,11 @@ class UbiiClientService {
     return uuidv4Regex;
   }
 }
+
+/*UbiiClientService.EVENTS = {
+  CONNECT: 'CONNECT',
+  DISCONNECT: 'DISCONNECT',
+  RECONNECT: 'RECONNECT'
+};*/
 
 export default new UbiiClientService();

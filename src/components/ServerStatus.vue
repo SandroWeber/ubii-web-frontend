@@ -1,29 +1,41 @@
 <template>
-  <app-layer
-    class="backend-info layer-two background low-contrast horizontal-shadow"
-  >
-    <label for="server-ip" class="label-server-ip">Server IP</label>
-    <app-input
-      :id="'server-ip'"
-      class="input-server-ip"
-      :type="'text'"
-      v-model="ubiiClientService.serverIP"
-    />
-    <label for="server-port" class="label-server-port">Server Port</label>
-    <app-input
-      :id="'server-port'"
-      class="input-server-port"
-      :type="'text'"
-      v-model="ubiiClientService.serverPort"
-    />
+  <app-layer class="layer-two background low-contrast horizontal-shadow">
     <app-button
-      :class="buttonConnectClass"
-      :contentSizePercentage="60"
-      :disabled="ubiiClientService.isConnected()"
-      @click="onButtonConnect"
+      class="button round"
+      :class="connected? 'green-accent' : 'red-accent'"
+      @click="onButtonConnectionStatus"
     >
-      {{ buttonConnectActionString }}
+      <font-awesome-icon
+        icon="plug"
+        class="icon"
+        v-b-tooltip.hover
+        title="Server Connection Config"
+      />
     </app-button>
+    <div v-if="showConnectionSettings" class="server-info connection-settings background layer-two">
+      <label for="server-ip" class="label-server-ip">Server IP</label>
+      <app-input
+        :id="'server-ip'"
+        class="input-server-ip"
+        :type="'text'"
+        v-model="ubiiClientService.serverIP"
+      />
+      <label for="server-port" class="label-server-port">Server Port</label>
+      <app-input
+        :id="'server-port'"
+        class="input-server-port"
+        :type="'text'"
+        v-model="ubiiClientService.serverPort"
+      />
+      <app-button
+        class="round button-connect"
+        :contentSizePercentage="60"
+        :disabled="connected"
+        @click="onButtonConnect"
+        v-b-tooltip.hover
+        :title="connected? 'disabled, already connected' : ''"
+      >{{ connected ? 'reconnect' : 'connect' }}</app-button>
+    </div>
   </app-layer>
 </template>
 
@@ -49,27 +61,18 @@ export default {
   },
   data: () => {
     return {
-      ubiiClientService: UbiiClientService
+      ubiiClientService: UbiiClientService,
+      connected: UbiiClientService.isConnected(),
+      showConnectionSettings: false
     };
   },
-  computed: {
-    buttonConnectClass: function() {
-      let connected = UbiiClientService.isConnected();
-      return {
-        'button-connect': true,
-        round: true,
-        'green-accent': connected,
-        'red-accent': !connected
-      };
-    },
-    buttonConnectActionString: function() {
-      let connected = UbiiClientService.isConnected();
-      if (connected) {
-        return 'reconnect';
-      } else {
-        return 'connect';
-      }
-    }
+  mounted: function() {
+    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
+      this.onConnectionChange(true);
+    });
+    UbiiClientService.on(UbiiClientService.EVENTS.DISCONNECT, () => {
+      this.onConnectionChange(false);
+    });
   },
   methods: {
     onButtonConnect: function() {
@@ -81,13 +84,19 @@ export default {
           UbiiClientService.connect();
         }
       }
+    },
+    onButtonConnectionStatus: function() {
+      this.showConnectionSettings = !this.showConnectionSettings;
+    },
+    onConnectionChange: function(connected) {
+      this.connected = connected;
     }
   }
 };
 </script>
 
 <style scoped>
-.backend-info {
+.server-info {
   padding: 8px;
   display: grid;
   grid-gap: 5px;
@@ -125,10 +134,30 @@ input {
   padding: 1px 5px 1px 5px;
 }
 
+.icon {
+  height: 1.5em;
+  width: 1.5em;
+}
+
+.button {
+  position: relative;
+  align-items: center;
+  height: 2em;
+  width: 2em;
+  padding-top: 0.2em;
+}
+
 .button-connect {
+  color: white;
   grid-area: button-connect;
   height: 1.8em;
   width: 8em;
   margin: 2px 10px 2px 10px;
+}
+
+.connection-settings {
+  position: absolute;
+  top: 3em;
+  right: 0.1em;
 }
 </style>
