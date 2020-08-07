@@ -9,7 +9,9 @@
         'toggle-active': openCVTestActive,
         'toggle-inactive': !openCVTestActive
       }"
-    >OpenCV Test</button>
+    >
+      OpenCV Test
+    </button>
   </div>
 </template>
 
@@ -67,7 +69,7 @@ export default {
     start: function() {
       this.cocoSSDLabels = [];
 
-      UbiiClientService.isConnected().then(() => {
+      UbiiClientService.waitForConnection().then(() => {
         this.createUbiiSpecs();
 
         UbiiClientService.registerDevice(this.ubiiDevice).then(device => {

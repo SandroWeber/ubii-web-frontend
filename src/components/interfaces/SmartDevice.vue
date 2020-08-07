@@ -92,7 +92,7 @@ export default {
 
     this.deviceData = {};
     this.registerEventListeners();
-    UbiiClientService.isConnected().then(() => {
+    UbiiClientService.waitForConnection().then(() => {
       this.startInterface();
     });
     UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
@@ -193,7 +193,7 @@ export default {
       this.initializing = true;
 
       // register the mouse pointer device
-      UbiiClientService.isConnected().then(
+      UbiiClientService.waitForConnection().then(
         () => {
           UbiiClientService.registerDevice(this.$data.ubiiDevice)
             .then(device => {
@@ -401,7 +401,6 @@ export default {
         x: event.touches[touchIndex].clientX,
         y: event.touches[touchIndex].clientY
       };
-      console.info('offsetTop: ' + target.offsetTop);
       let normalizedX =
         (touchPosition.x - target.offsetLeft) / target.offsetWidth;
       let normalizedY =

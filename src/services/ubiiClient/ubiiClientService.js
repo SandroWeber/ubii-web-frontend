@@ -1,32 +1,39 @@
 /* eslint-disable no-console */
 
+import EventEmitter from 'events';
+
 import ClientNodeWeb from './clientNodeWeb';
 import UbiiEventBus from './ubiiEventBus';
 
 const uuidv4Regex =
   '[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}';
 
-class UbiiClientService {
+class UbiiClientService extends EventEmitter {
+  EVENTS = {
+    CONNECT: 'CONNECT',
+    DISCONNECT: 'DISCONNECT',
+    RECONNECT: 'RECONNECT'
+  };
+
   constructor() {
+    super();
+
     this.serverIP = window.location.hostname;
     this.serverPort = '8102';
 
     this.client = undefined;
-    this.connected = undefined;
     this.connecting = false;
 
     this.onDisconnectCallbacks = [];
   }
 
   async connect() {
-    if (this.connected || this.connecting) {
-      return this.isConnected();
+    if (this.isConnected() || this.connecting) {
+      return this.waitForConnection();
     }
-    this.connecting = true;
 
-    console.info(
-      'connecting to backend ' + this.serverIP + ':' + this.serverPort
-    );
+    console.info('UbiiClientService - connecting ...');
+    this.connecting = true;
 
     if (!this.client) {
       this.client = new ClientNodeWeb(
@@ -43,21 +50,24 @@ class UbiiClientService {
             'UbiiClientService - client connected with ID:\n' +
               this.client.clientSpecification.id
           );
-          this.connected = true;
           this.connecting = false;
 
           UbiiEventBus.$emit(UbiiEventBus.CONNECT_EVENT);
+          this.emit(this.EVENTS.CONNECT);
         }
       },
       error => {
-        console.info('UbiiClientService.client.initialize() failed:\n' + error);
+        console.info(
+          'UbiiClientService.client.initialize() failed:\n' + error.toString()
+        );
       }
     );
   }
 
   async disconnect() {
-    if (!this.connected) {
-      console.warn('Client tried to disconnect without beeing connected.');
+    console.info('UbiiClientService - disconnecting ...');
+    if (!this.isConnected()) {
+      console.warn('Client tried to disconnect without being connected.');
       return;
     }
 
@@ -69,7 +79,6 @@ class UbiiClientService {
     });
 
     return this.client.deinitialize().then(() => {
-      this.connected = false;
       this.connecting = false;
       this.client = undefined;
       console.info('client disconnected with ID: ' + id);
@@ -77,24 +86,27 @@ class UbiiClientService {
   }
 
   async reconnect() {
+    console.info('UbiiClientService - reconnecting ...');
     await this.client.reinitialize();
   }
 
-  isConnected() {
+  waitForConnection() {
     return new Promise((resolve, reject) => {
-      let maxRetries = 1000;
+      let maxRetries = 10;
       let retry = 0;
 
       let checkConnection = () => {
         retry += 1;
+
+        if (retry > maxRetries) {
+          reject(false);
+          return;
+        }
+
         if (this.client && this.client.isConnected()) {
           resolve(this.client.isConnected());
           return;
         } else {
-          if (retry > maxRetries) {
-            reject();
-            return;
-          }
           setTimeout(() => {
             checkConnection();
           }, 100);
@@ -102,6 +114,10 @@ class UbiiClientService {
       };
       checkConnection();
     });
+  }
+
+  isConnected() {
+    return this.client && this.client.isConnected();
   }
 
   onDisconnect(callback) {
@@ -181,5 +197,11 @@ class UbiiClientService {
     return uuidv4Regex;
   }
 }
+
+/*UbiiClientService.EVENTS = {
+  CONNECT: 'CONNECT',
+  DISCONNECT: 'DISCONNECT',
+  RECONNECT: 'RECONNECT'
+};*/
 
 export default new UbiiClientService();

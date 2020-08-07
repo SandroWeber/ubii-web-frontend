@@ -75,9 +75,8 @@ class ClientNodeWeb {
     return this.callService({
       topic: DEFAULT_TOPICS.SERVICES.CLIENT_DEREGISTRATION,
       client: this.clientSpecification
-    }).then(reply => {
+    }).then(() => {
       this.clientSpecification = undefined;
-      console.info(reply);
     });
   }
 

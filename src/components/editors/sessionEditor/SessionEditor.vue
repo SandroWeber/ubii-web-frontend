@@ -39,7 +39,7 @@ export default {
     });
 
     // make sure we're connected, then start the example
-    UbiiClientService.isConnected().then(() => {
+    UbiiClientService.waitForConnection().then(() => {
       this.startEditor();
     });
 

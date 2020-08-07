@@ -240,7 +240,7 @@ export default {
       this.visualizedObjects = new Three.Object3D();
       this.scene.add(this.visualizedObjects);
 
-      UbiiClientService.isConnected().then(() => {
+      UbiiClientService.waitForConnection().then(() => {
         this.createUbiiSpecs();
 
         UbiiClientService.subscribeTopic(
@@ -250,7 +250,6 @@ export default {
 
         UbiiClientService.registerDevice(this.ubiiDevice).then(response => {
           if (!response.id) {
-            console.info(response);
             return;
           }
 
@@ -291,7 +290,7 @@ export default {
       this.sendTestData = !this.sendTestData;
 
       if (this.sendTestData) {
-        UbiiClientService.isConnected().then(() => {
+        UbiiClientService.waitForConnection().then(() => {
           UbiiClientService.client.callService({
             topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
             session: this.ubiiSessionGeneratePoseMovements
