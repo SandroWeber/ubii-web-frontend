@@ -11,16 +11,8 @@
         <br />
 
         <button class="button-fullscreen" @click="toggleFullScreen()">
-          <font-awesome-icon
-            icon="compress"
-            class="interface-icon"
-            v-show="fullscreen"
-          />
-          <font-awesome-icon
-            icon="expand"
-            class="interface-icon"
-            v-show="!fullscreen"
-          />
+          <font-awesome-icon icon="compress" class="interface-icon" v-show="fullscreen" />
+          <font-awesome-icon icon="expand" class="interface-icon" v-show="!fullscreen" />
         </button>
         <br />
         <button v-show="!fullscreen" @click="calibrate()">Calibrate</button>
@@ -409,7 +401,6 @@ export default {
         x: event.touches[touchIndex].clientX,
         y: event.touches[touchIndex].clientY
       };
-      console.info('offsetTop: ' + target.offsetTop);
       let normalizedX =
         (touchPosition.x - target.offsetLeft) / target.offsetWidth;
       let normalizedY =

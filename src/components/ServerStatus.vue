@@ -30,7 +30,6 @@
       <app-button
         class="round button-connect"
         :contentSizePercentage="60"
-        :disabled="connected"
         @click="onButtonConnect"
         v-b-tooltip.hover
         :title="connected? 'disabled, already connected' : ''"

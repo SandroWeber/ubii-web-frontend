@@ -32,7 +32,7 @@ export default {
     PageHeader
   },
   mounted: () => {
-    //UbiiClientService.connect();
+    UbiiClientService.connect();
     window.addEventListener('beforeunload', () => {
       UbiiClientService.disconnect();
     });

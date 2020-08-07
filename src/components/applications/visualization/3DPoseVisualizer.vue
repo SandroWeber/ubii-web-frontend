@@ -1,12 +1,7 @@
 <template>
   <div>
-    <button id="button-send-testdata" @click="toggleTestData()">
-      Toggle sending test data
-    </button>
-    <div
-      id="example-threejs-webvr-render-container"
-      class="render-container"
-    ></div>
+    <button id="button-send-testdata" @click="toggleTestData()">Toggle sending test data</button>
+    <div id="example-threejs-webvr-render-container" class="render-container"></div>
   </div>
 </template>
 
@@ -255,7 +250,6 @@ export default {
 
         UbiiClientService.registerDevice(this.ubiiDevice).then(response => {
           if (!response.id) {
-            console.info(response);
             return;
           }
 

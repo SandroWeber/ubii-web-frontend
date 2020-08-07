@@ -57,7 +57,9 @@ class UbiiClientService extends EventEmitter {
         }
       },
       error => {
-        console.info('UbiiClientService.client.initialize() failed:\n' + error);
+        console.info(
+          'UbiiClientService.client.initialize() failed:\n' + error.toString()
+        );
       }
     );
   }
@@ -65,7 +67,7 @@ class UbiiClientService extends EventEmitter {
   async disconnect() {
     console.info('UbiiClientService - disconnecting ...');
     if (!this.isConnected()) {
-      console.warn('Client tried to disconnect without beeing connected.');
+      console.warn('Client tried to disconnect without being connected.');
       return;
     }
 
@@ -89,14 +91,12 @@ class UbiiClientService extends EventEmitter {
   }
 
   waitForConnection() {
-    console.info('UbiiClientService.waitForConnection');
     return new Promise((resolve, reject) => {
       let maxRetries = 10;
       let retry = 0;
 
       let checkConnection = () => {
         retry += 1;
-        console.info('UbiiClientService.checkConnection: retry=', retry);
 
         if (retry > maxRetries) {
           reject(false);
@@ -104,10 +104,6 @@ class UbiiClientService extends EventEmitter {
         }
 
         if (this.client && this.client.isConnected()) {
-          console.info(
-            'UbiiClientService.checkConnection: ',
-            this.client.isConnected()
-          );
           resolve(this.client.isConnected());
           return;
         } else {
