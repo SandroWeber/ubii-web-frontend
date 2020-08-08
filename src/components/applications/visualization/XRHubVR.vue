@@ -9,7 +9,7 @@
 import * as THREE from 'three';
 
 import XRHub from '../sharedModules/XRHub';
-import FirstPersonControls from '../sharedModules/FirstPersonControls';
+import XRHubFirstPersonControls from '../sharedModules/XRHubFirstPersonControls';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 import XRHubHeaderbar from '../sharedModules/XRHubHeaderbar';
 
@@ -36,7 +36,7 @@ export default {
         0.1,
         10
       );
-      this.controls = new FirstPersonControls(this.camera, this.container);
+      this.controls = new XRHubFirstPersonControls(this.camera, this.container);
       this.xrHub = new XRHub(this.container, this.camera, this.$props.roomId, this.controls);
       this.$data.xrHub = this.xrHub;
       this.camera.position.y = 1;
