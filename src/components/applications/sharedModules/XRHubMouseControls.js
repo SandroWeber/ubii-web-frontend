@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { CONFIG_CANVAS_NAME } from './XRHubConstants';
 
 
 export class XRHubMouseControls {
@@ -42,10 +43,14 @@ export class XRHubMouseControls {
     const yNDC = -((event.y-this.container.offsetTop)/this.container.clientHeight)*2+1;
     const mouseVector = new THREE.Vector3(xNDC, yNDC, 0);
     mouseVector.unproject(this.camera);
-    mouseVector.sub(this.camera.position).normalize();
+    const cameraWorldPos = new THREE.Vector3();
+    this.camera.getWorldPosition(cameraWorldPos);
+    mouseVector.sub(cameraWorldPos).normalize();
     mouseVector.multiplyScalar(this.DISTANCE_TO_CAMERA);
     this.webGLMouseSphere.position.copy(this.camera.position.clone().add(mouseVector));
+    this.webGLMouseSphere.rotation.copy(this.camera.rotation);
     this.css3DMouseSphere.position.copy(this.camera.position.clone().add(mouseVector));
+    this.css3DMouseSphere.rotation.copy(this.camera.rotation);
     const toRotate = this.webGLMouseSphere.userData.toRotate;
     if(toRotate){
       // rotateOnAxis("WebGL", toRotate.name, new THREE.Vector3(0,1,0), event.movementX*0.1, this.roomId, true);
@@ -66,7 +71,7 @@ export class XRHubMouseControls {
   }
 
   handleMouseUp(event){
-    if(event.button === 1){
+    if(event.button === 0){
       this.removeFollower(this.webGLMouseSphere, this.webGLScene);
       this.removeFollower(this.css3DMouseSphere, this.css3DScene);
       this.webGLMouseSphere.userData.toRotate = undefined;
@@ -79,13 +84,6 @@ export class XRHubMouseControls {
       const object = intersectedObjects[0].object;
       switch (event.button) {
         case 0:
-          if(object.userData.updateUrl){
-            // const iframe = object.userData.css3DObject.userData.website;
-            // const element = iframe.elementFromPoint(100, 100);
-            // element.click();
-          }
-          break;
-        case 1:
           if(object.name !== "configCanvas"){
             if (object.name === "websiteMoveHandle") {
               this.addFollowerToParent(this.webGLMouseSphere, object.parent);
@@ -97,10 +95,12 @@ export class XRHubMouseControls {
             }
           }
           break;
+        case 1:
+          break;
         case 2:
-          if (object.userData.updateUrl || object.name === "configCanvas") {
-            this.toggleConfigCanvas(object);
-          }
+          // if (object.userData.updateUrl || object.name === CONFIG_CANVAS_NAME) {
+          //   this.toggleConfigCanvas(object);
+          // }
           break;
       }
 
@@ -113,6 +113,9 @@ export class XRHubMouseControls {
       const object = intersectedObjects[0].object;
       if(event.code === "Space" && object.userData.toggleHandles){
         object.userData.toggleHandles();
+      }
+      if((event.code === "KeyE" && object.userData.css3DObject) || object.name === CONFIG_CANVAS_NAME){
+        this.toggleConfigCanvas(object)
       }
     }
   }

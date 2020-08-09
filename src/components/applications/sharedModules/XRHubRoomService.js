@@ -67,7 +67,7 @@ export class XRHubRoomService {
           topic,
           string: serialized
         });
-      this.updateMap.delete(object3D.id);
+      this.updateMap.delete(object3D.userData.objectId);
     }
 
   }
