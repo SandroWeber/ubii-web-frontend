@@ -1,6 +1,6 @@
 import ClientNode from '../../../services/ubiiClient/ubiiClientService';
 import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
-import { WEBSOCKET_TOPIC } from './XRHubConstants';
+import { XR_HUB_ROOM_WEBSOCKET_TOPIC_PREFIX } from './XRHubConstants';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 /* eslint-disable no-console */
 
@@ -12,7 +12,7 @@ export class XRHubRoomService {
   }
 
   async subscribeToRoom(roomId, callback) {
-    const topic = WEBSOCKET_TOPIC + roomId;
+    const topic = XR_HUB_ROOM_WEBSOCKET_TOPIC_PREFIX + roomId;
     if (!UbiiClientService.isConnected) {
       return UbiiClientService.connect().then(() => {ClientNode.subscribe(topic, callback);});
     } else {
@@ -35,7 +35,7 @@ export class XRHubRoomService {
       deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
       components: [
         {
-          topic: WEBSOCKET_TOPIC+ roomId,
+          topic: XR_HUB_ROOM_WEBSOCKET_TOPIC_PREFIX+ roomId,
           messageFormat: 'string',
           ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
         }]
@@ -61,7 +61,7 @@ export class XRHubRoomService {
       const roomId = mapEntry[1].roomId;
       const object3D = mapEntry[1].object;
       const serialized = this.serializeObject3D(object3D);
-      const topic = WEBSOCKET_TOPIC + roomId;
+      const topic = XR_HUB_ROOM_WEBSOCKET_TOPIC_PREFIX + roomId;
       UbiiClientService.publishRecord(
         {
           topic,

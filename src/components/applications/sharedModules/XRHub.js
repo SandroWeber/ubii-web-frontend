@@ -3,9 +3,8 @@ import * as THREE from 'three';
 import { CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import { ThreeWebsiteCanvas } from './ThreeWebsiteCanvas';
 import {XRHubRoomService} from './XRHubRoomService';
-import { GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import { XRHubMouseControls } from './XRHubMouseControls';
-import { CSS3D_MOUSE_SPHERE_NAME, WEB_GL_MOUSE_SPHERE_NAME} from './XRHubConstants';
+import { CONFIG_CANVAS_NAME, CSS3D_MOUSE_SPHERE_NAME, WEB_GL_MOUSE_SPHERE_NAME } from './XRHubConstants';
 import { ThreeConfigCanvas } from './ThreeConfigCanvas';
 
 
@@ -19,30 +18,6 @@ class XRHub {
     this.togglePointerEvents = this.togglePointerEvents.bind(this);
     this.toggleConfigCanvas = this.toggleConfigCanvas.bind(this);
     this.initRoom();
-/*    this.acceptActions = this.acceptActions.bind(this);
-    Dispatcher.subscribe(this.acceptActions);
-    this.registerAndSubscribe();
-    this.initVRScene();
-    this.initWebContentScene();
-    this.spawnWebContent('https://threejs.org/');
-    this.initMouseControls();
-    this.createInteractionToggleButton();
-    // this.controllers = [];
-    // this.initControls();
-
-
-
-    //////////////////////////////
-    const exporter = new GLTFExporter();
-    exporter.parse(this.css3DScene,  function (exportObj, exportName = "gltfOutput") {
-        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
-        var downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href",     dataStr);
-        downloadAnchorNode.setAttribute("download", exportName + ".json");
-        document.body.appendChild(downloadAnchorNode); // required for firefox
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
-      },{});*/
   }
 
   async initRoom(){
@@ -58,20 +33,14 @@ class XRHub {
     } else {
       this.roomId = roomData.success.id !== this.roomId ? roomData.success.id : this.roomId;
       await this.roomService.registerAndSubscribe(this.roomId, this.updateObject3D.bind(this));
-      const loader = new GLTFLoader();
-      const webGLString = JSON.stringify(roomData.success["webGL"]);
-      loader.parse(webGLString, "", function (gltf){
-        this.webGLScene.add(...gltf.scene.children);
-        const css3DString = JSON.stringify(roomData.success["css3D"]);
-        loader.parse(css3DString, "",function (gltf){
-          this.css3DScene.add(...gltf.scene.children);
-          this.initWebContent();
-          this.initConfigCanvas();
-          const webGLMouseSphere = this.webGLScene.getObjectByName(WEB_GL_MOUSE_SPHERE_NAME);
-          const css3DMouseSphere = this.css3DScene.getObjectByName(CSS3D_MOUSE_SPHERE_NAME);
-          this.mouseControls = new XRHubMouseControls(this.container, this.roomId, this.perspCamera, this.webGLScene, webGLMouseSphere, this.css3DScene, css3DMouseSphere, this.roomService, this.toggleConfigCanvas);
-        }.bind(this));
-      }.bind(this));
+      const loader = new THREE.ObjectLoader();
+      this.webGLScene.add(...loader.parse(roomData.success["webGL"]).children);
+      this.css3DScene.add(...loader.parse(roomData.success["css3D"]).children);
+      this.initWebContent();
+      this.initConfigCanvas();
+      const webGLMouseSphere = this.webGLScene.getObjectByName(WEB_GL_MOUSE_SPHERE_NAME);
+      const css3DMouseSphere = this.css3DScene.getObjectByName(CSS3D_MOUSE_SPHERE_NAME);
+      this.mouseControls = new XRHubMouseControls(this.container, this.roomId, this.perspCamera, this.webGLScene, webGLMouseSphere, this.css3DScene, css3DMouseSphere, this.roomService, this.toggleConfigCanvas);
     }
   }
 
@@ -101,7 +70,7 @@ class XRHub {
 
   initWebContent(){
     for(const child of this.webGLScene.children){
-     if(child.userData.canvasId){
+     if(child.userData && child.userData.canvasId && child.name !== CONFIG_CANVAS_NAME){
        const css3DObject = this.getObjectByUserDataProperty(this.css3DScene, "canvasId", child.userData.canvasId);
        const websiteCanvas = new ThreeWebsiteCanvas(child.userData.res.x, child.userData.res.y, css3DObject.userData.url, child);
        websiteCanvas.addToScenes(this.webGLScene, this.css3DScene);
@@ -149,8 +118,7 @@ class XRHub {
     const webContent = new ThreeWebsiteCanvas(
       1024,
       768,
-      'threejsorg',
-      url
+      url,
     );
     webContent.addToScenes(this.webGLScene, this.css3DScene);
     webContent.setPosition(-1, 1, -1);
@@ -174,30 +142,6 @@ class XRHub {
     // this.mesh.rotation.y += delta;
   }
 
-  createGroundPlane() {
-    var geometry = new THREE.PlaneBufferGeometry(20, 20);
-    geometry.rotateX(THREE.Math.degToRad(90));
-    var material = new THREE.MeshBasicMaterial({
-      color: 0x00ffff,
-      side: THREE.DoubleSide
-    });
-    var plane = new THREE.Mesh(geometry, material);
-    plane.name = "groundPlane";
-    this.webGLScene.add(plane);
-  }
-
-  createDemoCube() {
-    let geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-    let material = new THREE.MeshBasicMaterial({color: "green"});
-
-    this.mesh = new THREE.Mesh(geometry, material);
-    this.mesh.position.y = 1;
-    this.mesh.name = "demoCube";
-    this.webGLScene.add(this.mesh);
-  }
-
-
-
   createInteractionToggleButton(){
     const button = document.createElement("button");
     button.style.width = 200+"px";
@@ -211,6 +155,21 @@ class XRHub {
     button.innerText = "Toggle Website Interaction";
     button.addEventListener("click", this.togglePointerEvents.bind(this));
     document.documentElement.appendChild(button);
+  }
+
+  downloadScenes(){
+    const exportName = "sceneJSONDownload";
+    const webGLDataURL = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.webGLScene.toJSON()));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", webGLDataURL);
+    downloadAnchorNode.setAttribute("download", exportName + "WebGL.json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    const css3DDataURL = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.css3DScene.toJSON()));
+    downloadAnchorNode.setAttribute("href", css3DDataURL);
+    downloadAnchorNode.setAttribute("download", exportName + "CSS3D.json");
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
   }
 }
 
