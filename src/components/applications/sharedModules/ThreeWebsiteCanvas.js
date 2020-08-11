@@ -72,6 +72,12 @@ export class ThreeWebsiteCanvas extends ThreeWebContentCanvas{
     object.userData.canvasId = this.canvasId;
     object.userData.objectId = css3DObject ? css3DObject.userData.objectId : uuidv4();
     object.uuid = css3DObject.uuid;
+    if(css3DObject){
+      object.position.copy(css3DObject.position);
+      object.rotation.copy(css3DObject.rotation);
+      object.scale.copy(css3DObject.scale);
+    }
+
 
     return object;
   }

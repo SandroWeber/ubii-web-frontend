@@ -75,9 +75,6 @@ class XRHub {
        this.css3DScene.remove(css3DObject);
        const websiteCanvas = new ThreeWebsiteCanvas(child.userData.res.x, child.userData.res.y, css3DObject.userData.url, child, css3DObject);
        websiteCanvas.addToScenes(this.webGLScene, this.css3DScene);
-       websiteCanvas.setPosition(-1, 1, -1);
-       websiteCanvas.setRotationQuaternion(new THREE.Quaternion());
-       websiteCanvas.setSize(1, 0.75);
      }
     }
   }
