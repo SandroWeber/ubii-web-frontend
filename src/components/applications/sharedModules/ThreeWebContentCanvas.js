@@ -55,7 +55,6 @@ class ThreeWebContentCanvas {
       webglPlaneMesh = new THREE.Mesh(geometry, material);
       webglPlaneMesh.name = this.name;
       webglPlaneMesh.userData.res= {x: this.resolution[0], y: this.resolution[1]};
-      webglPlaneMesh.userData.objectId = uuidv4();
       webglPlaneMesh.userData.canvasId = this.canvasId;
     }
 

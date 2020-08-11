@@ -51,9 +51,8 @@ export class XRHubRoomService {
     return UbiiClientService.isConnected().then(() => UbiiClientService.registerDevice(device));
   }
 
-  // setInterval update map objectId -> object
   updateObject3D(object3D, roomId){
-    this.updateMap.set(object3D.userData.objectId, {roomId, object: object3D});
+    this.updateMap.set(object3D.uuid, {roomId, object: object3D});
   }
 
   sendUpdates(){
@@ -67,7 +66,7 @@ export class XRHubRoomService {
           topic,
           string: serialized
         });
-      this.updateMap.delete(object3D.userData.objectId);
+      this.updateMap.delete(object3D.uuid);
     }
 
   }

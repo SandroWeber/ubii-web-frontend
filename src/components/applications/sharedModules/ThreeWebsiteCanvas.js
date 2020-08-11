@@ -6,7 +6,6 @@ import {
   WEBSITE_CANVAS_NAME_PREFIX,
   WEBSITE_CANVAS_ROTATION_HANDLE_NAME
 } from './XRHubConstants';
-import uuidv4 from 'uuid/v4';
 
 export class ThreeWebsiteCanvas extends ThreeWebContentCanvas{
   constructor(resolutionWidth, resolutionHeight, url, webGLCanvas, css3DObject) {
@@ -70,9 +69,8 @@ export class ThreeWebsiteCanvas extends ThreeWebContentCanvas{
     object.userData.website = iframe;
     object.userData.url = this.url;
     object.userData.canvasId = this.canvasId;
-    object.userData.objectId = css3DObject ? css3DObject.userData.objectId : uuidv4();
-    object.uuid = css3DObject.uuid;
     if(css3DObject){
+      object.uuid = css3DObject.uuid;
       object.position.copy(css3DObject.position);
       object.rotation.copy(css3DObject.rotation);
       object.scale.copy(css3DObject.scale);
