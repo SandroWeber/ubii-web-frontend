@@ -70,7 +70,8 @@ export class ThreeWebsiteCanvas extends ThreeWebContentCanvas{
     object.userData.website = iframe;
     object.userData.url = this.url;
     object.userData.canvasId = this.canvasId;
-    object.userData.objectId = uuidv4();
+    object.userData.objectId = css3DObject ? css3DObject.userData.objectId : uuidv4();
+    object.uuid = css3DObject.uuid;
 
     return object;
   }

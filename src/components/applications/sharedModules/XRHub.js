@@ -72,7 +72,8 @@ class XRHub {
     for(const child of this.webGLScene.children){
      if(child.userData && child.userData.canvasId && child.name !== CONFIG_CANVAS_NAME){
        const css3DObject = this.getObjectByUserDataProperty(this.css3DScene, "canvasId", child.userData.canvasId);
-       const websiteCanvas = new ThreeWebsiteCanvas(child.userData.res.x, child.userData.res.y, css3DObject.userData.url, child);
+       this.css3DScene.remove(css3DObject);
+       const websiteCanvas = new ThreeWebsiteCanvas(child.userData.res.x, child.userData.res.y, css3DObject.userData.url, child, css3DObject);
        websiteCanvas.addToScenes(this.webGLScene, this.css3DScene);
        websiteCanvas.setPosition(-1, 1, -1);
        websiteCanvas.setRotationQuaternion(new THREE.Quaternion());
@@ -82,7 +83,7 @@ class XRHub {
   }
 
   initConfigCanvas(){
-    this.configCanvas = new ThreeConfigCanvas(1024, 768, "configCanvas", this.perspCamera, this.togglePointerEvents);
+    this.configCanvas = new ThreeConfigCanvas(1024, 768, this.perspCamera, this.togglePointerEvents);
     this.configCanvas.addToScenes(this.webGLScene, this.css3DScene);
     this.configCanvas.setPosition(-1, 1, 0);
     this.configCanvas.setRotationQuaternion(new THREE.Quaternion());
@@ -96,7 +97,7 @@ class XRHub {
     if(object3D.userData.url){
       scene = this.css3DScene;
     }
-    const objectInScene = this.getObjectByUserDataProperty(scene, "objectId", object3D.userData.objectId);
+    const objectInScene = scene.getObjectByProperty("uuid", object3D.uuid);
     if(objectInScene){
       objectInScene.position.copy(object3D.position);
       objectInScene.rotation.copy(object3D.rotation);

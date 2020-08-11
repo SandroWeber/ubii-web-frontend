@@ -3,12 +3,13 @@ import TextBoxComponent from './TextBoxComponent';
 import Vue from 'vue';
 import ThreeWebContentCanvas from './ThreeWebContentCanvas';
 import * as THREE from 'three';
+import { CONFIG_CANVAS_NAME } from './XRHubConstants';
 
 export class ThreeConfigCanvas extends ThreeWebContentCanvas{
 
 
-  constructor(resolutionWidth, resolutionHeight, name, perspCamera){
-    super(resolutionWidth, resolutionHeight, name);
+  constructor(resolutionWidth, resolutionHeight, perspCamera){
+    super(resolutionWidth, resolutionHeight, CONFIG_CANVAS_NAME);
     this.perspCamera = perspCamera;
     this.webGLCanvas.visible = false;
     this.css3DCanvas.userData.container.style.visibility = "hidden";
