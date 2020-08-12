@@ -53,7 +53,7 @@ export default {
 
       this.initScene();
 
-      if (UbiiClientService.isConnected) {
+      if (UbiiClientService.isConnected()) {
         this.onConnectToUbiiParent();
       }
     },
@@ -167,7 +167,7 @@ export default {
     startPollLoop: function() {
       this.pollSmartDevices = true;
 
-      UbiiClientService.isConnected().then(() => {
+      UbiiClientService.waitForConnection().then(() => {
         const loop = () => {
           if (this.pollSmartDevices) {
             if (this.updateSmartDevices) {

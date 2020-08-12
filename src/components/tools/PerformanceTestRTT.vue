@@ -5,10 +5,16 @@
     <app-button
       class="start-button"
       @click="startTestRTT()"
-      :disabled="!ubiiClientService.isConnected"
+      :disabled="!ubiiClientService.isConnected()"
     >
-      <font-awesome-icon icon="play" v-show="this.$data.testRTT.status !== 'running'" />
-      <font-awesome-icon icon="spinner" v-show="this.$data.testRTT.status === 'running'" />
+      <font-awesome-icon
+        icon="play"
+        v-show="this.$data.testRTT.status !== 'running'"
+      />
+      <font-awesome-icon
+        icon="spinner"
+        v-show="this.$data.testRTT.status === 'running'"
+      />
     </app-button>
 
     <div class="statistics-grid">
@@ -21,7 +27,11 @@
 
     <div class="settings-grid">
       <label for="rtt-message-count"># messages:</label>
-      <app-input :id="'rtt-message-count'" :type="'# messages'" v-model="testRTT.messageCount" />
+      <app-input
+        :id="'rtt-message-count'"
+        :type="'# messages'"
+        v-model="testRTT.messageCount"
+      />
     </div>
   </div>
 </template>

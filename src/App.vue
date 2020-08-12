@@ -1,7 +1,8 @@
 <template>
   <app-layer id="app" class="layer-one background">
-    <div class="server-status-wrapper">
-      <server-status id="server-status" />
+    <div class="page-header-wrapper">
+      <!--<server-status id="server-status" />-->
+      <page-header />
     </div>
     <app-layer class="navigation-wrapper layer-one background border shadow">
       <nav class="navigation-bar">
@@ -20,25 +21,30 @@
 </template>
 
 <script>
-import ClientNode from './services/ubiiClient/ubiiClientService';
-import ServerStatus from './components/ServerStatus.vue';
+import UbiiClientService from './services/ubiiClient/ubiiClientService';
+import PageHeader from './components/PageHeader.vue';
 import { AppLayer } from './components/appComponents/appComponents.js';
 
 export default {
   name: 'app',
   components: {
-    ServerStatus,
-    AppLayer
+    AppLayer,
+    PageHeader
   },
-  data: () => {
-    return {
-      ubiiClientService: ClientNode
-    };
+  mounted: () => {
+    UbiiClientService.connect();
+    window.addEventListener('beforeunload', () => {
+      UbiiClientService.disconnect();
+    });
+  },
+  beforeDestroy: function() {
+    UbiiClientService.disconnect();
   }
 };
 </script>
 
-<style lang="stylus">@import './styles/main/color';
+<style lang="stylus">
+@import './styles/main/color';
 
 * {
   margin: 0;
@@ -83,7 +89,7 @@ html, body {
   flex-grow: 0;
 }
 
-.server-status-wrapper {
+.page-header-wrapper {
   flex-grow: 0;
 }
 

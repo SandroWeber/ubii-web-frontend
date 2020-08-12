@@ -8,7 +8,9 @@
         'toggle-active': cocoSsdActive,
         'toggle-inactive': !cocoSsdActive
       }"
-    >toggle coco-ssd object detection</button>
+    >
+      toggle coco-ssd object detection
+    </button>
   </div>
 </template>
 
@@ -63,7 +65,7 @@ export default {
     start: function() {
       this.cocoSSDLabels = [];
 
-      UbiiClientService.isConnected().then(() => {
+      UbiiClientService.waitForConnection().then(() => {
         this.createUbiiSpecs();
 
         UbiiClientService.registerDevice(this.ubiiDevice).then(device => {

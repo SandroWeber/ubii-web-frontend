@@ -3,7 +3,11 @@
     <div class="category-header header-services orange-accent">Services</div>
 
     <div class="category-content content-services" v-show="serviceList">
-      <div class="list-element" v-for="service in serviceList" :key="service.topic">
+      <div
+        class="list-element"
+        v-for="service in serviceList"
+        :key="service.topic"
+      >
         <service-viewer
           :topic="service.topic"
           :requestMessageFormat="service.requestMessageFormat"
@@ -39,7 +43,7 @@ export default {
     ServiceViewer
   },
   mounted: function() {
-    UbiiClientService.isConnected().then(() => {
+    UbiiClientService.waitForConnection().then(() => {
       this.getTopicList();
       this.getServiceList();
     });

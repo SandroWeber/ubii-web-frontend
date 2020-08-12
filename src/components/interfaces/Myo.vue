@@ -92,7 +92,7 @@ export default {
     });
     UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopInterface);
 
-    if (UbiiClientService.isConnected) this.startInterface();
+    if (UbiiClientService.isConnected()) this.startInterface();
   },
 
   beforeDestroy: function() {
@@ -165,7 +165,7 @@ export default {
     },
 
     startInterface: function() {
-      UbiiClientService.isConnected().then(() => {
+      UbiiClientService.waitForConnection().then(() => {
         // create all the specifications
         this.createUbiiSpecs();
 

@@ -78,7 +78,13 @@
           <div class="in-the-middle" id="text-area">
             <div id="message-text">{{ msgText }}</div>
             <br />
-            <button class="pure-button" id="optional-retry-btn" @click="startGame()">Retry</button>
+            <button
+              class="pure-button"
+              id="optional-retry-btn"
+              @click="startGame()"
+            >
+              Retry
+            </button>
           </div>
           <div class="in-the-middle" id="ready-area">
             <button class="pure-button" @click="startGame()">Ready</button>
@@ -160,7 +166,7 @@ export default {
     });
     UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopSession);
 
-    if (UbiiClientService.isConnected) this.startSession();
+    if (UbiiClientService.isConnected()) this.startSession();
   },
 
   beforeDestroy: function() {
@@ -346,7 +352,7 @@ export default {
       this.chooseGestureForOpponent();
       this.changeIcon("player", 1); */
 
-      UbiiClientService.isConnected().then(() => {
+      UbiiClientService.waitForConnection().then(() => {
         //find myo topic & set it as input
         this.findMyoTopic().then(() => {
           // create all specifications
