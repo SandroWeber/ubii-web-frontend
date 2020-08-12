@@ -172,6 +172,7 @@ export default {
       // specification of a ubii.devices.Device
       // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/devices/device.proto
       this.ubiiDevice = {
+        clientId: UbiiClientService.getClientID(),
         name: deviceName,
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
         components: [
