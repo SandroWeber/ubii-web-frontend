@@ -44,7 +44,6 @@ export default {
       this.xrHub.webGLScene.add(this.camera);
       this.xrHub.css3DScene.add(this.camera);
 
-      //this.container.appendChild(WebVR.createButton(this.xrHub.webGLRenderer));
       this.container.appendChild(
         VRButton.createButton(this.xrHub.webGLRenderer)
       );

@@ -9,6 +9,13 @@ import { ThreeConfigCanvas } from './ThreeConfigCanvas';
 
 
 class XRHub {
+  /**
+   *
+   * @param container {Element} DOM element of the render container
+   * @param camera {THREE.Camera}
+   * @param roomId {String} room id contained in the url or undefined
+   * @param controls {Controls}
+   */
   constructor(container, camera, roomId, controls) {
     this.roomId = roomId;
     this.container = container;
@@ -20,6 +27,11 @@ class XRHub {
     this.initRoom();
   }
 
+  /**
+   *  initializes the room by creating the new scene, getting the room data for the id and deserializing received scenes into THREE.Scenes
+   *  Finally it initializes the webcontent and the mouse controls
+   * @returns {Promise<void>}
+   */
   async initRoom(){
     this.webGLScene = new THREE.Scene();
     this.webGLScene.background = new THREE.Color('skyblue');
@@ -44,6 +56,9 @@ class XRHub {
     }
   }
 
+  /**
+   * Initializes the WebGLRenderer
+   */
   initWebGLRenderer(){
     this.webGLRenderer = new THREE.WebGLRenderer({
       alpha: true , antialias: false
@@ -59,6 +74,9 @@ class XRHub {
     this.container.appendChild(this.webGLRenderer.domElement);
   }
 
+  /**
+   * Initializes the CSS3D Renderer
+   */
   initCSS3DRenderer(){
     this.css3DRenderer = new CSS3DRenderer();
     this.css3DRenderer.setSize(
@@ -68,6 +86,10 @@ class XRHub {
     this.container.appendChild(this.css3DRenderer.domElement);
   }
 
+  /**
+   * Initializes the WebContent by iterating through the children of the WebGL Scene and instantiating a new ThreeWebsiteCanvas
+   * for each object with a userData.canvasId property
+   */
   initWebContent(){
     for(const child of this.webGLScene.children){
      if(child.userData && child.userData.canvasId && child.name !== CONFIG_CANVAS_NAME){
@@ -79,6 +101,9 @@ class XRHub {
     }
   }
 
+  /**
+   * Initializes the THREE.ConfigCanvas in a scene
+   */
   initConfigCanvas(){
     this.configCanvas = new ThreeConfigCanvas(1024, 768, this.perspCamera, this.togglePointerEvents);
     this.configCanvas.addToScenes(this.webGLScene, this.css3DScene);
@@ -87,6 +112,13 @@ class XRHub {
     this.configCanvas.setSize(0.3, 0.25);
   }
 
+  /**
+   * Deserializes the object string
+   * Depending on the userData.url property it searches for the object in either the WebGL or the CSS3D scene
+   * When found it updates the scene objects position, rotation and scale, with the values from the given object
+   *
+   * @param object3DString {String}
+   */
   updateObject3D(object3DString){
     const loader = new THREE.ObjectLoader();
     const object3D = loader.parse(JSON.parse(object3DString));
@@ -102,6 +134,13 @@ class XRHub {
     }
   }
 
+  /**
+   * Recursively goes through the given scene and searches for an object that has the given value in the given property inside its userData property
+   * @param scene {THREE.Scene}
+   * @param property {String} name of the property you want to search for
+   * @param value {String} value of the property you want to search for
+   * @returns {undefined|any}
+   */
   getObjectByUserDataProperty(scene, property, value){
     for(const child of scene.children){
       if(child.userData[property] && child.userData[property] === value){
@@ -111,6 +150,10 @@ class XRHub {
     return undefined;
   }
 
+  /**
+   * creates a new ThreeWebsiteCanvas with the given url ate a fixed location
+   * @param url {String}
+   */
   spawnWebContent(url){
     // let url = 'https://threejs.org/'; // 'http://localhost:8080'; // 'https://threejs.org/examples/?q=css#css3d_youtube';
     const webContent = new ThreeWebsiteCanvas(
@@ -124,37 +167,34 @@ class XRHub {
     webContent.setSize(1, 0.75);
   }
 
+  /**
+   * Sets the "pointe-events" style of the webGLRenderer DOM element to either "none" or "all"
+   */
   togglePointerEvents(){
     const current = this.webGLRenderer.domElement.style.pointerEvents;
     this.webGLRenderer.domElement.style.pointerEvents = current === "none" && current.length > 0 ? "all": "none";
   }
 
+  /**
+   * Toggles the configCanvas of the scene and toggles the pointer events
+   * @param websiteCanvas
+   */
   toggleConfigCanvas(websiteCanvas){
     this.controls.enabled = !this.controls.enabled;
     this.configCanvas.toggle(websiteCanvas);
     this.togglePointerEvents();
   }
 
+  /**
+   * update function that gets executed on every render
+   * @param delta
+   */
   update(delta) {
-    // this.mesh.rotation.x += delta;
-    // this.mesh.rotation.y += delta;
   }
 
-  createInteractionToggleButton(){
-    const button = document.createElement("button");
-    button.style.width = 200+"px";
-    button.style.height = 20+"px";
-    button.style.position = "absolute";
-    button.style.top = 100+"px";
-    button.style.right = 10+"px";
-    button.style.textAlign=  "center";
-    button.style.zIndex = 100;
-    button.style.display = "block";
-    button.innerText = "Toggle Website Interaction";
-    button.addEventListener("click", this.togglePointerEvents.bind(this));
-    document.documentElement.appendChild(button);
-  }
-
+  /**
+   * downloads both scenes as JSON files
+   */
   downloadScenes(){
     const exportName = "sceneJSONDownload";
     const webGLDataURL = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.webGLScene.toJSON()));

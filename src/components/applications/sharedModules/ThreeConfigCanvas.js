@@ -1,5 +1,5 @@
 import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer';
-import TextBoxComponent from './TextBoxComponent';
+import ConfigCanvasVueComponent from './ConfigCanvasVueComponent';
 import Vue from 'vue';
 import ThreeWebContentCanvas from './ThreeWebContentCanvas';
 import * as THREE from 'three';
@@ -8,6 +8,12 @@ import { CONFIG_CANVAS_NAME } from './XRHubConstants';
 export class ThreeConfigCanvas extends ThreeWebContentCanvas{
 
 
+  /**
+   *
+   * @param resolutionWidth {int}
+   * @param resolutionHeight {int}
+   * @param perspCamera {THREE.Camera}
+   */
   constructor(resolutionWidth, resolutionHeight, perspCamera){
     super(resolutionWidth, resolutionHeight, CONFIG_CANVAS_NAME);
     this.perspCamera = perspCamera;
@@ -15,6 +21,10 @@ export class ThreeConfigCanvas extends ThreeWebContentCanvas{
     this.css3DCanvas.userData.container.style.visibility = "hidden";
   }
 
+  /**
+   * Creates a new THREE.CSS3DObject containing a ConfigCanvasVueComponent
+   * @returns {THREE.CSS3DObject}
+   */
   createCSS3DCanvas(){
     const container = document.createElement("div");
     container.id = "configCanvas";
@@ -26,7 +36,7 @@ export class ThreeConfigCanvas extends ThreeWebContentCanvas{
     const css3DCanvas = new CSS3DObject(container);
     css3DCanvas.userData.container = container;
 
-    const TextboxClass = Vue.extend(TextBoxComponent);
+    const TextboxClass = Vue.extend(ConfigCanvasVueComponent);
     const dataObject = {
       urlObject: this,
     };
@@ -41,10 +51,19 @@ export class ThreeConfigCanvas extends ThreeWebContentCanvas{
     return css3DCanvas;
   }
 
+  /**
+   * Calls the update URL callback of the given website object
+   */
   onReload(){
     this.websiteObject.userData.updateUrl(this.url);
   }
 
+  /**
+   * Sets the local url property to the one from the given object
+   * positions the both the WebGL and CSS3D part of the ConfigCanvas according to the given url
+   * and toggle the visibility of the canvas
+   * @param webGLWebsiteObject {THREE.Object3D}
+   */
   toggle(webGLWebsiteObject){
     this.url = webGLWebsiteObject.userData.css3DObject.userData.url;
     this.websiteObject = webGLWebsiteObject;

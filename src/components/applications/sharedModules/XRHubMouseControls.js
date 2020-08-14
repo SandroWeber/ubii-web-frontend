@@ -6,6 +6,18 @@ export class XRHubMouseControls {
 
   DISTANCE_TO_CAMERA = 1.5;
 
+  /**
+   *
+   * @param container {Element}the container of the three.js scene
+   * @param roomId  {String}
+   * @param camera {THREE.Camera}
+   * @param webGLScene {THREE.Scene}
+   * @param webGLMouseSphere {THREE.Object3D}
+   * @param css3DScene {THREE.Scene}
+   * @param css3DMouseSpehre {THREE.Object3D}
+   * @param roomService {XRHubRoomService}
+   * @param toggleConfigCanvas {callback} callback to toggle the ThreeConfigCanvas in a Scene
+   */
   constructor(container, roomId, camera, webGLScene, webGLMouseSphere, css3DScene, css3DMouseSpehre, roomService, toggleConfigCanvas) {
     this.container = container;
     this.roomId = roomId;
@@ -25,19 +37,11 @@ export class XRHubMouseControls {
     this.container.addEventListener('keydown', this.handleKeyDown.bind(this));
   }
 
-  // createMouseSpheres() {
-  //   const geometry = new THREE.SphereGeometry(0.01);
-  //   const material = new THREE.MeshBasicMaterial();
-  //
-  //   const mesh = new THREE.Mesh(geometry, material);
-  //   mesh.name = "webGLMouseSphere";
-  //   this.webGLMouseSphere = mesh;
-  //   this.css3DMouseSphere = mesh.clone();
-  //   this.css3DMouseSphere.name = "css3DMouseSphere";
-  //   this.webGLScene.add(this.webGLMouseSphere);
-  //   this.css3DScene.add(this.css3DMouseSphere);
-  // }
-
+  /**
+   * Calculates new mouse coordinates from the given MouseEvent.
+   * Then updates the position of both mouse spheres in the WebGL and CSS3D scene, with the calculated position.
+   * @param event {MouseEvent}
+   */
   updateMouse(event){
     const xNDC = ((event.x-this.container.offsetLeft)/this.container.clientWidth)*2-1;
     const yNDC = -((event.y-this.container.offsetTop)/this.container.clientHeight)*2+1;
@@ -51,13 +55,20 @@ export class XRHubMouseControls {
     this.webGLMouseSphere.rotation.copy(this.camera.rotation);
     this.css3DMouseSphere.position.copy(this.camera.position.clone().add(mouseVector));
     this.css3DMouseSphere.rotation.copy(this.camera.rotation);
+    this.updateObjects(event);
+  }
+
+  /**
+   * Rotates all objects that are appended to the userData.toRotate property from the webGLMouseSphere
+   * Sends updates for all rotated objects and all child objects of both mouse spheres.
+   * @param event {MouseEvent}
+   */
+  updateObjects(event){
     const toRotate = this.webGLMouseSphere.userData.toRotate;
     if(toRotate){
-      // rotateOnAxis("WebGL", toRotate.name, new THREE.Vector3(0,1,0), event.movementX*0.1, this.roomId, true);
       toRotate.rotateOnAxis(new THREE.Vector3(0,1,0), event.movementX*0.1);
       this.roomService.updateObject3D(toRotate, this.roomId);
       if(toRotate.userData.css3DObject){
-        // rotateOnAxis("CSS3D", toRotate.userData.css3DObject.name, new THREE.Vector3(0,1,0), event.movementX*0.1, this.roomId, true);
         toRotate.userData.css3DObject.rotateOnAxis(new THREE.Vector3(0,1,0), event.movementX*0.1);
         this.roomService.updateObject3D(toRotate.userData.css3DObject, this.roomId);
       }
@@ -70,6 +81,11 @@ export class XRHubMouseControls {
     }
   }
 
+  /**
+   * Handles if a mouseup event has occurred.
+   * Removes all children from both mouse spheres and clears the userData.toRotate property
+   * @param event {MouseEvent}
+   */
   handleMouseUp(event){
     if(event.button === 0){
       this.removeFollower(this.webGLMouseSphere, this.webGLScene);
@@ -78,6 +94,15 @@ export class XRHubMouseControls {
     }
   }
 
+  /**
+   * Handles the mousedown MouseEvent
+   * Gets the object closest to the mouse sphere which is intersecting the raycast from the camera through the sphere
+   * According to the mouse button that has been pressed it applies the corresponding action to that object
+   * event.button = 0 -> left mouse button has been pressed
+   * event.button = 1 -> middle mouse button has been pressed
+   * event.button = 2 -> right mouse button has been pressed
+   * @param event {MouseEvent}
+   */
   handleMouseDown(event){
     const intersectedObjects = this.raycastFromScreenCoordinates(event.x, event.y).filter(it => it.object.name !== this.webGLMouseSphere.name);
     if (intersectedObjects.length > 0) {
@@ -98,15 +123,18 @@ export class XRHubMouseControls {
         case 1:
           break;
         case 2:
-          // if (object.userData.updateUrl || object.name === CONFIG_CANVAS_NAME) {
-          //   this.toggleConfigCanvas(object);
-          // }
           break;
       }
 
     }
   }
 
+  /**
+   *  Handles the keydown KeyboardEvent
+   *  Gets the object closest to the mouse sphere which is intersecting the raycast from the camera through the sphere
+   *  Applies a certain action to that object depending on the key that has been pressed
+   * @param event {KeyboardEvent}
+   */
   handleKeyDown(event){
     const intersectedObjects = this.raycastFromMousePosition();
     if (intersectedObjects.length > 0) {
@@ -120,6 +148,12 @@ export class XRHubMouseControls {
     }
   }
 
+  /**
+   * Transforms the follower object into object space of the parent object
+   * Then attaches the follower object as a child to the parent.
+   * @param parent {THREE.Object3D}
+   * @param follower {THREE.Object3D}
+   */
   addFollowerToParent(parent, follower){
     const matrix = new THREE.Matrix4;
     matrix.getInverse( parent.matrixWorld );
@@ -129,6 +163,12 @@ export class XRHubMouseControls {
     parent.userData.selected = follower;
   }
 
+  /**
+   * Takes the object referenced in userData.selected property of the parent object
+   * Transforms it into world space, and adds it to the scene, wich means it gets removed from the parent
+   * @param parent {THREE.Object3D}
+   * @param scene {THREE.Scene}
+   */
   removeFollower(parent, scene){
     if(parent.userData.selected !== undefined){
       const child = parent.userData.selected;
@@ -139,6 +179,12 @@ export class XRHubMouseControls {
     }
   }
 
+  /**
+   * Sends a raycast into the scene from the given position transformed into NDC into the direction the camera is looking
+   * @param screenPosX {Integer} screenX property from a MouseEvent
+   * @param screenPosY {Integer} screenX property from a MouseEvent
+   * @returns {Intersection[]} all objects that intersect with the ray sent from the given position
+   */
   raycastFromScreenCoordinates(screenPosX, screenPosY){
     const eventXPosFromCenter = ((screenPosX-this.container.offsetLeft)/this.container.clientWidth)*2-1;
     const eventYPosFromCenter = -((screenPosY-this.container.offsetTop)/this.container.clientHeight)*2+1;
@@ -149,6 +195,10 @@ export class XRHubMouseControls {
     );
   }
 
+  /**
+   * Sends a raycast into the scene from the mouse sphere position into the direction of the mouse sphere position substracted by the camera position
+   * @returns {Intersection[]} all objects that intersect with the ray sent from the mouse sphere position
+   */
   raycastFromMousePosition(){
     const mouseWorldPosition = new THREE.Vector3();
     const cameraWorldPosition = new THREE.Vector3();
@@ -162,6 +212,11 @@ export class XRHubMouseControls {
     );
   }
 
+  /**
+   * Returns all children of the given object in a flat array
+   * @param object3D {THREE.Object3D}
+   * @returns {[]} {THREE.Object3D[]}
+   */
   getChildrenRecursive (object3D) {
     let children = [];
     object3D.children.forEach(child =>{
