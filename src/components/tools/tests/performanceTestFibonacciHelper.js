@@ -46,7 +46,6 @@ class PerformanceTestFibonacciHelper {
 
   static createSessionSpecs(number) {
     return {
-      id: uuidv4(),
       name: 'test-fibonacci-session-' + number,
       interactions: [],
       ioMappings: []
