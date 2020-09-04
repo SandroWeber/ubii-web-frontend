@@ -8,9 +8,7 @@
         'toggle-active': cocoSsdActive,
         'toggle-inactive': !cocoSsdActive
       }"
-    >
-      toggle coco-ssd object detection
-    </button>
+    >toggle coco-ssd object detection</button>
   </div>
 </template>
 
@@ -118,7 +116,6 @@ export default {
       }
 
       this.ubiiSessionCoCoSSD = {
-        id: uuidv4(),
         name: 'CameraWebInterface - Session CoCoSSD',
         processMode:
           ProtobufLibrary.ubii.sessions.ProcessMode
@@ -166,8 +163,8 @@ export default {
       }).then(response => {
         if (response.error) {
           console.warn(response.error);
-        } else {
-          console.info(response);
+        } else if (response.session) {
+          this.ubiiSessionCoCoSSD = response.session;
         }
       });
 
