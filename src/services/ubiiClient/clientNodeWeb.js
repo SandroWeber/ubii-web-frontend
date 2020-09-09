@@ -326,7 +326,7 @@ class ClientNodeWeb {
         topic: DEFAULT_TOPICS.SERVICES.TOPIC_SUBSCRIPTION,
         topicSubscription: {
           clientId: this.clientSpecification.id,
-          subscribeTopicRegexp: regexString
+          subscribeTopicRegexp: [regexString]
         }
       };
 
@@ -390,7 +390,7 @@ class ClientNodeWeb {
         topic: DEFAULT_TOPICS.SERVICES.TOPIC_SUBSCRIPTION,
         topicSubscription: {
           clientId: this.clientSpecification.id,
-          unsubscribeTopicRegexp: regexString
+          unsubscribeTopicRegexp: [regexString]
         }
       };
 
