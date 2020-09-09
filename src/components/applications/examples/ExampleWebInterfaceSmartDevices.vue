@@ -86,9 +86,8 @@ export default {
                 session: this.session
               })
               .then(response => {
-                if (response.id) {
-                  console.info(response);
-                  this.session = response;
+                if (response.session) {
+                  this.session = response.session;
                 }
               });
           });
@@ -258,7 +257,6 @@ export default {
 
       /* our session that contains the interaction and the mapping between "muxer -> interaction input" and "interaction output -> demuxer" */
       this.session = {
-        id: uuidv4(),
         name: 'SmartDeviceGathererExample - Session',
         interactions: [this.interaction],
         ioMappings: [
