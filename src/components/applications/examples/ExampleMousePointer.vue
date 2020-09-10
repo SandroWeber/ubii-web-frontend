@@ -7,31 +7,19 @@
 
       <div class="options">
         <!-- a checkbox to toggle showing the client side pointer -->
-        <input
-          id="checkboxClientPointer"
-          type="checkbox"
-          v-model="showClientPointer"
-        />
+        <input id="checkboxClientPointer" type="checkbox" v-model="showClientPointer" />
         <label for="checkboxClientPointer">Show Client Pointer</label>
 
         <br />
 
         <!-- a checkbox to toggle showing the server side pointer -->
-        <input
-          id="checkboxServerPointer"
-          type="checkbox"
-          v-model="showServerPointer"
-        />
+        <input id="checkboxServerPointer" type="checkbox" v-model="showServerPointer" />
         <label for="checkboxServerPointer">Show Server Pointer</label>
 
         <br />
 
         <!-- a checkbox to toggle inverting the pointer position at the server before sending it back to client -->
-        <input
-          id="checkboxMirrorPointer"
-          type="checkbox"
-          v-model="mirrorPointer"
-        />
+        <input id="checkboxMirrorPointer" type="checkbox" v-model="mirrorPointer" />
         <label for="checkboxMirrorPointer">Mirror Pointer</label>
       </div>
 
@@ -127,17 +115,17 @@ export default {
       this.stopExample();
     });
 
-    // some event hooks to restart/stop the experiment if necessary
-    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
-      this.stopExample();
+    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
       this.startExample();
+    });
+    UbiiClientService.on(UbiiClientService.EVENTS.DISCONNECT, () => {
+      this.stopExample();
     });
 
     // make sure we're connected, then start the example
     UbiiClientService.waitForConnection().then(() => {
       this.startExample();
     });
-
     UbiiClientService.onDisconnect(() => {
       this.stopExample();
     });
@@ -172,6 +160,7 @@ export default {
   },
   methods: {
     createUbiiSpecs: function() {
+      console.info('createUbiiSpecs');
       // create specifications for ubi-interact
 
       // helper definitions that we can reference later
@@ -288,6 +277,11 @@ export default {
     },
     /* STEP 2: making all calls related to ubi-interact backend */
     startExample: function() {
+      if (this.exampleStarted) {
+        return;
+      }
+      this.$data.exampleStarted = true;
+
       // make sure we're connected, then continue
       UbiiClientService.waitForConnection().then(() => {
         // create all the specifications we need to define our example application
@@ -328,7 +322,6 @@ export default {
               .then(response => {
                 if (response.session) {
                   this.ubiiSession = response.session;
-                  this.$data.exampleStarted = true;
                 }
               });
           });
