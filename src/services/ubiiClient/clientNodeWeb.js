@@ -75,7 +75,7 @@ class ClientNodeWeb {
     // unsubscribe all topics / regexes
     let topics = Array.from(this.topicDataCallbacks.keys());
     let regexes = Array.from(this.topicDataRegexCallbacks.keys());
-    let reply = await this.callService({
+    await this.callService({
       topic: DEFAULT_TOPICS.SERVICES.TOPIC_SUBSCRIPTION,
       topicSubscription: {
         unsubscribeTopics: topics,
@@ -84,7 +84,7 @@ class ClientNodeWeb {
     });
 
     // deregister all devices
-    this.deviceSpecifications.forEach(deviceSpecs => {
+    this.deviceSpecifications.forEach(async deviceSpecs => {
       await this.deregisterDevice(deviceSpecs);
     });
 
