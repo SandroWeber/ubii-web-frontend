@@ -88,7 +88,6 @@
 
 <script>
 import UbiiClientContent from '../sharedModules/UbiiClientContent';
-import UbiiEventBus from '../../../services/ubiiClient/ubiiEventBus';
 
 import uuidv4 from 'uuid/v4';
 import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
@@ -160,7 +159,6 @@ export default {
   },
   methods: {
     createUbiiSpecs: function() {
-      console.info('createUbiiSpecs');
       // create specifications for ubi-interact
 
       // helper definitions that we can reference later
