@@ -12,7 +12,6 @@ import * as dat from 'dat.gui';
 
 // Networking
 import UbiiClientService from '../../../services/ubiiClient/ubiiClientService';
-import UbiiEventBus from '../../../services/ubiiClient/ubiiEventBus';
 
 export default {
   name: 'SAVRScene',
@@ -66,10 +65,10 @@ export default {
         this.handleResize();
       });
 
-      UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
+      UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
         this.onConnectToUbiiParent();
       });
-      UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, () => {
+      UbiiClientService.on(UbiiClientService.EVENTS.DISCONNECT, () => {
         this.onDisconnectToUbiiParent();
       });
     },

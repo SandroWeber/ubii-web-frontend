@@ -4,14 +4,8 @@
       <br />
       <div class="c">
         Myo connected:
-        <font-awesome-icon
-          id="connect-icon"
-          :icon="connectedIcon"
-          class="interface-icon"
-        />
-        <p v-if="!myoConnected">
-          Do you have the Myo SDK installed? (only available for Windows/Mac)
-        </p>
+        <font-awesome-icon id="connect-icon" :icon="connectedIcon" class="interface-icon" />
+        <p v-if="!myoConnected">Do you have the Myo SDK installed? (only available for Windows/Mac)</p>
       </div>
       <table class="sturdy">
         <tr>
@@ -61,7 +55,6 @@
 import Myo from 'myo';
 
 import UbiiClientContent from '../applications/sharedModules/UbiiClientContent';
-import UbiiEventBus from '../../services/ubiiClient/ubiiEventBus';
 
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
@@ -86,11 +79,14 @@ export default {
       this.stopInterface();
     });
 
-    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
+    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
       this.stopInterface();
       this.startInterface();
     });
-    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopInterface);
+    UbiiClientService.on(
+      UbiiClientService.EVENTS.DISCONNECT,
+      this.stopInterface
+    );
 
     if (UbiiClientService.isConnected()) this.startInterface();
   },
