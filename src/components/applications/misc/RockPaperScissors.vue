@@ -78,13 +78,7 @@
           <div class="in-the-middle" id="text-area">
             <div id="message-text">{{ msgText }}</div>
             <br />
-            <button
-              class="pure-button"
-              id="optional-retry-btn"
-              @click="startGame()"
-            >
-              Retry
-            </button>
+            <button class="pure-button" id="optional-retry-btn" @click="startGame()">Retry</button>
           </div>
           <div class="in-the-middle" id="ready-area">
             <button class="pure-button" @click="startGame()">Ready</button>
@@ -128,7 +122,6 @@
 
 <script>
 import UbiiClientContent from '../sharedModules/UbiiClientContent';
-import UbiiEventBus from '../../../services/ubiiClient/ubiiEventBus';
 
 import uuidv4 from 'uuid/v4';
 import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
@@ -160,11 +153,11 @@ export default {
       this.stopSession();
     });
 
-    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
+    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
       this.stopSession();
       this.startSession();
     });
-    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopSession);
+    UbiiClientService.on(UbiiClientService.EVENTS.DISCONNECT, this.stopSession);
 
     if (UbiiClientService.isConnected()) this.startSession();
   },

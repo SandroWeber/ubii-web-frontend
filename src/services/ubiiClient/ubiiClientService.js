@@ -3,7 +3,6 @@
 import EventEmitter from 'events';
 
 import ClientNodeWeb from './clientNodeWeb';
-import UbiiEventBus from './ubiiEventBus';
 
 const uuidv4Regex =
   '[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}';
@@ -52,7 +51,6 @@ class UbiiClientService extends EventEmitter {
           );
           this.connecting = false;
 
-          UbiiEventBus.$emit(UbiiEventBus.CONNECT_EVENT);
           this.emit(this.EVENTS.CONNECT);
         }
       },
@@ -73,7 +71,7 @@ class UbiiClientService extends EventEmitter {
 
     let id = this.client.clientSpecification.id;
 
-    UbiiEventBus.$emit(UbiiEventBus.DISCONNECT_EVENT);
+    this.emit(this.EVENTS.DISCONNECT);
     this.onDisconnectCallbacks.forEach(callback => {
       callback();
     });

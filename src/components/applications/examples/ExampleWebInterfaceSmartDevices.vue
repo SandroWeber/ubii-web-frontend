@@ -1,9 +1,6 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
-    <div
-      id="example-web-smart-devices-touch-positions"
-      class="touch-position-area"
-    ></div>
+    <div id="example-web-smart-devices-touch-positions" class="touch-position-area"></div>
   </UbiiClientContent>
 </template>
 
@@ -15,7 +12,6 @@ import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 
 import UbiiClientContent from '../sharedModules/UbiiClientContent';
 import UbiiClientService from '../../../services/ubiiClient/ubiiClientService';
-import UbiiEventBus from '../../../services/ubiiClient/ubiiEventBus';
 
 /* eslint-disable no-console */
 
@@ -28,7 +24,7 @@ export default {
       this.stopExample();
     });
 
-    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, async () => {
+    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, async () => {
       await this.stopExample();
       await this.startExample();
     });

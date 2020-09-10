@@ -10,7 +10,6 @@
 import Visualizer from './Visualizer.vue';
 
 import UbiiClientContent from '../../applications/sharedModules/UbiiClientContent';
-import UbiiEventBus from '../../../services/ubiiClient/ubiiEventBus';
 
 import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
@@ -33,7 +32,7 @@ export default {
     });
 
     // some event hooks to restart/stop the experiment if necessary
-    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
+    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
       this.stopEditor();
       this.startEditor();
     });

@@ -68,7 +68,6 @@ import Fullscreen from 'vue-fullscreen';
 import UbiiClientContent from '../applications/sharedModules/UbiiClientContent';
 import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
-import UbiiEventBus from '../../services/ubiiClient/ubiiEventBus';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -95,7 +94,7 @@ export default {
     UbiiClientService.waitForConnection().then(() => {
       this.startInterface();
     });
-    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
+    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
       this.startInterface();
     });
     UbiiClientService.onDisconnect(async () => {
