@@ -72,6 +72,23 @@ class ClientNodeWeb {
   }
 
   async deinitialize() {
+    // unsubscribe all topics / regexes
+    let topics = Array.from(this.topicDataCallbacks.keys());
+    let regexes = Array.from(this.topicDataRegexCallbacks.keys());
+    await this.callService({
+      topic: DEFAULT_TOPICS.SERVICES.TOPIC_SUBSCRIPTION,
+      topicSubscription: {
+        unsubscribeTopics: topics,
+        unsubscribeTopicRegexp: regexes
+      }
+    });
+
+    // deregister all devices
+    this.deviceSpecifications.forEach(async deviceSpecs => {
+      await this.deregisterDevice(deviceSpecs);
+    });
+
+    // deregister client
     return this.callService({
       topic: DEFAULT_TOPICS.SERVICES.CLIENT_DEREGISTRATION,
       client: this.clientSpecification
@@ -182,7 +199,7 @@ class ClientNodeWeb {
       reply => {
         if (reply.device) {
           // Process the reply client specification.
-          this.deviceSpecifications.set(reply.device.name, reply.device);
+          this.deviceSpecifications.set(reply.device.id, reply.device);
 
           return reply.device;
         }
@@ -211,7 +228,7 @@ class ClientNodeWeb {
     return this.callService(message).then(
       reply => {
         if (reply.success) {
-          this.deviceSpecifications.delete(specs.name);
+          this.deviceSpecifications.delete(specs.id);
         }
 
         if (reply.error) {
