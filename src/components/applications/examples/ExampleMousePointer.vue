@@ -35,7 +35,7 @@
         <label for="checkboxMirrorPointer">Mirror Pointer</label>
       </div>
 
-      <!-- the interaction area.
+      <!-- the mouse area.
       if our pointer is inside, its position is sent to the server and back to us, then displayed as a red square-->
       <div
         id="mouse-pointer-area"
@@ -99,14 +99,11 @@
 </template>
 
 <script>
-import UbiiClientContent from '../sharedModules/UbiiClientContent';
-
-//import uuidv4 from 'uuid/v4';
-import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
-//import { mapActions } from 'vuex';
+import UbiiClientContent from '../sharedModules/UbiiClientContent';
+import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -364,7 +361,7 @@ export default {
     /* publishing and subscribing */
     subscriptionServerPointerPosition: function(vec2) {
       // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
-      // interaction area and set our red square indicator
+      // mouse area and set our red square indicator
       let boundingRect = document
         .getElementById('mouse-pointer-area')
         .getBoundingClientRect();
@@ -438,10 +435,7 @@ export default {
       this.$data.clientMousePosition = relativeMousePosition;
       // publish our normalized client touch position
       this.publishClientPointerPosition(this.$data.clientMousePosition);
-    } /*,
-    ...mapActions('interactions', {
-      addInteraction: 'add'
-    })*/
+    }
   }
 };
 </script>
