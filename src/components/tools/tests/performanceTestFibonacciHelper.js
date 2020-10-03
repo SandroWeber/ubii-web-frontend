@@ -1,9 +1,7 @@
-import uuidv4 from 'uuid/v4';
-
 class PerformanceTestFibonacciHelper {
   static SEQENCE_LENGTH_INPUT_SUFFIX = 'fibonacciInput';
   static PROCESSED_OUTPUT_SUFFIX = 'fibonacciResult';
-  static processingCallback(inputs, outputs) {
+  static processingCallback(deltaTime, inputs, outputs) {
     let fibonacci = num => {
       var a = 1,
         b = 0,
@@ -23,68 +21,72 @@ class PerformanceTestFibonacciHelper {
     outputs.fibonacciResult = result;
   }
 
-  static createInteractionSpecs(number) {
+  static createProcessingModuleSpecs(number) {
     return {
-      id: uuidv4(),
-      name: 'test-fibonacci-interaction-' + number,
-      inputFormats: [
+      name: 'test-fibonacci-pm-' + number,
+      processingMode: {
+        frequency: {
+          hertz: 1000000 // basically go as fast as you can
+        }
+      },
+      inputs: [
         {
           internalName:
             PerformanceTestFibonacciHelper.SEQENCE_LENGTH_INPUT_SUFFIX,
           messageFormat: 'double'
         }
       ],
-      outputFormats: [
+      outputs: [
         {
           internalName: PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX,
           messageFormat: 'double'
         }
       ],
-      processingCallback: PerformanceTestFibonacciHelper.processingCallback.toString()
+      onProcessingStringified: PerformanceTestFibonacciHelper.processingCallback.toString()
     };
   }
 
   static createSessionSpecs(number) {
     return {
       name: 'test-fibonacci-session-' + number,
-      interactions: [],
+      processingModules: [],
       ioMappings: []
     };
   }
 
-  static addInteractionToSession(sessionSpecs, interactionSpecs) {
-    sessionSpecs.interactions.push(interactionSpecs);
+  static addProcessingModuleToSession(sessionSpecs, pmSpecs) {
+    sessionSpecs.processingModules.push(pmSpecs);
 
-    let topicPrefix = '/' + interactionSpecs.id + '/';
-    let ioMappings = {
-      interactionId: interactionSpecs.id,
+    let topicPrefix = '/' + sessionSpecs.name + '/' + pmSpecs.name + '/';
+    let ioMapping = {
+      processingModuleName: pmSpecs.name,
       inputMappings: [],
       outputMappings: []
     };
-    interactionSpecs.inputFormats.forEach(element => {
-      ioMappings.inputMappings.push({
-        name: element.internalName,
+    pmSpecs.inputs.forEach(element => {
+      ioMapping.inputMappings.push({
+        inputName: element.internalName,
         topicSource: topicPrefix + element.internalName
       });
     });
-    interactionSpecs.outputFormats.forEach(element => {
-      ioMappings.outputMappings.push({
-        name: element.internalName,
+    pmSpecs.outputs.forEach(element => {
+      ioMapping.outputMappings.push({
+        outputName: element.internalName,
         topicDestination: topicPrefix + element.internalName
       });
     });
-    sessionSpecs.ioMappings.push(ioMappings);
+    sessionSpecs.ioMappings.push(ioMapping);
   }
 
-  static createTestSpecs(sessionCount, interactionCountPerSession) {
+  static createTestSpecs(sessionCount, pmCountPerSession) {
     let allSessionSpecs = [];
 
     for (let s = 0; s < sessionCount; s++) {
       let sessionSpecs = this.createSessionSpecs(s);
 
-      for (let i = 0; i < interactionCountPerSession; i++) {
-        let interactionSpecs = this.createInteractionSpecs(i);
-        this.addInteractionToSession(sessionSpecs, interactionSpecs);
+      for (let i = 0; i < pmCountPerSession; i++) {
+        let pmSpecs = this.createProcessingModuleSpecs(i);
+        this.addProcessingModuleToSession(sessionSpecs, pmSpecs);
       }
 
       allSessionSpecs.push(sessionSpecs);

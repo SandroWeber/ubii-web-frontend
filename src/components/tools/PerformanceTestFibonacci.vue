@@ -50,13 +50,13 @@
         v-model="testData.settings.sessionCount"
       />
 
-      <label for="fibonacci-interaction-count" class="setting-label"
-        ># interactions:</label
+      <label for="fibonacci-pm-count" class="setting-label"
+        ># processing modules:</label
       >
       <app-input
-        :id="'fibonacci-interaction-count'"
-        :type="'# interactions'"
-        v-model="testData.settings.interactionCountPerSession"
+        :id="'fibonacci-pm-count'"
+        :type="'# processing modules'"
+        v-model="testData.settings.pmCountPerSession"
       />
 
       <label for="fibonacci-sequence-length" class="setting-label"
@@ -64,7 +64,7 @@
       >
       <app-input
         :id="'fibonacci-sequence-length'"
-        :type="'# interactions'"
+        :type="'# processing modules'"
         v-model="testData.settings.fibSequenceLength"
       />
 
@@ -115,7 +115,7 @@ export default {
         allSessionsSpecs: [],
         settings: {
           sessionCount: '1',
-          interactionCountPerSession: '5',
+          pmCountPerSession: '5',
           fibSequenceLength: '999999',
           testDurationSeconds: '5'
         },
@@ -137,44 +137,36 @@ export default {
       this.testData.statistics.processingPerSecond = 'N/A';
       this.testData.statistics.processingTime = 'N/A';
 
-      // create all the specs for sessions and interactions
+      // create all the specs for sessions and processing modules
       this.testData.allSessionsSpecs = PerformanceTestFibonacciHelper.createTestSpecs(
         this.testData.settings.sessionCount,
-        this.testData.settings.interactionCountPerSession
+        this.testData.settings.pmCountPerSession
       );
 
       this.testData.allSessionsSpecs.forEach(sessionSpec => {
         sessionSpec.ioMappings.forEach(ioMapping => {
-          // publish the sequence lengths to be calculated for each interaction
+          // publish the sequence lengths to be calculated for each processing module
           ioMapping.inputMappings.forEach(inputMapping => {
             if (
-              inputMapping.name.indexOf(
+              inputMapping.inputName.indexOf(
                 PerformanceTestFibonacciHelper.SEQENCE_LENGTH_INPUT_SUFFIX
               ) !== -1
             ) {
               UbiiClientService.publishRecord({
-                topic:
-                  '/' +
-                  ioMapping.interactionId +
-                  '/' +
-                  PerformanceTestFibonacciHelper.SEQENCE_LENGTH_INPUT_SUFFIX,
+                topic: inputMapping.topicSource,
                 double: parseFloat(this.testData.settings.fibSequenceLength)
               });
             }
           });
 
-          // subscribe to all interaction output topics
+          // subscribe to all processing module output topics
           ioMapping.outputMappings.forEach(outputMapping => {
             if (
-              outputMapping.name.indexOf(
+              outputMapping.outputName.indexOf(
                 PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX
               ) !== -1
             ) {
-              let subscriptionTopic =
-                '/' +
-                ioMapping.interactionId +
-                '/' +
-                PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX;
+              let subscriptionTopic = outputMapping.topicDestination;
               UbiiClientService.subscribeTopic(
                 subscriptionTopic,
                 this.onProcessingFinishedCallback
@@ -185,8 +177,6 @@ export default {
       });
     },
     startTest: async function() {
-      this.testData.statistics.processingIterations = 'N/A';
-
       this.prepareTest();
 
       let sessionSpecs = [];
@@ -233,6 +223,25 @@ export default {
         }
       });
 
+      // unsubscribe from all processing finished topics
+      this.testData.allSessionsSpecs.forEach(sessionSpec => {
+        sessionSpec.ioMappings.forEach(ioMapping => {
+          ioMapping.outputMappings.forEach(outputMapping => {
+            if (
+              outputMapping.outputName.indexOf(
+                PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX
+              ) !== -1
+            ) {
+              let subscriptionTopic = outputMapping.topicDestination;
+              UbiiClientService.unsubscribeTopic(
+                subscriptionTopic,
+                this.onProcessingFinishedCallback
+              );
+            }
+          });
+        });
+      });
+
       let passedTime =
         this.testData.statistics.stopTime - this.testData.statistics.startTime;
       this.testData.statistics.processingTime = passedTime;
@@ -248,7 +257,10 @@ export default {
     },
     onProcessingFinishedCallback: function(float, topic) {
       if (this.testData.status === 'running') {
-        let id = topic.substring(1, 37); // uuidv4 is 36 chars long
+        let indexSuffix = topic.indexOf(
+          PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX
+        );
+        let id = topic.substring(0, indexSuffix);
         this.testData.statistics.processingFinished.push(id);
       }
     }
