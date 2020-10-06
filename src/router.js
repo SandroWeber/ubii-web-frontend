@@ -163,6 +163,12 @@ export default new Router({
       name: 'Rock Paper Scissors',
       component: () =>
         import('./components/applications/misc/RockPaperScissors.vue')
+    },
+    {
+      path: '/applications/misc/remote-control',
+      name: 'Remote Control',
+      component: () =>
+        import('./components/applications/misc/remoteControl.vue')
     }
   ]
 });

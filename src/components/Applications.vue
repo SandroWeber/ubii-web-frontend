@@ -121,6 +121,13 @@
             <p>Rock Paper Scissors</p>
           </app-tile>
         </router-link>
+        
+        <router-link to="/applications/misc/remote-control" class="interface-link" tag="div">
+          <app-tile class="layer-three background round shadow purple-accent">
+            <font-awesome-icon icon="mobile-alt" class="interface-icon" />
+            <p>Remote Control</p>
+          </app-tile>
+        </router-link>
       </div>
 
       <div class="grid"></div>
