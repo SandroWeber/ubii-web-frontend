@@ -7,23 +7,35 @@
 
       <div class="options">
         <!-- a checkbox to toggle showing the client side pointer -->
-        <input id="checkboxClientPointer" type="checkbox" v-model="showClientPointer" />
+        <input
+          id="checkboxClientPointer"
+          type="checkbox"
+          v-model="showClientPointer"
+        />
         <label for="checkboxClientPointer">Show Client Pointer</label>
 
         <br />
 
         <!-- a checkbox to toggle showing the server side pointer -->
-        <input id="checkboxServerPointer" type="checkbox" v-model="showServerPointer" />
+        <input
+          id="checkboxServerPointer"
+          type="checkbox"
+          v-model="showServerPointer"
+        />
         <label for="checkboxServerPointer">Show Server Pointer</label>
 
         <br />
 
         <!-- a checkbox to toggle inverting the pointer position at the server before sending it back to client -->
-        <input id="checkboxMirrorPointer" type="checkbox" v-model="mirrorPointer" />
+        <input
+          id="checkboxMirrorPointer"
+          type="checkbox"
+          v-model="mirrorPointer"
+        />
         <label for="checkboxMirrorPointer">Mirror Pointer</label>
       </div>
 
-      <!-- the interaction area.
+      <!-- the mouse area.
       if our pointer is inside, its position is sent to the server and back to us, then displayed as a red square-->
       <div
         id="mouse-pointer-area"
@@ -60,41 +72,38 @@
         <br />Reading the code of this example will show your how to register a
         device with Ubi-Interact defining the topics for data communication. It
         also shows you how to publish (send) and subcribe (receive) to topics. A
-        small session+interaction is also specified and communicated to
+        small session + processing module is also specified and communicated to
         Ubi-Interact that can manipulate the communicated mouse position. You
-        can see in the code how to specify this interaction on the client side,
-        link it to the topics of our device and start it.
+        can see in the code how to specify this processing module on the client
+        side, link it to the topics of our device and start it.
       </div>
 
       <div class="description-options">
         You can toggle whether the client/server side mouse indicator should be
-        shown. "Mirror Pointer" will tell the interaction to invert your client
-        mouse position in X and Y.
+        shown. "Mirror Pointer" will tell the processing module to invert your
+        client mouse position in X and Y.
       </div>
 
       <div class="description-mouse-area">
         Moving your mouse inside this area will publish its current position
         normalized to ([0;1] , [0;1]) on the topic ".../mouse_client_position".
-        An interaction in the backend will read this client position. If the
-        flag "mirror pointer" is set, the interaction will invert the client
-        position. The interaction will then write the new position to the topic
-        ".../mouse_server_position", which we subscribe to. Once we receive data
-        on the ".../mouse_server_position" topic, the position of the server
-        pointer indicator (red square) will be updated.
+        A processing module in the backend will read this client position. If
+        the flag "mirror pointer" is set, the processing module will invert the
+        client position. The processing module will then write the new position
+        to the topic ".../mouse_server_position", which we subscribe to. Once we
+        receive data on the ".../mouse_server_position" topic, the position of
+        the server pointer indicator (red square) will be updated.
       </div>
     </div>
   </UbiiClientContent>
 </template>
 
 <script>
-import UbiiClientContent from '../sharedModules/UbiiClientContent';
-
-import uuidv4 from 'uuid/v4';
-import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
-import { mapActions } from 'vuex';
+import UbiiClientContent from '../sharedModules/UbiiClientContent';
+import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -187,7 +196,7 @@ export default {
             topic: topicPrefix + '/mirror_mouse',
             messageFormat: 'bool'
           },
-          // component subscribing to the pointer position returned by the server interaction
+          // component subscribing to the pointer position returned by the server processing module
           {
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER,
             topic: topicPrefix + '/mouse_server_position',
@@ -199,9 +208,8 @@ export default {
       this.ubiiComponentMirrorPointer = this.ubiiDevice.components[1];
       this.ubiiComponentServerPointer = this.ubiiDevice.components[2];
 
-      // specification of a ubii.interactions.Interaction
-      // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/interactions/interaction.proto
-      let processingCallback = (input, output) => {
+      // specification of a ubii.processing.ProcessingModule
+      let processingCallback = (deltaTime, input, output) => {
         if (!input.clientPointer) {
           return;
         }
@@ -219,12 +227,15 @@ export default {
         }
       };
 
-      this.ubiiInteraction = {
-        id: uuidv4(),
+      this.ubiiProcessingModule = {
         name: 'mirror-mouse-pointer',
-        processingCallback: processingCallback.toString(),
-        processFrequency: 60,
-        inputFormats: [
+        onProcessingStringified: processingCallback.toString(),
+        processingMode: {
+          frequency: {
+            hertz: 60
+          }
+        },
+        inputs: [
           {
             internalName: 'clientPointer',
             messageFormat: 'ubii.dataStructure.Vector2'
@@ -234,38 +245,41 @@ export default {
             messageFormat: 'bool'
           }
         ],
-        outputFormats: [
+        outputs: [
           {
             internalName: 'serverPointer',
             messageFormat: 'ubii.dataStructure.Vector2'
           }
         ]
       };
-      this.ubiiInteraction.inputClientPointer = this.ubiiInteraction.inputFormats[0];
-      this.ubiiInteraction.inputMirrorPointer = this.ubiiInteraction.inputFormats[1];
-      this.ubiiInteraction.outputServerPointer = this.ubiiInteraction.outputFormats[0];
+      this.ubiiProcessingModule.inputClientPointer = this.ubiiProcessingModule.inputs[0];
+      this.ubiiProcessingModule.inputMirrorPointer = this.ubiiProcessingModule.inputs[1];
+      this.ubiiProcessingModule.outputServerPointer = this.ubiiProcessingModule.outputs[0];
 
       // specification of a ubii.sessions.Session
       // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/sessions/session.proto
       this.ubiiSession = {
         name: 'web-mouse-example-session',
-        interactions: [this.ubiiInteraction],
+        processingModules: [this.ubiiProcessingModule],
         ioMappings: [
           {
-            interactionId: this.ubiiInteraction.id,
+            processingModuleName: this.ubiiProcessingModule.name,
             inputMappings: [
               {
-                name: this.ubiiInteraction.inputClientPointer.internalName,
+                inputName: this.ubiiProcessingModule.inputClientPointer
+                  .internalName,
                 topicSource: this.ubiiComponentClientPointer.topic
               },
               {
-                name: this.ubiiInteraction.inputMirrorPointer.internalName,
+                inputName: this.ubiiProcessingModule.inputMirrorPointer
+                  .internalName,
                 topicSource: this.ubiiComponentMirrorPointer.topic
               }
             ],
             outputMappings: [
               {
-                name: this.ubiiInteraction.outputServerPointer.internalName,
+                outputName: this.ubiiProcessingModule.outputServerPointer
+                  .internalName,
                 topicDestination: this.ubiiComponentServerPointer.topic
               }
             ]
@@ -347,7 +361,7 @@ export default {
     /* publishing and subscribing */
     subscriptionServerPointerPosition: function(vec2) {
       // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
-      // interaction area and set our red square indicator
+      // mouse area and set our red square indicator
       let boundingRect = document
         .getElementById('mouse-pointer-area')
         .getBoundingClientRect();
@@ -421,10 +435,7 @@ export default {
       this.$data.clientMousePosition = relativeMousePosition;
       // publish our normalized client touch position
       this.publishClientPointerPosition(this.$data.clientMousePosition);
-    },
-    ...mapActions('interactions', {
-      addInteraction: 'add'
-    })
+    }
   }
 };
 </script>

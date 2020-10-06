@@ -15,7 +15,7 @@
         </app-tile>
       </router-link>-->
 
-      <router-link to="/administration/interactionEditor" class="grid-link" tag="div">
+      <!--<router-link to="/administration/interactionEditor" class="grid-link" tag="div">
         <app-tile class="layer-three background round shadow green-accent">
           <font-awesome-icon icon="microchip" class="grid-icon" />
           <p>Interaction Editor</p>
@@ -26,9 +26,13 @@
             title="Under Construction"
           />
         </app-tile>
-      </router-link>
+      </router-link>-->
 
-      <router-link to="/administration/sessionEditor" class="grid-link" tag="div">
+      <router-link
+        to="/administration/sessionEditor"
+        class="grid-link"
+        tag="div"
+      >
         <app-tile class="layer-three background round shadow green-accent">
           <font-awesome-icon icon="project-diagram" class="grid-icon" />
           <p>Session Editor</p>

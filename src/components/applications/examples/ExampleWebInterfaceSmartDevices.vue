@@ -1,12 +1,13 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
-    <div id="example-web-smart-devices-touch-positions" class="touch-position-area"></div>
+    <div
+      id="example-web-smart-devices-touch-positions"
+      class="touch-position-area"
+    ></div>
   </UbiiClientContent>
 </template>
 
 <script>
-import uuidv4 from 'uuid/v4';
-
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 
@@ -25,11 +26,11 @@ export default {
     });
 
     UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, async () => {
-      await this.stopExample();
       await this.startExample();
     });
-
-    this.createUbiiSpecs();
+    UbiiClientService.on(UbiiClientService.EVENTS.DISCONNECT, () => {
+      this.stopExample();
+    });
     UbiiClientService.waitForConnection().then(() => {
       this.startExample();
     });
@@ -47,15 +48,18 @@ export default {
     };
   },
   methods: {
-    startExample: async function() {
+    startExample: function() {
       if (this.running) return;
 
       this.running = true;
 
-      await UbiiClientService.waitForConnection().then(() => {
+      this.createUbiiSpecs();
+
+      UbiiClientService.waitForConnection().then(() => {
         /* we register our device needed to publish the vibration distance threshold */
         UbiiClientService.registerDevice(this.device)
           .then(response => {
+            console.info(response);
             if (response.id) {
               this.device = response;
               return response;
@@ -79,11 +83,12 @@ export default {
             UbiiClientService.client
               .callService({
                 topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
-                session: this.session
+                session: this.ubiiSession
               })
               .then(response => {
+                console.info(response);
                 if (response.session) {
-                  this.session = response.session;
+                  this.ubiiSession = response.session;
                 }
               });
           });
@@ -97,10 +102,10 @@ export default {
         this.handleTouchObjects
       );
 
-      if (this.session) {
+      if (this.ubiiSession) {
         await UbiiClientService.client.callService({
           topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
-          session: this.session
+          session: this.ubiiSession
         });
       }
 
@@ -136,7 +141,7 @@ export default {
       };
 
       /* this is the processing callback that compares touch positions and lets devices vibrate whose positions are close */
-      let processCB = (inputs, outputs) => {
+      let processCB = (deltaTime, inputs, outputs) => {
         /* compare touch positions of all smart devices, let those who are close (distance below threshold) vibrate */
         let positionRecords = inputs.muxTouchPositions;
         let vibrationIndices = [];
@@ -205,12 +210,16 @@ export default {
         };
       };
 
-      /* our interaction with the I/O specifications fitting the processCB */
-      this.interaction = {
-        id: uuidv4(),
-        name: 'SmartDeviceGathererExample - Interaction',
-        processingCallback: processCB.toString(),
-        inputFormats: [
+      /* our processing module with the I/O specifications fitting the processCB */
+      this.ubiiProcessingModule = {
+        name: 'SmartDeviceGathererExample',
+        processingMode: {
+          frequency: {
+            hertz: 30
+          }
+        },
+        onProcessingStringified: processCB.toString(),
+        inputs: [
           {
             internalName: 'muxTouchPositions',
             messageFormat: 'ubii.dataStructure.Vector2'
@@ -220,7 +229,7 @@ export default {
             messageFormat: 'double'
           }
         ],
-        outputFormats: [
+        outputs: [
           {
             internalName: 'demuxVibration',
             messageFormat: 'double'
@@ -234,7 +243,6 @@ export default {
 
       /* our muxer gathers all topics "<ID>/web-interface-smart-device/touch_position" and extracts <ID> as identity */
       this.muxerTouchPositions = {
-        id: uuidv4(),
         name: 'SmartDeviceGathererExample - TopicMux positions',
         dataType: 'vector2',
         topicSelector:
@@ -245,36 +253,35 @@ export default {
 
       /* our demuxer will publish to "<ID>/web-interface-smart-device/vibration_pattern" when provided the ID as outputTopicParams */
       this.demuxerVibrations = {
-        id: uuidv4(),
         name: 'SmartDeviceGathererExample - TopicDemux vibrations',
         dataType: 'double',
         outputTopicFormat: '%s/web-interface-smart-device/vibration_pattern'
       };
 
-      /* our session that contains the interaction and the mapping between "muxer -> interaction input" and "interaction output -> demuxer" */
-      this.session = {
+      /* our session that contains the processing module and the mapping between "muxer -> PM input" and "PM output -> demuxer" */
+      this.ubiiSession = {
         name: 'SmartDeviceGathererExample - Session',
-        interactions: [this.interaction],
+        processingModules: [this.ubiiProcessingModule],
         ioMappings: [
           {
-            interactionId: this.interaction.id,
+            processingModuleName: this.ubiiProcessingModule.name,
             inputMappings: [
               {
-                name: this.interaction.inputFormats[0].internalName,
+                inputName: this.ubiiProcessingModule.inputs[0].internalName,
                 topicSource: this.muxerTouchPositions
               },
               {
-                name: this.interaction.inputFormats[1].internalName,
+                inputName: this.ubiiProcessingModule.inputs[1].internalName,
                 topicSource: this.topicVibrationDistanceThreshold
               }
             ],
             outputMappings: [
               {
-                name: this.interaction.outputFormats[0].internalName,
+                outputName: this.ubiiProcessingModule.outputs[0].internalName,
                 topicDestination: this.demuxerVibrations
               },
               {
-                name: this.interaction.outputFormats[1].internalName,
+                outputName: this.ubiiProcessingModule.outputs[1].internalName,
                 topicDestination: this.topicTouchObjects
               }
             ]
