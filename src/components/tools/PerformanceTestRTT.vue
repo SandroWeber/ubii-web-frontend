@@ -37,7 +37,7 @@
 </template>
 
 <script>
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 
 import { AppInput, AppButton } from '../appComponents/appComponents.js';

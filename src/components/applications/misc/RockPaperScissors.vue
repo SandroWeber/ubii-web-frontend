@@ -78,7 +78,13 @@
           <div class="in-the-middle" id="text-area">
             <div id="message-text">{{ msgText }}</div>
             <br />
-            <button class="pure-button" id="optional-retry-btn" @click="startGame()">Retry</button>
+            <button
+              class="pure-button"
+              id="optional-retry-btn"
+              @click="startGame()"
+            >
+              Retry
+            </button>
           </div>
           <div class="in-the-middle" id="ready-area">
             <button class="pure-button" @click="startGame()">Ready</button>
@@ -124,7 +130,7 @@
 import UbiiClientContent from '../sharedModules/UbiiClientContent';
 
 import uuidv4 from 'uuid/v4';
-import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 

@@ -13,7 +13,7 @@ import * as THREE from 'three';
 import { loadObj } from './modules/threeHelper';
 
 // Networking
-import UbiiClientService from '../../../services/ubiiClient/ubiiClientService';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import UbiiClientContent from '../sharedModules/UbiiClientContent';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 import { createUbiiSpecs } from './modules/ubiiHelper';

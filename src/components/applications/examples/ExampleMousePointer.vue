@@ -101,9 +101,9 @@
 <script>
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
 import UbiiClientContent from '../sharedModules/UbiiClientContent';
-import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';

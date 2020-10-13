@@ -11,7 +11,7 @@ import Visualizer from './Visualizer.vue';
 
 import UbiiClientContent from '../../applications/sharedModules/UbiiClientContent';
 
-import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 export default {

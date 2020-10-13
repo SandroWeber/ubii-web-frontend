@@ -11,7 +11,7 @@ import Stats from '../sharedModules/Stats';
 import * as dat from 'dat.gui';
 
 // Networking
-import UbiiClientService from '../../../services/ubiiClient/ubiiClientService';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
 export default {
   name: 'SAVRScene',
