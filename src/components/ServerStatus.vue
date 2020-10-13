@@ -2,7 +2,7 @@
   <app-layer class="layer-two background low-contrast horizontal-shadow">
     <app-button
       class="button round"
-      :class="connected? 'green-accent' : 'red-accent'"
+      :class="connected ? 'green-accent' : 'red-accent'"
       @click="onButtonConnectionStatus"
     >
       <font-awesome-icon
@@ -12,7 +12,10 @@
         title="Server Connection Config"
       />
     </app-button>
-    <div v-if="showConnectionSettings" class="server-info connection-settings background layer-two">
+    <div
+      v-if="showConnectionSettings"
+      class="server-info connection-settings background layer-two"
+    >
       <label for="server-ip" class="label-server-ip">Server IP</label>
       <app-input
         :id="'server-ip'"
@@ -32,14 +35,15 @@
         :contentSizePercentage="60"
         @click="onButtonConnect"
         v-b-tooltip.hover
-        :title="connected? 'disabled, already connected' : ''"
-      >{{ connected ? 'reconnect' : 'connect' }}</app-button>
+        :title="connected ? 'disabled, already connected' : ''"
+        >{{ connected ? 'reconnect' : 'connect' }}</app-button
+      >
     </div>
   </app-layer>
 </template>
 
 <script>
-import UbiiClientService from '../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import {
   AppButton,
   AppLayer,

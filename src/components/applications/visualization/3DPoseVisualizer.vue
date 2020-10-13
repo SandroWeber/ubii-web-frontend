@@ -1,7 +1,12 @@
 <template>
   <div>
-    <button id="button-send-testdata" @click="toggleTestData()">Toggle sending test data</button>
-    <div id="example-threejs-webvr-render-container" class="render-container"></div>
+    <button id="button-send-testdata" @click="toggleTestData()">
+      Toggle sending test data
+    </button>
+    <div
+      id="example-threejs-webvr-render-container"
+      class="render-container"
+    ></div>
   </div>
 </template>
 
@@ -14,7 +19,7 @@ import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 import WebVR from '../sharedModules/WebVR';
-import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
 export default {
   name: 'Pose3DVisualizer',

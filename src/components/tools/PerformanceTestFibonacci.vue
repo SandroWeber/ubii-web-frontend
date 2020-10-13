@@ -82,12 +82,12 @@
 
 <script>
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faPlay, faSpinner } from '@fortawesome/free-solid-svg-icons';
 library.add(faPlay, faSpinner);
 
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
 import { AppInput, AppButton } from '../appComponents/appComponents.js';
 import PerformanceTestFibonacciHelper from './tests/performanceTestFibonacciHelper';
 

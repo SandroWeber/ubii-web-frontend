@@ -4,8 +4,14 @@
       <br />
       <div class="c">
         Myo connected:
-        <font-awesome-icon id="connect-icon" :icon="connectedIcon" class="interface-icon" />
-        <p v-if="!myoConnected">Do you have the Myo SDK installed? (only available for Windows/Mac)</p>
+        <font-awesome-icon
+          id="connect-icon"
+          :icon="connectedIcon"
+          class="interface-icon"
+        />
+        <p v-if="!myoConnected">
+          Do you have the Myo SDK installed? (only available for Windows/Mac)
+        </p>
       </div>
       <table class="sturdy">
         <tr>
@@ -56,7 +62,7 @@ import Myo from 'myo';
 
 import UbiiClientContent from '../applications/sharedModules/UbiiClientContent';
 
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 
 /* fontawesome */

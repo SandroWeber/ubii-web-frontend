@@ -1,6 +1,10 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
-    <div ref="savr-render-container" id="savr-render-container" class="render-container"></div>
+    <div
+      ref="savr-render-container"
+      id="savr-render-container"
+      class="render-container"
+    ></div>
   </UbiiClientContent>
 </template>
 
@@ -13,7 +17,7 @@ import * as THREE from 'three';
 import { loadObj } from './modules/threeHelper';
 
 // Networking
-import UbiiClientService from '../../../services/ubiiClient/ubiiClientService';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import UbiiClientContent from '../sharedModules/UbiiClientContent';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';

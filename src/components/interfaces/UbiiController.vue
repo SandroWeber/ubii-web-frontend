@@ -9,8 +9,16 @@
       >
         <div class="debug-log">{{ textOutput }}</div>
         <button class="button-fullscreen" @click="toggleFullScreen()">
-          <font-awesome-icon icon="compress" class="interface-icon" v-show="fullscreen" />
-          <font-awesome-icon icon="expand" class="interface-icon" v-show="!fullscreen" />
+          <font-awesome-icon
+            icon="compress"
+            class="interface-icon"
+            v-show="fullscreen"
+          />
+          <font-awesome-icon
+            icon="expand"
+            class="interface-icon"
+            v-show="!fullscreen"
+          />
         </button>
         <div id="analog-left" class="analog-left">
           <div class="analog-ring">
@@ -32,14 +40,18 @@
             @touchstart="publishPressedActionButton(1)"
             @touchend="publishReleasedActionButton(1)"
             class="action-button"
-          >A</button>
+          >
+            A
+          </button>
         </div>
         <div id="b-button" class="b-button">
           <button
             @touchstart="publishPressedActionButton(2)"
             @touchend="publishReleasedActionButton(2)"
             class="action-button"
-          >B</button>
+          >
+            B
+          </button>
         </div>
         <div id="start-select-area" class="start-select-area">
           <button
@@ -54,7 +66,9 @@
               )
             "
             class="start-button"
-          >Start</button>
+          >
+            Start
+          </button>
         </div>
         <div id="ubii-controller-touch-display-area" class="touch-area">
           <canvas id="canvas-display-area" class="canvas-display-area"></canvas>
@@ -69,7 +83,7 @@ import Vue from 'vue';
 import Fullscreen from 'vue-fullscreen';
 
 import UbiiClientContent from '../applications/sharedModules/UbiiClientContent';
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 
 /* fontawesome */

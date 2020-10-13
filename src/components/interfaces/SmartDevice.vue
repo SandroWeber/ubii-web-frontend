@@ -11,8 +11,16 @@
         <br />
 
         <button class="button-fullscreen" @click="toggleFullScreen()">
-          <font-awesome-icon icon="compress" class="interface-icon" v-show="fullscreen" />
-          <font-awesome-icon icon="expand" class="interface-icon" v-show="!fullscreen" />
+          <font-awesome-icon
+            icon="compress"
+            class="interface-icon"
+            v-show="fullscreen"
+          />
+          <font-awesome-icon
+            icon="expand"
+            class="interface-icon"
+            v-show="!fullscreen"
+          />
         </button>
         <br />
         <button v-show="!fullscreen" @click="calibrate()">Calibrate</button>
@@ -66,7 +74,7 @@ import Vue from 'vue';
 import Fullscreen from 'vue-fullscreen';
 
 import UbiiClientContent from '../applications/sharedModules/UbiiClientContent';
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 
 /* fontawesome */

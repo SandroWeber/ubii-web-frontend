@@ -1,5 +1,5 @@
 import uuidv4 from 'uuid/v4';
-import UbiiClientService from '../../../../services/ubiiClient/ubiiClientService';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 function createUbiiSpecs(name, inputs, outputs, callback) {

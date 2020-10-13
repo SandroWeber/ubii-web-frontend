@@ -1,7 +1,9 @@
 <template>
   <div class="full-height">
     <div v-show="!connected">
-      <span class="notification">Please connect to backend before starting the application.</span>
+      <span class="notification"
+        >Please connect to backend before starting the application.</span
+      >
     </div>
 
     <div v-show="connected" class="full-height">
@@ -11,7 +13,7 @@
 </template>
 
 <script>
-import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser/src/index.js';
 
 export default {
   name: 'UbiiClientContent',

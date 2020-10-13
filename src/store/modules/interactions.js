@@ -1,4 +1,4 @@
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 const SYNCHRONIZATION_SERVICE_INTERVAL_TIME = 1000; // in ms

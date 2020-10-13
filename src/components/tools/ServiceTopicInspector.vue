@@ -30,7 +30,7 @@
 import util from 'util';
 import Vue from 'vue';
 
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 import TopicDataViewer from './TopicDataViewer.vue';
