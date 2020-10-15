@@ -375,32 +375,43 @@ export default {
       });
     },
     publishDeviceMotion: function() {
-      if (!this.deviceData.acceleration) {
+      if (!this.deviceData.accelerationData) {
         return;
       }
 
       if (this.showDebugView) {
         this.debugAcceleration = {
-          x: this.round(this.deviceData.acceleration.x, 2),
-          y: this.round(this.deviceData.acceleration.y, 2),
-          z: this.round(this.deviceData.acceleration.z, 2)
+          x: this.round(this.deviceData.accelerationData.acceleration.x, 2),
+          y: this.round(this.deviceData.accelerationData.acceleration.y, 2),
+          z: this.round(this.deviceData.accelerationData.acceleration.z, 2)
         };
-        if (this.deviceData.rotationRate) {
+        if (this.deviceData.rotationRateData) {
           this.debugRotationRate = {
-            alpha: this.round(this.deviceData.rotationRate.alpha, 2),
-            beta: this.round(this.deviceData.rotationRate.beta, 2),
-            gamma: this.round(this.deviceData.rotationRate.gamma, 2)
+            alpha: this.round(
+              this.deviceData.rotationRateData.rotationRate.alpha,
+              2
+            ),
+            beta: this.round(
+              this.deviceData.rotationRateData.rotationRate.beta,
+              2
+            ),
+            gamma: this.round(
+              this.deviceData.rotationRateData.rotationRate.gamma,
+              2
+            )
           };
         }
       }
 
+      console.info(this.deviceData.accelerationData);
       UbiiClientService.publish({
         topicDataRecord: {
           topic: this.componentLinearAcceleration.topic,
+          timestamp: this.deviceData.accelerationData.timestamp,
           vector3: {
-            x: this.deviceData.acceleration.x,
-            y: this.deviceData.acceleration.y,
-            z: this.deviceData.acceleration.z
+            x: this.deviceData.accelerationData.acceleration.x,
+            y: this.deviceData.accelerationData.acceleration.y,
+            z: this.deviceData.accelerationData.acceleration.z
           }
         }
       });
@@ -460,8 +471,15 @@ export default {
     },
     onDeviceMotion: function(event) {
       // https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent
-      this.deviceData.acceleration = event.acceleration;
-      this.deviceData.rotationRate = event.rotationRate;
+      let timestamp = UbiiClientService.generateTimestamp();
+      this.deviceData.accelerationData = {
+        acceleration: event.acceleration,
+        timestamp: timestamp
+      };
+      this.deviceData.rotationRateData = {
+        rotationRate: event.rotationRate,
+        timestamp: timestamp
+      };
     },
     /* helper methods */
     round: function(value, digits) {
