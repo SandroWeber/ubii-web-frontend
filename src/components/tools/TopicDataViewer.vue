@@ -1,5 +1,6 @@
 <template>
   <div>
+    <div class="update-signal" v-bind:class="{ flash: flashing }"></div>
     <font-awesome-icon
       class="expand-icon"
       v-show="!expanded"
@@ -12,9 +13,13 @@
       icon="chevron-down"
       @click="toggleTopicDataDisplay(topic)"
     />
-    <div class="topic-title">{{topic}}</div>
-    <div class="topic-data green-accent" v-show="expanded && topicData">{{topicData}}</div>
-    <div class="topic-data red-accent" v-show="expanded && !topicData">received empty data</div>
+    <div class="topic-title">{{ topic }}</div>
+    <div class="topic-data green-accent" v-show="expanded && topicData">
+      {{ topicData }}
+    </div>
+    <div class="topic-data red-accent" v-show="expanded && !topicData">
+      received empty data
+    </div>
   </div>
 </template>
 
@@ -34,11 +39,19 @@ export default {
     topicData: { type: String, default: '... no data received yet ...' }
   },
   data: () => {
-    return { expanded: false };
+    return { expanded: false, flashing: false };
   },
   methods: {
     toggleTopicDataDisplay() {
       this.expanded = !this.expanded;
+    }
+  },
+  watch: {
+    topicData: function() {
+      this.flashing = true;
+      setTimeout(() => {
+        this.flashing = false;
+      }, 100);
     }
   }
 };
@@ -46,17 +59,30 @@ export default {
 
 <style scoped>
 .expand-icon {
-  width: 20px;
+  width: 15px;
   cursor: pointer;
 }
 
 .topic-title {
   font-size: 1.2em;
   display: inline;
-  margin: 10px;
+  margin: 5px;
 }
 
 .topic-data {
   padding-left: 40px;
+}
+
+.update-signal {
+  height: 15px;
+  width: 15px;
+  margin-right: 10px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.flash {
+  background-color: greenyellow;
 }
 </style>

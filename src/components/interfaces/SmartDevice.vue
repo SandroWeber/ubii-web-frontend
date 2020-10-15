@@ -40,6 +40,10 @@
             <br />
             <span>Touch0: {{ getTouch0X() }} {{ getTouch0Y() }}</span>
             <br />
+            <span v-if="!debugDeviceOrientation">
+              IMU data only available via HTTPS
+            </span>
+            <br />
             <span>Orientation:</span>
             <span v-if="debugDeviceOrientation">
               {{ debugDeviceOrientation.alpha }}
@@ -120,7 +124,7 @@ export default {
     this.deviceData = {};
     this.initializing = false;
     this.hasRegisteredUbiiDevice = false;
-    this.publishFrequency = 0.01;
+    this.publishFrequency = 0.02;
 
     // unsubscribe before page is unloaded
     window.addEventListener('beforeunload', async () => {
