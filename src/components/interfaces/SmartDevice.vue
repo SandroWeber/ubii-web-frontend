@@ -157,6 +157,9 @@ export default {
   },
   methods: {
     startInterface: function() {
+      if (this.initializing) return;
+      
+      this.initializing = true;
       this.createUbiiSpecs();
       this.registerUbiiSpecs();
     },
@@ -175,6 +178,7 @@ export default {
       let ubiiDevice = {
         name: deviceName,
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
+        tags: ['smartdevice'],
         components: [
           {
             topic: topicPrefix + '/touch_position',
@@ -230,7 +234,6 @@ export default {
           'registerUbiiSpecs(), already registered';
         return;
       }
-      this.initializing = true;
 
       // register the mouse pointer device
       UbiiClientService.waitForConnection().then(
