@@ -102,7 +102,7 @@ import Fullscreen from 'vue-fullscreen';
 import uuidv4 from 'uuid/v4';
 
 import UbiiClientContent from '../applications/sharedModules/UbiiClientContent';
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import UbiiEventBus from '../../services/ubiiClient/ubiiEventBus';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
@@ -135,13 +135,19 @@ export default {
       this.stopInterface();
     });
 
-    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, this.registerUbiiSpecs);
-    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.unregisterUbiiSpecs);
+    UbiiClientService.on(
+      UbiiClientService.EVENTS.CONNECT,
+      this.registerUbiiSpecs
+    );
+    UbiiClientService.on(
+      UbiiClientService.EVENTS.DISCONNECT,
+      this.unregisterUbiiSpecs
+    );
 
     this.deviceData = {};
     this.canvasDisplayArea = document.getElementById('canvas-display-area');
     this.registerEventListeners();
-    UbiiClientService.isConnected().then(() => {
+    UbiiClientService.waitForConnection().then(() => {
       this.createUbiiSpecs();
       this.registerUbiiSpecs();
     });
@@ -220,52 +226,52 @@ export default {
           {
             topic: topicPrefix + '/orientation',
             messageFormat: 'ubii.dataStructure.Vector3',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/linear_acceleration',
             messageFormat: 'ubii.dataStructure.Vector3',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/analog_stick_left',
             messageFormat: 'ubii.dataStructure.Vector2',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/button_a',
             messageFormat: 'ubii.dataStructure.KeyEvent',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/button_b',
             messageFormat: 'ubii.dataStructure.KeyEvent',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/button_start',
             messageFormat: 'ubii.dataStructure.KeyEvent',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/set_color',
             messageFormat: 'ubii.dataStructure.Color',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           },
           {
             topic: topicPrefix + '/set_image',
             messageFormat: 'ubii.dataStructure.Image2D',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           },
           {
             topic: topicPrefix + '/clear_image',
             messageFormat: 'boolean',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           },
           {
             topic: topicPrefix + '/set_text',
             messageFormat: 'string',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           },
           {
             topic: topicPrefix + '/set_controllerMode',
@@ -295,7 +301,7 @@ export default {
         this.componentVibration = {
           topic: topicPrefix + '/vibration_pattern',
           messageFormat: 'double',
-          ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+          ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
         };
         this.ubiiDevice.components.push(this.componentVibration);
         this.tNextVibrate = Date.now();
@@ -367,7 +373,7 @@ export default {
       this.cocoSSDLabels = [];
 
       // register the mouse pointer device
-      UbiiClientService.isConnected().then(() => {
+      UbiiClientService.waitForConnection().then(() => {
         UbiiClientService.registerDevice(this.ubiiDevice)
           .then(device => {
             if (device.id) {
@@ -379,22 +385,23 @@ export default {
             return device;
           })
           .then(() => {
-            UbiiClientService.subscribe(this.componentSetColor.topic, color => {
-              this.setColor(color);
-            });
+            UbiiClientService.subscribeTopic(
+              this.componentSetColor.topic,
+              this.setColor
+            );
 
-            UbiiClientService.subscribe(this.componentSetImage.topic, image => {
-              this.drawImage(image);
-            });
-            UbiiClientService.subscribe(this.componentClearImage.topic, () => {
-              this.clearImage();
-            });
+            UbiiClientService.subscribeTopic(
+              this.componentSetImage.topic,
+              this.drawImage
+            );
+            UbiiClientService.subscribeTopic(
+              this.componentClearImage.topic,
+              this.clearImage
+            );
 
-            UbiiClientService.subscribe(
+            UbiiClientService.subscribeTopic(
               this.componentTextOutput.topic,
-              text => {
-                this.textOutput = text;
-              }
+              this.setTextOutput
             );
 
             UbiiClientService.subscribe(
@@ -405,14 +412,9 @@ export default {
             )
 
             if (this.componentVibration) {
-              UbiiClientService.subscribe(
+              UbiiClientService.subscribeTopic(
                 this.componentVibration.topic,
-                vibrationPattern => {
-                  if (Date.now() >= this.tNextVibrate) {
-                    navigator.vibrate(vibrationPattern);
-                    this.tNextVibrate = Date.now() + 2 * vibrationPattern;
-                  }
-                }
+                this.vibrate
               );
             }
           });
@@ -431,11 +433,11 @@ export default {
           // eslint-disable-next-line no-console
           console.log('unsubscribed to ' + component.topic);
 
-          UbiiClientService.unsubscribe(component.topic);
+          UbiiClientService.unsubscribeTopic(component.topic);
         });
       }
 
-      this.hasRegisteredUbiiDevice = null;
+      this.hasRegisteredUbiiDevice = false;
 
       //TODO: this should not happen here, move to interaction
       UbiiClientService.publishRecord({
@@ -446,6 +448,9 @@ export default {
       // TODO: unregister device
       this.ubiiDevice &&
         (await UbiiClientService.deregisterDevice(this.ubiiDevice));
+    },
+    setTextOutput: function(text) {
+      this.textOutput = text;
     },
     setColor: function(color) {
       let colorString =
@@ -499,22 +504,49 @@ export default {
       let resizeDimensions = [imgData.width, imgData.height];
       if (imgData.width > imgData.height) {
         resizeDimensions[0] = displayDimensions[0];
-        resizeDimensions[1] = imgData.height * (displayDimensions[0] / imgData.width);
+        resizeDimensions[1] =
+          imgData.height * (displayDimensions[0] / imgData.width);
       } else {
-        resizeDimensions[0] = imgData.width * (displayDimensions[1] / imgData.height);
+        resizeDimensions[0] =
+          imgData.width * (displayDimensions[1] / imgData.height);
         resizeDimensions[1] = displayDimensions[1];
       }
 
-      createImageBitmap(imgData, 0, 0, imgData.width, imgData.height).then(imgBitmap => {
-        let startX = displayDimensions[0] > resizeDimensions[0] ? ((displayDimensions[0] - resizeDimensions[0]) / 2) : 0;
-        let startY = displayDimensions[1] > resizeDimensions[1] ? ((displayDimensions[1] - resizeDimensions[1]) / 2) : 0;
-        ctx.drawImage(imgBitmap, startX, startY, resizeDimensions[0], resizeDimensions[1]);
-      });
+      createImageBitmap(imgData, 0, 0, imgData.width, imgData.height).then(
+        imgBitmap => {
+          let startX =
+            displayDimensions[0] > resizeDimensions[0]
+              ? (displayDimensions[0] - resizeDimensions[0]) / 2
+              : 0;
+          let startY =
+            displayDimensions[1] > resizeDimensions[1]
+              ? (displayDimensions[1] - resizeDimensions[1]) / 2
+              : 0;
+          ctx.drawImage(
+            imgBitmap,
+            startX,
+            startY,
+            resizeDimensions[0],
+            resizeDimensions[1]
+          );
+        }
+      );
     },
     clearImage: function() {
       const ctx = this.canvasDisplayArea.getContext('2d');
 
-      ctx.clearRect(0, 0, this.canvasDisplayArea.width, this.canvasDisplayArea.height);
+      ctx.clearRect(
+        0,
+        0,
+        this.canvasDisplayArea.width,
+        this.canvasDisplayArea.height
+      );
+    },
+    vibrate: function(vibrationPattern) {
+      if (Date.now() >= this.tNextVibrate) {
+        navigator.vibrate(vibrationPattern);
+        this.tNextVibrate = Date.now() + 2 * vibrationPattern;
+      }
     },
     publishContinuousDeviceData: function() {
       this.deviceData['analog-stick-left'] &&

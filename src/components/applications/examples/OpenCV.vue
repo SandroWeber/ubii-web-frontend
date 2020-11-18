@@ -5,8 +5,13 @@
     <canvas id="canvas-opencv" class="canvas-opencv"></canvas>
     <button
       @click="onButtonOpenCVTest"
-      :class="{'toggle-active': openCVTestActive, 'toggle-inactive': !openCVTestActive}"
-    >OpenCV Test</button>
+      :class="{
+        'toggle-active': openCVTestActive,
+        'toggle-inactive': !openCVTestActive
+      }"
+    >
+      OpenCV Test
+    </button>
   </div>
 </template>
 
@@ -16,7 +21,7 @@
 
 import uuidv4 from 'uuid/v4';
 
-import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 import { setTimeout } from 'timers';
@@ -64,7 +69,7 @@ export default {
     start: function() {
       this.cocoSSDLabels = [];
 
-      UbiiClientService.isConnected().then(() => {
+      UbiiClientService.waitForConnection().then(() => {
         this.createUbiiSpecs();
 
         UbiiClientService.registerDevice(this.ubiiDevice).then(device => {
@@ -93,12 +98,12 @@ export default {
           {
             topic: topicPrefix + '/camera_image',
             messageFormat: 'ubii.dataStructure.Image2D',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/opencv_image',
             messageFormat: 'ubii.dataStructure.Image2D',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           }
         ]
       };
@@ -187,7 +192,7 @@ export default {
       }
     },
     startOpenCVTest: function() {
-      UbiiClientService.subscribe(
+      UbiiClientService.subscribeTopic(
         this.ubiiDevice.components[1].topic,
         image => {
           this.drawImageOpenCV(image);
@@ -195,7 +200,7 @@ export default {
       );
 
       UbiiClientService.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
         session: this.ubiiSessionOpenCVTest
       }).then(response => {
         if (response.error) {
@@ -213,11 +218,11 @@ export default {
       continuousPublish();
     },
     stopOpenCVTest: function() {
-      UbiiClientService.unsubscribe(this.ubiiDevice.components[1].topic);
+      UbiiClientService.unsubscribeTopic(this.ubiiDevice.components[1].topic);
 
       this.ubiiSessionOpenCVTest &&
         UbiiClientService.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: this.ubiiSessionOpenCVTest
         });
     },

@@ -4,7 +4,7 @@
       <router-link to="/tools/topic-inspector" class="interface-link" tag="div">
         <app-tile class="layer-three background round shadow orange-accent">
           <font-awesome-icon icon="eye" class="interface-icon" />
-          <p>Topic Inspector</p>
+          <p>Service & Topic Inspector</p>
         </app-tile>
       </router-link>
 

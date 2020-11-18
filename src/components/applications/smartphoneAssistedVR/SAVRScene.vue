@@ -11,8 +11,7 @@ import Stats from '../sharedModules/Stats';
 import * as dat from 'dat.gui';
 
 // Networking
-import UbiiClientService from '../../../services/ubiiClient/ubiiClientService';
-import UbiiEventBus from '../../../services/ubiiClient/ubiiEventBus';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
 export default {
   name: 'SAVRScene',
@@ -53,7 +52,7 @@ export default {
 
       this.initScene();
 
-      if (UbiiClientService.isConnected) {
+      if (UbiiClientService.isConnected()) {
         this.onConnectToUbiiParent();
       }
     },
@@ -66,10 +65,10 @@ export default {
         this.handleResize();
       });
 
-      UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
+      UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
         this.onConnectToUbiiParent();
       });
-      UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, () => {
+      UbiiClientService.on(UbiiClientService.EVENTS.DISCONNECT, () => {
         this.onDisconnectToUbiiParent();
       });
     },
@@ -167,7 +166,7 @@ export default {
     startPollLoop: function() {
       this.pollSmartDevices = true;
 
-      UbiiClientService.isConnected().then(() => {
+      UbiiClientService.waitForConnection().then(() => {
         const loop = () => {
           if (this.pollSmartDevices) {
             if (this.updateSmartDevices) {

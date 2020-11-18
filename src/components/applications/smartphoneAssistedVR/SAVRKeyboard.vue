@@ -15,7 +15,7 @@ import VirtualKeyboard from './modules/VirtualKeyboard';
 import TextDisplay from './modules/TextDisplay';
 
 // Networking
-import UbiiClientService from '../../../services/ubiiClient/ubiiClientService';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import UbiiClientContent from '../sharedModules/UbiiClientContent';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';

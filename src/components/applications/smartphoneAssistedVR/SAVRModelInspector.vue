@@ -13,7 +13,7 @@ import * as THREE from 'three';
 import { loadObj } from './modules/threeHelper';
 
 // Networking
-import UbiiClientService from '../../../services/ubiiClient/ubiiClientService';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import UbiiClientContent from '../sharedModules/UbiiClientContent';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 import { createUbiiSpecs } from './modules/ubiiHelper';
@@ -152,11 +152,11 @@ export default {
       // start our session (registering not necessary as we do not want to save it permanently)
       client.subscribe = (createModel = false) =>
         UbiiClientService.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
           session: client.session
         }).then(() => {
           // subscribe the topic
-          UbiiClientService.subscribe(specs.topic, orientation => {
+          UbiiClientService.subscribeTopic(specs.topic, orientation => {
             client.orientation = orientation;
           }).then(() => {
             if (createModel) checkForPrefab();
@@ -202,10 +202,10 @@ export default {
     onDisconnectToUbii: function() {
       // unsubscribe and stop all sessions
       this.clients.forEach((v, k) => {
-        UbiiClientService.unsubscribe(v.topic);
+        UbiiClientService.unsubscribeTopic(v.topic);
 
         UbiiClientService.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: v.session
         });
       });

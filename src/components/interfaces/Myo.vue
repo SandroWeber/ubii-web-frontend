@@ -4,8 +4,14 @@
       <br />
       <div class="c">
         Myo connected:
-        <font-awesome-icon id="connect-icon" :icon="connectedIcon" class="interface-icon" />
-        <p v-if="!myoConnected">Do you have the Myo SDK installed? (only available for Windows/Mac)</p>
+        <font-awesome-icon
+          id="connect-icon"
+          :icon="connectedIcon"
+          class="interface-icon"
+        />
+        <p v-if="!myoConnected">
+          Do you have the Myo SDK installed? (only available for Windows/Mac)
+        </p>
       </div>
       <table class="sturdy">
         <tr>
@@ -14,37 +20,37 @@
         </tr>
         <tr>
           <th>EMG</th>
-          <td>{{this.round(myoData.emg.v0, 1)}}</td>
-          <td>{{this.round(myoData.emg.v1, 1)}}</td>
-          <td>{{this.round(myoData.emg.v2, 1)}}</td>
-          <td>{{this.round(myoData.emg.v3, 1)}}</td>
-          <td>{{this.round(myoData.emg.v4, 1)}}</td>
-          <td>{{this.round(myoData.emg.v5, 1)}}</td>
-          <td>{{this.round(myoData.emg.v6, 1)}}</td>
-          <td>{{this.round(myoData.emg.v7, 1)}}</td>
+          <td>{{ this.round(myoData.emg.v0, 1) }}</td>
+          <td>{{ this.round(myoData.emg.v1, 1) }}</td>
+          <td>{{ this.round(myoData.emg.v2, 1) }}</td>
+          <td>{{ this.round(myoData.emg.v3, 1) }}</td>
+          <td>{{ this.round(myoData.emg.v4, 1) }}</td>
+          <td>{{ this.round(myoData.emg.v5, 1) }}</td>
+          <td>{{ this.round(myoData.emg.v6, 1) }}</td>
+          <td>{{ this.round(myoData.emg.v7, 1) }}</td>
         </tr>
         <tr>
           <th>Orientation</th>
-          <td colspan="2">{{this.round(myoData.orientation.x, 1)}}</td>
-          <td colspan="2">{{this.round(myoData.orientation.y, 1)}}</td>
-          <td colspan="2">{{this.round(myoData.orientation.z, 1)}}</td>
-          <td colspan="2">{{this.round(myoData.orientation.w, 1)}}</td>
+          <td colspan="2">{{ this.round(myoData.orientation.x, 1) }}</td>
+          <td colspan="2">{{ this.round(myoData.orientation.y, 1) }}</td>
+          <td colspan="2">{{ this.round(myoData.orientation.z, 1) }}</td>
+          <td colspan="2">{{ this.round(myoData.orientation.w, 1) }}</td>
         </tr>
         <tr>
           <th>Gyroscope</th>
-          <td colspan="3">{{this.round(myoData.gyroscope.x, 1)}}</td>
-          <td colspan="3">{{this.round(myoData.gyroscope.y, 1)}}</td>
-          <td colspan="2">{{this.round(myoData.gyroscope.z, 1)}}</td>
+          <td colspan="3">{{ this.round(myoData.gyroscope.x, 1) }}</td>
+          <td colspan="3">{{ this.round(myoData.gyroscope.y, 1) }}</td>
+          <td colspan="2">{{ this.round(myoData.gyroscope.z, 1) }}</td>
         </tr>
         <tr>
           <th>Accelerometer</th>
-          <td colspan="3">{{this.round(myoData.accelerometer.x, 1)}}</td>
-          <td colspan="3">{{this.round(myoData.accelerometer.y, 1)}}</td>
-          <td colspan="2">{{this.round(myoData.accelerometer.z, 1)}}</td>
+          <td colspan="3">{{ this.round(myoData.accelerometer.x, 1) }}</td>
+          <td colspan="3">{{ this.round(myoData.accelerometer.y, 1) }}</td>
+          <td colspan="2">{{ this.round(myoData.accelerometer.z, 1) }}</td>
         </tr>
         <tr>
           <th>Gesture</th>
-          <td colspan="8">{{gestureToString(myoData.gesture)}}</td>
+          <td colspan="8">{{ gestureToString(myoData.gesture) }}</td>
         </tr>
       </table>
     </div>
@@ -55,9 +61,8 @@
 import Myo from 'myo';
 
 import UbiiClientContent from '../applications/sharedModules/UbiiClientContent';
-import UbiiEventBus from '../../services/ubiiClient/ubiiEventBus';
 
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 
 /* fontawesome */
@@ -80,13 +85,16 @@ export default {
       this.stopInterface();
     });
 
-    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
+    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
       this.stopInterface();
       this.startInterface();
     });
-    UbiiEventBus.$on(UbiiEventBus.DISCONNECT_EVENT, this.stopInterface);
+    UbiiClientService.on(
+      UbiiClientService.EVENTS.DISCONNECT,
+      this.stopInterface
+    );
 
-    if (UbiiClientService.isConnected) this.startInterface();
+    if (UbiiClientService.isConnected()) this.startInterface();
   },
 
   beforeDestroy: function() {
@@ -147,7 +155,7 @@ export default {
           {
             topic: inputClientMyoData.topic,
             messageFormat: inputClientMyoData.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           }
         ]
       };
@@ -159,7 +167,7 @@ export default {
     },
 
     startInterface: function() {
-      UbiiClientService.isConnected().then(() => {
+      UbiiClientService.waitForConnection().then(() => {
         // create all the specifications
         this.createUbiiSpecs();
 

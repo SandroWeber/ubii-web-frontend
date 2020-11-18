@@ -1,4 +1,4 @@
-# ubii-web-frontend-vue
+# ubii-web-frontend
 
 ## Project setup
 

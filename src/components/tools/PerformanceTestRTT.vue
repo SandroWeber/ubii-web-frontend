@@ -5,10 +5,16 @@
     <app-button
       class="start-button"
       @click="startTestRTT()"
-      :disabled="!ubiiClientService.isConnected"
+      :disabled="!ubiiClientService.isConnected()"
     >
-      <font-awesome-icon icon="play" v-show="this.$data.testRTT.status !== 'running'" />
-      <font-awesome-icon icon="spinner" v-show="this.$data.testRTT.status === 'running'" />
+      <font-awesome-icon
+        icon="play"
+        v-show="this.$data.testRTT.status !== 'running'"
+      />
+      <font-awesome-icon
+        icon="spinner"
+        v-show="this.$data.testRTT.status === 'running'"
+      />
     </app-button>
 
     <div class="statistics-grid">
@@ -21,13 +27,17 @@
 
     <div class="settings-grid">
       <label for="rtt-message-count"># messages:</label>
-      <app-input :id="'rtt-message-count'" :type="'# messages'" v-model="testRTT.messageCount" />
+      <app-input
+        :id="'rtt-message-count'"
+        :type="'# messages'"
+        v-model="testRTT.messageCount"
+      />
     </div>
   </div>
 </template>
 
 <script>
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 
 import { AppInput, AppButton } from '../appComponents/appComponents.js';
@@ -101,7 +111,7 @@ export default {
       let counter = 0;
       let maxMessages = parseInt(this.$data.testRTT.messageCount);
 
-      UbiiClientService.subscribe(this.$data.testRTT.topic, () => {
+      UbiiClientService.subscribeTopic(this.$data.testRTT.topic, () => {
         this.$data.testRTT.timings.push(Date.now() - this.$data.testRTT.tSent);
         counter++;
         if (counter < maxMessages) {
@@ -120,7 +130,7 @@ export default {
     stopTestRTT: function() {
       if (this.$data.testRTT && this.$data.testRTT.avgRTT) {
         this.$data.testRTT.status = this.$data.testRTT.avgRTT.toString() + 'ms';
-        UbiiClientService.unsubscribe(this.$data.testRTT.topic);
+        UbiiClientService.unsubscribeTopic(this.$data.testRTT.topic);
       }
     },
     rttSendPackage: function() {

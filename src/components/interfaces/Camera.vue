@@ -4,8 +4,13 @@
     <div id="video-overlay" class="video-overlay"></div>
     <button
       @click="onButtonCoCoSSD"
-      :class="{'toggle-active': cocoSsdActive, 'toggle-inactive': !cocoSsdActive}"
-    >toggle coco-ssd object detection</button>
+      :class="{
+        'toggle-active': cocoSsdActive,
+        'toggle-inactive': !cocoSsdActive
+      }"
+    >
+      toggle coco-ssd object detection
+    </button>
   </div>
 </template>
 
@@ -15,7 +20,7 @@
 
 import uuidv4 from 'uuid/v4';
 
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 import { setTimeout } from 'timers';
@@ -60,7 +65,7 @@ export default {
     start: function() {
       this.cocoSSDLabels = [];
 
-      UbiiClientService.isConnected().then(() => {
+      UbiiClientService.waitForConnection().then(() => {
         this.createUbiiSpecs();
 
         UbiiClientService.registerDevice(this.ubiiDevice).then(device => {
@@ -89,12 +94,12 @@ export default {
           {
             topic: topicPrefix + '/camera_image',
             messageFormat: 'ubii.dataStructure.Image',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/objects',
             messageFormat: 'ubii.dataStructure.Object2DList',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           }
         ]
       };
@@ -113,7 +118,6 @@ export default {
       }
 
       this.ubiiSessionCoCoSSD = {
-        id: uuidv4(),
         name: 'CameraWebInterface - Session CoCoSSD',
         processMode:
           ProtobufLibrary.ubii.sessions.ProcessMode
@@ -150,21 +154,19 @@ export default {
       }
     },
     startCoCoSSDObjectDetection: function() {
-      UbiiClientService.subscribe(
+      UbiiClientService.subscribeTopic(
         this.ubiiDevice.components[1].topic,
-        predictedObjectsList => {
-          this.drawCoCoSSDLabels(predictedObjectsList.elements);
-        }
+        this.handleObjectPredictions
       );
 
       UbiiClientService.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
         session: this.ubiiSessionCoCoSSD
       }).then(response => {
         if (response.error) {
           console.warn(response.error);
-        } else {
-          console.info(response);
+        } else if (response.session) {
+          this.ubiiSessionCoCoSSD = response.session;
         }
       });
 
@@ -178,7 +180,10 @@ export default {
       continuousPublish();
     },
     stopCoCoSSDObjectDetection: function() {
-      UbiiClientService.unsubscribe(this.ubiiDevice.components[1].topic);
+      UbiiClientService.unsubscribeTopic(
+        this.ubiiDevice.components[1].topic,
+        this.handleObjectPredictions
+      );
 
       this.cocoSSDLabels.forEach(div => {
         div.style.visibility = 'hidden';
@@ -186,7 +191,7 @@ export default {
 
       this.ubiiSessionCoCoSSD &&
         UbiiClientService.callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: this.ubiiSessionCoCoSSD
         });
     },
@@ -214,6 +219,9 @@ export default {
             ProtobufLibrary.ubii.dataStructure.Image2D.DataFormat.RGBA8
         }
       });
+    },
+    handleObjectPredictions: function(predictedObjectsList) {
+      this.drawCoCoSSDLabels(predictedObjectsList.elements);
     },
     captureImage: function() {
       var canvas = document.createElement('canvas');

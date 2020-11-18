@@ -1,5 +1,4 @@
-import uuidv4 from 'uuid/v4';
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 const SYNCHRONIZATION_SERVICE_INTERVAL_TIME = 1000; // in ms
@@ -17,7 +16,7 @@ const backendData = {
 
         // Get the list with all local interactions from the server...
         let replyLocalDB = await UbiiClientService.client.callService({
-          topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_GET_LIST
+          topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_LOCAL_GET_LIST
         });
         replyLocalDB.interactionList &&
           replyLocalDB.interactionList.forEach(interaction => {
@@ -36,7 +35,7 @@ const backendData = {
 
         // Get the list with all online interactions from the server...
         let replyOnlineDB = await UbiiClientService.client.callService({
-          topic: DEFAULT_TOPICS.SERVICES.INTERACTION_ONLINE_DATABASE_GET_LIST
+          topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_ONLINE_GET_LIST
         });
         replyOnlineDB.interactionList &&
           replyOnlineDB.interactionList.forEach(interaction => {
@@ -65,7 +64,7 @@ const backendData = {
         // register new interaction at the backend
         await UbiiClientService.client
           .callService({
-            topic: DEFAULT_TOPICS.SERVICES.INTERACTION_REGISTRATION,
+            topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_SAVE,
             interaction: interaction
           })
           .then(
@@ -91,7 +90,7 @@ const backendData = {
         // delete interaction at the backend
         await UbiiClientService.client
           .callService({
-            topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DELETE,
+            topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_DELETE,
             interaction: interaction
           })
           .then(
@@ -116,7 +115,7 @@ const backendData = {
       try {
         await UbiiClientService.client
           .callService({
-            topic: DEFAULT_TOPICS.SERVICES.INTERACTION_REPLACE,
+            topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_SAVE,
             interaction: interaction
           })
           .then(
@@ -167,7 +166,6 @@ const actions = {
   addDefault(context) {
     actions.add(context, {
       interaction: {
-        id: uuidv4(),
         name: 'New Interaction',
         authors: ['author 1', 'author 2'],
         tags: ['tag1', 'tag2'],
@@ -212,8 +210,8 @@ const actions = {
     interactionsToSync.set(payload.interaction.id, payload.interaction);
   },
   async updateImmediately(context, payload) {
-    console.info('updateImmediately');
-    console.info(payload);
+    //console.info('updateImmediately');
+    //console.info(payload);
     // Update immediately locally ...
     context.commit('setInteraction', payload);
 

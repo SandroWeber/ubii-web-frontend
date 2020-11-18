@@ -1,15 +1,25 @@
 <template>
   <div class="topic-list-grid">
     <div class="category-header header-services orange-accent">Services</div>
-    <div class="category-header header-topicdata orange-accent">Topic Data</div>
-    <div class="category-content content-services" v-show="serviceTopicList">
-      <div class="topic-list-element" v-for="topic in serviceTopicList" :key="topic">{{topic}}</div>
+
+    <div class="category-content content-services" v-show="serviceList">
+      <div
+        class="list-element"
+        v-for="service in serviceList"
+        :key="service.topic"
+      >
+        <service-viewer
+          :topic="service.topic"
+          :requestMessageFormat="service.requestMessageFormat"
+          :responseMessageFormat="service.responseMessageFormat"
+        />
+      </div>
     </div>
 
-    <div class="category-content content-device-topicdata" v-show="topicData
-    ">
-      <div class="topic-list-element" v-for="(data, topic) in topicData
-      " :key="topic">
+    <div class="category-header header-topicdata orange-accent">Topic Data</div>
+
+    <div class="category-content content-device-topicdata" v-show="topicData">
+      <div class="list-element" v-for="(data, topic) in topicData" :key="topic">
         <topic-data-viewer :topic="topic" :topic-data="data" />
       </div>
     </div>
@@ -20,19 +30,22 @@
 import util from 'util';
 import Vue from 'vue';
 
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 import TopicDataViewer from './TopicDataViewer.vue';
+import ServiceViewer from './ServiceViewer.vue';
 
 export default {
-  name: 'TopicInspector',
+  name: 'ServiceTopicInspector',
   components: {
-    TopicDataViewer
+    TopicDataViewer,
+    ServiceViewer
   },
   mounted: function() {
-    UbiiClientService.isConnected().then(() => {
+    UbiiClientService.waitForConnection().then(() => {
       this.getTopicList();
+      this.getServiceList();
     });
     this.open = true;
   },
@@ -46,6 +59,7 @@ export default {
   data: () => {
     return {
       ubiiClientService: UbiiClientService,
+      serviceList: [],
       serviceTopicList: [],
       topicData: {},
       regexAllTopics: '.*'
@@ -56,7 +70,7 @@ export default {
       UbiiClientService.callService({
         topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST
       }).then(reply => {
-        let topics = reply.stringList.list;
+        let topics = reply.stringList.elements;
         this.$data.serviceTopicList = topics.filter(topic => {
           return topic.indexOf('/services/') === 0;
         });
@@ -69,6 +83,14 @@ export default {
     },
     handleTopicData: function(data, topic) {
       Vue.set(this.topicData, topic, util.inspect(data));
+    },
+    getServiceList: function() {
+      UbiiClientService.callService({
+        topic: DEFAULT_TOPICS.SERVICES.SERVICE_LIST
+      }).then(reply => {
+        let services = reply.serviceList.elements;
+        this.$data.serviceList = services;
+      });
     }
   }
 };
@@ -102,7 +124,7 @@ export default {
 .category-content {
   overflow: auto;
 }
-.topic-list-element {
+.list-element {
   padding-bottom: 3px;
 }
 </style>

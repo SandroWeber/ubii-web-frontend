@@ -10,9 +10,8 @@
 import Visualizer from './Visualizer.vue';
 
 import UbiiClientContent from '../../applications/sharedModules/UbiiClientContent';
-import UbiiEventBus from '../../../services/ubiiClient/ubiiEventBus';
 
-import UbiiClientService from '../../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 export default {
@@ -33,13 +32,13 @@ export default {
     });
 
     // some event hooks to restart/stop the experiment if necessary
-    UbiiEventBus.$on(UbiiEventBus.CONNECT_EVENT, () => {
+    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
       this.stopEditor();
       this.startEditor();
     });
 
     // make sure we're connected, then start the example
-    UbiiClientService.isConnected().then(() => {
+    UbiiClientService.waitForConnection().then(() => {
       this.startEditor();
     });
 
@@ -53,24 +52,28 @@ export default {
   methods: {
     startEditor: function() {
       // subscribe to session info topic
-      UbiiClientService.subscribe(
+      UbiiClientService.subscribeTopic(
         DEFAULT_TOPICS.INFO_TOPICS.NEW_SESSION,
-        sessionInfo => {
-          this.$refs.visualizer.update(sessionInfo);
-        }
+        this.handleSessionInfo
       );
     },
     stopEditor: async function() {
       // unsubscribe and stop session
-      UbiiClientService.unsubscribe(this.$data.outputServerPointer.topic);
+      UbiiClientService.unsubscribeTopic(
+        DEFAULT_TOPICS.INFO_TOPICS.NEW_SESSION,
+        this.handleSessionInfo
+      );
       UbiiClientService.client.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
         session: this.$data.ubiiSession
       });
 
       if (this.$data.ubiiDevice) {
         await UbiiClientService.deregisterDevice(this.$data.ubiiDevice);
       }
+    },
+    handleSessionInfo: function(sessionInfo) {
+      this.$refs.visualizer.update(sessionInfo);
     }
   }
 };
