@@ -31,7 +31,7 @@ export default {
     let video = document.getElementById('video');
     this.videoOverlayElement = document.getElementById('video-overlay');
 
-    this.publishFrequency = 500; // ms
+    this.publishFrequency = 100; // ms
 
     // Get access to the camera!
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -104,38 +104,21 @@ export default {
         ]
       };
 
-      let interactionCocoSsdID = 'b74761e9-3cd3-400c-8144-23669e951c2c';
-      let getInteractionResponse = await UbiiClientService.callService({
-        topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_GET,
-        interaction: {
-          id: interactionCocoSsdID
-        }
-      });
-      if (getInteractionResponse.error) {
-        console.warn(getInteractionResponse.error);
-      } else {
-        this.interactionCocoSsdSpecs = getInteractionResponse.interaction;
-      }
-
       this.ubiiSessionCoCoSSD = {
         name: 'CameraWebInterface - Session CoCoSSD',
-        processMode:
-          ProtobufLibrary.ubii.sessions.ProcessMode
-            .INDIVIDUAL_PROCESS_FREQUENCIES,
-        interactions: [this.interactionCocoSsdSpecs],
+        processingModules: [{name: 'COCO-SSD-local'}],
         ioMappings: [
           {
-            interactionId: this.interactionCocoSsdSpecs.id,
+            processingModuleName: 'COCO-SSD-local',
             inputMappings: [
               {
-                name: this.interactionCocoSsdSpecs.inputFormats[0].internalName,
+                inputName: 'image',
                 topicSource: this.ubiiDevice.components[0].topic
               }
             ],
             outputMappings: [
               {
-                name: this.interactionCocoSsdSpecs.outputFormats[0]
-                  .internalName,
+                outputName: 'predictions',
                 topicDestination: this.ubiiDevice.components[1].topic
               }
             ]
@@ -162,7 +145,9 @@ export default {
       UbiiClientService.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
         session: this.ubiiSessionCoCoSSD
-      }).then(response => {
+      })
+      .then(response => {
+        console.info(response);
         if (response.error) {
           console.warn(response.error);
         } else if (response.session) {
