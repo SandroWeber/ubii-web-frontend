@@ -158,7 +158,7 @@ export default {
   methods: {
     startInterface: function() {
       if (this.initializing) return;
-      
+
       this.initializing = true;
       this.createUbiiSpecs();
       this.registerUbiiSpecs();
@@ -406,7 +406,6 @@ export default {
         }
       }
 
-      console.info(this.deviceData.accelerationData);
       UbiiClientService.publish({
         topicDataRecord: {
           topic: this.componentLinearAcceleration.topic,

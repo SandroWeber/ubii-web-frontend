@@ -59,12 +59,11 @@ export default {
         /* we register our device needed to publish the vibration distance threshold */
         UbiiClientService.registerDevice(this.device)
           .then(response => {
-            console.info(response);
             if (response.id) {
               this.device = response;
               return response;
             } else {
-              console.info(response);
+              console.warn(response);
             }
           })
           .then(() => {
@@ -86,7 +85,6 @@ export default {
                 session: this.ubiiSession
               })
               .then(response => {
-                console.info(response);
                 if (response.session) {
                   this.ubiiSession = response.session;
                 }
