@@ -106,7 +106,7 @@ export default {
 
       this.ubiiSessionCoCoSSD = {
         name: 'CameraWebInterface - Session CoCoSSD',
-        processingModules: [{name: 'COCO-SSD-local'}],
+        processingModules: [{ name: 'COCO-SSD-local' }],
         ioMappings: [
           {
             processingModuleName: 'COCO-SSD-local',
@@ -145,8 +145,7 @@ export default {
       UbiiClientService.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
         session: this.ubiiSessionCoCoSSD
-      })
-      .then(response => {
+      }).then(response => {
         console.info(response);
         if (response.error) {
           console.warn(response.error);
@@ -187,15 +186,9 @@ export default {
         return (index + 1) % 4 !== 0;
       });
 
-      let tSeconds = Date.now() / 1000;
-      let seconds = Math.floor(tSeconds);
-      let nanos = Math.floor((tSeconds - seconds) * 1000000000);
       UbiiClientService.publishRecord({
         topic: this.ubiiDevice.components[0].topic,
-        timestamp: {
-          seconds: seconds,
-          nanos: nanos
-        },
+        timestamp: UbiiClientService.generateTimestamp(),
         image2D: {
           width: img.width,
           height: img.height,
