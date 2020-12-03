@@ -31,8 +31,11 @@
         id="processing-option-tesseract-ocr"
         value="tesseract-ocr"
         v-model="processingOption"
+        :disabled="true"
       />
-      <label for="processing-option-tesseract-ocr">Tesseract OCR</label>
+      <label for="processing-option-tesseract-ocr"
+        >Tesseract OCR (coming soon)</label
+      >
       <app-button
         class="button round button-toggle-processing"
         :class="processing ? 'red-accent' : 'green-accent'"
