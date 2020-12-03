@@ -22,28 +22,44 @@
       </div>
 
       <div class="grid">
-        <router-link to="/applications/examples/mouse-pointer" class="interface-link" tag="div">
+        <router-link
+          to="/applications/examples/mouse-pointer"
+          class="interface-link"
+          tag="div"
+        >
           <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="mouse-pointer" class="interface-icon" />
             <p>Mouse Demo</p>
           </app-tile>
         </router-link>
 
-        <router-link to="/applications/examples/threejs" class="interface-link" tag="div">
+        <router-link
+          to="/applications/examples/threejs"
+          class="interface-link"
+          tag="div"
+        >
           <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="cube" class="interface-icon" />
             <p>Three.js Web Rendering</p>
           </app-tile>
         </router-link>
 
-        <router-link to="/applications/examples/threejs-webvr" class="interface-link" tag="div">
+        <router-link
+          to="/applications/examples/threejs-webvr"
+          class="interface-link"
+          tag="div"
+        >
           <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="vr-cardboard" class="interface-icon" />
             <p>Three.js WebVR Rendering</p>
           </app-tile>
         </router-link>
 
-        <router-link to="/applications/examples/aframe" class="interface-link" tag="div">
+        <router-link
+          to="/applications/examples/aframe"
+          class="interface-link"
+          tag="div"
+        >
           <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="vr-cardboard" class="interface-icon" />
             <p>A-Frame</p>
@@ -61,10 +77,25 @@
           </app-tile>
         </router-link>
 
-        <router-link to="/applications/examples/opencv" class="interface-link" tag="div">
+        <router-link
+          to="/applications/examples/opencv"
+          class="interface-link"
+          tag="div"
+        >
           <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="eye" class="interface-icon" />
             <p>OpenCV</p>
+          </app-tile>
+        </router-link>
+
+        <router-link
+          to="/applications/examples/image-processing"
+          class="interface-link"
+          tag="div"
+        >
+          <app-tile class="layer-three background round shadow purple-accent">
+            <font-awesome-icon icon="camera" class="interface-icon" />
+            <p>Image Processing</p>
           </app-tile>
         </router-link>
       </div>
@@ -115,7 +146,11 @@
       </div>
 
       <div class="grid">
-        <router-link to="/applications/misc/rock-paper-scissors" class="interface-link" tag="div">
+        <router-link
+          to="/applications/misc/rock-paper-scissors"
+          class="interface-link"
+          tag="div"
+        >
           <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="hand-scissors" class="interface-icon" />
             <p>Rock Paper Scissors</p>
@@ -143,7 +178,8 @@ import {
   faKeyboard,
   faHandPointer,
   faHandScissors,
-  faEye
+  faEye,
+  faCamera
 } from '@fortawesome/free-solid-svg-icons';
 library.add(
   faMousePointer,
@@ -154,8 +190,9 @@ library.add(
   faTabletAlt,
   faKeyboard,
   faHandPointer,
+  faHandScissors,
   faEye,
-  faHandScissors
+  faCamera
 );
 
 export default {
