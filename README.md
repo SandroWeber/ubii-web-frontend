@@ -56,5 +56,6 @@ Alternatives:
 ### NGINX
 
 - Install nginx (https://www.nginx.com/)
-- Copy the `ubii.nginx.conf` into a folder that is used by nginx. This depends on your distribution - /etc/nginx/nginx.conf, /usr/local/nginx/conf/nginx.conf or /usr/local/etc/nginx/nginx.conf are common defaults.
+- Copy the `ubii.nginx.<os>.conf` into a folder that is used by nginx. This depends on your distribution - /etc/nginx/nginx.conf, /usr/local/nginx/conf/nginx.conf or /usr/local/etc/nginx/nginx.conf are common defaults under UNIX.
+- On Windows, copy the content of config wholesale into your nginx.conf or use an include statement with the path to your ubii nginx config file
 - Inside the fresh copy of `ubii.nginx.conf`, edit the paths to the certificate files and the location of root to point to the proper directory of your frontend.

@@ -143,6 +143,14 @@ export default new Router({
       name: 'Example - OpenCV',
       component: () => import('./components/applications/examples/OpenCV.vue')
     },
+    {
+      path: '/applications/examples/image-processing',
+      name: 'Example - Image Processing',
+      component: () =>
+        import(
+          './components/applications/examples/imageProcessing/ImageProcessing.vue'
+        )
+    },
     /* applications - smartphone VR */
     {
       path: '/applications/smartphone-assisted-vr/savr-model-inspector',
