@@ -56,6 +56,16 @@ export default new Router({
       component: () => import('./components/interfaces/UbiiController.vue')
     },
     {
+      path: '/interfaces/ubii-game-pad',
+      name: 'Interface - Ubii Gamepad',
+      component: () => import('./components/interfaces/UbiiGamePad.vue')
+    },
+    {
+      path: '/interfaces/ubii-game-camera',
+      name: 'Interface - Ubii Game Camera',
+      component: () => import('./components/interfaces/UbiiGameCamera.vue')
+    },
+    {
       path: '/interfaces/camera',
       name: 'Interface - Camera',
       component: () => import('./components/interfaces/Camera.vue')
