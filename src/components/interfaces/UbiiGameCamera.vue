@@ -1,9 +1,7 @@
 <template>
-
   <div class="interface-wrapper">
     <div class="debug-log">{{ textOutput }}</div>
     <video id="video" class="camera-image" autoplay></video>
-    <div id="video-overlay" class="video-overlay"></div>
     <button
       @click="onButtonCoCoSSD"
       :class="{'toggle-active': cocoSsdActive, 'toggle-inactive': !cocoSsdActive}"
@@ -17,19 +15,18 @@
 
 import uuidv4 from 'uuid/v4';
 
-import UbiiClientService from '../../services/ubiiClient/ubiiClientService.js';
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 import { setTimeout } from 'timers';
 
 export default {
-  name: 'Interface-GameCamera',
+  name: 'Interface-UbiiController-GameCamera',
   mounted: function() {
+     // For CAMERA
     let video = document.getElementById('video');
     this.videoOverlayElement = document.getElementById('video-overlay');
-
     this.publishFrequency = 500; // ms
-
     // Get access to the camera!
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       // Not adding `{ audio: true }` since we only want video now
@@ -63,7 +60,7 @@ export default {
     start: function() {
       this.cocoSSDLabels = [];
 
-      UbiiClientService.isConnected().then(() => {
+      UbiiClientService.waitForConnection().then(() => {
         this.createUbiiSpecs();
 
         UbiiClientService.registerDevice(this.ubiiDevice).then(device => {
@@ -71,7 +68,7 @@ export default {
             this.ubiiDevice = device;
           }
         });
-        UbiiClientService.subscribe(
+        UbiiClientService.subscribeTopic(
             this.componentTextOutput.topic,
             text => {
                 this.textOutput = text;
@@ -86,9 +83,15 @@ export default {
     },
     /* ubii methods */
     createUbiiSpecs: async function() {
-      this.ubiiDeviceName = 'CameraUbiiParty';
-      let topicPrefix =
-        '/' + UbiiClientService.getClientID() + '/' + this.ubiiDeviceName;
+       if (this.clientId) {
+        console.warn('tried to create ubii specs, but are already present');
+        return;
+      }
+
+      this.deviceName = 'web-interface-ubii-controller-gamecamera';
+
+      this.clientId = UbiiClientService.getClientID();
+      let topicPrefix = '/' + this.clientId + '/' + this.deviceName;
 
       this.ubiiDevice = {
         name: this.ubiiDeviceName,
@@ -98,23 +101,25 @@ export default {
           {
             topic: topicPrefix + '/camera_image',
             messageFormat: 'ubii.dataStructure.Image',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.INPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
           },
           {
             topic: topicPrefix + '/objects',
             messageFormat: 'ubii.dataStructure.Object2DList',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/set_text',
             messageFormat: 'string',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.OUTPUT
+            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           }
         ]
-      };
+      };    
+      
+      this.componentCameraImage = this.ubiiDevice.components[0];
+      this.componentCameraObjects = this.ubiiDevice.components[1];
+      this.componentTextOutput = this.ubiiDevice.components[2];
 
-    
-      this.componentTextOutput = this.ubiiDevice.components[3];
       let interactionCocoSsdID = 'b74761e9-3cd3-400c-8144-23669e951c2c';
       let getInteractionResponse = await UbiiClientService.callService({
         topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_GET,
@@ -155,6 +160,72 @@ export default {
         ]
       };
     },
+     registerUbiiSpecs: function() {
+      if (this.initializing || this.hasRegisteredUbiiDevice) {
+        console.warn(
+          'Tried to register ubii device, but is already registered'
+        );
+        return;
+      }
+      this.initializing = true;
+      this.cocoSSDLabels = [];
+
+      // register the mouse pointer device
+      UbiiClientService.waitForConnection().then(() => {
+        UbiiClientService.registerDevice(this.ubiiDevice)
+          .then(device => {
+            if (device.id) {
+              this.ubiiDevice = device;
+              this.hasRegisteredUbiiDevice = true;
+              this.initializing = false;
+              this.publishContinuousDeviceData();
+            }
+            return device;
+          })
+          .then(() => {
+            UbiiClientService.subscribeTopic(
+              this.componentTextOutput.topic,
+              this.setTextOutput
+            );
+
+            if (this.componentVibration) {
+              UbiiClientService.subscribeTopic(
+                this.componentVibration.topic,
+                this.vibrate
+              );
+            }
+          });
+      });
+    },
+    unregisterUbiiSpecs: async function() {
+      if (!this.hasRegisteredUbiiDevice) {
+        console.warn(
+          'Tried to unregister ubii specs, but they are not registered.'
+        );
+        return;
+      }
+
+      if (this.ubiiDevice && this.ubiiDevice.components) {
+        this.ubiiDevice.components.forEach(component => {
+          // eslint-disable-next-line no-console
+          console.log('unsubscribed to ' + component.topic);
+
+          UbiiClientService.unsubscribeTopic(component.topic);
+        });
+      }
+
+      this.hasRegisteredUbiiDevice = false;
+
+      //TODO: this should not happen here, move to interaction
+      UbiiClientService.publishRecord({
+        topic: 'removeClient',
+        string: UbiiClientService.getClientID()
+      });
+
+      // TODO: unregister device
+      this.ubiiDevice &&
+        (await UbiiClientService.deregisterDevice(this.ubiiDevice));
+    },
     /* interface methods */
     onButtonCoCoSSD: function() {
       this.cocoSsdActive = !this.cocoSsdActive;
@@ -194,7 +265,7 @@ export default {
       continuousPublish();
     },
     stopCoCoSSDObjectDetection: function() {
-      UbiiClientService.unsubscribe(this.ubiiDevice.components[1].topic);
+      UbiiClientService.unsubscribeTopic(this.ubiiDevice.components[1].topic);
 
       this.cocoSSDLabels.forEach(div => {
         div.style.visibility = 'hidden';
@@ -308,11 +379,11 @@ export default {
   grid-gap: 5px;
   padding: 5px;
   grid-template-rows: auto 30px;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 20fr 20fr;
   grid-template-areas:
-    'debug-log debug-log debug-log'
-    'camera-image camera-image camera-image'
-    'button-coco-ssd placeholder-a placeholder-b';
+    'debug-log camera-image camera-image'
+    'button-coco-ssd camera-image camera-image'
+    'button-coco-ssd camera-image camera-image';
 }
 
 .camera-image {
@@ -324,7 +395,7 @@ export default {
 .video-overlay {
   grid-area: camera-image;
   width: 100%;
-  justify-self: center;
+  justify-self: right;
   overflow: hidden;
 }
 
@@ -335,10 +406,12 @@ export default {
 }
 
 .toggle-active {
+  grid-area: button-coco-ssd;
   background-color: green;
 }
 
 .toggle-inactive {
+  grid-area: button-coco-ssd;
   background-color: grey;
 }
 
