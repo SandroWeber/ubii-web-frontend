@@ -143,7 +143,7 @@ export default {
   },
   data: () => {
     return {
-      showClientPointer: true,
+      showClientPointer: false,
       showServerPointer: true,
       mirrorPointer: false,
       ubiiClientService: UbiiClientService,
