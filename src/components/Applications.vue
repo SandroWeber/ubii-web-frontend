@@ -56,6 +56,18 @@
         </router-link>
 
         <router-link
+          to="/applications/examples/webvr-avatar"
+          class="interface-link"
+          tag="div"
+        >
+          <app-tile class="layer-three background round shadow purple-accent">
+            <font-awesome-icon icon="vr-cardboard" class="interface-icon" />
+            <p>Three.js WebVR Avatar</p>
+          </app-tile>
+        </router-link>
+
+
+        <router-link
           to="/applications/examples/aframe"
           class="interface-link"
           tag="div"

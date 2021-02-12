@@ -54,7 +54,7 @@ import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faExpand, faCompress } from '@fortawesome/free-solid-svg-icons';
 
-// enum for controller modes, default shall be joycon
+// enum for controller modes, default shall be joycon, TODO: ubii msg format?
 const controllerModes = {
   JOYCON: 'joycon',
   CAMERA: 'camera',

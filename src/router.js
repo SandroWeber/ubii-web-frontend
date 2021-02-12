@@ -124,6 +124,12 @@ export default new Router({
         import('./components/applications/examples/ExampleThreejsWebVR.vue')
     },
     {
+      path: '/applications/examples/webvr-avatar',
+      name: 'Example - WebVR Avatar',
+      component: () =>
+        import('./components/applications/examples/ExampleWebVRAvatar.vue')
+    },
+    {
       path: '/applications/examples/aframe',
       name: 'Example - A-Frame',
       component: () =>
