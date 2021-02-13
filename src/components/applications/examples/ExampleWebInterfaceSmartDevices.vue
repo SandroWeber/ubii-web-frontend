@@ -206,6 +206,8 @@ export default {
         outputs.touchObjects = {
           elements: touchObjects
         };
+
+        return outputs;
       };
 
       /* our processing module with the I/O specifications fitting the processCB */

@@ -225,6 +225,8 @@ export default {
             y: input.clientPointer.y
           };
         }
+
+        return output;
       };
 
       this.ubiiProcessingModule = {

@@ -19,6 +19,8 @@ class PerformanceTestFibonacciHelper {
     let result = fibonacci(inputs.fibonacciInput);
 
     outputs.fibonacciResult = result;
+
+    return outputs;
   }
 
   static createProcessingModuleSpecs(number) {
