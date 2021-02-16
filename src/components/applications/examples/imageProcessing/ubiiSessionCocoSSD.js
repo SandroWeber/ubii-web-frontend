@@ -20,11 +20,11 @@ export default class UbiiSessionCocoSSD {
     this.ioMappings = [
       {
         processingModuleName: 'coco-ssd-object-detection',
-        inputMappings: [{ inputName: 'image', topicSource: topicImageInput }],
+        inputMappings: [{ inputName: 'image', topic: topicImageInput }],
         outputMappings: [
           {
             outputName: 'predictions',
-            topicDestination: topicPredictionsOutput
+            topic: topicPredictionsOutput
           }
         ]
       }
