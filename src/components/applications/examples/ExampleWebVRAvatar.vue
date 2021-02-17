@@ -75,7 +75,7 @@ export default {
 
       this.loader = new ColladaLoader();
 
-      this.loader.load("./models/avatar.dae", avatar => {
+      this.loader.load('./models/avatar.dae', avatar => {
         this.scene.add(avatar.scene);
       });
     },
