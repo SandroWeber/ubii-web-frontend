@@ -146,7 +146,6 @@ export default {
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
         session: this.ubiiSessionCoCoSSD
       }).then(response => {
-        console.info(response);
         if (response.error) {
           console.warn(response.error);
         } else if (response.session) {

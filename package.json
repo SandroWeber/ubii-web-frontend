@@ -14,7 +14,7 @@
     "@fortawesome/vue-fontawesome": "^0.1.10",
     "@riophae/vue-treeselect": "0.0.38",
     "@tum-far/ubii-msg-formats": "0.15.8",
-    "@tum-far/ubii-node-webbrowser": "0.1.6",
+    "@tum-far/ubii-node-webbrowser": "0.1.7",
     "aframe": "0.9.2",
     "bootstrap": "^4.5.0",
     "bootstrap-vue": "^2.15.0",

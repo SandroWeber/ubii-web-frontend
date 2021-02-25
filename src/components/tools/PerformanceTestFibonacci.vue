@@ -166,7 +166,7 @@ export default {
                 PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX
               ) !== -1
             ) {
-              let subscriptionTopic = outputMapping.topicDestination;
+              let subscriptionTopic = outputMapping.topic;
               UbiiClientService.subscribeTopic(
                 subscriptionTopic,
                 this.onProcessingFinishedCallback
@@ -232,7 +232,7 @@ export default {
                 PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX
               ) !== -1
             ) {
-              let subscriptionTopic = outputMapping.topicDestination;
+              let subscriptionTopic = outputMapping.topic;
               UbiiClientService.unsubscribeTopic(
                 subscriptionTopic,
                 this.onProcessingFinishedCallback
