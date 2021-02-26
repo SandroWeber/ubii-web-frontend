@@ -19,6 +19,8 @@ class PerformanceTestFibonacciHelper {
     let result = fibonacci(inputs.fibonacciInput);
 
     outputs.fibonacciResult = result;
+
+    return outputs;
   }
 
   static createProcessingModuleSpecs(number) {
@@ -66,13 +68,15 @@ class PerformanceTestFibonacciHelper {
     pmSpecs.inputs.forEach(element => {
       ioMapping.inputMappings.push({
         inputName: element.internalName,
-        topicSource: topicPrefix + element.internalName
+        topicSource: 'topic',
+        topic: topicPrefix + element.internalName
       });
     });
     pmSpecs.outputs.forEach(element => {
       ioMapping.outputMappings.push({
         outputName: element.internalName,
-        topicDestination: topicPrefix + element.internalName
+        topicDestination: 'topic',
+        topic: topicPrefix + element.internalName
       });
     });
     sessionSpecs.ioMappings.push(ioMapping);

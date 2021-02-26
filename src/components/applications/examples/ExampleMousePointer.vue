@@ -225,6 +225,8 @@ export default {
             y: input.clientPointer.y
           };
         }
+
+        return output;
       };
 
       this.ubiiProcessingModule = {
@@ -268,19 +270,22 @@ export default {
               {
                 inputName: this.ubiiProcessingModule.inputClientPointer
                   .internalName,
-                topicSource: this.ubiiComponentClientPointer.topic
+                topicSource: 'topic',
+                topic: this.ubiiComponentClientPointer.topic
               },
               {
                 inputName: this.ubiiProcessingModule.inputMirrorPointer
                   .internalName,
-                topicSource: this.ubiiComponentMirrorPointer.topic
+                topicSource: 'topic',
+                topic: this.ubiiComponentMirrorPointer.topic
               }
             ],
             outputMappings: [
               {
                 outputName: this.ubiiProcessingModule.outputServerPointer
                   .internalName,
-                topicDestination: this.ubiiComponentServerPointer.topic
+                topicDestination: 'topic',
+                topic: this.ubiiComponentServerPointer.topic
               }
             ]
           }

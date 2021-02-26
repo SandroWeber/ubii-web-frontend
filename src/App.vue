@@ -37,6 +37,7 @@ export default {
     PageHeader
   },
   mounted: () => {
+    UbiiClientService.setName('Ubi-Interact Web Frontend');
     UbiiClientService.connect();
     window.addEventListener('beforeunload', () => {
       UbiiClientService.disconnect();
