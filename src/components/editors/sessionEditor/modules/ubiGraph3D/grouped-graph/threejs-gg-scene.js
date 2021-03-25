@@ -266,35 +266,37 @@ export class GroupedGraphScene {
     });
 
     //create bounding box for group
-    let geometry = new THREE.Geometry();
+    let geometry = new THREE.BufferGeometry();
     //8 corner points of a 3D box
-    geometry.vertices.push(
-      new THREE.Vector3(1, -1, 1),
-      new THREE.Vector3(1, -1, -1),
-      new THREE.Vector3(-1, -1, -1),
-      new THREE.Vector3(-1, -1, 1),
-      new THREE.Vector3(1, 1, 1),
-      new THREE.Vector3(1, 1, -1),
-      new THREE.Vector3(-1, 1, -1),
-      new THREE.Vector3(-1, 1, 1)
-    );
+    const vertices = new Float32Array([
+      1, -1, 1,
+      1, -1, -1
+      -1, -1, -1,
+      -1, -1, 1,
+      1, 1, 1,
+      1, 1, -1,
+      -1, 1, -1,
+      -1, 1, 1
+    ]);
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
 
     //stitch triangular faces together to form a 3D box (2 triangle per side, 6 sides per box)
     //by connecting 3 vertices each by index to form one face
-    geometry.faces.push(
-      new THREE.Face3(0, 1, 2),
-      new THREE.Face3(0, 2, 3),
-      new THREE.Face3(0, 1, 5),
-      new THREE.Face3(0, 4, 5),
-      new THREE.Face3(3, 2, 6),
-      new THREE.Face3(3, 7, 6),
-      new THREE.Face3(3, 0, 4),
-      new THREE.Face3(3, 7, 4),
-      new THREE.Face3(2, 1, 5),
-      new THREE.Face3(2, 6, 5),
-      new THREE.Face3(4, 5, 6),
-      new THREE.Face3(4, 7, 6)
-    );
+    const indices = [
+      0, 1, 2,
+      0, 2, 3,
+      0, 1, 5,
+      0, 4, 5,
+      3, 2, 6,
+      3, 7, 6,
+      3, 0, 4,
+      3, 7, 4,
+      2, 1, 5,
+      2, 6, 5,
+      4, 5, 6,
+      4, 7, 6
+    ]
+    geometry.setIndex( indices );
 
     let boundingBox = new THREE.Mesh(
       geometry,
@@ -572,27 +574,30 @@ export class GroupedGraphScene {
     });
 
     //Line on x-axis
-    let geometry = new THREE.Geometry();
-    geometry.vertices.push(
-      new THREE.Vector3(-0.5, 0, 0),
-      new THREE.Vector3(0.5, 0, 0)
-    );
+    let geometry = new THREE.BufferGeometry();
+    let vertices = new Float32Array([
+      -0.5, 0, 0,
+      0.5, 0, 0
+    ]);
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
     this.zero.line1 = new THREE.Line(geometry, lineMat);
 
     //Line on y-axis
-    geometry = new THREE.Geometry();
-    geometry.vertices.push(
-      new THREE.Vector3(0, 0.5, 0),
-      new THREE.Vector3(0, -0.5, 0)
-    );
+    geometry = new THREE.BufferGeometry();
+    vertices = new Float32Array([
+      0, 0.5, 0,
+      0, -0.5, 0
+    ]);
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
     this.zero.line2 = new THREE.Line(geometry, lineMat);
 
     //Line on z-axis
-    geometry = new THREE.Geometry();
-    geometry.vertices.push(
-      new THREE.Vector3(0, 0, -0.5),
-      new THREE.Vector3(0, 0, 0.5)
-    );
+    geometry = new THREE.BufferGeometry();
+    vertices = new Float32Array([
+      0, 0, -0.5,
+      0, 0, 0.5
+    ]);
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
     this.zero.line3 = new THREE.Line(geometry, lineMat);
 
     this.scene.add(this.zero.circle);
