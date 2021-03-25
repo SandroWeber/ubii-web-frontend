@@ -8,6 +8,13 @@
         </app-tile>
       </router-link>
 
+      <router-link to="/tools/client-inspector" class="interface-link" tag="div">
+        <app-tile class="layer-three background round shadow orange-accent">
+          <font-awesome-icon icon="eye" class="interface-icon" />
+          <p>Client, Device & Component Inspector</p>
+        </app-tile>
+      </router-link>
+
       <router-link to="/tools/performance_tests" class="interface-link" tag="div">
         <app-tile class="layer-three background round shadow orange-accent">
           <font-awesome-icon icon="stopwatch" class="interface-icon" />

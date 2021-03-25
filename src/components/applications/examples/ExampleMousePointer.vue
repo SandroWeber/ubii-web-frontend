@@ -186,18 +186,21 @@ export default {
         components: [
           // component publishing our mouse pointer position
           {
+            name: '2D pointer original',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
             topic: topicPrefix + '/mouse_client_position',
             messageFormat: 'ubii.dataStructure.Vector2'
           },
           // component publishing the flag to invert the pointer position
           {
+            name: '2D pointer mirroring around center',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
             topic: topicPrefix + '/mirror_mouse',
             messageFormat: 'bool'
           },
           // component subscribing to the pointer position returned by the server processing module
           {
+            name: '2D pointer processed',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER,
             topic: topicPrefix + '/mouse_server_position',
             messageFormat: 'ubii.dataStructure.Vector2'

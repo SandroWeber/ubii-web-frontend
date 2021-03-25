@@ -124,6 +124,7 @@ export default {
 .category-content {
   overflow: auto;
 }
+
 .list-element {
   padding-bottom: 3px;
 }
