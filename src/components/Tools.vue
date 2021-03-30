@@ -28,6 +28,13 @@
           <p>QRCode Display</p>
         </app-tile>
       </router-link>
+
+      <router-link to="/tools/topic-publisher" class="interface-link" tag="div">
+        <app-tile class="layer-three background round shadow orange-accent">
+          <font-awesome-icon icon="paper-plane" class="interface-icon" />
+          <p>Topic Publisher</p>
+        </app-tile>
+      </router-link>
     </div>
   </div>
 </template>
