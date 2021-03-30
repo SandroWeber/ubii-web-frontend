@@ -96,6 +96,11 @@ export default new Router({
       name: 'Tool - QR Code Display',
       component: () => import('./components/tools/QRCodeDisplay.vue')
     },
+    {
+      path: '/tools/topic-publisher',
+      name: 'Tool - Topic Publisher',
+      component: () => import('./components/tools/TopicPublisher.vue')
+    },
     /* applications */
     {
       path: '/applications',
