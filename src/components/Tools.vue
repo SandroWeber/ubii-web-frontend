@@ -47,9 +47,10 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import {
   faEye,
   faStopwatch,
-  faQrcode
+  faQrcode,
+  faPaperPlane
 } from '@fortawesome/free-solid-svg-icons';
-library.add(faEye, faStopwatch, faQrcode);
+library.add(faEye, faStopwatch, faQrcode, faPaperPlane);
 
 export default {
   name: 'Tools',

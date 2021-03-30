@@ -1,8 +1,22 @@
 <template>
   <div class="grid">
-    <div>Data:</div>
+    <div>
+      TopicDataRecord:
+      <br />
+      <button @click="publish">Publish</button>
+      <div class="info-text">
+        Enter your record in the form of a JSON following the schema of
+        <a
+          href="https://github.com/SandroWeber/ubii-msg-formats/blob/develop/src/proto/topicData/topicDataRecord/topicDataRecord.proto"
+          target="_blank"
+        >
+          TopicDataRecord.proto</a
+        >
+        <br />
+        A timestamp will be automatically added.
+      </div>
+    </div>
     <codemirror v-model="localValue" :options="codemirror.options"></codemirror>
-    <button @click="publish">Publish</button>
   </div>
 </template>
 
@@ -13,11 +27,6 @@ import { codemirror } from 'vue-codemirror';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/javascript/javascript.js';
 import 'codemirror/theme/base16-dark.css';
-
-// Fontawesome.
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
-library.add(faPaperPlane);
 
 /* eslint-disable no-console */
 
@@ -30,11 +39,12 @@ export default {
     return {
       ubiiClientService: UbiiClientService,
       topicDataRecord: {
-        topic: '/123456/android_client/patient',
+        topic: '/my/topic/here',
         object2D: {
-          id: 'c45140af-0cbe-4c1d-88f2-78f39376a5b8',
-          pose: { position: {x: 0.1, y:0.2}, angle: 0 },
-          userDataJson: "{\"Classification\":\"BLACK\",\"Time\":1617119992565,\"clientID\":\"266f1beb-abe8-44bb-ad13-d949aa62775f\"}"
+          id: 'abcdefgh-1234-abcd-1234-abcdefghijkl',
+          pose: { position: { x: 0.1, y: 0.2 }, angle: 0.3 },
+          userDataJson:
+            '{"clientID":"266f1beb-abe8-44bb-ad13-d949aa62775f"}'
         }
       },
       codemirror: {
@@ -52,7 +62,7 @@ export default {
   computed: {
     localValue: {
       get() {
-        return JSON.stringify(this.topicDataRecord);
+        return JSON.stringify(this.topicDataRecord, null, 4);
       },
       set(localValue) {
         //this.$emit('input', localValue);
@@ -73,20 +83,15 @@ export default {
 </script>
 
 <style scoped>
-.warning {
-  color: red;
-}
-
 .grid {
   display: grid;
   grid-gap: 25px;
-  grid-template-rows: 500px 50px;
-  grid-template-columns: 100px 600px;
+  grid-template-rows: auto 50px;
+  grid-template-columns: 20% 75%;
   margin: 25px;
 }
 
-.vue-codemirror {
-  height: 100%;
-  background-color: cyan;
+.info-text {
+  margin-top: 15px;
 }
 </style>
