@@ -1,7 +1,5 @@
 <template>
   <div class="grid">
-    <div>Topic:</div>
-    <input v-model="topic">
     <div>Data:</div>
     <codemirror v-model="localValue" :options="codemirror.options"></codemirror>
     <button @click="publish">Publish</button>
@@ -31,11 +29,14 @@ export default {
   data() {
     return {
       ubiiClientService: UbiiClientService,
-      topic: '',
-      data: JSON.stringify({
-        topic: '/your/topic/here',
-        bool: true
-      }),
+      topicDataRecord: {
+        topic: '/123456/android_client/patient',
+        object2D: {
+          id: 'c45140af-0cbe-4c1d-88f2-78f39376a5b8',
+          pose: { position: {x: 0.1, y:0.2}, angle: 0 },
+          userDataJson: "{\"Classification\":\"BLACK\",\"Time\":1617119992565,\"clientID\":\"266f1beb-abe8-44bb-ad13-d949aa62775f\"}"
+        }
+      },
       codemirror: {
         options: {
           tabSize: 4,
@@ -48,27 +49,24 @@ export default {
       }
     };
   },
-  mounted() {
-    
-  },
   computed: {
     localValue: {
       get() {
-        return this.data;
+        return JSON.stringify(this.topicDataRecord);
       },
       set(localValue) {
-        this.$emit('input', localValue);
-        this.data = localValue;
+        //this.$emit('input', localValue);
+        this.topicDataRecord = JSON.parse(localValue);
       }
     }
   },
   methods: {
     publish: async function() {
       console.info('publish');
-      console.info(this.topic);
-      console.info(this.data);
-      //await UbiiClientService.waitForConnection();
-      //UbiiClientService.publish(topic, data)
+      console.info(this.topicDataRecord);
+      this.topicDataRecord.timestamp = UbiiClientService.generateTimestamp();
+      await UbiiClientService.waitForConnection();
+      UbiiClientService.publishRecord(this.topicDataRecord);
     }
   }
 };
@@ -82,8 +80,8 @@ export default {
 .grid {
   display: grid;
   grid-gap: 25px;
-  grid-template-rows: 50px 500px 50px;
-  grid-template-columns: 100px auto;
+  grid-template-rows: 500px 50px;
+  grid-template-columns: 100px 600px;
   margin: 25px;
 }
 
