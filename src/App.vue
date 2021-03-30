@@ -115,4 +115,8 @@ html, body {
 .svg-inline--fa {
   vertical-align: 0;
 }
+
+a {
+  color: purpleAccentColor;
+}
 </style>
