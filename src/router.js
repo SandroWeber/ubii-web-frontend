@@ -149,6 +149,14 @@ export default new Router({
         )
     },
     {
+      path: '/applications/examples/model-viewer',
+      name: 'Example - Model Viewer',
+      component: () =>
+        import(
+          './components/applications/examples/model-viewer/ExampleModelViewer.vue'
+        )
+    },
+    {
       path: '/applications/examples/opencv',
       name: 'Example - OpenCV',
       component: () => import('./components/applications/examples/OpenCV.vue')
