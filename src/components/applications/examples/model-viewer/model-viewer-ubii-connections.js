@@ -9,6 +9,7 @@ export default class ModelViewerUbiiConnections {
   async init() {
     await UbiiClientService.waitForConnection();
 
+    // find the first best smart device
     this.intervalCheckForSmartphone = setInterval(async () => {
       let response = await UbiiClientService.callService({
         topic: DEFAULT_TOPICS.SERVICES.DEVICE_GET_LIST

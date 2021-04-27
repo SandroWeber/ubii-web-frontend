@@ -178,7 +178,7 @@ export default {
       let ubiiDevice = {
         name: deviceName,
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
-        tags: ['smartdevice'],
+        tags: ['smart device', 'web interface'],
         components: [
           {
             topic: topicPrefix + '/touch_position',
@@ -197,7 +197,7 @@ export default {
           },
           {
             topic: topicPrefix + '/touch_events',
-            messageFormat: 'ubii.dataStructure.TouchEvent',
+            messageFormat: 'ubii.dataStructure.TouchEventList',
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
           }
         ]
@@ -333,6 +333,16 @@ export default {
         });
       }
     },
+    publishTouchEventList: function(touches) {
+      if (this.hasRegisteredUbiiDevice) {
+        UbiiClientService.publish({
+          topicDataRecord: {
+            topic: this.componentTouchEvents.topic,
+            touchEventList: { elements: touches }
+          }
+        });
+      }
+    },
     publishDeviceOrientation: function() {
       if (!this.deviceData.currentOrientation) {
         return;
@@ -440,16 +450,32 @@ export default {
     onTouchStart: function(event) {
       this.debugOutput = 'event onTouchStart';
       this.deviceData.touches = event.touches;
+      /*console.info('touch start');
+      console.info(event.touches);*/
 
-      this.deviceData.touchPosition = this.normalizeCoordinates(event, 0);
+      /*this.deviceData.touchPosition = this.normalizeCoordinates(event, 0);
       this.publishTouchEvent(
         ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN,
         this.deviceData.touchPosition
-      );
+      );*/
+
+      console.info('onTouchStart');
+      console.info(event.touches);
+      let touchList = [];
+      for (let i = 0; i < event.touches.length; i++) {
+        touchList.push({
+          type: ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN,
+          position: this.normalizeCoordinates(event, i)
+        });
+      }
+      console.info(touchList);
+      this.publishTouchEventList(touchList);
     },
     onTouchMove: function(event) {
       this.debugOutput = 'event onTouchMove';
       this.deviceData.touches = event.touches;
+      /*console.info('touch move');
+      console.info(event.touches);*/
 
       this.deviceData.touchPosition = this.normalizeCoordinates(event, 0);
     },
@@ -457,6 +483,10 @@ export default {
       this.debugOutput = 'event onTouchEnd';
       this.deviceData.touches = event.touches;
       this.deviceData.touchPosition = undefined;
+      /*console.info('touch end');
+      console.info(event.touches);*/
+      console.info('onTouchEnd');
+      console.info(event.touches);
 
       this.publishTouchEvent(
         ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP,
