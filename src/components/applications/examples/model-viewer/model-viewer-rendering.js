@@ -143,11 +143,12 @@ export default class ModelViewerRendering {
   updateSelectedRotation() {
     if (!this.rotateSelected) return;
 
-    let currentSmartPhoneQuaternion = this.objectSmartphone.quaternion.clone();
-    let diffSmartphoneQuaternion = this.lastSmartPhoneQuaternion.invert().premultiply(this.objectSmartphone.quaternion);
+    let currentSmartPhoneQuaternion = new THREE.Quaternion();
+    this.objectSmartphone.getWorldQuaternion(currentSmartPhoneQuaternion);
+    let diffSmartphoneQuaternion = this.lastSmartPhoneQuaternion.invert().premultiply(currentSmartPhoneQuaternion);
 
     this.selectedObjects.forEach(object => {
-      object.quaternion.multiply(diffSmartphoneQuaternion);
+      object.quaternion.premultiply(diffSmartphoneQuaternion);
     });
 
     this.lastSmartPhoneQuaternion = currentSmartPhoneQuaternion;
