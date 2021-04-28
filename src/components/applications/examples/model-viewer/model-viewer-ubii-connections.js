@@ -1,5 +1,8 @@
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
+import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
+
+const ButtonEventType = ProtobufLibrary.ubii.dataStructure.ButtonEventType;
 
 export default class ModelViewerUbiiConnections {
   constructor(modelViewerRendering) {
@@ -28,15 +31,15 @@ export default class ModelViewerUbiiConnections {
   }
 
   async subscribeTopics(ubiiDevice) {
-    this.componentToucEvents = ubiiDevice.components.find(component =>
+    this.componentTouchEvents = ubiiDevice.components.find(component =>
       component.topic.includes('/touch_events')
     );
-    console.info('componentToucEvents');
-    console.info(this.componentToucEvents);
+    console.info('componentTouchEvents');
+    console.info(this.componentTouchEvents);
     await UbiiClientService.subscribeTopic(
-      this.componentToucEvents.topic,
-      touchEvent => {
-        //console.info(touchEvent);
+      this.componentTouchEvents.topic,
+      touchEventList => {
+        this.onTouchEvents(touchEventList);
       }
     );
 
@@ -56,5 +59,19 @@ export default class ModelViewerUbiiConnections {
         );
       }
     );
+  }
+
+  onTouchEvents(touchEventList) {
+    let touches = touchEventList.elements;
+    //console.info(touches);
+    if (touches.length === 1 && touches[0].type === ButtonEventType.DOWN) {
+      this.modelViewerRendering.triggerSelection();
+    } else if (touches.length >= 2 && touches[0].type === ButtonEventType.DOWN) {
+      this.modelViewerRendering.startSelectionRotation();
+    }
+    
+    if (touches.length < 2) {
+      this.modelViewerRendering.stopSelectionRotation();
+    }
   }
 }

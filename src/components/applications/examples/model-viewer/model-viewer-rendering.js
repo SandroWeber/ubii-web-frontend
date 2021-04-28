@@ -11,6 +11,7 @@ import { MathUtils } from 'three/src/math/MathUtils';
 export default class ModelViewerRendering {
   constructor(containerElement) {
     this.containerElement = containerElement;
+    this.selectedObjects = [];
   }
 
   init() {
@@ -53,7 +54,7 @@ export default class ModelViewerRendering {
     );
     this.outlinePass.edgeStrength = 3;
     this.outlinePass.visibleEdgeColor.set('#ffffff');
-    this.outlinePass.selectedObjects = [];
+    this.outlinePass.selectedObjects = this.selectedObjects;
     this.composer.addPass(this.outlinePass);
 
     this.effectFXAA = new ShaderPass(FXAAShader);
@@ -73,7 +74,8 @@ export default class ModelViewerRendering {
       requestAnimationFrame(() => {
         this.animate();
       });
-      //this.renderer.render(this.scene, this.camera);
+
+      this.updateSelectedRotation();
       this.composer.render();
     }
   }
@@ -87,15 +89,82 @@ export default class ModelViewerRendering {
   }
 
   selectObject(object) {
-    this.outlinePass.selectedObjects = [object];
+    let index = this.selectedObjects.indexOf(object);
+    if (index === -1) {
+      this.selectedObjects.push(object);
+    } else {
+      this.selectedObjects.splice(index, 1);
+    }
+  }
+
+  triggerSelection() {
+    console.info('triggerSelection');
+    let smartphonePosition = new THREE.Vector3();
+    let smartphoneForward = new THREE.Vector3();
+    this.objectSmartphone.getWorldPosition(smartphonePosition);
+    this.objectSmartphone.getWorldDirection(smartphoneForward);
+    const raycaster = new THREE.Raycaster(
+      smartphonePosition,
+      smartphoneForward,
+      0.1,
+      100
+    );
+    const intersects = raycaster
+      .intersectObjects(this.scene.children, true)
+      .filter(hit => hit.object.type === 'Mesh');
+    console.info(intersects);
+
+    if (intersects.length > 0) {
+      let object = undefined;
+      intersects[0].object.traverseAncestors(ancestor => {
+        if (ancestor.parent === this.scene) {
+          object = ancestor;
+        }
+      });
+      this.selectObject(object);
+    }
+  }
+
+  startSelectionRotation() {
+    console.info('startSelectionRotation');
+    /*this.onSelectionRotationStartInfo = {
+      smartphoneRotation: this.objectSmartphone.quaternion.clone()
+    }*/
+
+    this.rotateSelected = true;
+    this.lastSmartPhoneQuaternion = this.objectSmartphone.quaternion.clone();
+  }
+
+  stopSelectionRotation() {
+    console.info('stopSelectionRotation');
+    this.rotateSelected = false;
+  }
+
+  updateSelectedRotation() {
+    if (!this.rotateSelected) return;
+
+    let currentSmartPhoneQuaternion = this.objectSmartphone.quaternion.clone();
+    let diffSmartphoneQuaternion = this.lastSmartPhoneQuaternion.invert().premultiply(this.objectSmartphone.quaternion);
+
+    this.selectedObjects.forEach(object => {
+      object.quaternion.multiply(diffSmartphoneQuaternion);
+    });
+
+    this.lastSmartPhoneQuaternion = currentSmartPhoneQuaternion;
   }
 
   setSmartphoneRotation(eulerDegX, eulerDegY, eulerDegZ) {
     let smartPhoneQuaternion = new THREE.Quaternion().setFromEuler(
-      new THREE.Euler(MathUtils.degToRad(eulerDegX), MathUtils.degToRad(eulerDegY), MathUtils.degToRad(eulerDegZ))
+      new THREE.Euler(
+        MathUtils.degToRad(eulerDegX),
+        MathUtils.degToRad(eulerDegY),
+        MathUtils.degToRad(eulerDegZ)
+      )
     );
     smartPhoneQuaternion.multiply(this.objectSmartphoneInitQuaternion);
-    this.objectSmartphone.setRotationFromQuaternion(smartPhoneQuaternion.normalize());
+    this.objectSmartphone.setRotationFromQuaternion(
+      smartPhoneQuaternion.normalize()
+    );
     //this.objectSmartphone.setRotationFromQuaternion(new Quaternion(1,1,0,1).normalize());
   }
 
@@ -128,8 +197,8 @@ export default class ModelViewerRendering {
       new OBJLoader(manager).setMaterials(mtl).load(
         'models/skeleton.obj',
         obj => {
-          console.info(obj);
           this.objectSkeleton = obj;
+          this.objectSkeleton.name = 'spooky boi';
           this.objectSkeleton.position.set(-0.5, -0.5, 0);
           this.objectSkeleton.traverse(node => {
             if (node.type === 'Mesh') {
@@ -146,9 +215,10 @@ export default class ModelViewerRendering {
     loaderOBJ.load(
       'models/teapot.obj',
       obj => {
-        console.info(obj);
         this.objectTeapot1 = obj;
         this.objectTeapot2 = obj.clone();
+        this.objectTeapot1.name = 'teapot1';
+        this.objectTeapot2.name = 'teapot2';
 
         this.objectTeapot1.position.set(0, -0.5, -1);
         this.objectTeapot1.scale.set(0.3, 0.3, 0.3);
@@ -179,15 +249,17 @@ export default class ModelViewerRendering {
         new OBJLoader(manager).setMaterials(mtl).load(
           'models/smartphone.obj',
           obj => {
-            console.info(obj);
             this.objectSmartphone = obj;
+            this.objectSmartphone.name = 'smartphone';
             this.objectSmartphone.position.set(0, -0.05, 0.9);
             this.objectSmartphone.rotation.set(Math.PI, 0, 0);
             this.scene.add(this.objectSmartphone);
             this.objectSmartphoneInitQuaternion = this.objectSmartphone.quaternion.clone();
+            //const axesHelper = new THREE.AxesHelper(0.5);
+            //this.objectSmartphone.add(axesHelper);
 
             // add raycast visualizer
-            const material = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+            const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
             const points = [];
             points.push(new THREE.Vector3(0, 0, 0));
             points.push(new THREE.Vector3(0, 0, 10));

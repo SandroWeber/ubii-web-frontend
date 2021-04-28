@@ -459,16 +459,17 @@ export default {
         this.deviceData.touchPosition
       );*/
 
-      console.info('onTouchStart');
-      console.info(event.touches);
+      /*console.info('onTouchStart');
+      console.info(event.touches);*/
       let touchList = [];
       for (let i = 0; i < event.touches.length; i++) {
         touchList.push({
+          id: event.touches[i].identifier.toString(),
           type: ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN,
           position: this.normalizeCoordinates(event, i)
         });
       }
-      console.info(touchList);
+      //console.info(touchList);
       this.publishTouchEventList(touchList);
     },
     onTouchMove: function(event) {
@@ -485,13 +486,24 @@ export default {
       this.deviceData.touchPosition = undefined;
       /*console.info('touch end');
       console.info(event.touches);*/
-      console.info('onTouchEnd');
-      console.info(event.touches);
 
-      this.publishTouchEvent(
+      /*this.publishTouchEvent(
         ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP,
         null
-      );
+      );*/
+
+      /*console.info('onTouchEnd');
+      console.info(event.touches);*/
+      let touchList = [];
+      for (let i = 0; i < event.touches.length; i++) {
+        touchList.push({
+          id: event.touches[i].identifier.toString(),
+          type: ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP,
+          position: this.normalizeCoordinates(event, i)
+        });
+      }
+      //console.info(touchList);
+      this.publishTouchEventList(touchList);
     },
     onDeviceOrientation: function(event) {
       // https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent
