@@ -89,7 +89,7 @@
 import Vue from 'vue';
 import Fullscreen from 'vue-fullscreen';
 
-import UbiiClientContent from '../applications/sharedModules/UbiiClientContent';
+import UbiiClientContent from '../../applications/sharedModules/UbiiClientContent';
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 

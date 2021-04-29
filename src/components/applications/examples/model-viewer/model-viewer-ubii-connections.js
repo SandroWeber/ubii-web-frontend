@@ -64,10 +64,18 @@ export default class ModelViewerUbiiConnections {
   onTouchEvents(touchEventList) {
     let touches = touchEventList.elements;
     //console.info(touches);
+
     if (touches.length === 1 && touches[0].type === ButtonEventType.DOWN) {
-      this.modelViewerRendering.triggerSelection();
+      this.singleFingerDown = true;
     } else if (touches.length >= 2 && touches[0].type === ButtonEventType.DOWN) {
+      this.singleFingerDown = false;
+
       this.modelViewerRendering.startSelectionRotation();
+    }
+
+    if (touches.length === 0 && this.singleFingerDown) {
+      this.singleFingerDown = false;
+      this.modelViewerRendering.triggerSelection();
     }
     
     if (touches.length < 2) {
