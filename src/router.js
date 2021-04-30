@@ -43,7 +43,7 @@ export default new Router({
     {
       path: '/interfaces/smart-device',
       name: 'Interface - Smart Device',
-      component: () => import('./components/interfaces/SmartDevice.vue')
+      component: () => import('./components/interfaces/smart-device/SmartDevice.vue')
     },
     {
       path: '/interfaces/myo',
@@ -146,6 +146,14 @@ export default new Router({
       component: () =>
         import(
           './components/applications/examples/ExampleWebInterfaceSmartDevices.vue'
+        )
+    },
+    {
+      path: '/applications/examples/model-viewer',
+      name: 'Example - Model Viewer',
+      component: () =>
+        import(
+          './components/applications/examples/model-viewer/ExampleModelViewer.vue'
         )
     },
     {

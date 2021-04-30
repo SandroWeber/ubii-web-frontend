@@ -78,6 +78,17 @@
         </router-link>
 
         <router-link
+          to="/applications/examples/model-viewer"
+          class="interface-link"
+          tag="div"
+        >
+          <app-tile class="layer-three background round shadow purple-accent">
+            <font-awesome-icon icon="cubes" class="interface-icon" />
+            <p>Model Viewer</p>
+          </app-tile>
+        </router-link>
+
+        <router-link
           to="/applications/examples/opencv"
           class="interface-link"
           tag="div"
