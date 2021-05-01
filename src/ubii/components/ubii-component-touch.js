@@ -3,27 +3,35 @@ import { MSG_TYPES } from '@tum-far/ubii-msg-formats';
 const UbiiImage2D = ProtobufLibrary.ubii.dataStructure.Image2D;
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
+const TOPIC_PLACEHOLDER_PREFIX = '<placeholder-topic-prefix>';
 const TOPIC_SUFFIX = '/camera_image';
 
-export default class UbiiCameraInterface {
-  constructor(
-    ubiiImageFormat,
-    topicPrefix,
-    publishFrequencyMS,
-    videoPlaybackElement
-  ) {
+const UBII_SPECS_TEMPLATE = {
+  topic: '/' + TOPIC_PLACEHOLDER_PREFIX + TOPIC_SUFFIX,
+  messageFormat: MSG_TYPES.DATASTRUCTURE_IMAGE,
+  ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
+  tags: ['camera', 'image', '2D'],
+  description: 'web interface - camera componenent'
+};
+
+export default class UbiiComponentTouchscreen {
+  constructor(publishFrequencyMS, touchElement) {
+    Object.assign(this, UBII_SPECS_TEMPLATE);
+
     this.ubiiImageFormat = ubiiImageFormat;
-    this.topicPrefix = topicPrefix;
-    this.topic = this.topicPrefix + TOPIC_SUFFIX;
     this.publishFrequencyMS = publishFrequencyMS;
     this.videoPlaybackElement = videoPlaybackElement;
   }
 
-  start() {
+  async start() {
     if (this.running) {
       return;
     }
     this.running = true;
+
+    await UbiiClientService.waitForConnection();
+    let clientId = UbiiClientService.getClientID();
+    this.topic = this.topic.replace(TOPIC_PLACEHOLDER_PREFIX, clientId);
 
     navigator.mediaDevices
       .getUserMedia({ video: true })
@@ -81,9 +89,7 @@ export default class UbiiCameraInterface {
       ctx = canvas.getContext('2d');
       ctx.drawImage(image, 0, 0);
     }
-    return canvas
-      .getContext('2d')
-      .getImageData(0, 0, canvas.width, canvas.height);
+    return canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
   }
 
   publishFrame(imageBitmap) {
@@ -106,15 +112,5 @@ export default class UbiiCameraInterface {
         dataFormat: this.ubiiImageFormat
       }
     });
-  }
-
-  getUbiiComponent() {
-    return {
-      topic: this.topic,
-      messageFormat: MSG_TYPES.DATASTRUCTURE_IMAGE,
-      ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
-      tags: ['camera', 'image', '2D'],
-      description: 'web interface for device camera'
-    };
   }
 }
