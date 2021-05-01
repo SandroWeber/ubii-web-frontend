@@ -127,10 +127,6 @@ export default class ModelViewerRendering {
 
   startSelectionRotation() {
     console.info('startSelectionRotation');
-    /*this.onSelectionRotationStartInfo = {
-      smartphoneRotation: this.objectSmartphone.quaternion.clone()
-    }*/
-
     this.rotateSelected = true;
     this.lastSmartPhoneQuaternion = this.objectSmartphone.quaternion.clone();
   }

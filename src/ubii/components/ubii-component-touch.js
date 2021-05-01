@@ -1,116 +1,105 @@
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
-import { MSG_TYPES } from '@tum-far/ubii-msg-formats';
-const UbiiImage2D = ProtobufLibrary.ubii.dataStructure.Image2D;
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
-const TOPIC_PLACEHOLDER_PREFIX = '<placeholder-topic-prefix>';
-const TOPIC_SUFFIX = '/camera_image';
+import UbiiComponent from './ubii-component-base';
 
-const UBII_SPECS_TEMPLATE = {
-  topic: '/' + TOPIC_PLACEHOLDER_PREFIX + TOPIC_SUFFIX,
-  messageFormat: MSG_TYPES.DATASTRUCTURE_IMAGE,
+const TOPIC_SUFFIX = 'touch_events';
+
+const UBII_SPECS = {
+  messageFormat: 'ubii.dataStructure.TouchEventList',
   ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
-  tags: ['camera', 'image', '2D'],
-  description: 'web interface - camera componenent'
+  tags: ['touch'],
+  description: 'web interface - touch screen'
 };
 
-export default class UbiiComponentTouchscreen {
+export default class UbiiComponentTouchscreen extends UbiiComponent {
   constructor(publishFrequencyMS, touchElement) {
-    Object.assign(this, UBII_SPECS_TEMPLATE);
+    super(TOPIC_SUFFIX);
+    Object.assign(this, UBII_SPECS);
 
-    this.ubiiImageFormat = ubiiImageFormat;
     this.publishFrequencyMS = publishFrequencyMS;
-    this.videoPlaybackElement = videoPlaybackElement;
+    this.touchElement = touchElement;
   }
 
-  async start() {
-    if (this.running) {
-      return;
-    }
-    this.running = true;
-
-    await UbiiClientService.waitForConnection();
-    let clientId = UbiiClientService.getClientID();
-    this.topic = this.topic.replace(TOPIC_PLACEHOLDER_PREFIX, clientId);
-
-    navigator.mediaDevices
-      .getUserMedia({ video: true })
-      .then(mediaStream => {
-        this.mediaStream = mediaStream;
-        if (this.videoPlaybackElement) {
-          this.videoPlaybackElement.srcObject = this.mediaStream;
-        }
-
-        const track = mediaStream.getVideoTracks()[0];
-        this.imageCapture = new ImageCapture(track);
-
-        UbiiClientService.waitForConnection().then(() => {
-          let continuousPublishing = async () => {
-            let imageBitmap = await this.grabFrame();
-            this.publishFrame(imageBitmap);
-
-            if (this.running) {
-              setTimeout(continuousPublishing, this.publishFrequencyMS);
-            }
-          };
-          continuousPublishing();
-        });
-      })
-      // eslint-disable-next-line no-console
-      .catch(error => console.log(error));
+  onStart() {
+    this.continuousPublishing();
   }
 
-  stop() {
-    this.running = false;
-  }
+  /* event callbacks */
 
-  /* under firefox, ImageCapture API seems to be buggy */
-  async grabFrame() {
-    let imageBitmap = await this.imageCapture
-      .grabFrame()
-      // eslint-disable-next-line no-console
-      .catch(error => console.log(error));
-    return imageBitmap;
-  }
+  onTouchStart(event) {
+    this.touches = event.touches;
 
-  /* unfortunately necessary to double memory, wait for bitmaprenderer API to finalize and be bug-free */
-  getFrameBuffer(image) {
-    var canvas = document.createElement('canvas');
-    canvas.width = image.width;
-    canvas.height = image.height;
-
-    let ctx = null; //canvas.getContext('bitmaprenderer');
-    if (ctx) {
-      // transfer the ImageBitmap to it
-      ctx.transferFromImageBitmap(image);
-    } else {
-      // in case someone supports createImageBitmap only
-      // twice in memory...
-      ctx = canvas.getContext('2d');
-      ctx.drawImage(image, 0, 0);
-    }
-    return canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
-  }
-
-  publishFrame(imageBitmap) {
-    let imageBuffer = this.getFrameBuffer(imageBitmap);
-    let data = imageBuffer.data;
-    if (this.ubiiImageFormat === UbiiImage2D.DataFormat.RGB8) {
-      // reduce from RGBA8 to RGB8, fitting tensorflow model
-      data = data.filter((element, index) => {
-        return (index + 1) % 4 !== 0;
+    let touchList = [];
+    for (let i = 0; i < event.touches.length; i++) {
+      touchList.push({
+        id: event.touches[i].identifier.toString(),
+        type: ProtobufLibrary.ubii.dataStructure.TouchEvent.TouchEventType.TOUCH_START,
+        position: this.normalizeCoordinates(event.touches[i])
       });
     }
+    //console.info(touchList);
+    this.publishTouchEventList(touchList);
+  }
 
-    UbiiClientService.publishRecord({
-      topic: this.topic,
-      timestamp: UbiiClientService.generateTimestamp(),
-      image2D: {
-        width: imageBuffer.width,
-        height: imageBuffer.height,
-        data: data,
-        dataFormat: this.ubiiImageFormat
+  onTouchMove(event) {
+    this.touches = event.touches;
+    this.newTouchMoveEvent = true;
+  }
+
+  onTouchEnd(event) {
+    this.touches = event.touches;
+
+    let touchList = [];
+    for (let i = 0; i < event.touches.length; i++) {
+      touchList.push({
+        id: event.touches[i].identifier.toString(),
+        type: ProtobufLibrary.ubii.dataStructure.TouchEvent.TouchEventType.TOUCH_END,
+        position: this.normalizeCoordinates(event.touches[i])
+      });
+    }
+    //console.info(touchList);
+    this.publishTouchEventList(touchList);
+  }
+
+  /* topic communication */
+
+  async continuousPublishing() {
+    if (this.newTouchMoveEvent) {
+      let touchList = [];
+      for (let i = 0; i < this.touches.length; i++) {
+        touchList.push({
+          id: this.touches[i].identifier.toString(),
+          type: ProtobufLibrary.ubii.dataStructure.TouchEvent.TouchEventType.TOUCH_MOVE,
+          position: this.normalizeCoordinates(this.touches[i])
+        });
+      }
+      this.publishTouchEventList(touchList);
+      this.newTouchMoveEvent = false;
+    }
+
+    if (this.running) {
+      setTimeout(() => {
+        this.continuousPublishing();
+      }, this.publishFrequencyMS);
+    }
+  }
+
+  publishTouchEventList(touches) {
+    UbiiClientService.publish({
+      topicDataRecord: {
+        topic: this.topic,
+        touchEventList: { elements: touches }
       }
     });
+  }
+
+  /* helper functions */
+
+  normalizeCoordinates(touchEvent) {
+    let normalizedX = (touchEvent.clientX - this.touchElement.offsetLeft) / this.touchElement.offsetWidth;
+    let normalizedY = (touchEvent.clientY - this.touchElement.offsetTop) / this.touchElement.offsetHeight;
+
+    return { x: normalizedX, y: normalizedY };
   }
 }

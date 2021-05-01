@@ -2,7 +2,7 @@ import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 
-const ButtonEventType = ProtobufLibrary.ubii.dataStructure.ButtonEventType;
+const TouchEventType = ProtobufLibrary.ubii.dataStructure.TouchEvent.TouchEventType;
 
 export default class ModelViewerUbiiConnections {
   constructor(modelViewerRendering) {
@@ -65,9 +65,9 @@ export default class ModelViewerUbiiConnections {
     let touches = touchEventList.elements;
     //console.info(touches);
 
-    if (touches.length === 1 && touches[0].type === ButtonEventType.DOWN) {
+    if (touches.length === 1 && touches[0].type === TouchEventType.TOUCH_START) {
       this.singleFingerDown = true;
-    } else if (touches.length >= 2 && touches[0].type === ButtonEventType.DOWN) {
+    } else if (touches.length >= 2 && touches[0].type === TouchEventType.TOUCH_START) {
       this.singleFingerDown = false;
 
       this.modelViewerRendering.startSelectionRotation();

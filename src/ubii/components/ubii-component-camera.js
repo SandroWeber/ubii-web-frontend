@@ -7,7 +7,7 @@ import UbiiComponent from './ubii-component-base';
 
 const TOPIC_SUFFIX = 'camera_image';
 
-const UBII_SPECS_TEMPLATE = {
+const UBII_SPECS = {
   messageFormat: MSG_TYPES.DATASTRUCTURE_IMAGE,
   ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
   tags: ['camera', 'image', '2D'],
@@ -17,10 +17,10 @@ const UBII_SPECS_TEMPLATE = {
 export default class UbiiComponentCamera extends UbiiComponent {
   constructor(publishFrequencyMS, ubiiImageFormat, videoPlaybackElement) {
     super(TOPIC_SUFFIX);
-    Object.assign(this, UBII_SPECS_TEMPLATE);
+    Object.assign(this, UBII_SPECS);
 
-    this.ubiiImageFormat = ubiiImageFormat;
     this.publishFrequencyMS = publishFrequencyMS;
+    this.ubiiImageFormat = ubiiImageFormat;
     this.videoPlaybackElement = videoPlaybackElement;
   }
 

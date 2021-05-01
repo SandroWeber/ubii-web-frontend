@@ -1,16 +1,12 @@
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
+import UbiiComponentTouchscreen from '../../../ubii/components/ubii-component-touch';
 
 const UBII_SPECS_TEMPLATE = {
   name: 'web-interface-smart-device',
   tags: ['smart device', 'web interface'],
   deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
   components: [
-    {
-      topic: '<placeholder-topic-prefix>/touch_position',
-      messageFormat: 'ubii.dataStructure.Vector2',
-      ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
-    },
     {
       topic: '<placeholder-topic-prefix>/orientation',
       messageFormat: 'ubii.dataStructure.Vector3',
@@ -22,11 +18,6 @@ const UBII_SPECS_TEMPLATE = {
       ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
     },
     {
-      topic: '<placeholder-topic-prefix>/touch_events',
-      messageFormat: 'ubii.dataStructure.TouchEventList',
-      ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
-    },
-    {
       topic: '<placeholder-topic-prefix>/vibration_pattern',
       messageFormat: 'double',
       ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
@@ -35,10 +26,11 @@ const UBII_SPECS_TEMPLATE = {
 };
 
 export default class UbiiSmartDevice {
-  constructor() {
+  constructor(elementTouch) {
     Object.assign(this, UBII_SPECS_TEMPLATE);
     this.deviceData = {};
     this.publishIntervalS = 0.02;
+    this.elementTouch = elementTouch;
   }
 
   /* setup */
@@ -64,13 +56,14 @@ export default class UbiiSmartDevice {
       component.topic = component.topic.replace('<placeholder-topic-prefix>', topicPrefix);
     });
 
-    this.componentTouchPosition = this.components[0];
-    this.componentOrientation = this.components[1];
-    this.componentLinearAcceleration = this.components[2];
-    this.componentTouchEvents = this.components[3];
-    if (this.components.length === 5) {
-      this.componentVibrate = this.components[4];
+    this.componentOrientation = this.components[0];
+    this.componentLinearAcceleration = this.components[1];
+    if (this.components.length === 3) {
+      this.componentVibrate = this.components[2];
     }
+    this.componentTouch = new UbiiComponentTouchscreen(33, this.elementTouch);
+    this.components.push(this.componentTouch);
+    await this.componentTouch.start();
 
     await this.register();
   }
@@ -149,45 +142,6 @@ export default class UbiiSmartDevice {
     };
   }
 
-  onTouchStart(event) {
-    this.deviceData.touches = event.touches;
-
-    let touchList = [];
-    for (let i = 0; i < event.touches.length; i++) {
-      touchList.push({
-        id: event.touches[i].identifier.toString(),
-        type: ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN,
-        position: this.normalizeCoordinates(event, i)
-      });
-    }
-    //console.info(touchList);
-    this.publishTouchEventList(touchList);
-  }
-
-  onTouchMove(event) {
-    this.deviceData.touches = event.touches;
-    /*console.info('touch move');
-    console.info(event.touches);*/
-
-    this.deviceData.touchPosition = this.normalizeCoordinates(event, 0);
-  }
-
-  onTouchEnd(event) {
-    this.deviceData.touches = event.touches;
-    this.deviceData.touchPosition = undefined;
-
-    let touchList = [];
-    for (let i = 0; i < event.touches.length; i++) {
-      touchList.push({
-        id: event.touches[i].identifier.toString(),
-        type: ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP,
-        position: this.normalizeCoordinates(event, i)
-      });
-    }
-    //console.info(touchList);
-    this.publishTouchEventList(touchList);
-  }
-
   /* ubii topic communication */
 
   handleVibrationPattern(vibrationPattern) {
@@ -203,47 +157,12 @@ export default class UbiiSmartDevice {
     }
     //console.info('publishContinuousDeviceData');
 
-    this.deviceData.touchPosition && this.publishTouchPosition(this.deviceData.touchPosition);
-
     this.deviceData.currentOrientation && this.publishDeviceOrientation();
 
     this.publishDeviceMotion();
 
     // call loop
     setTimeout(this.publishContinuousDeviceData, this.publishIntervalS * 1000);
-  }
-
-  publishTouchPosition(position) {
-    if (this.hasRegisteredUbiiDevice) {
-      UbiiClientService.publish({
-        topicDataRecord: {
-          topic: this.componentTouchPosition.topic,
-          vector2: position
-        }
-      });
-    }
-  }
-
-  publishTouchEvent(type, position) {
-    if (this.hasRegisteredUbiiDevice) {
-      UbiiClientService.publish({
-        topicDataRecord: {
-          topic: this.componentTouchEvents.topic,
-          touchEvent: { type: type, position: position }
-        }
-      });
-    }
-  }
-
-  publishTouchEventList(touches) {
-    if (this.hasRegisteredUbiiDevice) {
-      UbiiClientService.publish({
-        topicDataRecord: {
-          topic: this.componentTouchEvents.topic,
-          touchEventList: { elements: touches }
-        }
-      });
-    }
   }
 
   publishDeviceOrientation() {

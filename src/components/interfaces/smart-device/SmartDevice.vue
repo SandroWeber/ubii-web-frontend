@@ -74,12 +74,10 @@ import Fullscreen from 'vue-fullscreen';
 
 import UbiiClientContent from '../../applications/sharedModules/UbiiClientContent';
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faExpand, faCompress } from '@fortawesome/free-solid-svg-icons';
-import { setTimeout } from 'timers';
 
 import UbiiSmartDevice from './ubii-smart-device';
 
@@ -127,23 +125,14 @@ export default {
   beforeDestroy: function() {
     this.stopInterface();
   },
-  /*computed: {
-    touch0X: function() {
-      return (
-        this.ubiiDevice.deviceData &&
-        this.ubiiDevice.deviceData.touches &&
-        this.ubiiDevice.deviceData.touches[0] &&
-        this.round(this.ubiiDevice.deviceData.touches[0].clientX, 1)
-      );
-    }
-  },*/
   methods: {
     startInterface: async function() {
       if (this.initializing) return;
 
       this.initializing = true;
 
-      this.ubiiDevice = new UbiiSmartDevice();
+      this.elementTouch = document.getElementById('touch-area');
+      this.ubiiDevice = new UbiiSmartDevice(this.elementTouch);
       await this.ubiiDevice.init();
 
       this.intervalUpdateDebugView = setInterval(this.updateDebugView, 100);
@@ -154,15 +143,15 @@ export default {
     },
     onTouchStart: function(event) {
       this.debugOutput = 'event onTouchStart';
-      this.ubiiDevice.onTouchStart(event);
+      this.ubiiDevice && this.ubiiDevice.componentTouch && this.ubiiDevice.componentTouch.onTouchStart(event);
     },
     onTouchMove: function(event) {
       this.debugOutput = 'event onTouchMove';
-      this.ubiiDevice.onTouchMove(event);
+      this.ubiiDevice && this.ubiiDevice.componentTouch && this.ubiiDevice.componentTouch.onTouchMove(event);
     },
     onTouchEnd: function(event) {
       this.debugOutput = 'event onTouchEnd';
-      this.ubiiDevice.onTouchEnd(event);
+      this.ubiiDevice && this.ubiiDevice.componentTouch && this.ubiiDevice.componentTouch.onTouchEnd(event);
     },
     /* helper methods */
     round: function(value, digits) {
