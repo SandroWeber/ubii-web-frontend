@@ -1,7 +1,5 @@
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
-import Bowser from 'bowser';
-const browser = Bowser.getParser(window.navigator.userAgent);
 
 const UBII_SPECS_TEMPLATE = {
   name: 'web-interface-smart-device',
@@ -114,25 +112,12 @@ export default class UbiiSmartDevice {
     this.unregisterEventListeners();
   }
 
-  async registerEventListeners() {
-    let permissionDeviceMotion = 'denied',
-      permissionDeviceOrientation = 'denied';
-    if (browser.getBrowserName() === 'Safari') {
-      permissionDeviceMotion = await DeviceMotionEvent.requestPermission();
-      permissionDeviceOrientation = await DeviceOrientationEvent.requestPermission();
-    } else {
-      permissionDeviceMotion = permissionDeviceOrientation = 'granted';
-    }
+  registerEventListeners() {
+    this.cbOnDeviceMotion = this.onDeviceMotion.bind(this);
+    window.addEventListener('devicemotion', this.cbOnDeviceMotion, true);
 
-    if (permissionDeviceMotion === 'granted') {
-      this.cbOnDeviceMotion = this.onDeviceMotion.bind(this);
-      window.addEventListener('devicemotion', this.cbOnDeviceMotion, true);
-    }
-
-    if (permissionDeviceOrientation === 'granted') {
-      this.cbOnDeviceOrientation = this.onDeviceOrientation.bind(this);
-      window.addEventListener('deviceorientation', this.cbOnDeviceOrientation, true);
-    }
+    this.cbOnDeviceOrientation = this.onDeviceOrientation.bind(this);
+    window.addEventListener('deviceorientation', this.cbOnDeviceOrientation, true);
   }
 
   unregisterEventListeners() {

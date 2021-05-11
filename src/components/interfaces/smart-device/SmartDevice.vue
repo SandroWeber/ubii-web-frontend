@@ -3,11 +3,15 @@
     <div ref="top-div">
       <fullscreen ref="fullscreen" class="fullscreen" @change="onFullScreenChange" style="overflow: hidden;">
         <div class="content">
+          <button class="button-safari-permissions" v-show="isSafari" @click="safariRequestPermissions()">
+            IMU Permissions
+          </button>
+
           <button class="button-debug" @click="showDebugView = !showDebugView">
             Debug View
           </button>
 
-          <button class="button-calibrate" v-show="!fullscreen" @click="calibrate()">
+          <button class="button-calibrate" @click="calibrate()">
             Calibrate
           </button>
 
@@ -71,15 +75,15 @@
 <script>
 import Vue from 'vue';
 import Fullscreen from 'vue-fullscreen';
+import Bowser from 'bowser';
+const browser = Bowser.getParser(window.navigator.userAgent);
 
 import UbiiClientContent from '../../applications/sharedModules/UbiiClientContent';
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faExpand, faCompress } from '@fortawesome/free-solid-svg-icons';
-import { setTimeout } from 'timers';
 
 import UbiiSmartDevice from './ubii-smart-device';
 
@@ -102,7 +106,8 @@ export default {
       debugDeviceOrientation: undefined,
       debugFixedCalibratedOrientation: undefined,
       debugAcceleration: undefined,
-      debugRotationRate: undefined
+      debugRotationRate: undefined,
+      isSafari: undefined
     };
   },
   mounted: function() {
@@ -123,6 +128,8 @@ export default {
     UbiiClientService.onDisconnect(async () => {
       await this.stopInterface();
     });
+
+    this.isSafari = browser.getBrowserName() === 'Safari';
   },
   beforeDestroy: function() {
     this.stopInterface();
@@ -151,6 +158,19 @@ export default {
     stopInterface: async function() {
       this.ubiiDevice && (await this.ubiiDevice.deinit());
       this.intervalUpdateDebugView && clearInterval(this.intervalUpdateDebugView);
+    },
+    safariRequestPermissions: async function() {
+      if (this.isSafari) {
+        let permissionDeviceMotion = 'denied',
+          permissionDeviceOrientation = 'denied';
+        
+        permissionDeviceMotion = await DeviceMotionEvent.requestPermission();
+        permissionDeviceOrientation = await DeviceOrientationEvent.requestPermission();
+
+        if (permissionDeviceMotion === 'granted' && permissionDeviceOrientation === 'granted') {
+          this.ubiiDevice.registerEventListeners();
+        }
+      }
     },
     onTouchStart: function(event) {
       this.debugOutput = 'event onTouchStart';
@@ -254,13 +274,17 @@ export default {
   grid-template-columns: auto 100px 75px 25px;
   grid-template-rows: 25px auto 1fr;
   grid-template-areas:
-    '. btn-debug btn-calibrate btn-fullscreen'
+    'btn-safari-permissions btn-debug btn-calibrate btn-fullscreen'
     'debug-view debug-view debug-view debug-view'
     'touch touch touch touch';
 }
 
 .notification {
   color: red;
+}
+
+.button-safari-permissions {
+  grid-area: btn-safari-permissions;
 }
 
 .button-debug {
