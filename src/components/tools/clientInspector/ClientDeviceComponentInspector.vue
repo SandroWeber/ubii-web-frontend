@@ -54,7 +54,7 @@ export default {
       UbiiClientService.callService({
         topic: DEFAULT_TOPICS.SERVICES.CLIENT_GET_LIST
       }).then(reply => {
-        this.$data.clientList = reply.elements;
+        this.$data.clientList = reply.clientList.elements;
       });
     }
   }
