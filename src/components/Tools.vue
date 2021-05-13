@@ -1,37 +1,37 @@
 <template>
   <div>
-    <div class="grid">
-      <router-link to="/tools/topic-inspector" class="interface-link" tag="div">
+    <div class="tile-menu-list">
+      <router-link to="/tools/topic-inspector" class="tile-menu-item" tag="div">
         <app-tile class="layer-three background round shadow orange-accent">
-          <font-awesome-icon icon="eye" class="interface-icon" />
+          <font-awesome-icon icon="eye" class="tile-menu-icon" />
           <p>Service & Topic Inspector</p>
         </app-tile>
       </router-link>
 
-      <router-link to="/tools/client-inspector" class="interface-link" tag="div">
+      <router-link to="/tools/client-inspector" class="tile-menu-item" tag="div">
         <app-tile class="layer-three background round shadow orange-accent">
-          <font-awesome-icon icon="eye" class="interface-icon" />
+          <font-awesome-icon icon="eye" class="tile-menu-icon" />
           <p>Client, Device & Component Inspector</p>
         </app-tile>
       </router-link>
 
-      <router-link to="/tools/performance_tests" class="interface-link" tag="div">
+      <router-link to="/tools/performance_tests" class="tile-menu-item" tag="div">
         <app-tile class="layer-three background round shadow orange-accent">
-          <font-awesome-icon icon="stopwatch" class="interface-icon" />
+          <font-awesome-icon icon="stopwatch" class="tile-menu-icon" />
           <p>Performance Tests</p>
         </app-tile>
       </router-link>
 
-      <router-link to="/tools/qrcode_display" class="interface-link" tag="div">
+      <router-link to="/tools/qrcode_display" class="tile-menu-item" tag="div">
         <app-tile class="layer-three background round shadow orange-accent">
-          <font-awesome-icon icon="qrcode" class="interface-icon" />
+          <font-awesome-icon icon="qrcode" class="tile-menu-icon" />
           <p>QRCode Display</p>
         </app-tile>
       </router-link>
 
-      <router-link to="/tools/topic-publisher" class="interface-link" tag="div">
+      <router-link to="/tools/topic-publisher" class="tile-menu-item" tag="div">
         <app-tile class="layer-three background round shadow orange-accent">
-          <font-awesome-icon icon="paper-plane" class="interface-icon" />
+          <font-awesome-icon icon="paper-plane" class="tile-menu-icon" />
           <p>Topic Publisher</p>
         </app-tile>
       </router-link>
@@ -61,20 +61,7 @@ export default {
 </script>
 
 <style scoped lang="stylus">
-.grid {
-  display: grid;
-  grid-gap: 15px;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  margin: 25px;
-}
 
-.interface-link {
-  text-align: center;
-  cursor: pointer;
-}
+@import '../styles/tile-menu';
 
-.interface-icon {
-  width: 50px;
-  height: 50px;
-}
 </style>
