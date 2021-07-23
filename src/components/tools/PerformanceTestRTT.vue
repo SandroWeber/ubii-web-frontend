@@ -5,7 +5,7 @@
     <app-button
       class="start-button"
       @click="startTestRTT()"
-      :disabled="!ubiiClientService.isConnected()"
+      :disabled="!ubiiConnected"
     >
       <font-awesome-icon
         icon="play"
@@ -58,13 +58,17 @@ export default {
     window.addEventListener('beforeunload', () => {
       this.stopTestRTT();
     });
+
+    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
+      this.ubiiConnected = true;
+    });
   },
   beforeDestroy: function() {
     this.stopTestRTT();
   },
   data: () => {
     return {
-      ubiiClientService: UbiiClientService,
+      ubiiConnected: false,
       testRunningRTT: false,
       testRTT: {
         status: 'unmeasured',

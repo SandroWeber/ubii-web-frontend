@@ -5,7 +5,7 @@
     <app-button
       class="start-button"
       @click="startTest()"
-      :disabled="!ubiiClientService.isConnected()"
+      :disabled="!ubiiConnected"
     >
       <font-awesome-icon
         icon="play"
@@ -76,6 +76,15 @@
         :type="'test duration'"
         v-model="testData.settings.testDurationSeconds"
       />
+
+      <label for="fibonacci-session-count" class="setting-label"
+        >run on node:</label
+      >
+      <app-input
+        :id="'fibonacci-session-count'"
+        :type="'# sessions'"
+        v-model="testData.settings.nodeId"
+      />
     </div>
   </div>
 </template>
@@ -97,10 +106,15 @@ export default {
     AppInput: AppInput,
     AppButton: AppButton
   },
-  mounted: function() {
+  mounted: async function() {
     // unsubscribe before page is unloaded
     window.addEventListener('beforeunload', () => {
       this.stopTest();
+    });
+
+    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
+      this.ubiiConnected = true;
+      this.testData.settings.nodeId = UbiiClientService.client.serverSpecification.id
     });
   },
   beforeDestroy: function() {
@@ -108,7 +122,7 @@ export default {
   },
   data: () => {
     return {
-      ubiiClientService: UbiiClientService,
+      ubiiConnected: false,
       testRunning: false,
       testData: {
         status: 'unmeasured',
@@ -117,7 +131,8 @@ export default {
           sessionCount: '1',
           pmCountPerSession: '5',
           fibSequenceLength: '999999',
-          testDurationSeconds: '5'
+          testDurationSeconds: '5',
+          nodeId: 'unset'
         },
         statistics: {
           processingIterations: 'N/A',
@@ -140,7 +155,8 @@ export default {
       // create all the specs for sessions and processing modules
       this.testData.allSessionsSpecs = PerformanceTestFibonacciHelper.createTestSpecs(
         this.testData.settings.sessionCount,
-        this.testData.settings.pmCountPerSession
+        this.testData.settings.pmCountPerSession,
+        this.testData.settings.nodeId
       );
 
       this.testData.allSessionsSpecs.forEach(sessionSpec => {
@@ -297,7 +313,7 @@ export default {
   display: grid;
   grid-gap: 15px;
   grid-template-columns: 200px 100px 200px 100px;
-  grid-template-rows: 25px 25px;
+  grid-template-rows: 25px 25px 25px;
 }
 
 .test-title {

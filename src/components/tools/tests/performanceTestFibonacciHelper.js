@@ -1,7 +1,7 @@
 class PerformanceTestFibonacciHelper {
   static SEQENCE_LENGTH_INPUT_SUFFIX = 'fibonacciInput';
   static PROCESSED_OUTPUT_SUFFIX = 'fibonacciResult';
-  static processingCallback(deltaTime, inputs, outputs) {
+  static processingCallback(deltaTime, inputs) {
     let fibonacci = num => {
       var a = 1,
         b = 0,
@@ -16,16 +16,15 @@ class PerformanceTestFibonacciHelper {
 
       return b;
     };
+
     let result = fibonacci(inputs.fibonacciInput);
 
-    outputs.fibonacciResult = result;
-
-    return outputs;
+    return { fibonacciResult: result };
   }
 
-  static createProcessingModuleSpecs(number) {
+  static createProcessingModuleSpecs(index, nodeId) {
     return {
-      name: 'test-fibonacci-pm-' + number,
+      name: 'test-fibonacci-pm-' + index,
       processingMode: {
         frequency: {
           hertz: 1000000 // basically go as fast as you can
@@ -44,7 +43,8 @@ class PerformanceTestFibonacciHelper {
           messageFormat: 'double'
         }
       ],
-      onProcessingStringified: PerformanceTestFibonacciHelper.processingCallback.toString()
+      onProcessingStringified: PerformanceTestFibonacciHelper.processingCallback.toString(),
+      nodeId: nodeId
     };
   }
 
@@ -82,14 +82,14 @@ class PerformanceTestFibonacciHelper {
     sessionSpecs.ioMappings.push(ioMapping);
   }
 
-  static createTestSpecs(sessionCount, pmCountPerSession) {
+  static createTestSpecs(sessionCount, pmCountPerSession, nodeId) {
     let allSessionSpecs = [];
 
     for (let s = 0; s < sessionCount; s++) {
       let sessionSpecs = this.createSessionSpecs(s);
 
       for (let i = 0; i < pmCountPerSession; i++) {
-        let pmSpecs = this.createProcessingModuleSpecs(i);
+        let pmSpecs = this.createProcessingModuleSpecs(i, nodeId);
         this.addProcessingModuleToSession(sessionSpecs, pmSpecs);
       }
 
