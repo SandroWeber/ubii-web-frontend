@@ -169,7 +169,7 @@ export default {
               ) !== -1
             ) {
               UbiiClientService.publishRecord({
-                topic: inputMapping.topicSource,
+                topic: inputMapping.topic,
                 double: parseFloat(this.testData.settings.fibSequenceLength)
               });
             }
