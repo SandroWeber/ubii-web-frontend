@@ -13,7 +13,7 @@
           TopicDataRecord.proto</a
         >
         <br />
-        A timestamp will be automatically added.
+        A timestamp will be automatically added if not given here.
       </div>
     </div>
     <codemirror v-model="localValue" :options="codemirror.options"></codemirror>
@@ -43,8 +43,7 @@ export default {
         object2D: {
           id: 'abcdefgh-1234-abcd-1234-abcdefghijkl',
           pose: { position: { x: 0.1, y: 0.2 }, angle: 0.3 },
-          userDataJson:
-            '{"clientID":"266f1beb-abe8-44bb-ad13-d949aa62775f"}'
+          userDataJson: '{"clientID":"266f1beb-abe8-44bb-ad13-d949aa62775f"}'
         }
       },
       codemirror: {
@@ -72,9 +71,9 @@ export default {
   },
   methods: {
     publish: async function() {
-      console.info('publish');
-      console.info(this.topicDataRecord);
-      this.topicDataRecord.timestamp = UbiiClientService.generateTimestamp();
+      if (!this.topicDataRecord.timestamp) {
+        this.topicDataRecord.timestamp = UbiiClientService.generateTimestamp();
+      }
       await UbiiClientService.waitForConnection();
       UbiiClientService.publishRecord(this.topicDataRecord);
     }
