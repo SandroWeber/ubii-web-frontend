@@ -235,12 +235,12 @@ export default {
       const pList = res.processingModuleList.elements
 
       this.addProcsList = pList.filter(val => val.sessionId === this.selectedSession.id)
-      console.log(this.addProcsList)
+      // console.log(this.addProcsList)
     },
     loadSession: async function () {
       const res = await this.ubiiGetResult(DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_GET_LIST)
       const sList = res.sessionList.elements
-      console.log('Session:', sList)
+      // console.log('Session:', sList)
       try { 
         this.selectedSession = sList.filter(val => val.status === 1 && this.selectedSessionId == val.id)[0]
       } catch {
@@ -338,8 +338,8 @@ export default {
 
       node.prototype.onConnectionsChange = function(connection, slot, connected, link_info, input_info){
         
-        console.log(link_info)
-        console.log(input_info)
+        // console.log(link_info)
+        // console.log(input_info)
 
         if (connected) {
           this.size[0] = 400
@@ -557,7 +557,7 @@ export default {
     registerProcNodesOfSession: async function () {
       if (!this.selectedSession.processingModules || this.selectedSession.processingModules.length === 0) throw 'Session has no processing modules.'
       this.selectedSession.processingModules.forEach(proc => {
-        console.log(proc)
+        // console.log(proc)
         this.registerProcessNode(this.selectedSession.name, proc, proc.inputs, proc.outputs)
       })
     },
@@ -585,7 +585,7 @@ export default {
       })
     },
     calcPostions: async function () {
-      console.log('TODO CALC POSITIONS')
+      // console.log('TODO CALC POSITIONS')
     },
     addProcNodes: async function () {
       this.selectedSession.processingModules.forEach(proc => {
@@ -633,7 +633,7 @@ export default {
         await this.addProcNodes()
         await this.connectNodes()
       } catch (error) {
-        console.log(error)
+        // console.log(error)
       }
       
       // console.log(this.selectedSession)
@@ -656,7 +656,7 @@ export default {
       const pID = p.id.split('.')[0]
       let nodeIndex = -1
 
-      console.log(this.ClSeNodes)
+      // console.log(this.ClSeNodes)
 
       this.ClSeNodes.forEach((val,index) => {
         if(val.type === 'Proc' && val.id === pID)
