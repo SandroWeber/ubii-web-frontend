@@ -97,8 +97,8 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faPlay, faSpinner } from '@fortawesome/free-solid-svg-icons';
 library.add(faPlay, faSpinner);
 
-import { AppInput, AppButton } from '../appComponents/appComponents.js';
-import PerformanceTestFibonacciHelper from './tests/performanceTestFibonacciHelper';
+import { AppInput, AppButton } from '../../appComponents/appComponents';
+import PerformanceTestFibonacciHelper from './performanceTestFibonacciHelper';
 
 export default {
   name: 'PerformanceTest-FibonacciProcessing',
