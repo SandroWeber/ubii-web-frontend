@@ -56,10 +56,10 @@ class PerformanceTestFibonacciHelper {
     };
   }
 
-  static addProcessingModuleToSession(sessionSpecs, pmSpecs) {
+  static addProcessingModuleToSession(sessionSpecs, pmSpecs, nodeId) {
     sessionSpecs.processingModules.push(pmSpecs);
 
-    let topicPrefix = '/' + sessionSpecs.name + '/' + pmSpecs.name + '/';
+    let topicPrefix = '/' + nodeId + '/' + sessionSpecs.name + '/' + pmSpecs.name + '/';
     let ioMapping = {
       processingModuleName: pmSpecs.name,
       inputMappings: [],
@@ -90,7 +90,7 @@ class PerformanceTestFibonacciHelper {
 
       for (let i = 0; i < pmCountPerSession; i++) {
         let pmSpecs = this.createProcessingModuleSpecs(i, nodeId);
-        this.addProcessingModuleToSession(sessionSpecs, pmSpecs);
+        this.addProcessingModuleToSession(sessionSpecs, pmSpecs, nodeId);
       }
 
       allSessionSpecs.push(sessionSpecs);
