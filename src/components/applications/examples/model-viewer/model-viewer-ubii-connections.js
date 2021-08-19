@@ -10,11 +10,11 @@ export default class ModelViewerUbiiConnections {
   }
 
   async init() {
-    await UbiiClientService.waitForConnection();
+    await UbiiClientService.instance.waitForConnection();
 
     // find the first best smart device
     this.intervalCheckForSmartphone = setInterval(async () => {
-      let response = await UbiiClientService.callService({
+      let response = await UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.DEVICE_GET_LIST
       });
       //console.info(response.deviceList);
@@ -36,7 +36,7 @@ export default class ModelViewerUbiiConnections {
     );
     console.info('componentTouchEvents');
     console.info(this.componentTouchEvents);
-    await UbiiClientService.subscribeTopic(
+    await UbiiClientService.instance.subscribeTopic(
       this.componentTouchEvents.topic,
       touchEventList => {
         this.onTouchEvents(touchEventList);
@@ -48,7 +48,7 @@ export default class ModelViewerUbiiConnections {
     );
     console.info('componentOrientation');
     console.info(this.componentOrientation);
-    this.subscriptionTokenOrientation = await UbiiClientService.subscribeTopic(
+    this.subscriptionTokenOrientation = await UbiiClientService.instance.subscribeTopic(
       this.componentOrientation.topic,
       orientation => {
         //console.info(orientation);

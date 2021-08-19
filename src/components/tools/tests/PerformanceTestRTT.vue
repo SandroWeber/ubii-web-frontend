@@ -53,15 +53,19 @@ export default {
     AppInput: AppInput,
     AppButton: AppButton
   },
-  mounted: function() {
+  mounted: async function() {
     // unsubscribe before page is unloaded
     window.addEventListener('beforeunload', () => {
       this.stopTestRTT();
     });
 
-    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, () => {
       this.ubiiConnected = true;
     });
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, () => {
+      this.ubiiConnected = false;
+    });
+    this.ubiiConnected = UbiiClientService.instance.isConnected();
   },
   beforeDestroy: function() {
     this.stopTestRTT();
@@ -88,7 +92,7 @@ export default {
   methods: {
     ubiiSetupRTT: async function() {
       if (!this.$data.testRTT.device.registered) {
-        return UbiiClientService.registerDevice(this.$data.testRTT.device).then(
+        return UbiiClientService.instance.registerDevice(this.$data.testRTT.device).then(
           device => {
             this.$data.testRTT.device = device;
             this.$data.testRTT.device.registered = true;
@@ -101,7 +105,7 @@ export default {
     },
     prepareTestRTT: function() {
       this.$data.testRTT.status = 'running';
-      this.$data.testRTT.topic = UbiiClientService.getClientID() + '/test_rtt';
+      this.$data.testRTT.topic = UbiiClientService.instance.getClientID() + '/test_rtt';
       this.$data.testRTT.timings = [];
       this.$data.testRTT.tSent = 0;
       this.$data.testRTT.avgRTT = undefined;
@@ -115,7 +119,7 @@ export default {
       let counter = 0;
       let maxMessages = parseInt(this.$data.testRTT.messageCount);
 
-      UbiiClientService.subscribeTopic(this.$data.testRTT.topic, () => {
+      UbiiClientService.instance.subscribeTopic(this.$data.testRTT.topic, () => {
         this.$data.testRTT.timings.push(Date.now() - this.$data.testRTT.tSent);
         counter++;
         if (counter < maxMessages) {
@@ -134,12 +138,12 @@ export default {
     stopTestRTT: function() {
       if (this.$data.testRTT && this.$data.testRTT.avgRTT) {
         this.$data.testRTT.status = this.$data.testRTT.avgRTT.toString() + 'ms';
-        UbiiClientService.unsubscribeTopic(this.$data.testRTT.topic);
+        UbiiClientService.instance.unsubscribeTopic(this.$data.testRTT.topic);
       }
     },
     rttSendPackage: function() {
       this.$data.testRTT.tSent = Date.now();
-      UbiiClientService.publishRecord({
+      UbiiClientService.instance.publishRecord({
         topic: this.$data.testRTT.topic,
         double: 1
       });

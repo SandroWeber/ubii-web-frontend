@@ -37,7 +37,7 @@ export default {
   },
   data() {
     return {
-      ubiiClientService: UbiiClientService,
+      ubiiClientService: UbiiClientService.instance,
       topicDataRecord: {
         topic: '/my/topic/here',
         object2D: {
@@ -72,10 +72,10 @@ export default {
   methods: {
     publish: async function() {
       if (!this.topicDataRecord.timestamp) {
-        this.topicDataRecord.timestamp = UbiiClientService.generateTimestamp();
+        this.topicDataRecord.timestamp = UbiiClientService.instance.generateTimestamp();
       }
-      await UbiiClientService.waitForConnection();
-      UbiiClientService.publishRecord(this.topicDataRecord);
+      await UbiiClientService.instance.waitForConnection();
+      UbiiClientService.instance.publishRecord(this.topicDataRecord);
     }
   }
 };

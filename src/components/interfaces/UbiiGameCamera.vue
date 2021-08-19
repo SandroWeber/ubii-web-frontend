@@ -60,15 +60,15 @@ export default {
     start: function() {
       this.cocoSSDLabels = [];
 
-      UbiiClientService.waitForConnection().then(() => {
+      UbiiClientService.instance.waitForConnection().then(() => {
         this.createUbiiSpecs();
 
-        UbiiClientService.registerDevice(this.ubiiDevice).then(device => {
+        UbiiClientService.instance.registerDevice(this.ubiiDevice).then(device => {
           if (device) {
             this.ubiiDevice = device;
           }
         });
-        UbiiClientService.subscribeTopic(
+        UbiiClientService.instance.subscribeTopic(
             this.componentTextOutput.topic,
             text => {
                 this.textOutput = text;
@@ -78,7 +78,7 @@ export default {
     },
     stop: function() {
       this.cocoSsdActive = false;
-      this.ubiiDevice && UbiiClientService.deregisterDevice(this.ubiiDevice);
+      this.ubiiDevice && UbiiClientService.instance.deregisterDevice(this.ubiiDevice);
       this.stopCoCoSSDObjectDetection();
     },
     /* ubii methods */
@@ -90,13 +90,13 @@ export default {
 
       this.deviceName = 'web-interface-ubii-controller-gamecamera';
 
-      this.clientId = UbiiClientService.getClientID();
+      this.clientId = UbiiClientService.instance.getClientID();
       let topicPrefix = '/' + this.clientId + '/' + this.deviceName;
 
       this.ubiiDevice = {
         name: this.ubiiDeviceName,
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
-        clientId: UbiiClientService.getClientID(),
+        clientId: UbiiClientService.instance.getClientID(),
         components: [
           {
             topic: topicPrefix + '/camera_image',
@@ -121,7 +121,7 @@ export default {
       this.componentTextOutput = this.ubiiDevice.components[2];
 
       let interactionCocoSsdID = 'b74761e9-3cd3-400c-8144-23669e951c2c';
-      let getInteractionResponse = await UbiiClientService.callService({
+      let getInteractionResponse = await UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_GET,
         interaction: {
           id: interactionCocoSsdID
@@ -171,8 +171,8 @@ export default {
       this.cocoSSDLabels = [];
 
       // register the mouse pointer device
-      UbiiClientService.waitForConnection().then(() => {
-        UbiiClientService.registerDevice(this.ubiiDevice)
+      UbiiClientService.instance.waitForConnection().then(() => {
+        UbiiClientService.instance.registerDevice(this.ubiiDevice)
           .then(device => {
             if (device.id) {
               this.ubiiDevice = device;
@@ -183,13 +183,13 @@ export default {
             return device;
           })
           .then(() => {
-            UbiiClientService.subscribeTopic(
+            UbiiClientService.instance.subscribeTopic(
               this.componentTextOutput.topic,
               this.setTextOutput
             );
 
             if (this.componentVibration) {
-              UbiiClientService.subscribeTopic(
+              UbiiClientService.instance.subscribeTopic(
                 this.componentVibration.topic,
                 this.vibrate
               );
@@ -210,21 +210,21 @@ export default {
           // eslint-disable-next-line no-console
           console.log('unsubscribed to ' + component.topic);
 
-          UbiiClientService.unsubscribeTopic(component.topic);
+          UbiiClientService.instance.unsubscribeTopic(component.topic);
         });
       }
 
       this.hasRegisteredUbiiDevice = false;
 
       //TODO: this should not happen here, move to interaction
-      UbiiClientService.publishRecord({
+      UbiiClientService.instance.publishRecord({
         topic: 'removeClient',
-        string: UbiiClientService.getClientID()
+        string: UbiiClientService.instance.getClientID()
       });
 
       // TODO: unregister device
       this.ubiiDevice &&
-        (await UbiiClientService.deregisterDevice(this.ubiiDevice));
+        (await UbiiClientService.instance.deregisterDevice(this.ubiiDevice));
     },
     /* interface methods */
     onButtonCoCoSSD: function() {
@@ -237,14 +237,14 @@ export default {
       }
     },
     startCoCoSSDObjectDetection: function() {
-      UbiiClientService.subscribe(
+      UbiiClientService.instance.subscribe(
         this.ubiiDevice.components[1].topic,
         predictedObjectsList => {
           this.drawCoCoSSDLabels(predictedObjectsList.elements);
         }
       );
 
-      UbiiClientService.callService({
+      UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
         session: this.ubiiSessionCoCoSSD
       }).then(response => {
@@ -265,14 +265,14 @@ export default {
       continuousPublish();
     },
     stopCoCoSSDObjectDetection: function() {
-      UbiiClientService.unsubscribeTopic(this.ubiiDevice.components[1].topic);
+      UbiiClientService.instance.unsubscribeTopic(this.ubiiDevice.components[1].topic);
 
       this.cocoSSDLabels.forEach(div => {
         div.style.visibility = 'hidden';
       });
 
       this.ubiiSessionCoCoSSD &&
-        UbiiClientService.callService({
+        UbiiClientService.instance.callService({
           topic: DEFAULT_TOPICS.SERVICES.SESSION_STOP,
           session: this.ubiiSessionCoCoSSD
         });
@@ -287,7 +287,7 @@ export default {
       let tSeconds = Date.now() / 1000;
       let seconds = Math.floor(tSeconds);
       let nanos = Math.floor((tSeconds - seconds) * 1000000000);
-      UbiiClientService.publishRecord({
+      UbiiClientService.instance.publishRecord({
         topic: this.ubiiDevice.components[0].topic,
         timestamp: {
           seconds: seconds,

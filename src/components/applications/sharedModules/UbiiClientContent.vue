@@ -26,14 +26,14 @@ export default {
     };
   },
   mounted: function() {
-    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, () => {
       this.connected = true;
     });
-    UbiiClientService.on(UbiiClientService.EVENTS.DISCONNECT, () => {
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, () => {
       this.connected = false;
     });
 
-    UbiiClientService.waitForConnection().then(() => {
+    UbiiClientService.instance.waitForConnection().then(() => {
       this.connected = true;
     });
   }

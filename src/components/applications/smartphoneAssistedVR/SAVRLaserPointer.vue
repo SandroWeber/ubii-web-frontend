@@ -102,7 +102,7 @@ export default {
       }
     },
     updateSmartDevices: function() {
-      UbiiClientService.client
+      UbiiClientService.instance
         .callService({ topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST })
         .then(reply => {
           this.$data.topicList = reply.stringList.elements;

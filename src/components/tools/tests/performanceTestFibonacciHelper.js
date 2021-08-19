@@ -1,6 +1,7 @@
 class PerformanceTestFibonacciHelper {
   static SEQENCE_LENGTH_INPUT_SUFFIX = 'fibonacciInput';
   static PROCESSED_OUTPUT_SUFFIX = 'fibonacciResult';
+
   static processingCallback(deltaTime, inputs) {
     let fibonacci = num => {
       var a = 1,
@@ -59,7 +60,7 @@ class PerformanceTestFibonacciHelper {
   static addProcessingModuleToSession(sessionSpecs, pmSpecs, nodeId) {
     sessionSpecs.processingModules.push(pmSpecs);
 
-    let topicPrefix = '/' + nodeId + '/' + sessionSpecs.name + '/' + pmSpecs.name + '/';
+    let topicPrefix = PerformanceTestFibonacciHelper.getTopicPrefix(nodeId, sessionSpecs.name, pmSpecs.name);
     let ioMapping = {
       processingModuleName: pmSpecs.name,
       inputMappings: [],
@@ -97,6 +98,10 @@ class PerformanceTestFibonacciHelper {
     }
 
     return allSessionSpecs;
+  }
+
+  static getTopicPrefix(nodeId, sessionName, pmName) {
+    return '/' + nodeId + '/' + sessionName + '/' + pmName + '/';
   }
 }
 

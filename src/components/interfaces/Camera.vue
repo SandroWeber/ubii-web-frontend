@@ -65,10 +65,10 @@ export default {
     start: function() {
       this.cocoSSDLabels = [];
 
-      UbiiClientService.waitForConnection().then(() => {
+      UbiiClientService.instance.waitForConnection().then(() => {
         this.createUbiiSpecs();
 
-        UbiiClientService.registerDevice(this.ubiiDevice).then(device => {
+        UbiiClientService.instance.registerDevice(this.ubiiDevice).then(device => {
           if (device) {
             this.ubiiDevice = device;
           }
@@ -77,19 +77,19 @@ export default {
     },
     stop: function() {
       this.cocoSsdActive = false;
-      this.ubiiDevice && UbiiClientService.deregisterDevice(this.ubiiDevice);
+      this.ubiiDevice && UbiiClientService.instance.deregisterDevice(this.ubiiDevice);
       this.stopCoCoSSDObjectDetection();
     },
     /* ubii methods */
     createUbiiSpecs: async function() {
       this.ubiiDeviceName = 'CameraWebInterface';
       let topicPrefix =
-        '/' + UbiiClientService.getClientID() + '/' + this.ubiiDeviceName;
+        '/' + UbiiClientService.instance.getClientID() + '/' + this.ubiiDeviceName;
 
       this.ubiiDevice = {
         name: this.ubiiDeviceName,
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
-        clientId: UbiiClientService.getClientID(),
+        clientId: UbiiClientService.instance.getClientID(),
         components: [
           {
             topic: topicPrefix + '/camera_image',
@@ -137,12 +137,12 @@ export default {
       }
     },
     startCoCoSSDObjectDetection: function() {
-      UbiiClientService.subscribeTopic(
+      UbiiClientService.instance.subscribeTopic(
         this.ubiiDevice.components[1].topic,
         this.handleObjectPredictions
       );
 
-      UbiiClientService.callService({
+      UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
         session: this.ubiiSessionCoCoSSD
       }).then(response => {
@@ -163,7 +163,7 @@ export default {
       continuousPublish();
     },
     stopCoCoSSDObjectDetection: function() {
-      UbiiClientService.unsubscribeTopic(
+      UbiiClientService.instance.unsubscribeTopic(
         this.ubiiDevice.components[1].topic,
         this.handleObjectPredictions
       );
@@ -173,7 +173,7 @@ export default {
       });
 
       this.ubiiSessionCoCoSSD &&
-        UbiiClientService.callService({
+        UbiiClientService.instance.callService({
           topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: this.ubiiSessionCoCoSSD
         });
@@ -185,9 +185,9 @@ export default {
         return (index + 1) % 4 !== 0;
       });
 
-      UbiiClientService.publishRecord({
+      UbiiClientService.instance.publishRecord({
         topic: this.ubiiDevice.components[0].topic,
-        timestamp: UbiiClientService.generateTimestamp(),
+        timestamp: UbiiClientService.instance.generateTimestamp(),
         image2D: {
           width: img.width,
           height: img.height,

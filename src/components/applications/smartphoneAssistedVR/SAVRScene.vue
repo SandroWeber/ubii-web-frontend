@@ -23,7 +23,7 @@ export default {
       renderer: undefined,
       time: 0,
       clock: new THREE.Clock(),
-      ubiiClientService: UbiiClientService,
+      ubiiClientService: UbiiClientService.instance,
       pollSmartDevices: false,
       container: undefined,
       stats: undefined,
@@ -52,7 +52,7 @@ export default {
 
       this.initScene();
 
-      if (UbiiClientService.isConnected()) {
+      if (UbiiClientService.instance.isConnected()) {
         this.onConnectToUbiiParent();
       }
     },
@@ -65,10 +65,10 @@ export default {
         this.handleResize();
       });
 
-      UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
+      UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, () => {
         this.onConnectToUbiiParent();
       });
-      UbiiClientService.on(UbiiClientService.EVENTS.DISCONNECT, () => {
+      UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, () => {
         this.onDisconnectToUbiiParent();
       });
     },
@@ -166,7 +166,7 @@ export default {
     startPollLoop: function() {
       this.pollSmartDevices = true;
 
-      UbiiClientService.waitForConnection().then(() => {
+      UbiiClientService.instance.waitForConnection().then(() => {
         const loop = () => {
           if (this.pollSmartDevices) {
             if (this.updateSmartDevices) {

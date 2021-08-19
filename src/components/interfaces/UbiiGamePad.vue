@@ -110,11 +110,11 @@ export default {
       this.stopInterface();
     });
 
-    UbiiClientService.on(
+    UbiiClientService.instance.on(
       UbiiClientService.EVENTS.CONNECT,
       this.registerUbiiSpecs
     );
-    UbiiClientService.on(
+    UbiiClientService.instance.on(
       UbiiClientService.EVENTS.DISCONNECT,
       this.unregisterUbiiSpecs
     );
@@ -122,7 +122,7 @@ export default {
     this.deviceData = {};
     this.canvasDisplayArea = document.getElementById('canvas-display-area');
     this.registerEventListeners();
-    UbiiClientService.waitForConnection().then(() => {
+    UbiiClientService.instance.waitForConnection().then(() => {
       this.createUbiiSpecs();
       this.registerUbiiSpecs();
     });
@@ -136,7 +136,7 @@ export default {
     stickPos['analog-stick-left'] = { x: 25, y: 25 };
     stickPos['analog-stick-right'] = { x: 25, y: 25 };
     return {
-      ubiiClientService: UbiiClientService,
+      ubiiClientService: UbiiClientService.instance,
       ProtobufLibrary: ProtobufLibrary,
       initializing: false,
       hasRegisteredUbiiDevice: false,
@@ -161,7 +161,7 @@ export default {
 
       this.deviceName = 'web-interface-ubii-controller-gamepad';
 
-      this.clientId = UbiiClientService.getClientID();
+      this.clientId = UbiiClientService.instance.getClientID();
       let topicPrefix = '/' + this.clientId + '/' + this.deviceName;
 
       this.ubiiDevice = {
@@ -253,8 +253,8 @@ export default {
       this.cocoSSDLabels = [];
 
       // register the mouse pointer device
-      UbiiClientService.waitForConnection().then(() => {
-        UbiiClientService.registerDevice(this.ubiiDevice)
+      UbiiClientService.instance.waitForConnection().then(() => {
+        UbiiClientService.instance.registerDevice(this.ubiiDevice)
           .then(device => {
             if (device.id) {
               this.ubiiDevice = device;
@@ -265,22 +265,22 @@ export default {
             return device;
           })
           .then(() => {
-            UbiiClientService.subscribeTopic(
+            UbiiClientService.instance.subscribeTopic(
               this.componentSetColor.topic,
               this.setColor
             );
 
-            UbiiClientService.subscribeTopic(
+            UbiiClientService.instance.subscribeTopic(
               this.componentSetImage.topic,
               this.drawImage
             );
-            UbiiClientService.subscribeTopic(
+            UbiiClientService.instance.subscribeTopic(
               this.componentClearImage.topic,
               this.clearImage
             );          
 
             if (this.componentVibration) {
-              UbiiClientService.subscribeTopic(
+              UbiiClientService.instance.subscribeTopic(
                 this.componentVibration.topic,
                 this.vibrate
               );
@@ -301,21 +301,21 @@ export default {
           // eslint-disable-next-line no-console
           console.log('unsubscribed to ' + component.topic);
 
-          UbiiClientService.unsubscribeTopic(component.topic);
+          UbiiClientService.instance.unsubscribeTopic(component.topic);
         });
       }
 
       this.hasRegisteredUbiiDevice = false;
 
       //TODO: this should not happen here, move to interaction
-      UbiiClientService.publishRecord({
+      UbiiClientService.instance.publishRecord({
         topic: 'removeClient',
-        string: UbiiClientService.getClientID()
+        string: UbiiClientService.instance.getClientID()
       });
 
       // TODO: unregister device
       this.ubiiDevice &&
-        (await UbiiClientService.deregisterDevice(this.ubiiDevice));
+        (await UbiiClientService.instance.deregisterDevice(this.ubiiDevice));
     },
     setTextOutput: function(text) {
       this.textOutput = text;
@@ -454,13 +454,13 @@ export default {
 
       this.deviceData.fixedCalibratedOrientation = fixed;
 
-      UbiiClientService.publishRecord({
+      UbiiClientService.instance.publishRecord({
         topic: this.componentOrientation.topic,
         vector3: fixed
       });
     },
     publishDeviceMotion: function(acceleration) {
-      UbiiClientService.publishRecord({
+      UbiiClientService.instance.publishRecord({
         topic: this.componentLinearAcceleration.topic,
         vector3: {
           x: this.round(acceleration.x, 2),
@@ -470,7 +470,7 @@ export default {
       });
     },
     publishButtonStart: function(keyEventType) {
-      UbiiClientService.publishRecord({
+      UbiiClientService.instance.publishRecord({
         topic: this.componentButtonStart.topic,
         keyEvent: {
           type: keyEventType,
@@ -485,7 +485,7 @@ export default {
       } else if (buttonID === 2) {
         topic = this.componentButtonB.topic;
       }
-      UbiiClientService.publishRecord({
+      UbiiClientService.instance.publishRecord({
         topic: topic,
         keyEvent: {
           type: ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN,
@@ -500,7 +500,7 @@ export default {
       } else if (buttonID === 2) {
         topic = this.componentButtonB.topic;
       }
-      UbiiClientService.publishRecord({
+      UbiiClientService.instance.publishRecord({
         topic: topic,
         keyEvent: {
           type: ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP,
@@ -509,7 +509,7 @@ export default {
       });
     },
     publishAnalogStickPosition: function(stickPosition) {
-      UbiiClientService.publishRecord({
+      UbiiClientService.instance.publishRecord({
         topic: this.componentAnalogstickLeft.topic,
         vector2: stickPosition
       });

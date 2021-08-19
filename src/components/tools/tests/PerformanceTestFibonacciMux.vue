@@ -114,16 +114,8 @@ export default {
 
     UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, () => {
       this.ubiiConnected = true;
-      this.testData.settings.nodeId = UbiiClientService.instance.client.serverSpecification.id;
+      this.testData.settings.nodeId = UbiiClientService.instance.client.serverSpecification.id
     });
-    UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, () => {
-      this.ubiiConnected = false;
-      this.testData.settings.nodeId = undefined;
-    });
-
-    await UbiiClientService.instance.waitForConnection();
-    this.ubiiConnected = UbiiClientService.instance.isConnected();
-    this.testData.settings.nodeId = UbiiClientService.instance.client.serverSpecification.id;
   },
   beforeDestroy: function() {
     this.stopTest();

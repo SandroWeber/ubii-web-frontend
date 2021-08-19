@@ -76,18 +76,18 @@ export default {
       this.stopInterface();
     });
 
-    UbiiClientService.on(
+    UbiiClientService.instance.on(
       UbiiClientService.EVENTS.CONNECT,
       this.registerUbiiSpecs
     );
-    UbiiClientService.on(
+    UbiiClientService.instance.on(
       UbiiClientService.EVENTS.DISCONNECT,
       this.unregisterUbiiSpecs
     );
 
     this.deviceData = {};
     this.canvasDisplayArea = document.getElementById('canvas-display-area');
-    UbiiClientService.waitForConnection().then(() => {
+    UbiiClientService.instance.waitForConnection().then(() => {
       this.createUbiiSpecs();
       this.registerUbiiSpecs();
     });
@@ -98,7 +98,7 @@ export default {
   },
   data: () => {
     return {
-      ubiiClientService: UbiiClientService,
+      ubiiClientService: UbiiClientService.instance,
       ProtobufLibrary: ProtobufLibrary,
       initializing: false,
       hasRegisteredUbiiDevice: false,
@@ -122,7 +122,7 @@ export default {
 
       this.deviceName = 'web-interface-ubii-controller';
 
-      this.clientId = UbiiClientService.getClientID();
+      this.clientId = UbiiClientService.instance.getClientID();
       let topicPrefix = '/' + this.clientId + '/' + this.deviceName;
 
       this.ubiiDevice = {
@@ -149,8 +149,8 @@ export default {
       this.initializing = true;
 
       // register the mouse pointer device
-      UbiiClientService.waitForConnection().then(() => {
-        UbiiClientService.registerDevice(this.ubiiDevice)
+      UbiiClientService.instance.waitForConnection().then(() => {
+        UbiiClientService.instance.registerDevice(this.ubiiDevice)
           .then(device => {
             if (device.id) {
               this.ubiiDevice = device;
@@ -160,7 +160,7 @@ export default {
             return device;
           })
           .then(() => {           
-            UbiiClientService.subscribeTopic(
+            UbiiClientService.instance.subscribeTopic(
               this.componentSetControllerMode.topic,
               controllerMode => { 
                 this.controllerMode = controllerMode;
@@ -182,21 +182,21 @@ export default {
           // eslint-disable-next-line no-console
           console.log('unsubscribed to ' + component.topic);
 
-          UbiiClientService.unsubscribeTopic(component.topic);
+          UbiiClientService.instance.unsubscribeTopic(component.topic);
         });
       }
 
       this.hasRegisteredUbiiDevice = false;
 
       //TODO: this should not happen here, move to interaction
-      UbiiClientService.publishRecord({
+      UbiiClientService.instance.publishRecord({
         topic: 'removeClient',
-        string: UbiiClientService.getClientID()
+        string: UbiiClientService.instance.getClientID()
       });
 
       // TODO: unregister device
       this.ubiiDevice &&
-        (await UbiiClientService.deregisterDevice(this.ubiiDevice));
+        (await UbiiClientService.instance.deregisterDevice(this.ubiiDevice));
     },
     /* helper methods */
     toggleFullScreen: function() {
