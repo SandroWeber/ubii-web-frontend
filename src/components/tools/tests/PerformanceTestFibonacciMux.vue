@@ -161,6 +161,15 @@ export default {
 
       this.testData.allSessionsSpecs.forEach(sessionSpec => {
         sessionSpec.ioMappings.forEach(ioMapping => {
+          // subscribe to output topics via regex
+          let topicPrefix = PerformanceTestFibonacciHelper.getTopicPrefix(
+            this.testData.settings.nodeId,
+            sessionSpec.name,
+            ioMapping.processingModuleName 
+          );
+          let outputTopicRegex = topicPrefix + '/*'
+          this.tokenOutputTopicRegexSub = UbiiClientService.instance.subscribeRegex(outputTopicRegex, this.onProcessingFinishedCallback);
+
           // publish the sequence lengths to be calculated for each processing module
           ioMapping.inputMappings.forEach(inputMapping => {
             if (
@@ -176,7 +185,7 @@ export default {
           });
 
           // subscribe to all processing module output topics
-          ioMapping.outputMappings.forEach(outputMapping => {
+          /*ioMapping.outputMappings.forEach(outputMapping => {
             if (
               outputMapping.outputName.indexOf(
                 PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX
@@ -188,7 +197,7 @@ export default {
                 this.onProcessingFinishedCallback
               );
             }
-          });
+          });*/
         });
       });
     },
@@ -240,7 +249,8 @@ export default {
       });
 
       // unsubscribe from all processing finished topics
-      this.testData.allSessionsSpecs.forEach(sessionSpec => {
+      this.tokenOutputTopicRegexSub && UbiiClientService.instance.unsubscribe(this.tokenOutputTopicRegexSub);
+      /*this.testData.allSessionsSpecs.forEach(sessionSpec => {
         sessionSpec.ioMappings.forEach(ioMapping => {
           ioMapping.outputMappings.forEach(outputMapping => {
             if (
@@ -256,7 +266,7 @@ export default {
             }
           });
         });
-      });
+      });*/
 
       let passedTime =
         this.testData.statistics.stopTime - this.testData.statistics.startTime;

@@ -15,7 +15,6 @@
 </template>
 
 <script>
-/* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 
 import uuidv4 from 'uuid/v4';

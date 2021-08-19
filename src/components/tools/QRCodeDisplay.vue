@@ -24,8 +24,6 @@
 import QRCode from 'qrcode';
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
-/* eslint-disable no-console */
-
 export default {
   name: 'QRCodeDisplay',
   data() {

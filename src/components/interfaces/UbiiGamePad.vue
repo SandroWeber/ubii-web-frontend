@@ -298,9 +298,6 @@ export default {
 
       if (this.ubiiDevice && this.ubiiDevice.components) {
         this.ubiiDevice.components.forEach(component => {
-          // eslint-disable-next-line no-console
-          console.log('unsubscribed to ' + component.topic);
-
           UbiiClientService.instance.unsubscribeTopic(component.topic);
         });
       }

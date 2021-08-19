@@ -16,7 +16,6 @@
 </template>
 
 <script>
-/* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 
 import uuidv4 from 'uuid/v4';
@@ -276,7 +275,6 @@ export default {
       if (!this.openCVTestActive) {
         return;
       }
-      //console.info(image);
 
       const ctx = this.canvasOpenCV.getContext('2d');
       // set canvas dimensions
@@ -304,7 +302,6 @@ export default {
         imageDataRGBA = image.data;
       }
 
-      //console.info(imageDataRGBA);
       const imgData = new ImageData(
         new Uint8ClampedArray(imageDataRGBA),
         image.width,

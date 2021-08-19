@@ -13,7 +13,6 @@
  * added code to enable VR
  */
 
-/* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-redeclare */
 

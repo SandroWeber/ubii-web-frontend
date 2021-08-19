@@ -28,8 +28,6 @@ import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/javascript/javascript.js';
 import 'codemirror/theme/base16-dark.css';
 
-/* eslint-disable no-console */
-
 export default {
   name: 'TopicPublisher',
   components: {

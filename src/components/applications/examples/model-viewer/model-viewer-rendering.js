@@ -98,7 +98,6 @@ export default class ModelViewerRendering {
   }
 
   triggerSelection() {
-    console.info('triggerSelection');
     let smartphonePosition = new THREE.Vector3();
     let smartphoneForward = new THREE.Vector3();
     this.objectSmartphone.getWorldPosition(smartphonePosition);
@@ -112,7 +111,6 @@ export default class ModelViewerRendering {
     const intersects = raycaster
       .intersectObjects(this.scene.children, true)
       .filter(hit => hit.object.type === 'Mesh');
-    console.info(intersects);
 
     if (intersects.length > 0) {
       let object = undefined;
@@ -126,7 +124,6 @@ export default class ModelViewerRendering {
   }
 
   startSelectionRotation() {
-    console.info('startSelectionRotation');
     /*this.onSelectionRotationStartInfo = {
       smartphoneRotation: this.objectSmartphone.quaternion.clone()
     }*/
@@ -136,7 +133,6 @@ export default class ModelViewerRendering {
   }
 
   stopSelectionRotation() {
-    console.info('stopSelectionRotation');
     this.rotateSelected = false;
   }
 
