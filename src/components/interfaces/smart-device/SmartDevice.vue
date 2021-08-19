@@ -98,7 +98,7 @@ export default {
   components: { UbiiClientContent },
   data: () => {
     return {
-      ubiiClientService: UbiiClientService,
+      ubiiClientService: UbiiClientService.instance,
       clientId: undefined,
       fullscreen: false,
       showDebugView: false,
@@ -119,13 +119,13 @@ export default {
       await this.stopInterface();
     });
 
-    UbiiClientService.waitForConnection().then(() => {
+    UbiiClientService.instance.waitForConnection().then(() => {
       this.startInterface();
     });
-    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, () => {
       this.startInterface();
     });
-    UbiiClientService.onDisconnect(async () => {
+    UbiiClientService.instance.onDisconnect(async () => {
       await this.stopInterface();
     });
 

@@ -22,7 +22,7 @@ export default {
   },
   data: () => {
     return {
-      ubiiClientService: UbiiClientService
+      ubiiClientService: UbiiClientService.instance
     };
   },
   mounted: function() {
@@ -32,17 +32,17 @@ export default {
     });
 
     // some event hooks to restart/stop the experiment if necessary
-    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, () => {
       this.stopEditor();
       this.startEditor();
     });
 
     // make sure we're connected, then start the example
-    UbiiClientService.waitForConnection().then(() => {
+    UbiiClientService.instance.waitForConnection().then(() => {
       this.startEditor();
     });
 
-    UbiiClientService.onDisconnect(() => {
+    UbiiClientService.instance.onDisconnect(() => {
       this.stopEditor();
     });
   },
@@ -52,24 +52,24 @@ export default {
   methods: {
     startEditor: function() {
       // subscribe to session info topic
-      UbiiClientService.subscribeTopic(
+      UbiiClientService.instance.subscribeTopic(
         DEFAULT_TOPICS.INFO_TOPICS.NEW_SESSION,
         this.handleSessionInfo
       );
     },
     stopEditor: async function() {
       // unsubscribe and stop session
-      UbiiClientService.unsubscribeTopic(
+      UbiiClientService.instance.unsubscribeTopic(
         DEFAULT_TOPICS.INFO_TOPICS.NEW_SESSION,
         this.handleSessionInfo
       );
-      UbiiClientService.client.callService({
+      UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
         session: this.$data.ubiiSession
       });
 
       if (this.$data.ubiiDevice) {
-        await UbiiClientService.deregisterDevice(this.$data.ubiiDevice);
+        await UbiiClientService.instance.deregisterDevice(this.$data.ubiiDevice);
       }
     },
     handleSessionInfo: function(sessionInfo) {

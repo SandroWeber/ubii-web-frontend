@@ -44,9 +44,9 @@ export default class UbiiSmartDevice {
   /* setup */
 
   async init() {
-    await UbiiClientService.waitForConnection();
+    await UbiiClientService.instance.waitForConnection();
 
-    this.clientId = UbiiClientService.getClientID();
+    this.clientId = UbiiClientService.instance.getClientID();
 
     navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
     if (!navigator.vibrate) {
@@ -81,9 +81,9 @@ export default class UbiiSmartDevice {
   }
 
   async register() {
-    await UbiiClientService.waitForConnection();
+    await UbiiClientService.instance.waitForConnection();
 
-    let responseDeviceRegistration = await UbiiClientService.registerDevice(this);
+    let responseDeviceRegistration = await UbiiClientService.instance.registerDevice(this);
     if (!responseDeviceRegistration || !responseDeviceRegistration.id) return;
 
     this.id = responseDeviceRegistration.id;
@@ -96,17 +96,17 @@ export default class UbiiSmartDevice {
       this.publishContinuousDeviceData();
     }, this.publishIntervalS * 1000);
     if (this.componentVibrate) {
-      UbiiClientService.subscribeTopic(this.componentVibrate.topic, this.handleVibrationPattern);
+      UbiiClientService.instance.subscribeTopic(this.componentVibrate.topic, this.handleVibrationPattern);
     }
   }
 
   async deregister() {
     this.intervalPublishContinuousData && clearInterval(this.intervalPublishContinuousData);
     if (this.componentVibrate) {
-      await UbiiClientService.unsubscribeTopic(this.componentVibrate.topic, this.handleVibrationPattern);
+      await UbiiClientService.instance.unsubscribeTopic(this.componentVibrate.topic, this.handleVibrationPattern);
     }
 
-    await UbiiClientService.deregisterDevice(this);
+    await UbiiClientService.instance.deregisterDevice(this);
     this.hasRegisteredUbiiDevice = false;
 
     this.unregisterEventListeners();
@@ -138,7 +138,7 @@ export default class UbiiSmartDevice {
 
   onDeviceMotion(event) {
     // https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent
-    let timestamp = UbiiClientService.generateTimestamp();
+    let timestamp = UbiiClientService.instance.generateTimestamp();
     this.deviceData.accelerationData = {
       acceleration: event.acceleration,
       timestamp: timestamp
@@ -215,7 +215,7 @@ export default class UbiiSmartDevice {
 
   publishTouchPosition(position) {
     if (this.hasRegisteredUbiiDevice) {
-      UbiiClientService.publish({
+      UbiiClientService.instance.publish({
         topicDataRecord: {
           topic: this.componentTouchPosition.topic,
           vector2: position
@@ -226,7 +226,7 @@ export default class UbiiSmartDevice {
 
   publishTouchEvent(type, position) {
     if (this.hasRegisteredUbiiDevice) {
-      UbiiClientService.publish({
+      UbiiClientService.instance.publish({
         topicDataRecord: {
           topic: this.componentTouchEvents.topic,
           touchEvent: { type: type, position: position }
@@ -237,7 +237,7 @@ export default class UbiiSmartDevice {
 
   publishTouchEventList(touches) {
     if (this.hasRegisteredUbiiDevice) {
-      UbiiClientService.publish({
+      UbiiClientService.instance.publish({
         topicDataRecord: {
           topic: this.componentTouchEvents.topic,
           touchEventList: { elements: touches }
@@ -263,7 +263,7 @@ export default class UbiiSmartDevice {
       gamma: this.deviceData.currentOrientation.gamma - calibrated.gamma
     };
 
-    UbiiClientService.publish({
+    UbiiClientService.instance.publish({
       topicDataRecord: {
         topic: this.componentOrientation.topic,
         vector3: {
@@ -280,7 +280,7 @@ export default class UbiiSmartDevice {
       return;
     }
 
-    UbiiClientService.publish({
+    UbiiClientService.instance.publish({
       topicDataRecord: {
         topic: this.componentLinearAcceleration.topic,
         timestamp: this.deviceData.accelerationData.timestamp,

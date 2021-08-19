@@ -36,10 +36,10 @@ export default {
     this.scene = null;
     this.renderer = null;
 
-    UbiiClientService.unsubscribeTopic(this.topicObjects, this.handle3DObjects);
+    UbiiClientService.instance.unsubscribeTopic(this.topicObjects, this.handle3DObjects);
 
     if (this.ubiiSessionGeneratePoseMovements) {
-      UbiiClientService.client.callService({
+      UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
         session: this.ubiiSessionGeneratePoseMovements
       });
@@ -49,14 +49,14 @@ export default {
     createUbiiSpecs: function() {
       /* define topics used */
       this.topicObjects =
-        '/' + UbiiClientService.getClientID() + '/3d_pose_visualizer/objects';
+        '/' + UbiiClientService.instance.getClientID() + '/3d_pose_visualizer/objects';
       this.topicBoundingBox =
         '/' +
-        UbiiClientService.getClientID() +
+        UbiiClientService.instance.getClientID() +
         '/3d_pose_visualizer/bounding_box';
       this.topicGenerateNumberOfObjects =
         '/' +
-        UbiiClientService.getClientID() +
+        UbiiClientService.instance.getClientID() +
         '/3d_pose_visualizer/generate_number_of_objects';
 
       this.ubiiDevice = {
@@ -245,15 +245,15 @@ export default {
       this.visualizedObjects = new Three.Object3D();
       this.scene.add(this.visualizedObjects);
 
-      UbiiClientService.waitForConnection().then(() => {
+      UbiiClientService.instance.waitForConnection().then(() => {
         this.createUbiiSpecs();
 
-        UbiiClientService.subscribeTopic(
+        UbiiClientService.instance.subscribeTopic(
           this.topicObjects,
           this.handle3DObjects
         );
 
-        UbiiClientService.registerDevice(this.ubiiDevice).then(response => {
+        UbiiClientService.instance.registerDevice(this.ubiiDevice).then(response => {
           if (!response.id) {
             return;
           }
@@ -261,12 +261,12 @@ export default {
           // device registration successful
           this.ubiiDevice = response;
 
-          UbiiClientService.publishRecord({
+          UbiiClientService.instance.publishRecord({
             topic: this.topicBoundingBox,
             vector3: { x: 2, y: 2, z: 2 }
           });
 
-          UbiiClientService.publishRecord({
+          UbiiClientService.instance.publishRecord({
             topic: this.topicGenerateNumberOfObjects,
             double: 3
           });
@@ -295,14 +295,14 @@ export default {
       this.sendTestData = !this.sendTestData;
 
       if (this.sendTestData) {
-        UbiiClientService.waitForConnection().then(() => {
-          UbiiClientService.client.callService({
+        UbiiClientService.instance.waitForConnection().then(() => {
+          UbiiClientService.instance.callService({
             topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
             session: this.ubiiSessionGeneratePoseMovements
           });
         });
       } else {
-        UbiiClientService.client.callService({
+        UbiiClientService.instance.callService({
           topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: this.ubiiSessionGeneratePoseMovements
         });

@@ -95,7 +95,7 @@ export default new Router({
     {
       path: '/tools/performance_tests',
       name: 'Tool - Performance Tests',
-      component: () => import('./components/tools/PerformanceTests.vue')
+      component: () => import('./components/tools/tests/PerformanceTests.vue')
     },
     {
       path: '/tools/qrcode_display',

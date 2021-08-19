@@ -69,10 +69,10 @@ export default {
     start: function() {
       this.cocoSSDLabels = [];
 
-      UbiiClientService.waitForConnection().then(() => {
+      UbiiClientService.instance.waitForConnection().then(() => {
         this.createUbiiSpecs();
 
-        UbiiClientService.registerDevice(this.ubiiDevice).then(device => {
+        UbiiClientService.instance.registerDevice(this.ubiiDevice).then(device => {
           if (device) {
             this.ubiiDevice = device;
           }
@@ -81,19 +81,19 @@ export default {
     },
     stop: function() {
       this.openCVTestActive = false;
-      this.ubiiDevice && UbiiClientService.deregisterDevice(this.ubiiDevice);
+      this.ubiiDevice && UbiiClientService.instance.deregisterDevice(this.ubiiDevice);
       this.stopOpenCVTest();
     },
     /* ubii methods */
     createUbiiSpecs: function() {
       this.ubiiDeviceName = 'opencv_example';
       let topicPrefix =
-        '/' + UbiiClientService.getClientID() + '/' + this.ubiiDeviceName;
+        '/' + UbiiClientService.instance.getClientID() + '/' + this.ubiiDeviceName;
 
       this.ubiiDevice = {
         name: this.ubiiDeviceName,
         deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
-        clientId: UbiiClientService.getClientID(),
+        clientId: UbiiClientService.instance.getClientID(),
         components: [
           {
             topic: topicPrefix + '/camera_image',
@@ -192,14 +192,14 @@ export default {
       }
     },
     startOpenCVTest: function() {
-      UbiiClientService.subscribeTopic(
+      UbiiClientService.instance.subscribeTopic(
         this.ubiiDevice.components[1].topic,
         image => {
           this.drawImageOpenCV(image);
         }
       );
 
-      UbiiClientService.callService({
+      UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
         session: this.ubiiSessionOpenCVTest
       }).then(response => {
@@ -218,10 +218,10 @@ export default {
       continuousPublish();
     },
     stopOpenCVTest: function() {
-      UbiiClientService.unsubscribeTopic(this.ubiiDevice.components[1].topic);
+      UbiiClientService.instance.unsubscribeTopic(this.ubiiDevice.components[1].topic);
 
       this.ubiiSessionOpenCVTest &&
-        UbiiClientService.callService({
+        UbiiClientService.instance.callService({
           topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: this.ubiiSessionOpenCVTest
         });
@@ -237,7 +237,7 @@ export default {
       let tSeconds = Date.now() / 1000;
       let seconds = Math.floor(tSeconds);
       let nanos = Math.floor((tSeconds - seconds) * 1000000000);
-      UbiiClientService.publishRecord({
+      UbiiClientService.instance.publishRecord({
         topic: this.ubiiDevice.components[0].topic,
         timestamp: {
           seconds: seconds,

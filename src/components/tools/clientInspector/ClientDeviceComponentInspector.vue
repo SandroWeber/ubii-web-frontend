@@ -29,7 +29,7 @@ export default {
     };
   },
   mounted: async function() {
-    await UbiiClientService.waitForConnection();
+    await UbiiClientService.instance.waitForConnection();
     this.getClientList();
     this.intervalPollClientList = setInterval(() => this.getClientList(), 3000);
   },
@@ -41,7 +41,7 @@ export default {
       this.expanded = !this.expanded;
     },
     getClientList: async function() {
-      let reply = await UbiiClientService.callService({
+      let reply = await UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.CLIENT_GET_LIST
       });
 

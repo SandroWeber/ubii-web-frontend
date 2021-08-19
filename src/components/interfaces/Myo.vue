@@ -85,16 +85,16 @@ export default {
       this.stopInterface();
     });
 
-    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, () => {
       this.stopInterface();
       this.startInterface();
     });
-    UbiiClientService.on(
+    UbiiClientService.instance.on(
       UbiiClientService.EVENTS.DISCONNECT,
       this.stopInterface
     );
 
-    if (UbiiClientService.isConnected()) this.startInterface();
+    if (UbiiClientService.instance.isConnected()) this.startInterface();
   },
 
   beforeDestroy: function() {
@@ -104,7 +104,7 @@ export default {
   data: () => {
     return {
       //ubi-related
-      ubiiClientService: UbiiClientService,
+      ubiiClientService: UbiiClientService.instance,
       interfaceStarted: false,
 
       pollingInterval: null,
@@ -140,7 +140,7 @@ export default {
     createUbiiSpecs: function() {
       //helper definitions that we can reference later
       let deviceName = 'web-interface-myo';
-      let topicPrefix = UbiiClientService.getClientID() + '/' + deviceName;
+      let topicPrefix = UbiiClientService.instance.getClientID() + '/' + deviceName;
       let inputClientMyoData = {
         internalName: 'myoData',
         messageFormat: 'ubii.dataStructure.MyoEvent',
@@ -167,7 +167,7 @@ export default {
     },
 
     startInterface: function() {
-      UbiiClientService.waitForConnection().then(() => {
+      UbiiClientService.instance.waitForConnection().then(() => {
         // create all the specifications
         this.createUbiiSpecs();
 
@@ -177,7 +177,7 @@ export default {
         this.setPublishInterval();
 
         // register device
-        UbiiClientService.registerDevice(this.$data.ubiiDevice)
+        UbiiClientService.instance.registerDevice(this.$data.ubiiDevice)
           .then(device => {
             this.$data.ubiiDevice = device;
             return device;
@@ -221,7 +221,7 @@ export default {
     publishMyoData: function() {
       if (!this.$data.myoConnected) return;
 
-      UbiiClientService.publishRecord({
+      UbiiClientService.instance.publishRecord({
         topic: this.$data.inputClientMyoData.topic,
         myoEvent: this.$data.myoData
       });

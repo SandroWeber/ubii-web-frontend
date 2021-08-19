@@ -104,7 +104,7 @@ export default {
 
     // called by parent
     updateSmartDevices: function() {
-      UbiiClientService.client
+      UbiiClientService.instance
         .callService({ topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST })
         .then(reply => {
           this.$data.topicList = reply.stringList.elements;
@@ -151,12 +151,12 @@ export default {
 
       // start our session (registering not necessary as we do not want to save it permanently)
       client.subscribe = (createModel = false) =>
-        UbiiClientService.callService({
+        UbiiClientService.instance.callService({
           topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
           session: client.session
         }).then(() => {
           // subscribe the topic
-          UbiiClientService.subscribeTopic(specs.topic, orientation => {
+          UbiiClientService.instance.subscribeTopic(specs.topic, orientation => {
             client.orientation = orientation;
           }).then(() => {
             if (createModel) checkForPrefab();
@@ -202,9 +202,9 @@ export default {
     onDisconnectToUbii: function() {
       // unsubscribe and stop all sessions
       this.clients.forEach((v, k) => {
-        UbiiClientService.unsubscribeTopic(v.topic);
+        UbiiClientService.instance.unsubscribeTopic(v.topic);
 
-        UbiiClientService.callService({
+        UbiiClientService.instance.callService({
           topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: v.session
         });

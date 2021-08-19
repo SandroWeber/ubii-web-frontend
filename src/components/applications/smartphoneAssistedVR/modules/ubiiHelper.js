@@ -56,12 +56,12 @@ function subscribeSpecs(specs, callback) {
   console.log('subscribed to ' + specs.topic);
 
   // start our session (registering not necessary as we do not want to save it permanently)
-  UbiiClientService.callService({
+  UbiiClientService.instance.callService({
     topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
     session: specs.session
   }).then(() => {
     // subscribe the topic
-    UbiiClientService.subscribeTopic(specs.topic, callback);
+    UbiiClientService.instance.subscribeTopic(specs.topic, callback);
   });
 }
 
@@ -69,9 +69,9 @@ function unsubscribeSpecs(specs) {
   // eslint-disable-next-line no-console
   console.log('unsubscribed to ' + specs.topic);
 
-  UbiiClientService.unsubscribeTopic(specs.topic);
+  UbiiClientService.instance.unsubscribeTopic(specs.topic);
 
-  UbiiClientService.callService({
+  UbiiClientService.instance.callService({
     topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
     session: specs.session
   });
@@ -82,7 +82,7 @@ function subscribe(topic, callback) {
   console.log('subscribed to ' + topic);
 
   // subscribe the topic
-  UbiiClientService.subscribeTopic(topic, callback);
+  UbiiClientService.instance.subscribeTopic(topic, callback);
 }
 
 function unsubscribe(topics, sessions) {
@@ -93,7 +93,7 @@ function unsubscribe(topics, sessions) {
     UbiiClientService.unsubscribeTopic(topic);
   });
   sessions.forEach(session => {
-    UbiiClientService.callService({
+    UbiiClientService.instance.callService({
       topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
       session: session
     });

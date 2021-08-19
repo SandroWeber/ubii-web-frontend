@@ -30,17 +30,17 @@ export default {
   name: 'QRCodeDisplay',
   data() {
     return {
-      ubiiClientService: UbiiClientService,
+      ubiiClientService: UbiiClientService.instance,
       urlWlan: undefined,
       urlEthernet: undefined
     };
   },
   mounted() {
-    if (UbiiClientService.client.serverSpecification.ipWlan.length > 0) {
+    if (UbiiClientService.instance.client.serverSpecification.ipWlan.length > 0) {
       let canvas = document.getElementById('qrcode-canvas-wlan');
 
       this.urlWlan =
-        UbiiClientService.client.serverSpecification.ipWlan +
+        UbiiClientService.instance.client.serverSpecification.ipWlan +
         ':' +
         location.port;
 
@@ -49,11 +49,11 @@ export default {
       });
     }
 
-    if (UbiiClientService.client.serverSpecification.ipEthernet.length > 0) {
+    if (UbiiClientService.instance.client.serverSpecification.ipEthernet.length > 0) {
       let canvas = document.getElementById('qrcode-canvas-ethernet');
 
       this.urlEthernet =
-        UbiiClientService.client.serverSpecification.ipEthernet +
+        UbiiClientService.instance.client.serverSpecification.ipEthernet +
         ':' +
         location.port;
 

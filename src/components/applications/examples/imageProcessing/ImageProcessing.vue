@@ -96,7 +96,7 @@ export default {
           this.selectedCameraTopic !== this.subscribedCameraTopic) ||
         this.selectedCameraTopic === 'none'
       ) {
-        UbiiClientService.unsubscribeTopic(
+        UbiiClientService.instance.unsubscribeTopic(
           this.subscribedCameraTopic,
           this.drawImageTopicMirror
         );
@@ -116,7 +116,7 @@ export default {
         this.selectedCameraTopic !== 'none'
       ) {
         this.subscribedCameraTopic = this.selectedCameraTopic;
-        UbiiClientService.subscribeTopic(
+        UbiiClientService.instance.subscribeTopic(
           this.subscribedCameraTopic,
           this.drawImageTopicMirror
         );
@@ -130,10 +130,10 @@ export default {
       }
       this.running = true;
 
-      UbiiClientService.waitForConnection().then(() => {
+      UbiiClientService.instance.waitForConnection().then(() => {
         // set up ubii camera interface
         this.topicPrefix =
-          '/' + UbiiClientService.getClientID() + '/image-processing';
+          '/' + UbiiClientService.instance.getClientID() + '/image-processing';
         this.ubiiCameraInterface = new UbiiCameraInterface(
           ImageDataFormats.RGB8,
           this.topicPrefix,
@@ -161,7 +161,7 @@ export default {
     /* ubii methods */
     getImageTopicList: async function() {
       //TODO: get ubii components and search for image tags
-      let topicListReply = await UbiiClientService.callService({
+      let topicListReply = await UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST
       });
       this.cameraTopics = topicListReply.stringList.elements.filter(
