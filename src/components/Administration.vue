@@ -44,6 +44,22 @@
           />
         </app-tile>
       </router-link>
+      <router-link
+        to="/administration/graphEditor"
+        class="grid-link"
+        tag="div"
+      >
+        <app-tile class="layer-three background round shadow green-accent">
+          <font-awesome-icon icon="project-diagram" class="grid-icon" />
+          <p>Graph Editor</p>
+          <font-awesome-icon
+            icon="exclamation-triangle"
+            class="under-construction-icon"
+            v-b-tooltip.hover
+            title="Under Construction"
+          />
+        </app-tile>
+      </router-link>
     </div>
   </div>
 </template>

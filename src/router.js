@@ -34,6 +34,12 @@ export default new Router({
       component: () =>
         import('./components/editors/sessionEditor/SessionEditor.vue')
     },
+    {
+      path: '/administration/graphEditor',
+      name: 'Graph Editor',
+      component: () =>
+        import('./components/editors/graphEditor/GraphEditor.vue')
+    },
     /* interfaces */
     {
       path: '/interfaces',
