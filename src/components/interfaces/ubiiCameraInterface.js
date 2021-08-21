@@ -48,8 +48,7 @@ export default class UbiiCameraInterface {
           continuousPublishing();
         });
       })
-      // eslint-disable-next-line no-console
-      .catch(error => console.log(error));
+      .catch(error => console.error(error));
   }
 
   stop() {
@@ -60,8 +59,7 @@ export default class UbiiCameraInterface {
   async grabFrame() {
     let imageBitmap = await this.imageCapture
       .grabFrame()
-      // eslint-disable-next-line no-console
-      .catch(error => console.log(error));
+      .catch(error => console.error(error));
     return imageBitmap;
   }
 

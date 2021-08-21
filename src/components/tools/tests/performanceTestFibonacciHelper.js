@@ -70,14 +70,14 @@ class PerformanceTestFibonacciHelper {
       ioMapping.inputMappings.push({
         inputName: element.internalName,
         topicSource: 'topic',
-        topic: topicPrefix + element.internalName
+        topic: topicPrefix + '/' + element.internalName
       });
     });
     pmSpecs.outputs.forEach(element => {
       ioMapping.outputMappings.push({
         outputName: element.internalName,
         topicDestination: 'topic',
-        topic: topicPrefix + element.internalName
+        topic: topicPrefix + '/' + element.internalName
       });
     });
     sessionSpecs.ioMappings.push(ioMapping);
@@ -101,7 +101,7 @@ class PerformanceTestFibonacciHelper {
   }
 
   static getTopicPrefix(nodeId, sessionName, pmName) {
-    return '/' + nodeId + '/' + sessionName + '/' + pmName + '/';
+    return '/' + nodeId + '/' + sessionName + '/' + pmName;
   }
 }
 

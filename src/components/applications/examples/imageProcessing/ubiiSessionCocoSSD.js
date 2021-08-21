@@ -45,7 +45,6 @@ export default class UbiiSessionCocoSSD {
         session: this
       }).then(response => {
         if (response.error) {
-          // eslint-disable-next-line no-console
           console.warn(response.error);
         } else if (response.session) {
           Object.assign(this, response.session);
@@ -76,7 +75,6 @@ export default class UbiiSessionCocoSSD {
         session: this
       }).then(response => {
         if (response.error) {
-          // eslint-disable-next-line no-console
           console.warn(response.error);
         }
       });

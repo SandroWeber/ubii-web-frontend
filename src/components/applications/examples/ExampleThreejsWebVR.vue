@@ -5,7 +5,6 @@
 </template>
 
 <script>
-/* eslint-disable no-console */
 
 import * as Three from 'three';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';

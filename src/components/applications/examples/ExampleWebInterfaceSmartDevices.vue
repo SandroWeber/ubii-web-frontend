@@ -14,8 +14,6 @@ import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
 import UbiiClientContent from '../sharedModules/UbiiClientContent';
 
-/* eslint-disable no-console */
-
 export default {
   name: 'ExampleGathererWebInterfaceSmartDevices',
   components: { UbiiClientContent },

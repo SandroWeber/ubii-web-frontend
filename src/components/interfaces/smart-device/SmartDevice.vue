@@ -91,8 +91,6 @@ library.add([faExpand, faCompress]);
 
 Vue.use(Fullscreen);
 
-/* eslint-disable no-console */
-
 export default {
   name: 'Interface-SmartDevice',
   components: { UbiiClientContent },

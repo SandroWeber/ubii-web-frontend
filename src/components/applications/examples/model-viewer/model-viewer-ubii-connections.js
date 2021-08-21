@@ -17,13 +17,10 @@ export default class ModelViewerUbiiConnections {
       let response = await UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.DEVICE_GET_LIST
       });
-      //console.info(response.deviceList);
       for (const device of response.deviceList.elements) {
         if (device.name === 'web-interface-smart-device') {
           clearInterval(this.intervalCheckForSmartphone);
           this.smartDevice = device;
-          console.info('smart device found:');
-          console.info(this.smartDevice);
           await this.subscribeTopics(this.smartDevice);
         }
       }
@@ -34,8 +31,6 @@ export default class ModelViewerUbiiConnections {
     this.componentTouchEvents = ubiiDevice.components.find(component =>
       component.topic.includes('/touch_events')
     );
-    console.info('componentTouchEvents');
-    console.info(this.componentTouchEvents);
     await UbiiClientService.instance.subscribeTopic(
       this.componentTouchEvents.topic,
       touchEventList => {
@@ -46,12 +41,9 @@ export default class ModelViewerUbiiConnections {
     this.componentOrientation = ubiiDevice.components.find(component =>
       component.topic.includes('/orientation')
     );
-    console.info('componentOrientation');
-    console.info(this.componentOrientation);
     this.subscriptionTokenOrientation = await UbiiClientService.instance.subscribeTopic(
       this.componentOrientation.topic,
       orientation => {
-        //console.info(orientation);
         this.modelViewerRendering && this.modelViewerRendering.setSmartphoneRotation(
           orientation.y,
           orientation.x,
@@ -63,7 +55,6 @@ export default class ModelViewerUbiiConnections {
 
   onTouchEvents(touchEventList) {
     let touches = touchEventList.elements;
-    //console.info(touches);
 
     if (touches.length === 1 && touches[0].type === ButtonEventType.DOWN) {
       this.singleFingerDown = true;

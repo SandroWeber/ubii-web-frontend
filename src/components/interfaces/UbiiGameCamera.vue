@@ -10,7 +10,6 @@
 </template>
 
 <script>
-/* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 
 import uuidv4 from 'uuid/v4';
@@ -207,9 +206,6 @@ export default {
 
       if (this.ubiiDevice && this.ubiiDevice.components) {
         this.ubiiDevice.components.forEach(component => {
-          // eslint-disable-next-line no-console
-          console.log('unsubscribed to ' + component.topic);
-
           UbiiClientService.instance.unsubscribeTopic(component.topic);
         });
       }
@@ -250,8 +246,6 @@ export default {
       }).then(response => {
         if (response.error) {
           console.warn(response.error);
-        } else {
-          console.info(response);
         }
       });
 

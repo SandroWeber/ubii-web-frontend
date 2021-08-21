@@ -38,7 +38,6 @@ export default {
   },
   mounted: () => {
     let useHTTPS = window.location.protocol.includes('https');
-    console.info('useHTTPS: ' + useHTTPS);
     UbiiClientService.instance.setHTTPS(useHTTPS);
     UbiiClientService.instance.setName('Ubi-Interact Web Frontend');
     UbiiClientService.instance.connect();
