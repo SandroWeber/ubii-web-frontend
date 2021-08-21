@@ -1,0 +1,344 @@
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
+
+class PMTestExecutionTriggerOnInput {
+  static NAME_IN_DOUBLE = 'inDouble';
+  static NAME_OUT_DOUBLE = 'outDouble';
+
+  static NAME_IN_MUX_STRINGS = 'inMuxStrings';
+  static NAME_OUT_MUX_STRINGS = 'outMuxStrings';
+
+  static TEMPLATE = {
+    name: 'pm_test-exec_trigger-on-input',
+    tags: ['test', 'trigger on input'],
+    processingMode: {
+      triggerOnInput: {
+        minDelayMs: 0,
+        allInputsNeedUpdate: false
+      }
+    },
+    inputs: [
+      {
+        internalName: NAME_IN_DOUBLE,
+        messageFormat: 'double'
+      },
+      {
+        internalName: NAME_IN_MUX_STRINGS,
+        messageFormat: 'string',
+        isMuxed: true //TODO: add to msg-formats
+      }
+    ],
+    outputs: [
+      {
+        internalName: NAME_OUT_DOUBLE,
+        messageFormat: 'double'
+      },
+      {
+        internalName: NAME_OUT_MUX_STRING_LENGTHS,
+        messageFormat: 'int32',
+        isMuxed: true //TODO: add to msg-formats
+      }
+    ],
+    onProcessingStringified: undefined,
+    nodeId: undefined
+  };
+
+  static onCreated(state) {
+    state.mapStringLengths = new Map();
+  }
+
+  static onProcessing(deltaTime, inputs, state) {
+    let outputs = {};
+
+    // check if changed, otherwise no output
+    if (inputs[NAME_IN_DOUBLE] && inputs[NAME_IN_DOUBLE] !== state.lastInDouble) {
+      state.lastInDouble = inputs[NAME_IN_DOUBLE];
+      outputs[NAME_OUT_DOUBLE] = inputs[NAME_IN_DOUBLE];
+    }
+
+    let muxStringRecords = inputs[NAME_IN_MUX_STRINGS] && inputs[NAME_IN_MUX_STRINGS].elements;
+    if (muxStringRecords && muxStringRecords.length > 0) {
+      outputs[NAME_OUT_MUX_STRING_LENGTHS] = {
+        elements: []
+      };
+      for (let muxStringRecord of muxStringRecords) {
+        let topic = muxStringRecord.topic;
+        let string = muxStringRecord[muxStringRecord.type];
+        // detect if string length is new or has changed, if not do not produce output
+        if (!state.mapStringLengths.has(topic) || state.mapStringLengths.get(topic) !== string.length) {
+          outputs[NAME_OUT_MUX_STRING_LENGTHS].elements.push({
+            int32: string.length,
+            outputTopicParams: [muxStringRecord.identity]
+          });
+        }
+        // update map
+        state.mapStringLengths.set(muxStringRecord.topic, string.length);
+      }
+    }
+
+    return outputs;
+  }
+
+  static getProtobuf(nameSuffix, nodeId) {
+    let specs = Object.assign({}, PMTestExecutionTriggerOnInput.TEMPLATE);
+    specs.name += nameSuffix;
+    specs.onProcessingStringified = PMTestExecutionTriggerOnInput.onProcessing.toString();
+    specs.nodeId = nodeId;
+
+    return specs;
+  }
+}
+
+class TestPMExecutionSession {
+  static TEMPLATE = {
+    name: 'session-test-pm-exec',
+    tags: ['test'],
+    processingModules: [],
+    ioMappings: []
+  };
+  static MUX_STRING_VARIATION_REGEX = 'mux_string_[0-9]+';
+
+  constructor(nameSuffix) {
+    this.specs = Object.assign({}, TestPMExecutionSession.TEMPLATE);
+    this.nameSuffix = nameSuffix;
+    this.specs.name += this.nameSuffix;
+
+    this.pmCount = 0;
+    this.topicPrefix = '/' + UbiiClientService.instance.getClientID() + '/' + this.specs.name;
+    this.topics = {
+      pmTriggerOnInput: {
+        topicInDouble: this.topicPrefix + '/in_double',
+        topicOutDouble: this.topicPrefix + '/out_double',
+        muxStringTopics: [
+          this.topicPrefix + '/mux_string_0',
+          this.topicPrefix + '/mux_string_1',
+          this.topicPrefix + '/mux_string_2',
+          this.topicPrefix + '/mux_string_3',
+          this.topicPrefix + '/mux_string_4'
+        ],
+        regexMuxStringTopics: this.topicPrefix + '/' + MUX_STRING_VARIATION_REGEX,
+        demuxStringLengthTopics: [
+          this.topicPrefix + '/string_length/mux_string_0',
+          this.topicPrefix + '/string_length/mux_string_1',
+          this.topicPrefix + '/string_length/mux_string_2',
+          this.topicPrefix + '/string_length/mux_string_3',
+          this.topicPrefix + '/string_length/mux_string_4'
+        ],
+        demuxTopicPattern: this.topicPrefix + '/string_length/{{#1}}'
+      }
+    };
+  }
+
+  addPMTriggerOnInput(nodeId) {
+    this.pmCount++;
+    let pmNameSuffix = '_' + this.pmCount + '_' + this.specs.name;
+    let specPM = PMTestExecutionTriggerOnInput.getProtobuf(pmNameSuffix, nodeId);
+
+    let specIoMappings = {
+      processingModuleName: specPM.name,
+      inputMappings: [
+        {
+          inputName: PMTestExecutionTriggerOnInput.NAME_IN_DOUBLE,
+          topic: this.topics.triggerOnInput.topicInDouble
+        },
+        {
+          inputName: PMTestExecutionTriggerOnInput.NAME_IN_MUX_STRINGS,
+          topicMux: {
+            name: 'mux_pm-test_trigger-on-input' + pmNameSuffix,
+            dataType: 'string',
+            topicSelector: this.topics.triggerOnInput.muxRegexStrings,
+            identityMatchPattern: MUX_STRING_VARIATION_REGEX
+          }
+        }
+      ],
+      outputMappings: [
+        {
+          outputName: PMTestExecutionTriggerOnInput.NAME_OUT_DOUBLE,
+          topic: this.topics.triggerOnInput.topicOutDouble
+        },
+        {
+          outputName: PMTestExecutionTriggerOnInput.NAME_OUT_MUX_STRING_LENGTHS,
+          topicDemux: {
+            name: 'demux_pm-test_trigger-on-input' + pmNameSuffix,
+            dataType: 'int32',
+            outputTopicFormat: this.topics.triggerOnInput.demuxTopicPattern
+          }
+        }
+      ]
+    };
+
+    this.specs.processingModules.push(specPM);
+    this.specs.ioMappings.push(specIoMappings);
+  }
+
+  updateSpec(sessionSpec) {
+    Object.assign(this.specs, sessionSpec);
+  }
+
+  getProtobuf() {
+    return this.specs;
+  }
+}
+
+class TestPMExecutionHelper {
+  constructor(numSessions = 1, numPMsPerSession = 1) {
+    this.settings = {
+      numSessions: numSessions,
+      numPMsPerSession: numPMsPerSession,
+      sessionCount: 0,
+      sessions: []
+    };
+
+    this.statistics = {
+      status: TestPMExecutionHelper.CONSTANTS.STATUS.READY,
+      success: undefined
+    };
+
+    this.subscriptionTokens = [];
+  }
+
+  addSession() {
+    this.settings.sessionCount++;
+    let sessionNameSufix = '_' + this.settings.sessionCount;
+    let session = new TestPMExecutionSession(sessionNameSufix);
+    this.settings.sessions.push(session);
+
+    return session;
+  }
+
+  async prepareTest(nodeId) {
+    let session = this.addSession();
+    session.addPMTriggerOnInput(nodeId);
+
+    try {
+      let token = await UbiiClientService.instance.subscribeTopic(
+        session.topics.pmTriggerOnInput.topicOutDouble,
+        this.onOutputDoubleFromPMTriggerOnInput
+      );
+      this.subscriptionTokens.push(token);
+
+      for (let topic of session.topics.pmTriggerOnInput.demuxStringLengthTopics) {
+        token = await UbiiClientService.instance.subscribeTopic(topic, this.onOutputStringLengthsFromPMTriggerOnInput);
+        this.subscriptionTokens.push(token);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
+    this.expectedDoubles = new Map();
+    this.expectedStringLenghts = new Map();
+    this.expectedTopicsReceived = [];
+    this.expectedTopicsReceived.push(session.topics.pmTriggerOnInput.topicOutDouble);
+    this.expectedTopicsReceived.push(session.topics.pmTriggerOnInput.demuxStringLengthTopics);
+    console.info('expectedTopicsReceived: ' + this.expectedTopicsReceived);
+  }
+
+  async startTest(nodeId) {
+    if (this.statistics.status !== TestPMExecutionHelper.CONSTANTS.STATUS.READY) return;
+
+    await this.prepareTest(nodeId);
+
+    for (let session of this.testHelper.settings.sessions) {
+      let specSession = session.getProtobuf();
+      let reply = await UbiiClientService.instance.callService({
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
+        session: specSession
+      });
+      if (reply.session) {
+        session.updateSpec(reply.session);
+        console.info(session.getProtobuf());
+      } else if (reply.error) {
+        console.error(reply.error);
+      }
+    }
+
+    this.timeoutTestFailure = setTimeout(async () => {
+      await this.stopTest();
+      this.statistics.success = false;
+      this.statistics.status = TestPMExecutionHelper.CONSTANTS.STATUS.TIMEOUT;
+    }, TestPMExecutionHelper.CONSTANTS.TIMEOUT_MS);
+
+    this.runTest();
+  }
+
+  async runTest() {
+    this.testData.statistics.startTime = Date.now();
+    this.statistics.status = TestPMExecutionHelper.CONSTANTS.STATUS.RUNNING;
+
+    for (let session of this.settings.sessions) {
+      let double = Math.random();
+      let topic = session.topics.pmTriggerOnInput.topicInDouble;
+      this.expectedDoubles.set(topic, double);
+      await UbiiClientService.instance.publishRecord({
+        topic: topic,
+        double: double
+      });
+
+      for (let topic of session.topics.pmTriggerOnInput.demuxStringLengthTopics) {
+        // generate random string
+        let stringLength = Math.floor(Math.random() * 10 + 1);
+        let string = Math.random().toString(16).substr(2, stringLength);
+        // save string length as expected
+        this.expectedStringLenghts.set(topic, string.length);
+        // publish random string
+        await UbiiClientService.instance.publishRecord({
+          topic: topic,
+          string: string
+        });
+      }
+    }
+
+    this.intervalCheckDone = setInterval(() => {
+      if (this.expectedTopicsReceived.length === 0) {
+        this.stopTest();
+      }
+    }, 100);
+  }
+
+  async stopTest() {
+    if (this.statistics.status !== TestPMExecutionHelper.CONSTANTS.STATUS.RUNNING) return;
+
+    this.timeoutTestFailure && clearTimeout(this.timeoutTestFailure);
+    this.intervalCheckDone && clearInterval(this.intervalCheckDone);
+
+    this.statistics.status = TestPMExecutionHelper.CONSTANTS.STATUS.DONE;
+    this.statistics.stopTime = Date.now();
+
+    for (let session of this.settings.sessions) {
+      UbiiClientService.instance.callService({
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
+        session: session.getProtobuf()
+      });
+    }
+
+    for (let token of this.subscriptionTokens) {
+      await UbiiClientService.instance.unsubscribe(token);
+    }
+  }
+
+  onOutputDoubleFromPMTriggerOnInput(double, topic) {
+    if (double !== this.expectedDoubles.get(topic)) {
+      this.statistics.success = false;
+    }
+
+    this.expectedTopicsReceived.splice(this.expectedTopicsReceived.indexOf(topic), 1);
+  }
+
+  onOutputStringLengthsFromPMTriggerOnInput(length, topic) {
+    if (length !== this.expectedStringLengthFromPMTriggerOnInput.get(topic)) {
+      this.statistics.success = false;
+    }
+    this.expectedTopicsReceived.splice(this.expectedTopicsReceived.indexOf(topic), 1);
+  }
+}
+
+TestPMExecutionHelper.CONSTANTS = Object.freeze({
+  STATUS: {
+    READY: 'ready',
+    RUNNING: 'running',
+    DONE: 'done',
+    TIMEOUT: 'timeout'
+  },
+  TIMEOUT_MS: 3000
+});
+
+export default TestPMExecutionHelper;

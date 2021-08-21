@@ -77,12 +77,12 @@
         v-model="testData.settings.testDurationSeconds"
       />
 
-      <label for="fibonacci-session-count" class="setting-label"
+      <label for="fibonacci-node-id" class="setting-label"
         >run on node:</label
       >
       <app-input
-        :id="'fibonacci-session-count'"
-        :type="'# sessions'"
+        :id="'fibonacci-node-id'"
+        :type="'node id'"
         v-model="testData.settings.nodeId"
       />
     </div>
