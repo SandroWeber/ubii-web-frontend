@@ -203,8 +203,13 @@ export default new Router({
     },
     {
       path: '/tests/performance_tests',
-      name: 'Tool - Performance Tests',
+      name: 'Tests - Performance Tests',
       component: () => import('./components/tests/PerformanceTests.vue')
+    },
+    {
+      path: '/tests/pm_execution',
+      name: 'Tests - Processing/Execution Tests',
+      component: () => import('./components/tests/pm-execution/TestPMExecution.vue')
     }
   ]
 });

@@ -19,22 +19,22 @@ class PMTestExecutionTriggerOnInput {
     },
     inputs: [
       {
-        internalName: NAME_IN_DOUBLE,
+        internalName: PMTestExecutionTriggerOnInput.NAME_IN_DOUBLE,
         messageFormat: 'double'
       },
       {
-        internalName: NAME_IN_MUX_STRINGS,
+        internalName: PMTestExecutionTriggerOnInput.NAME_IN_MUX_STRINGS,
         messageFormat: 'string',
         isMuxed: true //TODO: add to msg-formats
       }
     ],
     outputs: [
       {
-        internalName: NAME_OUT_DOUBLE,
+        internalName: PMTestExecutionTriggerOnInput.NAME_OUT_DOUBLE,
         messageFormat: 'double'
       },
       {
-        internalName: NAME_OUT_MUX_STRING_LENGTHS,
+        internalName: PMTestExecutionTriggerOnInput.NAME_OUT_MUX_STRING_LENGTHS,
         messageFormat: 'int32',
         isMuxed: true //TODO: add to msg-formats
       }
@@ -51,14 +51,19 @@ class PMTestExecutionTriggerOnInput {
     let outputs = {};
 
     // check if changed, otherwise no output
-    if (inputs[NAME_IN_DOUBLE] && inputs[NAME_IN_DOUBLE] !== state.lastInDouble) {
-      state.lastInDouble = inputs[NAME_IN_DOUBLE];
-      outputs[NAME_OUT_DOUBLE] = inputs[NAME_IN_DOUBLE];
+    if (
+      inputs[PMTestExecutionTriggerOnInput.NAME_IN_DOUBLE] &&
+      inputs[PMTestExecutionTriggerOnInput.NAME_IN_DOUBLE] !== state.lastInDouble
+    ) {
+      state.lastInDouble = inputs[PMTestExecutionTriggerOnInput.NAME_IN_DOUBLE];
+      outputs[PMTestExecutionTriggerOnInput.NAME_OUT_DOUBLE] = inputs[PMTestExecutionTriggerOnInput.NAME_IN_DOUBLE];
     }
 
-    let muxStringRecords = inputs[NAME_IN_MUX_STRINGS] && inputs[NAME_IN_MUX_STRINGS].elements;
+    let muxStringRecords =
+      inputs[PMTestExecutionTriggerOnInput.NAME_IN_MUX_STRINGS] &&
+      inputs[PMTestExecutionTriggerOnInput.NAME_IN_MUX_STRINGS].elements;
     if (muxStringRecords && muxStringRecords.length > 0) {
-      outputs[NAME_OUT_MUX_STRING_LENGTHS] = {
+      outputs[PMTestExecutionTriggerOnInput.NAME_OUT_MUX_STRING_LENGTHS] = {
         elements: []
       };
       for (let muxStringRecord of muxStringRecords) {
@@ -66,7 +71,7 @@ class PMTestExecutionTriggerOnInput {
         let string = muxStringRecord[muxStringRecord.type];
         // detect if string length is new or has changed, if not do not produce output
         if (!state.mapStringLengths.has(topic) || state.mapStringLengths.get(topic) !== string.length) {
-          outputs[NAME_OUT_MUX_STRING_LENGTHS].elements.push({
+          outputs[PMTestExecutionTriggerOnInput.NAME_OUT_MUX_STRING_LENGTHS].elements.push({
             int32: string.length,
             outputTopicParams: [muxStringRecord.identity]
           });
@@ -116,7 +121,7 @@ class TestPMExecutionSession {
           this.topicPrefix + '/mux_string_3',
           this.topicPrefix + '/mux_string_4'
         ],
-        regexMuxStringTopics: this.topicPrefix + '/' + MUX_STRING_VARIATION_REGEX,
+        regexMuxStringTopics: this.topicPrefix + '/' + PMTestExecutionTriggerOnInput.MUX_STRING_VARIATION_REGEX,
         demuxStringLengthTopics: [
           this.topicPrefix + '/string_length/mux_string_0',
           this.topicPrefix + '/string_length/mux_string_1',
@@ -147,7 +152,7 @@ class TestPMExecutionSession {
             name: 'mux_pm-test_trigger-on-input' + pmNameSuffix,
             dataType: 'string',
             topicSelector: this.topics.triggerOnInput.muxRegexStrings,
-            identityMatchPattern: MUX_STRING_VARIATION_REGEX
+            identityMatchPattern: PMTestExecutionTriggerOnInput.MUX_STRING_VARIATION_REGEX
           }
         }
       ],
@@ -277,7 +282,9 @@ class TestPMExecutionHelper {
       for (let topic of session.topics.pmTriggerOnInput.demuxStringLengthTopics) {
         // generate random string
         let stringLength = Math.floor(Math.random() * 10 + 1);
-        let string = Math.random().toString(16).substr(2, stringLength);
+        let string = Math.random()
+          .toString(16)
+          .substr(2, stringLength);
         // save string length as expected
         this.expectedStringLenghts.set(topic, string.length);
         // publish random string

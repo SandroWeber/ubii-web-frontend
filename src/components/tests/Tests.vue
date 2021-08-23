@@ -7,6 +7,13 @@
           <p>Performance Tests</p>
         </app-tile>
       </router-link>
+
+      <router-link to="/tests/pm_execution" class="tile-menu-item" tag="div">
+        <app-tile class="layer-three background round shadow yellow-accent">
+          <font-awesome-icon icon="tasks" class="tile-menu-icon" />
+          <p>Processing / Execution Tests</p>
+        </app-tile>
+      </router-link>
     </div>
   </div>
 </template>
@@ -16,8 +23,8 @@ import { AppTile } from '../appComponents/appComponents.js';
 
 // Fontawesome.
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faStopwatch } from '@fortawesome/free-solid-svg-icons';
-library.add(faStopwatch);
+import { faStopwatch, faTasks } from '@fortawesome/free-solid-svg-icons';
+library.add(faStopwatch, faTasks);
 
 export default {
   name: 'Tests',
