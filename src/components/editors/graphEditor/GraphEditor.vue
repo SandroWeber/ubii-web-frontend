@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="overflow: scroll">
   <Error :alert="trigger" :msg="msg"/>
   <div class="header-editor">
     <span style="padding-right: 5px;">Sessions:</span>
@@ -11,79 +11,87 @@
       :multiple="false" 
       placeholder="Sessions..."/>
   </div>
-  <div>
+  <div align="center" class="button-editor">
     <b-button @click="playGraph()" variant="outline-primary" style="margin: 2px;">Play</b-button>
     <b-button @click="stopGraph()" variant="outline-primary" style="margin: 2px;">Stop</b-button>
   </div>
-  <b-row no-gutters class="flex-nowrap">
-    <b-col cols="5">
-      <b-tabs content-class="mt-3">
-        <b-tab title="Clients" active>
-          <b-list-group>
-            <b-list-group-item>Add Clients to the Graph.</b-list-group-item>
-            <b-list-group-item v-for="clientDev in addClientsList" :key="clientDev.id">
-              <b-card
-                title="Client.Device.Name"
-              >
-              <b-card-text>{{clientDev.id}}.{{clientDev.name}}</b-card-text>
-              <div >
-                <b-button @click="addClientToGraph(clientDev)" variant="outline-primary" style="margin: 2px;">Add Client to the Graph</b-button>
-                <b-button @click="removeClientNode(clientDev)" variant="outline-primary" style="margin: 2px;">Remove Client from the Graph</b-button>
-              </div>
-              </b-card>
-            </b-list-group-item>
-          </b-list-group>
-        </b-tab>
-        <b-tab title="Processing Modules">
-          <b-list-group>
-            <b-list-group-item>Add Processing Modules to the Graph.</b-list-group-item>
-            <b-list-group-item v-for="proc in addProcsList" :key="proc.id">
-              <b-card
-                title="Processing Module Name"
-              >
-              <b-card-text>{{proc.id}}.{{proc.name}}</b-card-text>
-              <div >
-                <b-button @click="addProcToGraph(proc)" variant="outline-primary" style="margin: 2px;">Add PM the Graph</b-button>
-                <b-button @click="removeProcNode(proc)" variant="outline-primary" style="margin: 2px;">Remove PM from the Graph</b-button>
-              </div>
-              </b-card>
-            </b-list-group-item>
-          </b-list-group>
-        </b-tab>
-        <b-tab title="Debug">
-          <b-container class="debug-row">
-            <b-row id="dIn" ref="DebugInputs" class="flex-nowrap justify-left" style="border: 1px solid; overflow: auto; padding: 1em"> 
-            </b-row>
-            <b-row id="dOut" ref="DebugOutputs" class="flex-nowrap justify-left" style="border: 1px solid; overflow: auto; padding: 1em"> 
-            </b-row>
-            <b-row style="border: 1px solid">
-              <b-col v-if="debug.func">
-                <div>
-                  <b-card
-                    tag="article"
-                    style="width: 100%; max-height: 20rem;"
-                  >
-                    <b-card-text style="font-size: small;">
-                      function
-                    </b-card-text>
-                    <b-form-textarea
-                      id="textarea-auto-height"
-                      rows="3"
-                      max-rows="8"
-                      v-model="debug.func"
-                      overflow-x:scroll
-                    ></b-form-textarea>
-                  </b-card>
+  <div align="center">
+    <b-row no-gutters class="flex-nowrap" align="center">
+      <b-col cols="5">
+        <b-tabs content-class="mt-3" class="ubii-graph-tabs">
+          <b-tab title="Clients" active>
+            <b-list-group>
+              <b-list-group-item variant="dark">Add Clients to the Graph.</b-list-group-item>
+              <b-list-group-item variant="dark" v-for="clientDev in addClientsList" :key="clientDev.id">
+                <b-card
+                  title="Client.Device.Name"
+                  bg-variant="dark" 
+                  text-variant="white"
+                >
+                <b-card-text>{{clientDev.id}}.{{clientDev.name}}</b-card-text>
+                <div >
+                  <b-button @click="addClientToGraph(clientDev)" variant="outline-primary" style="margin: 2px;">Add Client to the Graph</b-button>
+                  <b-button @click="removeClientNode(clientDev)" variant="outline-primary" style="margin: 2px;">Remove Client from the Graph</b-button>
                 </div>
-              </b-col>
-            </b-row>
-          </b-container>
-        </b-tab>
-      </b-tabs>
-    </b-col><b-col>
-    <canvas id="canvas" class='litegraph' width='1024' height='720' style='border: 1px solid;'></canvas>
-    </b-col>
-  </b-row>
+                </b-card>
+              </b-list-group-item>
+            </b-list-group>
+          </b-tab>
+          <b-tab title="Processing Modules">
+            <b-list-group>
+              <b-list-group-item variant="dark">Add Processing Modules to the Graph.</b-list-group-item>
+              <b-list-group-item variant="dark" v-for="proc in addProcsList" :key="proc.id">
+                <b-card
+                  title="Processing Module Name"
+                  bg-variant="dark" 
+                  text-variant="white"
+                >
+                <b-card-text>{{proc.id}}.{{proc.name}}</b-card-text>
+                <div >
+                  <b-button @click="addProcToGraph(proc)" variant="outline-primary" style="margin: 2px;">Add PM the Graph</b-button>
+                  <b-button @click="removeProcNode(proc)" variant="outline-primary" style="margin: 2px;">Remove PM from the Graph</b-button>
+                </div>
+                </b-card>
+              </b-list-group-item>
+            </b-list-group>
+          </b-tab>
+          <b-tab title="Debug">
+            <b-container class="debug-row">
+              <b-row id="dIn" ref="DebugInputs" class="flex-nowrap justify-left" style="border: 1px solid; overflow: auto; padding: 1em"> 
+              </b-row>
+              <b-row id="dOut" ref="DebugOutputs" class="flex-nowrap justify-left" style="border: 1px solid; overflow: auto; padding: 1em"> 
+              </b-row>
+              <b-row style="border: 1px solid">
+                <b-col v-if="debug.func">
+                  <div style="padding: 0.5em 0.5em 0.5em">
+                    <b-card
+                      tag="article"
+                      style="width: 100%; max-height: 20rem;"
+                      bg-variant="dark" 
+                      text-variant="white"
+                    >
+                      <b-card-text style="font-size: small;">
+                        function
+                      </b-card-text>
+                      <b-form-textarea
+                        id="textarea-auto-height"
+                        rows="3"
+                        max-rows="8"
+                        v-model="debug.func"
+                        overflow-x:scroll
+                      ></b-form-textarea>
+                    </b-card>
+                  </div>
+                </b-col>
+              </b-row>
+            </b-container>
+          </b-tab>
+        </b-tabs>
+      </b-col><b-col>
+      <canvas id="canvas" class='litegraph' width='1024' height='720' style='border: 1px solid;'></canvas>
+      </b-col>
+    </b-row>
+  </div>
   </div>
 </template>
 <script>
@@ -774,4 +782,9 @@ export default {
     align-items: center;
   }
 
+  .button-editor {
+    border: 1px solid;
+    padding: 5px;
+    justify-content: center;
+  }
 </style>

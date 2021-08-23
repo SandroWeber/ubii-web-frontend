@@ -1,7 +1,9 @@
 <template>
     <div :id="cardId" style="padding: 0.5em 0.5em 0.5em">
         <b-card
-        tag="article"
+            tag="article"
+            bg-variant="dark" 
+            text-variant="white"
         >
         <b-card-text style="font-size: small;">
             {{name}}
