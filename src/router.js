@@ -74,7 +74,7 @@ export default new Router({
     {
       path: '/tools',
       name: 'Tools',
-      component: () => import('./components/Tools.vue')
+      component: () => import('./components/tools/Tools.vue')
     },
     {
       path: '/tools/topic-inspector',
@@ -85,11 +85,6 @@ export default new Router({
       path: '/tools/client-inspector',
       name: 'Client Inspector',
       component: () => import('./components/tools/clientInspector/ClientDeviceComponentInspector.vue')
-    },
-    {
-      path: '/tools/performance_tests',
-      name: 'Tool - Performance Tests',
-      component: () => import('./components/tools/tests/PerformanceTests.vue')
     },
     {
       path: '/tools/qrcode_display',
@@ -199,6 +194,17 @@ export default new Router({
       name: 'Rock Paper Scissors',
       component: () =>
         import('./components/applications/misc/RockPaperScissors.vue')
+    },
+    /* tests */
+    {
+      path: '/tests',
+      name: 'Tests',
+      component: () => import('./components/tests/Tests.vue')
+    },
+    {
+      path: '/tests/performance_tests',
+      name: 'Tool - Performance Tests',
+      component: () => import('./components/tests/PerformanceTests.vue')
     }
   ]
 });

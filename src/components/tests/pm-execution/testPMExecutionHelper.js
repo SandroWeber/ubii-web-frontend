@@ -1,4 +1,5 @@
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
+import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 class PMTestExecutionTriggerOnInput {
   static NAME_IN_DOUBLE = 'inDouble';

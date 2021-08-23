@@ -67,7 +67,12 @@ export default {
   beforeDestroy: function() {
     this.stopTest();
   },
-  methods: {}
+  methods: {
+    startTest: function() {
+      this.test = new TestPMExecutionHelper();
+      this.test.startTest(this.nodeId);
+    }
+  }
 };
 </script>
 

@@ -10,15 +10,8 @@
 
       <router-link to="/tools/client-inspector" class="tile-menu-item" tag="div">
         <app-tile class="layer-three background round shadow orange-accent">
-          <font-awesome-icon icon="eye" class="tile-menu-icon" />
+          <font-awesome-icon icon="sitemap" class="tile-menu-icon" />
           <p>Client, Device & Component Inspector</p>
-        </app-tile>
-      </router-link>
-
-      <router-link to="/tools/performance_tests" class="tile-menu-item" tag="div">
-        <app-tile class="layer-three background round shadow orange-accent">
-          <font-awesome-icon icon="stopwatch" class="tile-menu-icon" />
-          <p>Performance Tests</p>
         </app-tile>
       </router-link>
 
@@ -40,17 +33,12 @@
 </template>
 
 <script>
-import { AppTile } from './appComponents/appComponents.js';
+import { AppTile } from '../appComponents/appComponents.js';
 
 // Fontawesome.
 import { library } from '@fortawesome/fontawesome-svg-core';
-import {
-  faEye,
-  faStopwatch,
-  faQrcode,
-  faPaperPlane
-} from '@fortawesome/free-solid-svg-icons';
-library.add(faEye, faStopwatch, faQrcode, faPaperPlane);
+import { faEye, faSitemap, faStopwatch, faQrcode, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+library.add(faEye, faSitemap, faStopwatch, faQrcode, faPaperPlane);
 
 export default {
   name: 'Tools',
@@ -62,6 +50,5 @@ export default {
 
 <style scoped lang="stylus">
 
-@import '../styles/tile-menu';
-
+@import '../../styles/tile-menu';
 </style>
