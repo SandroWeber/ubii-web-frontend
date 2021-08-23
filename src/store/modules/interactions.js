@@ -15,7 +15,7 @@ const backendData = {
         context.commit('clearAll');
 
         // Get the list with all local interactions from the server...
-        let replyLocalDB = await UbiiClientService.client.callService({
+        let replyLocalDB = await UbiiClientService.instance.callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_LOCAL_GET_LIST
         });
         replyLocalDB.interactionList &&
@@ -34,7 +34,7 @@ const backendData = {
           });
 
         // Get the list with all online interactions from the server...
-        let replyOnlineDB = await UbiiClientService.client.callService({
+        let replyOnlineDB = await UbiiClientService.instance.callService({
           topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_ONLINE_GET_LIST
         });
         replyOnlineDB.interactionList &&
@@ -62,7 +62,7 @@ const backendData = {
     return await new Promise(async (resolve, reject) => {
       try {
         // register new interaction at the backend
-        await UbiiClientService.client
+        await UbiiClientService.instance
           .callService({
             topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_SAVE,
             interaction: interaction
@@ -88,7 +88,7 @@ const backendData = {
     return await new Promise(async (resolve, reject) => {
       try {
         // delete interaction at the backend
-        await UbiiClientService.client
+        await UbiiClientService.instance
           .callService({
             topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_DELETE,
             interaction: interaction
@@ -113,7 +113,7 @@ const backendData = {
   update: async function(context, interaction) {
     return await new Promise(async (resolve, reject) => {
       try {
-        await UbiiClientService.client
+        await UbiiClientService.instance
           .callService({
             topic: DEFAULT_TOPICS.SERVICES.INTERACTION_DATABASE_SAVE,
             interaction: interaction

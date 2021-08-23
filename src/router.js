@@ -43,7 +43,7 @@ export default new Router({
     {
       path: '/interfaces/smart-device',
       name: 'Interface - Smart Device',
-      component: () => import('./components/interfaces/SmartDevice.vue')
+      component: () => import('./components/interfaces/smart-device/SmartDevice.vue')
     },
     {
       path: '/interfaces/myo',
@@ -79,17 +79,27 @@ export default new Router({
     {
       path: '/tools/topic-inspector',
       name: 'Topic Inspector',
-      component: () => import('./components/tools/ServiceTopicInspector.vue')
+      component: () => import('./components/tools/serviceTopicInspector/ServiceTopicInspector.vue')
+    },
+    {
+      path: '/tools/client-inspector',
+      name: 'Client Inspector',
+      component: () => import('./components/tools/clientInspector/ClientDeviceComponentInspector.vue')
     },
     {
       path: '/tools/performance_tests',
       name: 'Tool - Performance Tests',
-      component: () => import('./components/tools/PerformanceTests.vue')
+      component: () => import('./components/tools/tests/PerformanceTests.vue')
     },
     {
       path: '/tools/qrcode_display',
       name: 'Tool - QR Code Display',
       component: () => import('./components/tools/QRCodeDisplay.vue')
+    },
+    {
+      path: '/tools/topic-publisher',
+      name: 'Tool - Topic Publisher',
+      component: () => import('./components/tools/TopicPublisher.vue')
     },
     /* applications */
     {
@@ -142,6 +152,14 @@ export default new Router({
       component: () =>
         import(
           './components/applications/examples/ExampleWebInterfaceSmartDevices.vue'
+        )
+    },
+    {
+      path: '/applications/examples/model-viewer',
+      name: 'Example - Model Viewer',
+      component: () =>
+        import(
+          './components/applications/examples/model-viewer/ExampleModelViewer.vue'
         )
     },
     {

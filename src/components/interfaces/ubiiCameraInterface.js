@@ -36,7 +36,7 @@ export default class UbiiCameraInterface {
         const track = mediaStream.getVideoTracks()[0];
         this.imageCapture = new ImageCapture(track);
 
-        UbiiClientService.waitForConnection().then(() => {
+        UbiiClientService.instance.waitForConnection().then(() => {
           let continuousPublishing = async () => {
             let imageBitmap = await this.grabFrame();
             this.publishFrame(imageBitmap);
@@ -48,8 +48,7 @@ export default class UbiiCameraInterface {
           continuousPublishing();
         });
       })
-      // eslint-disable-next-line no-console
-      .catch(error => console.log(error));
+      .catch(error => console.error(error));
   }
 
   stop() {
@@ -60,8 +59,7 @@ export default class UbiiCameraInterface {
   async grabFrame() {
     let imageBitmap = await this.imageCapture
       .grabFrame()
-      // eslint-disable-next-line no-console
-      .catch(error => console.log(error));
+      .catch(error => console.error(error));
     return imageBitmap;
   }
 
@@ -96,9 +94,9 @@ export default class UbiiCameraInterface {
       });
     }
 
-    UbiiClientService.publishRecord({
+    UbiiClientService.instance.publishRecord({
       topic: this.topic,
-      timestamp: UbiiClientService.generateTimestamp(),
+      timestamp: UbiiClientService.instance.generateTimestamp(),
       image2D: {
         width: imageBuffer.width,
         height: imageBuffer.height,

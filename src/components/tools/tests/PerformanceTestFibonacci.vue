@@ -5,7 +5,7 @@
     <app-button
       class="start-button"
       @click="startTest()"
-      :disabled="!ubiiClientService.isConnected()"
+      :disabled="!ubiiConnected"
     >
       <font-awesome-icon
         icon="play"
@@ -76,6 +76,15 @@
         :type="'test duration'"
         v-model="testData.settings.testDurationSeconds"
       />
+
+      <label for="fibonacci-session-count" class="setting-label"
+        >run on node:</label
+      >
+      <app-input
+        :id="'fibonacci-session-count'"
+        :type="'# sessions'"
+        v-model="testData.settings.nodeId"
+      />
     </div>
   </div>
 </template>
@@ -88,8 +97,8 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faPlay, faSpinner } from '@fortawesome/free-solid-svg-icons';
 library.add(faPlay, faSpinner);
 
-import { AppInput, AppButton } from '../appComponents/appComponents.js';
-import PerformanceTestFibonacciHelper from './tests/performanceTestFibonacciHelper';
+import { AppInput, AppButton } from '../../appComponents/appComponents';
+import PerformanceTestFibonacciHelper from './performanceTestFibonacciHelper';
 
 export default {
   name: 'PerformanceTest-FibonacciProcessing',
@@ -97,18 +106,31 @@ export default {
     AppInput: AppInput,
     AppButton: AppButton
   },
-  mounted: function() {
+  mounted: async function() {
     // unsubscribe before page is unloaded
     window.addEventListener('beforeunload', () => {
       this.stopTest();
     });
+
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, () => {
+      this.ubiiConnected = true;
+      this.testData.settings.nodeId = UbiiClientService.instance.client.serverSpecification.id;
+    });
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, () => {
+      this.ubiiConnected = false;
+      this.testData.settings.nodeId = undefined;
+    });
+
+    await UbiiClientService.instance.waitForConnection();
+    this.ubiiConnected = UbiiClientService.instance.isConnected();
+    this.testData.settings.nodeId = UbiiClientService.instance.client.serverSpecification.id;
   },
   beforeDestroy: function() {
     this.stopTest();
   },
   data: () => {
     return {
-      ubiiClientService: UbiiClientService,
+      ubiiConnected: false,
       testRunning: false,
       testData: {
         status: 'unmeasured',
@@ -117,7 +139,8 @@ export default {
           sessionCount: '1',
           pmCountPerSession: '5',
           fibSequenceLength: '999999',
-          testDurationSeconds: '5'
+          testDurationSeconds: '5',
+          nodeId: 'unset'
         },
         statistics: {
           processingIterations: 'N/A',
@@ -140,7 +163,8 @@ export default {
       // create all the specs for sessions and processing modules
       this.testData.allSessionsSpecs = PerformanceTestFibonacciHelper.createTestSpecs(
         this.testData.settings.sessionCount,
-        this.testData.settings.pmCountPerSession
+        this.testData.settings.pmCountPerSession,
+        this.testData.settings.nodeId
       );
 
       this.testData.allSessionsSpecs.forEach(sessionSpec => {
@@ -152,8 +176,8 @@ export default {
                 PerformanceTestFibonacciHelper.SEQENCE_LENGTH_INPUT_SUFFIX
               ) !== -1
             ) {
-              UbiiClientService.publishRecord({
-                topic: inputMapping.topicSource,
+              UbiiClientService.instance.publishRecord({
+                topic: inputMapping.topic,
                 double: parseFloat(this.testData.settings.fibSequenceLength)
               });
             }
@@ -166,8 +190,8 @@ export default {
                 PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX
               ) !== -1
             ) {
-              let subscriptionTopic = outputMapping.topicDestination;
-              UbiiClientService.subscribeTopic(
+              let subscriptionTopic = outputMapping.topic;
+              UbiiClientService.instance.subscribeTopic(
                 subscriptionTopic,
                 this.onProcessingFinishedCallback
               );
@@ -181,7 +205,7 @@ export default {
 
       let sessionSpecs = [];
       this.testData.allSessionsSpecs.forEach(session => {
-        UbiiClientService.client
+        UbiiClientService.instance
           .callService({
             topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
             session: session
@@ -207,7 +231,7 @@ export default {
       this.testData.status = 'done';
       this.testData.statistics.stopTime = Date.now();
       this.testData.allSessionsSpecs.forEach(session => {
-        UbiiClientService.client.callService({
+        UbiiClientService.instance.callService({
           topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: session
         });
@@ -232,8 +256,8 @@ export default {
                 PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX
               ) !== -1
             ) {
-              let subscriptionTopic = outputMapping.topicDestination;
-              UbiiClientService.unsubscribeTopic(
+              let subscriptionTopic = outputMapping.topic;
+              UbiiClientService.instance.unsubscribeTopic(
                 subscriptionTopic,
                 this.onProcessingFinishedCallback
               );
@@ -297,7 +321,7 @@ export default {
   display: grid;
   grid-gap: 15px;
   grid-template-columns: 200px 100px 200px 100px;
-  grid-template-rows: 25px 25px;
+  grid-template-rows: 25px 25px 25px;
 }
 
 .test-title {

@@ -43,14 +43,14 @@ export default {
     ServiceViewer
   },
   mounted: function() {
-    UbiiClientService.waitForConnection().then(() => {
+    UbiiClientService.instance.waitForConnection().then(() => {
       this.getTopicList();
       this.getServiceList();
     });
     this.open = true;
   },
   beforeDestroy: function() {
-    UbiiClientService.unsubscribeRegex(
+    UbiiClientService.instance.unsubscribeRegex(
       this.regexAllTopics,
       this.handleTopicData
     );
@@ -58,7 +58,7 @@ export default {
   },
   data: () => {
     return {
-      ubiiClientService: UbiiClientService,
+      ubiiClientService: UbiiClientService.instance,
       serviceList: [],
       serviceTopicList: [],
       topicData: {},
@@ -67,7 +67,7 @@ export default {
   },
   methods: {
     getTopicList: function() {
-      UbiiClientService.callService({
+      UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST
       }).then(reply => {
         let topics = reply.stringList.elements;
@@ -76,7 +76,7 @@ export default {
         });
       });
 
-      UbiiClientService.subscribeRegex(
+      UbiiClientService.instance.subscribeRegex(
         this.regexAllTopics,
         this.handleTopicData
       );
@@ -85,7 +85,7 @@ export default {
       Vue.set(this.topicData, topic, util.inspect(data));
     },
     getServiceList: function() {
-      UbiiClientService.callService({
+      UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.SERVICE_LIST
       }).then(reply => {
         let services = reply.serviceList.elements;
@@ -124,6 +124,7 @@ export default {
 .category-content {
   overflow: auto;
 }
+
 .list-element {
   padding-bottom: 3px;
 }

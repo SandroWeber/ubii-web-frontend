@@ -37,13 +37,16 @@ export default {
     PageHeader
   },
   mounted: () => {
-    UbiiClientService.connect();
+    let useHTTPS = window.location.protocol.includes('https');
+    UbiiClientService.instance.setHTTPS(useHTTPS);
+    UbiiClientService.instance.setName('Ubi-Interact Web Frontend');
+    UbiiClientService.instance.connect();
     window.addEventListener('beforeunload', () => {
-      UbiiClientService.disconnect();
+      UbiiClientService.instance.disconnect();
     });
   },
   beforeDestroy: function() {
-    UbiiClientService.disconnect();
+    UbiiClientService.instance.disconnect();
   }
 };
 </script>
@@ -113,5 +116,9 @@ html, body {
 
 .svg-inline--fa {
   vertical-align: 0;
+}
+
+a {
+  color: purpleAccentColor;
 }
 </style>

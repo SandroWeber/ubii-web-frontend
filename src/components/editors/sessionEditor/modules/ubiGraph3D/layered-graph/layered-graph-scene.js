@@ -130,10 +130,6 @@ export class LayeredGraphScene {
     throw new Error('Cannot call abstract method');
   }
 
-  moveTo() {
-    throw new Error('Cannot call abstract method');
-  }
-
   drag() {
     throw new Error('Cannot call abstract method');
   }
@@ -330,17 +326,21 @@ export class LayeredGraphScene {
 
     let distance = this.steps * this.stepSize; //how far the layer extends in x and y direction
 
-    let geometry = new THREE.Geometry();
-
-    //corner points of the 2d layer geometry (plane) for fullPlane
-    geometry.vertices.push(
-      new THREE.Vector3(distance, distance, 0),
-      new THREE.Vector3(distance, -distance, 0),
-      new THREE.Vector3(-distance, -distance, 0),
-      new THREE.Vector3(-distance, distance, 0)
-    );
-
-    geometry.faces.push(new THREE.Face3(0, 1, 2), new THREE.Face3(0, 2, 3));
+    let geometry = new THREE.BufferGeometry();
+    // corner points of the 2d layer geometry (plane) for fullPlane
+    const vertices = new Float32Array([
+      -distance, distance, 0,
+      distance, -distance, 0,
+      -distance, -distance, 0,
+      -distance, distance, 0
+    ]);
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+    // faces
+    const indices = [
+      0, 1, 2,
+      0, 2, 3
+    ];
+    geometry.setIndex( indices );
 
     //the fullPlane is inivisble and is used for mouse ray cast while dragging when the layers are set to slim
     //this is needed so that a node can be dragged "out of" the slim layer and is not restricted by it
@@ -458,17 +458,21 @@ export class LayeredGraphScene {
    */
   createLayerPlane(color) {
     let distance = this.steps * this.stepSize;
-    let geometry = new THREE.Geometry();
-
+    let geometry = new THREE.BufferGeometry();
     //corner points of the 2d layer geometry (plane)
-    geometry.vertices.push(
-      new THREE.Vector3(distance, distance, 0),
-      new THREE.Vector3(distance, -distance, 0),
-      new THREE.Vector3(-distance, -distance, 0),
-      new THREE.Vector3(-distance, distance, 0)
-    );
-
-    geometry.faces.push(new THREE.Face3(0, 1, 2), new THREE.Face3(0, 2, 3));
+    const vertices = new Float32Array([
+      distance, distance, 0,
+      distance, -distance, 0,
+      -distance, -distance, 0,
+      -distance, distance, 0
+    ]);
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+    // faces
+    const indices = [
+      0, 1, 2,
+      0, 2, 3
+    ];
+    geometry.setIndex( indices );
 
     let plane = new THREE.Mesh(
       geometry,
@@ -512,36 +516,40 @@ export class LayeredGraphScene {
     let lineMat = new THREE.LineBasicMaterial({
       color: color
     });
-    let geometry = new THREE.Geometry();
+    let geometry = new THREE.BufferGeometry();
     //top line (1st point: top left; 2nd point: top right)
-    geometry.vertices.push(
-      new THREE.Vector3(-distance, distance, 0),
-      new THREE.Vector3(distance, distance, 0)
-    );
+    let vertices = new Float32Array([
+      -distance, distance, 0,
+      distance, distance, 0
+    ]);
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
     border.push(new THREE.Line(geometry, lineMat));
 
-    geometry = new THREE.Geometry();
+    geometry = new THREE.BufferGeometry();
     //right line (1st point: top right; 2nd point: bottom right)
-    geometry.vertices.push(
-      new THREE.Vector3(distance, distance, 0),
-      new THREE.Vector3(distance, -distance, 0)
-    );
+    vertices = new Float32Array([
+      distance, distance, 0,
+      distance, -distance, 0
+    ]);
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
     border.push(new THREE.Line(geometry, lineMat));
 
-    geometry = new THREE.Geometry();
+    geometry = new THREE.BufferGeometry();
     //bottom line (1st point: bottom right; 2nd point: bottom left)
-    geometry.vertices.push(
-      new THREE.Vector3(distance, -distance, 0),
-      new THREE.Vector3(-distance, -distance, 0)
-    );
+    vertices = new Float32Array([
+      distance, -distance, 0,
+      -distance, -distance, 0
+    ]);
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
     border.push(new THREE.Line(geometry, lineMat));
 
-    geometry = new THREE.Geometry();
+    geometry = new THREE.BufferGeometry();
     //left line (1st point: bottom left; 2nd point: top left)
-    geometry.vertices.push(
-      new THREE.Vector3(-distance, -distance, 0),
-      new THREE.Vector3(-distance, distance, 0)
-    );
+    vertices = new Float32Array([
+      -distance, -distance, 0,
+      -distance, distance, 0
+    ]);
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
     border.push(new THREE.Line(geometry, lineMat));
     border.forEach(el => this.scene.add(el));
     return border;
@@ -579,23 +587,25 @@ export class LayeredGraphScene {
 
     //First all vertical lines get created (1st point of line always upper one, 2nd point of line always lower one)
 
-    let geometry = new THREE.Geometry();
+    let geometry = new THREE.BufferGeometry();
     //1st the center vertical line (x-coord = 0)
-    geometry.vertices.push(
-      new THREE.Vector3(0, dimensions.y[0], 0),
-      new THREE.Vector3(0, dimensions.y[1], 0)
-    );
+    let vertices = new Float32Array([
+      0, dimensions.y[0], 0,
+      0, dimensions.y[1], 0
+    ]);
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
     line = new THREE.Line(geometry, lineMat);
     line.userData.vertical = true;
     grid.push(line);
 
     //all lines to the "right" of center line (positive x-coordinate)
     for (let i = this.stepSize; i < this.steps; i += this.stepSize) {
-      geometry = new THREE.Geometry();
-      geometry.vertices.push(
-        new THREE.Vector3(i, dimensions.y[0], 0),
-        new THREE.Vector3(i, dimensions.y[1], 0)
-      );
+      geometry = new THREE.BufferGeometry();
+      const vertices = new Float32Array([
+        i, dimensions.y[0], 0,
+        i, dimensions.y[1], 0
+      ]);
+      geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
       line = new THREE.Line(geometry, lineMat);
       line.userData.vertical = true;
       grid.push(line);
@@ -603,11 +613,12 @@ export class LayeredGraphScene {
 
     //all lines to the "left" of center line (negative x-coordinate)
     for (let i = distance - this.stepSize; i > 0; i -= this.stepSize) {
-      geometry = new THREE.Geometry();
-      geometry.vertices.push(
-        new THREE.Vector3(-i, dimensions.y[0], 0),
-        new THREE.Vector3(-i, dimensions.y[1], 0)
-      );
+      geometry = new THREE.BufferGeometry();
+      const vertices = new Float32Array([
+        -i, dimensions.y[0], 0,
+        -i, dimensions.y[1], 0
+      ]);
+      geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
       line = new THREE.Line(geometry, lineMat);
       line.userData.vertical = true;
       grid.push(line);
@@ -615,23 +626,25 @@ export class LayeredGraphScene {
 
     //Now all horizontal lines get created
 
-    geometry = new THREE.Geometry();
+    geometry = new THREE.BufferGeometry();
     //1st the center horizontal line (y-coor = 0)
-    geometry.vertices.push(
-      new THREE.Vector3(dimensions.x[0], 0, 0),
-      new THREE.Vector3(dimensions.x[1], 0, 0)
-    );
+    vertices = new Float32Array([
+      dimensions.x[0], 0, 0,
+      dimensions.x[1], 0, 0
+    ]);
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
     line = new THREE.Line(geometry, lineMat);
     line.userData.vertical = false;
     grid.push(line);
 
     //all lines to the "top" of center line (positive y-coordinate)
     for (let i = this.stepSize; i < this.steps; i += this.stepSize) {
-      geometry = new THREE.Geometry();
-      geometry.vertices.push(
-        new THREE.Vector3(dimensions.x[0], i, 0),
-        new THREE.Vector3(dimensions.x[1], i, 0)
-      );
+      geometry = new THREE.BufferGeometry();
+      const vertices = new Float32Array([
+        dimensions.x[0], i, 0,
+        dimensions.x[1], i, 0
+      ]);
+      geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
       line = new THREE.Line(geometry, lineMat);
       line.userData.vertical = false;
       grid.push(line);
@@ -639,11 +652,12 @@ export class LayeredGraphScene {
 
     //all lines to the "bottom" of center line (negative y-coordinate)
     for (let i = distance - this.stepSize; i > 0; i -= this.stepSize) {
-      geometry = new THREE.Geometry();
-      geometry.vertices.push(
-        new THREE.Vector3(dimensions.x[0], -i, 0),
-        new THREE.Vector3(dimensions.x[1], -i, 0)
-      );
+      geometry = new THREE.BufferGeometry();
+      const vertices = new Float32Array([
+        dimensions.x[0], -i, 0,
+        dimensions.x[1], -i, 0
+      ]);
+      geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
       line = new THREE.Line(geometry, lineMat);
       line.userData.vertical = false;
       grid.push(line);
@@ -718,7 +732,6 @@ export class LayeredGraphScene {
    * Applies dimensions to a layer, either full size of slim size calculated by calculateLayerDimensions()
    */
   setLayerDimensions(layer) {
-    let distance = this.steps * this.stepSize;
     let s = this.structure.find(el => el.id == layer);
     let g = s.plane.p.geometry;
     let bs = s.plane.b;
@@ -786,7 +799,6 @@ export class LayeredGraphScene {
     if (this.focusedLayer == '') {
       //If no layer is yet focused show only the from the param
       this.focusedLayer = layer;
-      let s = this.structure.find(el => el.id == layer);
       let temp, temp2;
 
       //Hide all other layers and also disable the container labels on top of visualization in graph view
@@ -866,27 +878,30 @@ export class LayeredGraphScene {
     });
 
     //Line on x-axis
-    let geometry = new THREE.Geometry();
-    geometry.vertices.push(
-      new THREE.Vector3(-0.5, 0, 0),
-      new THREE.Vector3(0.5, 0, 0)
-    );
+    let geometry = new THREE.BufferGeometry();
+    let vertices = new Float32Array([
+      -0.5, 0, 0,
+      0.5, 0, 0
+    ]);
+    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     this.zero.line1 = new THREE.Line(geometry, lineMat);
 
     //Line on y-axis
-    geometry = new THREE.Geometry();
-    geometry.vertices.push(
-      new THREE.Vector3(0, 0.5, 0),
-      new THREE.Vector3(0, -0.5, 0)
-    );
+    geometry = new THREE.BufferGeometry();
+    vertices = new Float32Array([
+      0, 0.5, 0,
+      0, -0.5, 0
+    ]);
+    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     this.zero.line2 = new THREE.Line(geometry, lineMat);
 
     //Line on z-axis
-    geometry = new THREE.Geometry();
-    geometry.vertices.push(
-      new THREE.Vector3(0, 0, -0.5),
-      new THREE.Vector3(0, 0, 0.5)
-    );
+    geometry = new THREE.BufferGeometry();
+    vertices = new Float32Array([
+      0, 0, -0.5,
+      0, 0, 0.5
+    ]);
+    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     this.zero.line3 = new THREE.Line(geometry, lineMat);
 
     this.scene.add(this.zero.circle);
@@ -1178,7 +1193,7 @@ export class LayeredGraphScene {
   }
 
   update(mouse) {
-    let obj, node;
+    let obj;
     this.raycaster.setFromCamera(mouse, this.camera);
     this.intersects = this.raycaster.intersectObjects(this.meshes);
 

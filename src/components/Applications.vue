@@ -1,56 +1,56 @@
 <template>
-  <div>
-    <div class="category">
-      <div class="seperator">
-        <span class="label">Visualization</span>
+  <div class="wrapper-applications">
+    <div class="tile-menu-category">
+      <div class="tile-menu-category-seperator">
+        <span class="tile-menu-category-seperator-label">Visualization</span>
       </div>
-      <div class="grid">
+      <div class="tile-menu-list">
         <router-link
           to="/applications/visualization/3d_pose_visualizer"
-          class="interface-link"
+          class="tile-menu-item"
           tag="div"
         >
-          <app-tile class="layer-three background round shadow purple-accent">
-            <font-awesome-icon icon="cubes" class="interface-icon" />
+          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
+            <font-awesome-icon icon="cubes" class="tile-menu-icon" />
             <p>3D Pose Visualizer</p>
           </app-tile>
         </router-link>
       </div>
 
-      <div class="seperator">
-        <span class="label">Tutorials, Learning Examples</span>
+      <div class="tile-menu-category-seperator">
+        <span class="tile-menu-category-seperator-label">Tutorials, Learning Examples</span>
       </div>
 
-      <div class="grid">
+      <div class="tile-menu-list">
         <router-link
           to="/applications/examples/mouse-pointer"
-          class="interface-link"
+          class="tile-menu-item"
           tag="div"
         >
-          <app-tile class="layer-three background round shadow purple-accent">
-            <font-awesome-icon icon="mouse-pointer" class="interface-icon" />
+          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
+            <font-awesome-icon icon="mouse-pointer" class="tile-menu-icon" />
             <p>Mouse Demo</p>
           </app-tile>
         </router-link>
 
         <router-link
           to="/applications/examples/threejs"
-          class="interface-link"
+          class="tile-menu-item"
           tag="div"
         >
-          <app-tile class="layer-three background round shadow purple-accent">
-            <font-awesome-icon icon="cube" class="interface-icon" />
+          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
+            <font-awesome-icon icon="cube" class="tile-menu-icon" />
             <p>Three.js Web Rendering</p>
           </app-tile>
         </router-link>
 
         <router-link
           to="/applications/examples/threejs-webvr"
-          class="interface-link"
+          class="tile-menu-item"
           tag="div"
         >
-          <app-tile class="layer-three background round shadow purple-accent">
-            <font-awesome-icon icon="vr-cardboard" class="interface-icon" />
+          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
+            <font-awesome-icon icon="vr-cardboard" class="tile-menu-icon" />
             <p>Three.js WebVR Rendering</p>
           </app-tile>
         </router-link>
@@ -69,108 +69,119 @@
 
         <router-link
           to="/applications/examples/aframe"
-          class="interface-link"
+          class="tile-menu-item"
           tag="div"
         >
-          <app-tile class="layer-three background round shadow purple-accent">
-            <font-awesome-icon icon="vr-cardboard" class="interface-icon" />
+          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
+            <font-awesome-icon icon="vr-cardboard" class="tile-menu-icon" />
             <p>A-Frame</p>
           </app-tile>
         </router-link>
 
         <router-link
           to="/applications/examples/gatherer-web-interface-smart-devices"
-          class="interface-link"
+          class="tile-menu-item"
           tag="div"
         >
-          <app-tile class="layer-three background round shadow purple-accent">
-            <font-awesome-icon icon="tablet-alt" class="interface-icon" />
-            <p>Gatherer - Interface Smart Devices</p>
+          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
+            <font-awesome-icon icon="tablet-alt" class="tile-menu-icon" />
+            <p>Interface Smart Device Playground</p>
+          </app-tile>
+        </router-link>
+
+        <router-link
+          to="/applications/examples/model-viewer"
+          class="tile-menu-item"
+          tag="div"
+        >
+          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
+            <font-awesome-icon icon="cubes" class="tile-menu-icon" />
+            <p>Model Viewer</p>
           </app-tile>
         </router-link>
 
         <router-link
           to="/applications/examples/opencv"
-          class="interface-link"
+          class="tile-menu-item"
           tag="div"
         >
-          <app-tile class="layer-three background round shadow purple-accent">
-            <font-awesome-icon icon="eye" class="interface-icon" />
+          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
+            <font-awesome-icon icon="eye" class="tile-menu-icon" />
             <p>OpenCV</p>
           </app-tile>
         </router-link>
 
         <router-link
           to="/applications/examples/image-processing"
-          class="interface-link"
+          class="tile-menu-item"
           tag="div"
         >
-          <app-tile class="layer-three background round shadow purple-accent">
-            <font-awesome-icon icon="camera" class="interface-icon" />
+          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
+            <font-awesome-icon icon="camera" class="tile-menu-icon" />
             <p>Image Processing</p>
           </app-tile>
         </router-link>
       </div>
     </div>
-    <div class="category">
-      <div class="seperator">
-        <span class="label">Smartphone Assisted VR</span>
+    <div class="tile-menu-category">
+      <div class="tile-menu-category-seperator">
+        <span class="tile-menu-category-seperator-label">Smartphone Assisted VR</span>
       </div>
 
-      <div class="grid">
+      <div class="tile-menu-list">
         <router-link
           to="/applications/smartphone-assisted-vr/savr-model-inspector"
-          class="interface-link"
+          class="tile-menu-item"
           tag="div"
         >
-          <app-tile class="layer-three background round shadow purple-accent">
-            <font-awesome-icon icon="cubes" class="interface-icon" />
+          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
+            <font-awesome-icon icon="cubes" class="tile-menu-icon" />
             <p>VR Model Inspector</p>
           </app-tile>
         </router-link>
 
         <router-link
           to="/applications/smartphone-assisted-vr/savr-laser-pointer"
-          class="interface-link"
+          class="tile-menu-item"
           tag="div"
         >
-          <app-tile class="layer-three background round shadow purple-accent">
-            <font-awesome-icon icon="hand-pointer" class="interface-icon" />
+          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
+            <font-awesome-icon icon="hand-pointer" class="tile-menu-icon" />
             <p>VR Laser Pointer</p>
           </app-tile>
         </router-link>
 
         <router-link
           to="/applications/smartphone-assisted-vr/savr-keyboard"
-          class="interface-link"
+          class="tile-menu-item"
           tag="div"
         >
-          <app-tile class="layer-three background round shadow purple-accent">
-            <font-awesome-icon icon="keyboard" class="interface-icon" />
+          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
+            <font-awesome-icon icon="keyboard" class="tile-menu-icon" />
             <p>VR Keyboard</p>
           </app-tile>
         </router-link>
       </div>
     </div>
-    <div class="category">
-      <div class="seperator">
-        <span class="label">Misc</span>
+    <div class="tile-menu-category">
+      <div class="tile-menu-category-seperator">
+        <span class="tile-menu-category-seperator-label">Misc</span>
       </div>
 
-      <div class="grid">
+      <div class="tile-menu-list">
         <router-link
           to="/applications/misc/rock-paper-scissors"
-          class="interface-link"
+          class="tile-menu-item"
           tag="div"
         >
           <app-tile class="layer-three background round shadow purple-accent">
-            <font-awesome-icon icon="hand-scissors" class="interface-icon" />
+            <font-awesome-icon icon="hand-scissors" class="tile-menu-icon" />
             <p>Rock Paper Scissors</p>
           </app-tile>
         </router-link>
       </div>
 
-      <div class="grid"></div>
+      <div class="tile-menu-list"></div>
     </div>
   </div>
 </template>
@@ -216,36 +227,12 @@ export default {
 </script>
 
 <style scoped lang="stylus">
-.grid {
-  display: grid;
-  grid-gap: 15px;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  margin: 25px;
+
+@import '../styles/tile-menu';
+
+.wrapper-applications {
+  overflow: auto;
+  width: 100%;
 }
 
-.interface-link {
-  text-align: center;
-  cursor: pointer;
-}
-
-.interface-icon {
-  width: 50px;
-  height: 50px;
-}
-
-.category {
-  .seperator {
-    border-bottom: solid 1px highContrastColor;
-    height: 10px;
-    line-height: 20px;
-    text-align: left;
-
-    .label {
-      display: inline;
-      padding-left: 15px;
-      padding-right: 20px;
-      background-color: layerOneSecondaryColor;
-    }
-  }
-}
 </style>

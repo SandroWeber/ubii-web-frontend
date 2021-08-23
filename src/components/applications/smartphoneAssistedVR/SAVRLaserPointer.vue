@@ -102,10 +102,10 @@ export default {
       }
     },
     updateSmartDevices: function() {
-      UbiiClientService.client
+      UbiiClientService.instance
         .callService({ topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST })
         .then(reply => {
-          this.$data.topicList = reply.stringList.list;
+          this.$data.topicList = reply.stringList.elements;
 
           this.$data.topicList.forEach(topic => {
             const topicIndex = topic.indexOf('/web-interface-smart-device/');
