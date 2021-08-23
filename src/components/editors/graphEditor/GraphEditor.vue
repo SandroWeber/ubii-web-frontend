@@ -52,34 +52,16 @@
         </b-tab>
         <b-tab title="Debug">
           <b-container class="debug-row">
-            <b-row class="flex-nowrap justify-left" style="border: 1px solid; overflow: auto;"> 
-              <b-col v-for="inputs in debug.active_inputs" :key="inputs.id">
-                <div>
-                  <b-card
-                    tag="article"
-                    style="max-width: 12rem; max-height: 15rem;"
-                  >
-                    <b-card-text style="font-size: small;">
-                      {{inputs.name}}
-                    </b-card-text>
-                    <b-card-text style="font-size: small">
-                      {{inputs.data}}
-                    </b-card-text>
-                    <b-card-text style="font-size: small;">
-                      {{inputs.type}}
-                    </b-card-text>
-
-                    <b-button size="sm" href="#" variant="primary">Go somewhere</b-button>
-                  </b-card>
-                </div>
-              </b-col>
+            <b-row id="dIn" ref="DebugInputs" class="flex-nowrap justify-left" style="border: 1px solid; overflow: auto; padding: 1em"> 
+            </b-row>
+            <b-row id="dOut" ref="DebugOutputs" class="flex-nowrap justify-left" style="border: 1px solid; overflow: auto; padding: 1em"> 
             </b-row>
             <b-row style="border: 1px solid">
               <b-col v-if="debug.func">
                 <div>
                   <b-card
                     tag="article"
-                    style="max-width: 30rem; max-height: 20rem;"
+                    style="width: 100%; max-height: 20rem;"
                   >
                     <b-card-text style="font-size: small;">
                       function
@@ -91,29 +73,6 @@
                       v-model="debug.func"
                       overflow-x:scroll
                     ></b-form-textarea>
-                    <b-button size="sm" href="#" variant="primary">Go somewhere</b-button>
-                  </b-card>
-                </div>
-              </b-col>
-            </b-row>
-            <b-row style="border: 1px solid">
-              <b-col v-for="outputs in debug.active_outputs" :key="outputs.id">
-                <div>
-                  <b-card
-                    tag="article"
-                    style="max-width: 12rem; max-height: 15rem;"
-                  >
-                    <b-card-text style="font-size: small;">
-                      {{outputs.name}}
-                    </b-card-text>
-                    <b-card-text style="font-size: small;">
-                      {{outputs.data}}
-                    </b-card-text>
-                    <b-card-text style="font-size: small;">
-                      {{outputs.type}}
-                    </b-card-text>
-
-                    <b-button size="sm" href="#" variant="primary">Go somewhere</b-button>
                   </b-card>
                 </div>
               </b-col>
@@ -129,21 +88,23 @@
 </template>
 <script>
 
-// import uuid4 from "uuid";
 import * as litegraph from "litegraph.js";
+// import uuid4 from "uuid";
 import "litegraph.js/css/litegraph.css";
 
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
-import Error from './Error.vue'
-
-// import the component
-import Treeselect from '@riophae/vue-treeselect'
-import { LOAD_ROOT_OPTIONS } from '@riophae/vue-treeselect'
-import '@riophae/vue-treeselect/dist/vue-treeselect.css'
+import Error from './components/Error.vue'
+import TopicViewer from './components/TopicViewer.vue'
 
 import Vue from 'vue'
+import Treeselect from '@riophae/vue-treeselect'
+import { LOAD_ROOT_OPTIONS } from '@riophae/vue-treeselect'
+// import the styles
+import '@riophae/vue-treeselect/dist/vue-treeselect.css'
+
+
 import { BootstrapVue } from 'bootstrap-vue'
 
 // Import Bootstrap an BootstrapVue CSS files (order is important)
@@ -182,16 +143,19 @@ export default {
         id: null,
         active_inputs: [],
         func: null,
-        active_outputs: [],
-
+        active_outputs: []
       }
-    
     };
   },
 
-  mounted() {
-    // Make BootstrapVue available throughout your project
-
+  async mounted() {
+    UbiiClientService.instance.setName('ubii-node-webbrowser VueJS Test');
+    UbiiClientService.instance.setHTTPS(false);
+    
+    await UbiiClientService.instance.connect(this.serverIP, this.servicePort);
+    // const cid = UbiiClientService.instance.getClientID()
+    // this.ws = await new UbiiWebsocketService(cid, 'localhost', 8104)
+    
     this.graph = new litegraph.LGraph();
     this.subgraph = new litegraph.LGraph();
     this.lGraphCanvas = new litegraph.LGraphCanvas('#canvas', this.graph);
@@ -304,6 +268,7 @@ export default {
 // } from '@tum-far/ubii-msg-formats'
 // console.log(proto);
 
+
       const types = ['double', 'bool', 'string', 'ubii.dataStructure.Vector2', 'ubii.dataStructure.Vector3', 'ubii.dataStructure.Vector4',
        'ubii.dataStructure.Quaternion', 'ubii.dataStructure.Matrix3x2', 'ubii.dataStructure.Matrix4x4', 'ubii.dataStructure.Color', 
        'ubii.dataStructure.TouchEvent', 'ubii.dataStructure.TouchEventList', 'ubii.dataStructure.KeyEvent', 'ubii.dataStructure.MouseEvent',
@@ -336,7 +301,7 @@ export default {
       litegraph.LiteGraph.registerNodeType("Debug/Visualizer", node)
       
 
-      node.prototype.onConnectionsChange = function(connection, slot, connected, link_info, input_info){
+      node.prototype.onConnectionsChange = function(connection, slot, connected, /*link_info,*/ /*input_info*/){
         
         // console.log(link_info)
         // console.log(input_info)
@@ -369,11 +334,6 @@ export default {
             const recX = 0
             const recY = redRectangleOffset
 
-            // if( this.mouseOver )
-            // {
-            //   console.log(this.mousepos)
-            // }
-
             ctx.strokeRect(recX + (cornerRadius / 2), recY + (cornerRadius / 2), redRectangleWidth - cornerRadius, redRectangleHeight - cornerRadius)
           }
         }
@@ -387,28 +347,6 @@ export default {
       {
         this.size = [140, 80];
   
-
-        //create inner graph
-        // this.subgraph = new litegraph.LiteGraph.LGraph();
-        // this.subgraph._subgraph_node = this;
-        // this.subgraph._is_subgraph = true;
-
-
-        // node.prototype.onSubgraphTrigger = function(/*event, param*/) {
-        //   console.log('Subgraph opened.')
-        // };
-
-        // //nodes input node added inside
-        // this.subgraph.onInputAdded = this.onSubgraphNewInput.bind(this);
-        // this.subgraph.onInputRenamed = this.onSubgraphRenamedInput.bind(this);
-        // this.subgraph.onInputTypeChanged = this.onSubgraphTypeChangeInput.bind(this);
-        // this.subgraph.onInputRemoved = this.onSubgraphRemovedInput.bind(this);
-
-        // this.subgraph.onOutputAdded = this.onSubgraphNewOutput.bind(this);
-        // this.subgraph.onOutputRenamed = this.onSubgraphRenamedOutput.bind(this);
-        // this.subgraph.onOutputTypeChanged = this.onSubgraphTypeChangeOutput.bind(this);
-        // this.subgraph.onOutputRemoved = this.onSubgraphRemovedOutput.bind(this);
-        
         inp.forEach(i => {
           this.addInput(i.internalName, i.messageFormat)
         })
@@ -420,7 +358,7 @@ export default {
       node.title = proc.name
       node.title_color = "#243";
       node.slot_start_y = 20;
-
+      
       let that = this
       
       node.prototype.onDrawForeground = function(ctx)
@@ -439,13 +377,9 @@ export default {
       //function to call when the node is executed
       node.prototype.onExecute = function()
       {
-        // var A = this.getInputData(0);
-        // if( A === undefined )
-        //   A = 0;
-        // var B = this.getInputData(1);
-        // if( B === undefined )
-        //   B = 0;
-        // this.setOutputData( 0, A + B );
+        out.forEach((_,i) => {
+          this.triggerSlot(i)
+        })
       }
 
       litegraph.LiteGraph.registerNodeType("Sessions/"+sname+"/"+proc.name, node)
@@ -467,7 +401,49 @@ export default {
         ctx.fill();
       };
 
+      node.prototype.onConnectionsChange = function(inOrOut, slot, state, link_info, input_info) {
+          if (!that.debug.id) return
+          // console.log('Input or Output', inOrOut);
+          // console.log('slot', slot);
+          // console.log('state', state);
+          // console.log('link_info', link_info);
+          // console.log('input_info', input_info);
 
+          // input remove
+          // output remove
+          // input add
+          // output add
+          // play? active?
+          //
+          let nodeIndex = -1
+          if(inOrOut == 1 && !state) {
+            that.debug.active_inputs.forEach((val,index) => {
+              if(val.name === input_info.name)
+                nodeIndex = index
+            })
+            if (nodeIndex > -1) {  
+              let element = that.debug.active_inputs[nodeIndex].component.$el
+              element.remove()
+              that.debug.active_inputs.splice(nodeIndex, 1);
+            }
+          } else if (inOrOut == 2 && !state) {
+            that.debug.active_outputs.forEach((val,index) => {
+              if(val.name === input_info.name)
+                nodeIndex = index
+            })
+            if (nodeIndex > -1) {  
+              let element = that.debug.active_outputs[nodeIndex].component.$el
+              element.remove()
+              that.debug.active_outputs.splice(nodeIndex, 1);
+            }
+          } else if (inOrOut == 1 && state) {
+              const topic = that.selectedSession.ioMappings.filter(pval => pval.processingModuleId === this.id)[0].inputMappings.filter(io => io.inputName === input_info.name)[0].topic
+              that.debug.active_inputs.push({name: input_info.name, type: input_info.type, topic: topic, component: that.dynInComp(input_info.name, input_info.type, "in")})
+          } else if (inOrOut == 2 && state) {
+              const topic = that.selectedSession.ioMappings.filter(pval => pval.processingModuleId === this.id)[0].outputMappings.filter(io => io.outputName === input_info.name)[0].topic
+              that.debug.active_outputs.push({name: input_info.name, type: input_info.type, topic: topic, component: that.dynInComp(input_info.name, input_info.type, "out")})
+          }
+      },
       node.prototype.onMouseDown = function(e, pos) {
         if (
             !this.flags.collapsed &&
@@ -478,7 +454,7 @@ export default {
             this.inputs.filter(val => val.link !== null).forEach((val) => {
               // Still need connection to graph inputs and outputs, also [0] garanteed?
               const topic = that.selectedSession.ioMappings.filter(pval => pval.processingModuleId === this.id)[0].inputMappings.filter(io => io.inputName === val.name)[0].topic
-              that.debug.active_inputs.push({name: val.name, type: val.type, topic: topic})
+              that.debug.active_inputs.push({name: val.name, type: val.type, topic: topic, component: that.dynInComp(val.name, val.type, "in")})
             })
 
             that.debug.func = that.selectedSession.processingModules.filter(val => val.id === this.id).map(val => {
@@ -488,12 +464,25 @@ export default {
             this.outputs.filter(val => val.link !== null).forEach((val) => {
               // Still need connection to graph inputs and outputs, also [0] garanteed?
               const topic = that.selectedSession.ioMappings.filter(pval => pval.processingModuleId === this.id)[0].outputMappings.filter(io => io.outputName === val.name)[0].topic
-              that.debug.active_outputs.push({name: val.name, type: val.type, topic: topic})
+              that.debug.active_outputs.push({name: val.name, type: val.type, topic: topic, component: that.dynInComp(val.name, val.type, "out")})
             })
+            // console.log(that.graph.status)
+            if(that.graph.status == 2) that.playGraph();
 
         }
       };
 
+    },
+    dynInComp: function (name, type, inOrOut) {
+
+      var ComponentClass = Vue.extend(TopicViewer)
+      var instance = new ComponentClass({
+            propsData: { name: name, type: type }
+        })
+      instance.$mount() // pass nothing
+      if (inOrOut === "in") {this.$refs.DebugInputs.appendChild(instance.$el)} else {this.$refs.DebugOutputs.appendChild(instance.$el)}
+      
+      return instance
     },
     registerClientNode: function (clientName, dev, comp) {
 
@@ -528,13 +517,10 @@ export default {
       //function to call when the node is executed
       node.prototype.onExecute = function()
       {
-        // var A = this.getInputData(0);
-        // if( A === undefined )
-        //   A = 0;
-        // var B = this.getInputData(1);
-        // if( B === undefined )
-        //   B = 0;
-        // this.setOutputData( 0, A + B );
+        let o = 0
+        for (let i = 0; i < comp.length; i++) {
+          if (comp[i].ioType != 1) {this.triggerSlot(o); o++;}
+        }
       }
 
       //register in the system
@@ -719,35 +705,46 @@ export default {
     },
 
     playGraph: async function () {
-      if (this.graph.status == litegraph.LGraph.STATUS_STOPPED) {
-        this.debug.active_inputs.forEach(val => {
-          UbiiClientService.instance.unsubscribeTopic(
-            val.topic
-          );
-        })
-        this.debug.active_inputs.forEach(val => {
+      // this.ws.onMessageReceived(this.wsCallback)
+      // const enc = new TextEncoder();
+      // this.ws.send(enc.encode("PING"))
+      this.debug.active_inputs.forEach(val => {
+        UbiiClientService.instance.unsubscribeTopic(
+          val.topic
+        );
+      })
+      this.debug.active_inputs.forEach(val => {
+        UbiiClientService.instance.subscribeTopic(
+          val.topic,
+          (data) => {
+            switch(val.type) {
+              case 'ubii.dataStructure.Vector2': val.component.ubii_updateVector2(data); break;
+              case 'bool': val.component.ubii_updateBool(data); break;
+            }  
+          }
+        );
+      })
 
-          UbiiClientService.instance.subscribeTopic(
-            val.topic,
-            (data) => {this.$set(val, 'data', data)}
-          );
-        })
+      this.debug.active_outputs.forEach(val => {
+        UbiiClientService.instance.unsubscribeTopic(
+          val.topic
+        );
+      })
+      this.debug.active_outputs.forEach(val => {
 
-        this.debug.active_outputs.forEach(val => {
-          UbiiClientService.instance.unsubscribeTopic(
-            val.topic
-          );
-        })
-        this.debug.active_outputs.forEach(val => {
+        UbiiClientService.instance.subscribeTopic(
+          val.topic,
+          (data) => {
+            switch(val.type) {
+              case 'ubii.dataStructure.Vector2': val.component.ubii_updateVector2(data); break;
+              case 'bool': val.component.ubii_updateBool(data); break;
+            }  
+          }
+        );
+      })
+      
+      this.graph.start();
 
-          UbiiClientService.instance.subscribeTopic(
-            val.topic,
-            (data) => {this.$set(val, 'data', data)}
-          );
-        })
-        
-        this.graph.start();
-      }
     },
     stopGraph: async function () {
       this.debug.active_inputs.forEach(val => {
@@ -764,15 +761,17 @@ export default {
       this.graph.stop();
     }
   }
+  
 }
 </script>
 
 <style scoped>
-.header-editor {
-  border: 1px solid;
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+  .header-editor {
+    border: 1px solid;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
 </style>
