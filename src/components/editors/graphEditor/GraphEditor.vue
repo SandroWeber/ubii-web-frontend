@@ -5,6 +5,7 @@
     <span style="padding-right: 5px;">Sessions:</span>
     <treeselect v-model="selectedSessionId" 
       @input="showSessionPipeline()"
+      @open="loadOps"
       :load-options="loadOps" 
       :options="availableSessions" 
       :auto-load-root-options="false" 
@@ -108,7 +109,6 @@ import TopicViewer from './components/TopicViewer.vue'
 
 import Vue from 'vue'
 import Treeselect from '@riophae/vue-treeselect'
-import { LOAD_ROOT_OPTIONS } from '@riophae/vue-treeselect'
 // import the styles
 import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 
@@ -146,6 +146,10 @@ export default {
       addClientsList: [],
       addProcsList: [],
 
+      latenz: [],
+      timer: null,
+
+
       ClSeNodes: [],
       debug: { 
         id: null,
@@ -176,6 +180,16 @@ export default {
       this.ClSeNodes = []
       this.addClientsList = []
       this.addProcsList = []
+      this.latenz = []
+      this.$refs.DebugInputs.innerHTML = ''
+      this.$refs.DebugOutputs.innerHTML = ''
+      this.debug = {
+        id: null,
+        active_inputs: [],
+        func: null,
+        active_outputs: []
+      }
+      clearInterval(this.timer)
       this.graph.clear()
       litegraph.LiteGraph.clearRegisteredTypes()
     },
@@ -208,6 +222,10 @@ export default {
 
       this.addProcsList = pList.filter(val => val.sessionId === this.selectedSession.id)
       // console.log(this.addProcsList)
+    },
+    loadLatenz: async function() {
+      const res = await this.ubiiGetResult(DEFAULT_TOPICS.SERVICES.LATENZ_CLIENTS_LIST)
+      this.latenz = res.clientList.elements
     },
     loadSession: async function () {
       const res = await this.ubiiGetResult(DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_GET_LIST)
@@ -247,24 +265,23 @@ export default {
       }
       
     },
-    loadOps: async function({ action/*, callback*/ }) {
-      if (action === LOAD_ROOT_OPTIONS) {
+    loadOps: async function() {
 
-        const res = await this.ubiiGetResult(DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_GET_LIST)
-        const sList = res.sessionList.elements
+      const res = await this.ubiiGetResult(DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_GET_LIST)
+      const sList = res.sessionList.elements
 
-        try { 
-          this.availableSessions = sList.filter(val => val.status === 1).map(val => {
-            return { 
-              id: val.id,
-              label: `${val.name}`
-            }
-          })
-        } catch {
-          this.msg = 'No sessions available.'
-          this.trigger= !this.trigger// console.log('An empty or a invalid response from the server.')
-        }
+      try { 
+        this.availableSessions = sList.filter(val => val.status === 1).map(val => {
+          return { 
+            id: val.id,
+            label: `${val.name}`
+          }
+        })
+      } catch {
+        this.msg = 'No sessions available.'
+        this.trigger= !this.trigger// console.log('An empty or a invalid response from the server.')
       }
+
     },
     registerInputTypes: async function() {
       
@@ -295,57 +312,6 @@ export default {
         litegraph.LiteGraph.registerNodeType("Input/"+val, node)
       })
       
-
-    },
-    registerDebugNode: async function() {
-      //node constructor class
-      function node()
-      {
-        this.addInput('Debug Input')
-      }
-      node.title = 'Debug Node'
-      node.title_color = "#cf331f"
-
-      litegraph.LiteGraph.registerNodeType("Debug/Visualizer", node)
-      
-
-      node.prototype.onConnectionsChange = function(connection, slot, connected, /*link_info,*/ /*input_info*/){
-        
-        // console.log(link_info)
-        // console.log(input_info)
-
-        if (connected) {
-          this.size[0] = 400
-          this.size[1] = 250
-        }
-        else {
-          this.size[0] = 200
-          this.size[1] = 30
-        }
-        
-        node.prototype.onDrawForeground = function(ctx)
-        {
-          this.properties = { height: 200, width: 350 };
-          const startOffset = 40
-          const redRectangleOffset = startOffset
-          
-          if(this.flags.collapsed)
-            return;
-          if(connected) {
-            ctx.fillStyle = "#555";
-            ctx.fillRect(0,startOffset,this.size[0],this.size[1]-startOffset);
-            
-            ctx.strokeStyle = 'red';
-            const cornerRadius = 40
-            const redRectangleWidth = this.size[0]
-            const redRectangleHeight = this.size[1] - redRectangleOffset
-            const recX = 0
-            const recY = redRectangleOffset
-
-            ctx.strokeRect(recX + (cornerRadius / 2), recY + (cornerRadius / 2), redRectangleWidth - cornerRadius, redRectangleHeight - cornerRadius)
-          }
-        }
-      } 
 
     },
     registerProcessNode: function(sname, proc, inp, out) {
@@ -509,8 +475,22 @@ export default {
       node.title_color = "#345";
       node.slot_start_y = 40;
 
+      let that = this;
+      let latenz = 'NaN';
+
       node.prototype.onDrawForeground = function(ctx)
       {
+        
+        latenz = that.latenz.filter(obj => this.id.split(".")[0] === obj.id)[0]
+        if (latenz !== undefined) latenz = latenz.latenz+'ms'; else latenz = 'NaN' 
+
+
+        var w = litegraph.LiteGraph.NODE_TITLE_HEIGHT;
+        var x = this.size[0] - w;
+        ctx.fillStyle = '#fff'
+        ctx.fillText(latenz,x,-8)
+
+
         if(this.flags.collapsed)
           return;
         ctx.fillStyle = "#555";
@@ -616,7 +596,6 @@ export default {
       if(!this.selectedSessionId) return
       await this.loadSession()
       try {
-        await this.registerDebugNode()
         await this.registerProcNodesOfSession()
         await this.loadClientsOfSessionAndIO()
         await this.registerClientNodes()
@@ -626,6 +605,11 @@ export default {
         await this.addClientNodes()
         await this.addProcNodes()
         await this.connectNodes()
+        this.loadLatenz();
+        this.timer = setInterval(function () {
+          this.loadLatenz();
+        }.bind(this), 10000); 
+
       } catch (error) {
         // console.log(error)
       }
@@ -773,7 +757,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
   .header-editor {
     border: 1px solid;
     padding: 20px;
@@ -786,5 +770,9 @@ export default {
     border: 1px solid;
     padding: 5px;
     justify-content: center;
+  }
+
+  .vue-treeselect__menu {
+    color: black;
   }
 </style>
