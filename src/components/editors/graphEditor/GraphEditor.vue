@@ -12,9 +12,18 @@
       :multiple="false" 
       placeholder="Sessions..."/>
   </div>
-  <div align="center" class="button-editor">
-    <b-button @click="playGraph()" variant="outline-primary" style="margin: 2px;">Play</b-button>
-    <b-button @click="stopGraph()" variant="outline-primary" style="margin: 2px;">Stop</b-button>
+  <div>
+    <b-container class="button-editor" fluid="xl">
+      <b-row>
+        <b-col>
+          <b-form-select v-model="selected_scene_order" :options="options_scene_order"></b-form-select>
+        </b-col>
+        <b-col>
+          <b-button @click="playGraph()" variant="outline-primary" style="margin: 2px;">Play</b-button>
+          <b-button @click="stopGraph()" variant="outline-primary" style="margin: 2px;">Stop</b-button>
+        </b-col>
+      </b-row>
+    </b-container>
   </div>
   <div align="center">
     <b-row no-gutters class="flex-nowrap" align="center">
@@ -87,6 +96,15 @@
               </b-row>
             </b-container>
           </b-tab>
+          <b-tab title="Debug the Debugger">
+            <b-form-textarea
+                        id="textarea-auto-height"
+                        rows="30"
+                        max-rows="30"
+                        v-model="sessionUpdate"
+                        overflow-x:scroll
+                      ></b-form-textarea>
+          </b-tab>  
         </b-tabs>
       </b-col><b-col>
       <canvas id="canvas" class='litegraph' width='1024' height='720' style='border: 1px solid;'></canvas>
@@ -140,6 +158,7 @@ export default {
       selectedSessionId: null,
       selectedSession: null,
       availableSessions: null,
+      sessionUpdate: null,
 
       clientsOfInterest: null,
 
@@ -148,6 +167,11 @@ export default {
 
       latenz: [],
       timer: null,
+
+      options_scene_order:  [
+          { value: null, text: 'Select a GraphOrder' }
+      ],
+      selected_scene_order: null,
 
 
       ClSeNodes: [],
@@ -233,6 +257,7 @@ export default {
       // console.log('Session:', sList)
       try { 
         this.selectedSession = sList.filter(val => val.status === 1 && this.selectedSessionId == val.id)[0]
+        this.sessionUpdate = JSON.stringify(this.selectedSession, null, 2)
       } catch {
         this.msg = 'Selected Session was not found.'
         this.trigger= !this.trigger
@@ -363,11 +388,11 @@ export default {
             return;
         }
 
-        ctx.fillStyle = "#555";
+        ctx.fillStyle = "#1c2e4a";
         var w = litegraph.LiteGraph.NODE_TITLE_HEIGHT;
         var x = this.size[0] - w;
-        ctx.fillRect(x, -w, w, w);
-        ctx.fillStyle = "#333";
+        ctx.fillRect(x, -w, w+1, w);
+        ctx.fillStyle = "#8cd2e8";
         ctx.beginPath();
         ctx.moveTo(x + w * 0.2, -w * 0.6);
         ctx.lineTo(x + w * 0.8, -w * 0.6);
@@ -488,7 +513,7 @@ export default {
         var w = litegraph.LiteGraph.NODE_TITLE_HEIGHT;
         var x = this.size[0] - w;
         ctx.fillStyle = '#fff'
-        ctx.fillText(latenz,x,-8)
+        ctx.fillText(latenz,x,-10)
 
 
         if(this.flags.collapsed)
@@ -767,6 +792,7 @@ export default {
   }
 
   .button-editor {
+    width: 100%;
     border: 1px solid;
     padding: 5px;
     justify-content: center;
