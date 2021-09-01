@@ -3,28 +3,35 @@
     <h3 class="test-title">PM Execution</h3>
 
     <app-button class="start-button" @click="startTest()" :disabled="!ubiiConnected">
-      <font-awesome-icon icon="play" v-show="this.testData.status !== 'running'" />
-      <font-awesome-icon icon="spinner" v-show="this.testData.status === 'running'" />
+      <font-awesome-icon icon="play" v-show="this.testHelper.statistics.status !== 'running'" />
+      <font-awesome-icon icon="spinner" v-show="this.testHelper.statistics.status === 'running'" />
     </app-button>
 
     <div class="statistics-grid">
       <!-- status -->
       <span>Status:</span>
-      <span class="test-status">{{ this.testData.status }}</span>
+      <span class="test-status">{{ this.testHelper.statistics.status }}</span>
     </div>
 
     <div class="separator"></div>
 
     <div class="settings-grid">
-      <label for="node-id" class="setting-label">run on node:</label>
-      <app-input :id="'node-id'" :type="'node id'" v-model="nodeId" />
+      <label for="input-node-id" class="setting-label">run on node:</label>
+
+      <b-form-input id="input-node-id" list="input-list-node-ids" v-model="nodeId"></b-form-input>
+      <datalist id="input-list-node-ids">
+        <option v-for="nodeId in this.nodeIds" :key="nodeId">{{ nodeId }}</option>
+      </datalist>
     </div>
   </div>
 </template>
 
 <script>
-import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
+import { BFormInput } from 'bootstrap-vue';
+
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
+import { DEFAULT_TOPICS, proto } from '@tum-far/ubii-msg-formats';
+const CLIENT_STATE = proto.ubii.clients.Client.State;
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faPlay, faSpinner } from '@fortawesome/free-solid-svg-icons';
@@ -37,42 +44,71 @@ export default {
   name: 'Test-PM-Execution',
   components: {
     AppInput: AppInput,
-    AppButton: AppButton
+    AppButton: AppButton,
+    BFormInput,
   },
   data: () => {
     return {
       ubiiConnected: false,
       testHelper: new TestPMExecutionHelper(),
-      nodeId: undefined
+      nodeId: 'unset',
+      nodeIds: [],
     };
   },
-  mounted: async function() {
+  mounted: async function () {
     // unsubscribe before page is unloaded
     window.addEventListener('beforeunload', () => {
       this.stopTest();
     });
 
     UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, () => {
-      this.ubiiConnected = true;
-      this.nodeId = UbiiClientService.instance.client.serverSpecification.id;
+      this.onUbiiConnectionChange(true);
     });
     UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, () => {
-      this.ubiiConnected = false;
-      this.nodeId = undefined;
+      this.onUbiiConnectionChange(false);
     });
     await UbiiClientService.instance.waitForConnection();
-    this.ubiiConnected = UbiiClientService.instance.isConnected();
-    this.nodeId = UbiiClientService.instance.client.serverSpecification.id;
+    this.onUbiiConnectionChange(UbiiClientService.instance.isConnected());
   },
-  beforeDestroy: function() {
+  beforeDestroy: function () {
     this.stopTest();
   },
   methods: {
-    startTest: function() {
-      this.test = new TestPMExecutionHelper();
-      this.test.startTest(this.nodeId);
-    }
-  }
+    onUbiiConnectionChange: function (connected) {
+      if (connected === this.ubiiConnected) return;
+
+      this.ubiiConnected = connected;
+
+      if (connected) {
+        this.intervalUpdateNodeIds = setInterval(this.updateNodeIDs, 1000);
+        this.nodeId = UbiiClientService.instance.client.serverSpecification.id;
+      } else {
+        this.nodeId = 'unset';
+        this.intervalUpdateNodeIds && clearInterval(this.intervalUpdateNodeIds);
+      }
+    },
+    updateNodeIDs: async function () {
+      let eligibleNodeIds = [];
+      eligibleNodeIds.push(UbiiClientService.instance.client.serverSpecification.id);
+      let clientListResponse = await UbiiClientService.instance.callService({
+        topic: DEFAULT_TOPICS.SERVICES.CLIENT_GET_LIST,
+      });
+      if (clientListResponse.clientList) {
+        eligibleNodeIds.push(
+          ...clientListResponse.clientList.elements
+            .filter((client) => client.state === CLIENT_STATE.ACTIVE)
+            .map((client) => client.id)
+        );
+      }
+      this.nodeIds = eligibleNodeIds;
+    },
+    startTest: function () {
+      this.testHelper.startTest(this.nodeId);
+    },
+    stopTest: function () {
+      this.testHelper.stopTest();
+    },
+  },
 };
 </script>
 
@@ -85,6 +121,7 @@ export default {
   grid-template-areas:
     'run title title title'
     'empty statistics separator settings';
+  margin: 20px;
 }
 
 .statistics-grid {
@@ -104,12 +141,14 @@ export default {
   grid-area: settings;
   display: grid;
   grid-gap: 15px;
-  grid-template-columns: 200px 100px 200px 100px;
-  grid-template-rows: 25px 25px 25px;
+  grid-template-columns: 150px 1fr;
+  grid-template-rows: 25px 50px 25px;
 }
 
 .test-title {
   grid-area: title;
+  font-size: 1.5em;
+  font-weight: bold;
 }
 
 .start-button {

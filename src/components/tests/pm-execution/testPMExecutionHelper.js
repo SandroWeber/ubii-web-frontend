@@ -6,7 +6,7 @@ class PMTestExecutionTriggerOnInput {
   static NAME_OUT_DOUBLE = 'outDouble';
 
   static NAME_IN_MUX_STRINGS = 'inMuxStrings';
-  static NAME_OUT_MUX_STRINGS = 'outMuxStrings';
+  static NAME_OUT_MUX_STRING_LENGTHS = 'outMuxStrings';
 
   static TEMPLATE = {
     name: 'pm_test-exec_trigger-on-input',
@@ -50,6 +50,8 @@ class PMTestExecutionTriggerOnInput {
   static onProcessing(deltaTime, inputs, state) {
     let outputs = {};
 
+    console.info(PMTestExecutionTriggerOnInput.NAME_IN_DOUBLE + ' = ' + inputs[PMTestExecutionTriggerOnInput.NAME_IN_DOUBLE]);
+
     // check if changed, otherwise no output
     if (
       inputs[PMTestExecutionTriggerOnInput.NAME_IN_DOUBLE] &&
@@ -81,6 +83,7 @@ class PMTestExecutionTriggerOnInput {
       }
     }
 
+    console.info(outputs);
     return outputs;
   }
 
@@ -121,7 +124,7 @@ class TestPMExecutionSession {
           this.topicPrefix + '/mux_string_3',
           this.topicPrefix + '/mux_string_4'
         ],
-        regexMuxStringTopics: this.topicPrefix + '/' + PMTestExecutionTriggerOnInput.MUX_STRING_VARIATION_REGEX,
+        muxRegexStringTopics: this.topicPrefix + '/' + TestPMExecutionSession.MUX_STRING_VARIATION_REGEX,
         demuxStringLengthTopics: [
           this.topicPrefix + '/string_length/mux_string_0',
           this.topicPrefix + '/string_length/mux_string_1',
@@ -144,29 +147,29 @@ class TestPMExecutionSession {
       inputMappings: [
         {
           inputName: PMTestExecutionTriggerOnInput.NAME_IN_DOUBLE,
-          topic: this.topics.triggerOnInput.topicInDouble
+          topic: this.topics.pmTriggerOnInput.topicInDouble
         },
         {
           inputName: PMTestExecutionTriggerOnInput.NAME_IN_MUX_STRINGS,
           topicMux: {
             name: 'mux_pm-test_trigger-on-input' + pmNameSuffix,
             dataType: 'string',
-            topicSelector: this.topics.triggerOnInput.muxRegexStrings,
-            identityMatchPattern: PMTestExecutionTriggerOnInput.MUX_STRING_VARIATION_REGEX
+            topicSelector: this.topics.pmTriggerOnInput.muxRegexStringTopics,
+            identityMatchPattern: TestPMExecutionSession.MUX_STRING_VARIATION_REGEX
           }
         }
       ],
       outputMappings: [
         {
           outputName: PMTestExecutionTriggerOnInput.NAME_OUT_DOUBLE,
-          topic: this.topics.triggerOnInput.topicOutDouble
+          topic: this.topics.pmTriggerOnInput.topicOutDouble
         },
         {
           outputName: PMTestExecutionTriggerOnInput.NAME_OUT_MUX_STRING_LENGTHS,
           topicDemux: {
             name: 'demux_pm-test_trigger-on-input' + pmNameSuffix,
             dataType: 'int32',
-            outputTopicFormat: this.topics.triggerOnInput.demuxTopicPattern
+            outputTopicFormat: this.topics.pmTriggerOnInput.demuxTopicPattern
           }
         }
       ]
@@ -200,6 +203,7 @@ class TestPMExecutionHelper {
     };
 
     this.subscriptionTokens = [];
+    this.expectedStringLengthFromPMTriggerOnInput = new Map();
   }
 
   addSession() {
@@ -215,15 +219,23 @@ class TestPMExecutionHelper {
     let session = this.addSession();
     session.addPMTriggerOnInput(nodeId);
 
+    //TODO: after node-webbrowser includes new topicdata implementation, switch tokens
     try {
-      let token = await UbiiClientService.instance.subscribeTopic(
-        session.topics.pmTriggerOnInput.topicOutDouble,
-        this.onOutputDoubleFromPMTriggerOnInput
-      );
+      let token = {
+        topic: session.topics.pmTriggerOnInput.topicOutDouble,
+        type: 'topic',
+        callback: (record) => this.onOutputDoubleFromPMTriggerOnInput(record)
+      };
+      await UbiiClientService.instance.subscribeTopic(token.topic, token.callback);
       this.subscriptionTokens.push(token);
 
       for (let topic of session.topics.pmTriggerOnInput.demuxStringLengthTopics) {
-        token = await UbiiClientService.instance.subscribeTopic(topic, this.onOutputStringLengthsFromPMTriggerOnInput);
+        let token = {
+          topic: topic,
+          type: 'topic',
+          callback: (record) => this.onOutputStringLengthsFromPMTriggerOnInput(record)
+        };
+        await UbiiClientService.instance.subscribeTopic(token.topic, token.callback);
         this.subscriptionTokens.push(token);
       }
     } catch (error) {
@@ -234,8 +246,9 @@ class TestPMExecutionHelper {
     this.expectedStringLenghts = new Map();
     this.expectedTopicsReceived = [];
     this.expectedTopicsReceived.push(session.topics.pmTriggerOnInput.topicOutDouble);
-    this.expectedTopicsReceived.push(session.topics.pmTriggerOnInput.demuxStringLengthTopics);
-    console.info('expectedTopicsReceived: ' + this.expectedTopicsReceived);
+    this.expectedTopicsReceived.push(...session.topics.pmTriggerOnInput.demuxStringLengthTopics);
+    console.info('expectedTopicsReceived:');
+    console.info(this.expectedTopicsReceived);
   }
 
   async startTest(nodeId) {
@@ -243,10 +256,10 @@ class TestPMExecutionHelper {
 
     await this.prepareTest(nodeId);
 
-    for (let session of this.testHelper.settings.sessions) {
+    for (let session of this.settings.sessions) {
       let specSession = session.getProtobuf();
       let reply = await UbiiClientService.instance.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_ADD,
         session: specSession
       });
       if (reply.session) {
@@ -267,7 +280,7 @@ class TestPMExecutionHelper {
   }
 
   async runTest() {
-    this.testData.statistics.startTime = Date.now();
+    this.statistics.startTime = Date.now();
     this.statistics.status = TestPMExecutionHelper.CONSTANTS.STATUS.RUNNING;
 
     for (let session of this.settings.sessions) {
@@ -286,7 +299,7 @@ class TestPMExecutionHelper {
           .toString(16)
           .substr(2, stringLength);
         // save string length as expected
-        this.expectedStringLenghts.set(topic, string.length);
+        this.expectedStringLengthFromPMTriggerOnInput.set(topic, string.length);
         // publish random string
         await UbiiClientService.instance.publishRecord({
           topic: topic,
@@ -318,9 +331,16 @@ class TestPMExecutionHelper {
       });
     }
 
+    //TODO: after node-webbrowser includes new topicdata implementation, switch tokens
     for (let token of this.subscriptionTokens) {
-      await UbiiClientService.instance.unsubscribe(token);
+      if (token.type === 'topic') {
+        await UbiiClientService.instance.unsubscribeTopic(token.topic, token.callback);
+      }
     }
+
+    console.info('TestPMExecution stopped:');
+    console.info(this.statistics);
+    console.info(this.expectedTopicsReceived);
   }
 
   onOutputDoubleFromPMTriggerOnInput(double, topic) {
