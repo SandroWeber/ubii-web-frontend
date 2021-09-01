@@ -4,9 +4,8 @@ import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 class PMTestExecutionTriggerOnInput {
   static NAME_IN_DOUBLE = 'inDouble';
   static NAME_OUT_DOUBLE = 'outDouble';
-
   static NAME_IN_MUX_STRINGS = 'inMuxStrings';
-  static NAME_OUT_MUX_STRING_LENGTHS = 'outMuxStrings';
+  static NAME_OUT_MUX_STRING_LENGTHS = 'outMuxStringLengths';
 
   static TEMPLATE = {
     name: 'pm_test-exec_trigger-on-input',
@@ -47,33 +46,32 @@ class PMTestExecutionTriggerOnInput {
     state.mapStringLengths = new Map();
   }
 
+  //static NAME_IN_DOUBLE = 'inDouble';
+  //static NAME_OUT_DOUBLE = 'outDouble';
+  //static NAME_IN_MUX_STRINGS = 'inMuxStrings';
+  //static NAME_OUT_MUX_STRING_LENGTHS = 'outMuxStringLengths';
   static onProcessing(deltaTime, inputs, state) {
     let outputs = {};
 
-    console.info(PMTestExecutionTriggerOnInput.NAME_IN_DOUBLE + ' = ' + inputs[PMTestExecutionTriggerOnInput.NAME_IN_DOUBLE]);
+    console.info('inDouble = ' + inputs.inDouble);
 
     // check if changed, otherwise no output
-    if (
-      inputs[PMTestExecutionTriggerOnInput.NAME_IN_DOUBLE] &&
-      inputs[PMTestExecutionTriggerOnInput.NAME_IN_DOUBLE] !== state.lastInDouble
-    ) {
-      state.lastInDouble = inputs[PMTestExecutionTriggerOnInput.NAME_IN_DOUBLE];
-      outputs[PMTestExecutionTriggerOnInput.NAME_OUT_DOUBLE] = inputs[PMTestExecutionTriggerOnInput.NAME_IN_DOUBLE];
+    if (inputs.inDouble && inputs.inDouble !== state.lastInDouble) {
+      state.lastInDouble = inputs.inDouble;
+      outputs.outDouble = inputs.inDouble;
     }
 
     let muxStringRecords =
-      inputs[PMTestExecutionTriggerOnInput.NAME_IN_MUX_STRINGS] &&
-      inputs[PMTestExecutionTriggerOnInput.NAME_IN_MUX_STRINGS].elements;
+      inputs.inMuxStrings &&
+      inputs.inMuxStrings.elements;
     if (muxStringRecords && muxStringRecords.length > 0) {
-      outputs[PMTestExecutionTriggerOnInput.NAME_OUT_MUX_STRING_LENGTHS] = {
-        elements: []
-      };
+      outputs.outMuxStringLengths = { elements: [] };
       for (let muxStringRecord of muxStringRecords) {
         let topic = muxStringRecord.topic;
         let string = muxStringRecord[muxStringRecord.type];
         // detect if string length is new or has changed, if not do not produce output
         if (!state.mapStringLengths.has(topic) || state.mapStringLengths.get(topic) !== string.length) {
-          outputs[PMTestExecutionTriggerOnInput.NAME_OUT_MUX_STRING_LENGTHS].elements.push({
+          outputs.outMuxStringLengths.elements.push({
             int32: string.length,
             outputTopicParams: [muxStringRecord.identity]
           });
@@ -249,15 +247,11 @@ class TestPMExecutionHelper {
     this.expectedTopicsReceived.push(...session.topics.pmTriggerOnInput.demuxStringLengthTopics);
     console.info('expectedTopicsReceived:');
     console.info(this.expectedTopicsReceived);
-  }
 
-  async startTest(nodeId) {
-    if (this.statistics.status !== TestPMExecutionHelper.CONSTANTS.STATUS.READY) return;
-
-    await this.prepareTest(nodeId);
-
+    this.remainingSessionsIdsToStart = [];
     for (let session of this.settings.sessions) {
       let specSession = session.getProtobuf();
+      this.remainingSessionsIdsToStart.push(specSession.id);
       let reply = await UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_ADD,
         session: specSession
@@ -269,6 +263,12 @@ class TestPMExecutionHelper {
         console.error(reply.error);
       }
     }
+  }
+
+  async startTest(nodeId) {
+    if (this.statistics.status !== TestPMExecutionHelper.CONSTANTS.STATUS.READY) return;
+
+    await this.prepareTest(nodeId);
 
     this.timeoutTestFailure = setTimeout(async () => {
       await this.stopTest();
@@ -276,12 +276,32 @@ class TestPMExecutionHelper {
       this.statistics.status = TestPMExecutionHelper.CONSTANTS.STATUS.TIMEOUT;
     }, TestPMExecutionHelper.CONSTANTS.TIMEOUT_MS);
 
-    this.runTest();
+    let token = {
+      topic: DEFAULT_TOPICS.INFO_TOPICS.START_SESSION,
+      type: 'topic',
+      callback: (session) => {
+        this.remainingSessionsIdsToStart = this.remainingSessionsIdsToStart.filter(id => id !== session.id);
+        if (this.remainingSessionsIdsToStart.length === 0) {
+          this.runTest();
+        }
+      }
+    };
+    await UbiiClientService.instance.subscribeTopic(token.topic, token.callback);
+    this.subscriptionTokens.push(token);
+
+    for (let session of this.settings.sessions) {
+      await UbiiClientService.instance.callService({
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
+        session: session.getProtobuf()
+      });
+    }
   }
 
   async runTest() {
-    this.statistics.startTime = Date.now();
+    if (this.statistics.status === TestPMExecutionHelper.CONSTANTS.STATUS.RUNNING) return;
+
     this.statistics.status = TestPMExecutionHelper.CONSTANTS.STATUS.RUNNING;
+    this.statistics.startTime = Date.now();
 
     for (let session of this.settings.sessions) {
       let double = Math.random();
