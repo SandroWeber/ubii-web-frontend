@@ -3,40 +3,43 @@ import { MSG_TYPES } from '@tum-far/ubii-msg-formats';
 const UbiiImage2D = ProtobufLibrary.ubii.dataStructure.Image2D;
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
-const TOPIC_SUFFIX = '/camera_image';
+import UbiiComponent from './ubii-component-base';
 
-export default class UbiiCameraInterface {
-  constructor(
-    ubiiImageFormat,
-    topicPrefix,
-    publishFrequencyMS,
-    videoPlaybackElement
-  ) {
-    this.ubiiImageFormat = ubiiImageFormat;
-    this.topicPrefix = topicPrefix;
-    this.topic = this.topicPrefix + TOPIC_SUFFIX;
+const TOPIC_SUFFIX = 'camera_image';
+
+const UBII_SPECS = {
+  messageFormat: MSG_TYPES.DATASTRUCTURE_IMAGE,
+  ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
+  tags: ['camera', 'image', '2D'],
+  description: 'web interface - camera componenent'
+};
+
+export default class UbiiComponentCamera extends UbiiComponent {
+  constructor(publishFrequencyMS, ubiiImageFormat, videoPlaybackElement) {
+    super(TOPIC_SUFFIX);
+    Object.assign(this, UBII_SPECS);
+
     this.publishFrequencyMS = publishFrequencyMS;
+    this.ubiiImageFormat = ubiiImageFormat;
     this.videoPlaybackElement = videoPlaybackElement;
   }
 
-  start() {
-    if (this.running) {
-      return;
-    }
-    this.running = true;
+  async onStart() {
+    try {
+      this.mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (this.videoPlaybackElement) {
+        this.videoPlaybackElement.srcObject = this.mediaStream;
+      }
 
-    navigator.mediaDevices
-      .getUserMedia({ video: true })
-      .then(mediaStream => {
-        this.mediaStream = mediaStream;
-        if (this.videoPlaybackElement) {
-          this.videoPlaybackElement.srcObject = this.mediaStream;
-        }
+      const track = this.mediaStream.getVideoTracks()[0];
+      this.imageCapture = new ImageCapture(track);
 
-        const track = mediaStream.getVideoTracks()[0];
-        this.imageCapture = new ImageCapture(track);
+      await UbiiClientService.instance.waitForConnection();
+      this.continuousPublishing();
 
-        UbiiClientService.instance.waitForConnection().then(() => {
+      /* develop code */
+      /*
+      UbiiClientService.instance.waitForConnection().then(() => {
           let continuousPublishing = async () => {
             let imageBitmap = await this.grabFrame();
             this.publishFrame(imageBitmap);
@@ -49,10 +52,22 @@ export default class UbiiCameraInterface {
         });
       })
       .catch(error => console.error(error));
+      */
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log(error);
+    }
   }
 
-  stop() {
-    this.running = false;
+  async continuousPublishing() {
+    let imageBitmap = await this.grabFrame();
+    this.publishFrame(imageBitmap);
+
+    if (this.running) {
+      setTimeout(() => {
+        this.continuousPublishing();
+      }, this.publishFrequencyMS);
+    }
   }
 
   /* under firefox, ImageCapture API seems to be buggy */
@@ -79,9 +94,7 @@ export default class UbiiCameraInterface {
       ctx = canvas.getContext('2d');
       ctx.drawImage(image, 0, 0);
     }
-    return canvas
-      .getContext('2d')
-      .getImageData(0, 0, canvas.width, canvas.height);
+    return canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
   }
 
   publishFrame(imageBitmap) {
@@ -104,15 +117,5 @@ export default class UbiiCameraInterface {
         dataFormat: this.ubiiImageFormat
       }
     });
-  }
-
-  getUbiiComponent() {
-    return {
-      topic: this.topic,
-      messageFormat: MSG_TYPES.DATASTRUCTURE_IMAGE,
-      ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
-      tags: ['camera', 'image', '2D'],
-      description: 'web interface for device camera'
-    };
   }
 }
