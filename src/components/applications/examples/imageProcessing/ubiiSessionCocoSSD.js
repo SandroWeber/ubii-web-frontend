@@ -32,20 +32,19 @@ export default class UbiiSessionCocoSSD {
   }
 
   startSession() {
-    UbiiClientService.waitForConnection().then(() => {
+    UbiiClientService.instance.waitForConnection().then(() => {
       this.cocoSSDLabels = [];
 
-      UbiiClientService.subscribeTopic(
+      UbiiClientService.instance.subscribeTopic(
         this.topicPredictionsOutput,
         this.handleObjectPredictions.bind(this)
       );
 
-      UbiiClientService.callService({
+      UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
         session: this
       }).then(response => {
         if (response.error) {
-          // eslint-disable-next-line no-console
           console.warn(response.error);
         } else if (response.session) {
           Object.assign(this, response.session);
@@ -58,8 +57,8 @@ export default class UbiiSessionCocoSSD {
   stopSession() {
     this.sessionRunning = false;
 
-    UbiiClientService.waitForConnection().then(() => {
-      UbiiClientService.unsubscribeTopic(
+    UbiiClientService.instance.waitForConnection().then(() => {
+      UbiiClientService.instance.unsubscribeTopic(
         this.topicPredictionsOutput,
         this.handleObjectPredictions
       ).then(() => {
@@ -71,12 +70,11 @@ export default class UbiiSessionCocoSSD {
         this.cocoSSDLabels = [];
       });
 
-      UbiiClientService.callService({
+      UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
         session: this
       }).then(response => {
         if (response.error) {
-          // eslint-disable-next-line no-console
           console.warn(response.error);
         }
       });

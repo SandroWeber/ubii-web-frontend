@@ -1,30 +1,30 @@
 <template>
   <app-layer class="canvas layer-two background horizontal-shadow">
-    <div class="grid">
-      <router-link to="/administration" class="interface-link" tag="div">
-        <app-tile class="layer-three background round shadow green-accent">
-          <font-awesome-icon icon="cogs" class="interface-icon" />
+    <div class="tile-menu-list">
+      <router-link to="/administration" class="tile-menu-item" tag="div">
+        <app-tile class="layer-three background round shadow green-accent tile-menu-item-background">
+          <font-awesome-icon icon="cogs" class="tile-menu-icon" />
           <p>Administration</p>
         </app-tile>
       </router-link>
 
-      <router-link to="/tools" class="interface-link" tag="div">
-        <app-tile class="layer-three background round shadow orange-accent">
-          <font-awesome-icon icon="toolbox" class="interface-icon" />
+      <router-link to="/tools" class="tile-menu-item" tag="div">
+        <app-tile class="layer-three background round shadow orange-accent tile-menu-item-background">
+          <font-awesome-icon icon="toolbox" class="tile-menu-icon" />
           <p>Tools</p>
         </app-tile>
       </router-link>
 
-      <router-link to="/interfaces" class="interface-link" tag="div">
-        <app-tile class="layer-three background round shadow blue-accent">
-          <font-awesome-icon icon="link" class="interface-icon" />
+      <router-link to="/interfaces" class="tile-menu-item" tag="div">
+        <app-tile class="layer-three background round shadow blue-accent tile-menu-item-background">
+          <font-awesome-icon icon="link" class="tile-menu-icon" />
           <p>Interfaces</p>
         </app-tile>
       </router-link>
 
-      <router-link to="/applications" class="interface-link" tag="div">
-        <app-tile class="layer-three background round shadow purple-accent">
-          <font-awesome-icon icon="play-circle" class="interface-icon" />
+      <router-link to="/applications" class="tile-menu-item" tag="div">
+        <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
+          <font-awesome-icon icon="play-circle" class="tile-menu-icon" />
           <p>Applications</p>
         </app-tile>
       </router-link>
@@ -54,24 +54,12 @@ export default {
 </script>
 
 <style scoped lang="stylus">
+
+@import '../styles/tile-menu';
+
 .canvas {
   height: 100%;
   padding: 25px;
 }
 
-.grid {
-  display: grid;
-  grid-gap: 15px;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-}
-
-.interface-link {
-  text-align: center;
-  cursor: pointer;
-}
-
-.interface-icon {
-  width: 50px;
-  height: 50px;
-}
 </style>

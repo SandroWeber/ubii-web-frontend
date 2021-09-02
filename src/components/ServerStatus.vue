@@ -64,27 +64,27 @@ export default {
   },
   data: () => {
     return {
-      ubiiClientService: UbiiClientService,
-      connected: UbiiClientService.isConnected(),
+      ubiiClientService: UbiiClientService.instance,
+      connected: UbiiClientService.instance.isConnected(),
       showConnectionSettings: false
     };
   },
   mounted: function() {
-    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, () => {
       this.onConnectionChange(true);
     });
-    UbiiClientService.on(UbiiClientService.EVENTS.DISCONNECT, () => {
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, () => {
       this.onConnectionChange(false);
     });
   },
   methods: {
     onButtonConnect: function() {
-      if (!UbiiClientService.isConnected()) {
-        let id = UbiiClientService.getClientID();
+      if (!UbiiClientService.instance.isConnected()) {
+        let id = UbiiClientService.instance.getClientID();
         if (id && id.length > 0) {
-          UbiiClientService.reconnect();
+          UbiiClientService.instance.reconnect();
         } else {
-          UbiiClientService.connect();
+          UbiiClientService.instance.connect();
         }
       }
     },

@@ -159,13 +159,13 @@ export default {
       this.stopSession();
     });
 
-    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, () => {
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, () => {
       this.stopSession();
       this.startSession();
     });
-    UbiiClientService.on(UbiiClientService.EVENTS.DISCONNECT, this.stopSession);
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, this.stopSession);
 
-    if (UbiiClientService.isConnected()) this.startSession();
+    if (UbiiClientService.instance.isConnected()) this.startSession();
   },
 
   beforeDestroy: function() {
@@ -196,7 +196,7 @@ export default {
       percentScissors: 0,
 
       //ubi-related
-      ubiiClientService: UbiiClientService,
+      ubiiClientService: UbiiClientService.instance,
       myoDataTopicSource: ''
     };
   },
@@ -205,7 +205,7 @@ export default {
     createUbiiSpecs: function() {
       //helper definitions that we can reference later
       let deviceName = 'rock-paper-scissors-game';
-      let topicPrefix = UbiiClientService.getClientID() + '/' + deviceName;
+      let topicPrefix = UbiiClientService.instance.getClientID() + '/' + deviceName;
       let inputMyoData = {
         internalName: 'myoData',
         messageFormat: 'ubii.dataStructure.MyoEvent',
@@ -351,21 +351,21 @@ export default {
       this.chooseGestureForOpponent();
       this.changeIcon("player", 1); */
 
-      UbiiClientService.waitForConnection().then(() => {
+      UbiiClientService.instance.waitForConnection().then(() => {
         //find myo topic & set it as input
         this.findMyoTopic().then(() => {
           // create all specifications
           this.createUbiiSpecs();
 
           // register device
-          UbiiClientService.registerDevice(this.$data.ubiiDevice)
+          UbiiClientService.instance.registerDevice(this.$data.ubiiDevice)
             .then(device => {
               this.$data.ubiiDevice = device;
               return device;
             })
             .then(() => {
               // start our session (registering not necessary as we do not want to save it permanently)
-              UbiiClientService.client
+              UbiiClientService.instance
                 .callService({
                   topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
                   session: this.$data.ubiiSession
@@ -374,7 +374,7 @@ export default {
                   console.info(response);
                 });
               //subscribe to our classied output gesture topic
-              UbiiClientService.client.subscribeTopic(
+              UbiiClientService.instance.subscribeTopic(
                 this.$data.outputGestureData.topic,
                 this.handleGestureData
               );
@@ -385,11 +385,11 @@ export default {
 
     //unsubscribe and stop session
     stopSession: function() {
-      UbiiClientService.client.unsubscribeTopic(
+      UbiiClientService.instance.unsubscribeTopic(
         this.$data.outputGestureData.topic,
         this.handleGestureData
       );
-      UbiiClientService.client.callService({
+      UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
         session: this.$data.ubiiSession
       });
@@ -410,7 +410,7 @@ export default {
     //look for myo interfaces
     findMyoTopic: async function() {
       return new Promise(resolve => {
-        UbiiClientService.client
+        UbiiClientService.instance
           .callService({ topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST })
           .then(reply => {
             this.$data.topicList = reply.stringList.list;

@@ -5,7 +5,6 @@
 </template>
 
 <script>
-/* eslint-disable no-console */
 
 import * as THREE from 'three';
 

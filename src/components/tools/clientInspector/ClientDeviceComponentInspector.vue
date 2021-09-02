@@ -1,13 +1,7 @@
 <template>
-  <div class='client-list-wrapper'>
-    <div
-      class="client"
-      v-for="client in clientList"
-      :key="client.id"
-    >
-      <ubii-client-viewer
-        :client="client"
-      />
+  <div class="client-list-wrapper">
+    <div class="client" v-for="client in clientList" :key="client.id">
+      <ubii-client-viewer :client="client" />
     </div>
   </div>
 </template>
@@ -18,10 +12,7 @@ import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
-import {
-  faChevronRight,
-  faChevronDown
-} from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 library.add(faChevronRight, faChevronDown);
 
 import UbiiClientViewer from './UbiiClientViewer';
@@ -32,16 +23,15 @@ export default {
     UbiiClientViewer
   },
   data: () => {
-    return { 
+    return {
       expanded: false,
       clientList: undefined
     };
   },
-  mounted: function() {
-    UbiiClientService.waitForConnection().then(() => {
-      this.getClientList();
-      this.intervalPollClientList = setInterval(() => this.getClientList(), 3000);
-    });
+  mounted: async function() {
+    await UbiiClientService.instance.waitForConnection();
+    this.getClientList();
+    this.intervalPollClientList = setInterval(() => this.getClientList(), 3000);
   },
   beforeDestroy: function() {
     this.intervalPollClientList && clearInterval(this.intervalPollClientList);
@@ -50,12 +40,14 @@ export default {
     toggleClientDetails() {
       this.expanded = !this.expanded;
     },
-    getClientList: function() {
-      UbiiClientService.callService({
+    getClientList: async function() {
+      let reply = await UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.CLIENT_GET_LIST
-      }).then(reply => {
-        this.$data.clientList = reply.elements;
       });
+
+      if (reply.clientList) {
+        this.$data.clientList = reply.clientList.elements;
+      }
     }
   }
 };

@@ -13,7 +13,7 @@
           TopicDataRecord.proto</a
         >
         <br />
-        A timestamp will be automatically added.
+        A timestamp will be automatically added if not given here.
       </div>
     </div>
     <codemirror v-model="localValue" :options="codemirror.options"></codemirror>
@@ -28,8 +28,6 @@ import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/javascript/javascript.js';
 import 'codemirror/theme/base16-dark.css';
 
-/* eslint-disable no-console */
-
 export default {
   name: 'TopicPublisher',
   components: {
@@ -37,14 +35,13 @@ export default {
   },
   data() {
     return {
-      ubiiClientService: UbiiClientService,
+      ubiiClientService: UbiiClientService.instance,
       topicDataRecord: {
         topic: '/my/topic/here',
         object2D: {
           id: 'abcdefgh-1234-abcd-1234-abcdefghijkl',
           pose: { position: { x: 0.1, y: 0.2 }, angle: 0.3 },
-          userDataJson:
-            '{"clientID":"266f1beb-abe8-44bb-ad13-d949aa62775f"}'
+          userDataJson: '{"clientID":"266f1beb-abe8-44bb-ad13-d949aa62775f"}'
         }
       },
       codemirror: {
@@ -72,11 +69,11 @@ export default {
   },
   methods: {
     publish: async function() {
-      console.info('publish');
-      console.info(this.topicDataRecord);
-      this.topicDataRecord.timestamp = UbiiClientService.generateTimestamp();
-      await UbiiClientService.waitForConnection();
-      UbiiClientService.publishRecord(this.topicDataRecord);
+      if (!this.topicDataRecord.timestamp) {
+        this.topicDataRecord.timestamp = UbiiClientService.instance.generateTimestamp();
+      }
+      await UbiiClientService.instance.waitForConnection();
+      UbiiClientService.instance.publishRecord(this.topicDataRecord);
     }
   }
 };

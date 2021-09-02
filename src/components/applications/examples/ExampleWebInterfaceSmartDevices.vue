@@ -14,8 +14,6 @@ import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
 import UbiiClientContent from '../sharedModules/UbiiClientContent';
 
-/* eslint-disable no-console */
-
 export default {
   name: 'ExampleGathererWebInterfaceSmartDevices',
   components: { UbiiClientContent },
@@ -25,16 +23,16 @@ export default {
       this.stopExample();
     });
 
-    UbiiClientService.on(UbiiClientService.EVENTS.CONNECT, async () => {
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, async () => {
       await this.startExample();
     });
-    UbiiClientService.on(UbiiClientService.EVENTS.DISCONNECT, () => {
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, () => {
       this.stopExample();
     });
-    UbiiClientService.waitForConnection().then(() => {
+    UbiiClientService.instance.waitForConnection().then(() => {
       this.startExample();
     });
-    UbiiClientService.onDisconnect(async () => {
+    UbiiClientService.instance.onDisconnect(async () => {
       await this.stopExample();
     });
   },
@@ -43,7 +41,7 @@ export default {
   },
   data: () => {
     return {
-      ubiiClientService: UbiiClientService,
+      ubiiClientService: UbiiClientService.instance,
       clients: new Map()
     };
   },
@@ -55,9 +53,9 @@ export default {
 
       this.createUbiiSpecs();
 
-      UbiiClientService.waitForConnection().then(() => {
+      UbiiClientService.instance.waitForConnection().then(() => {
         /* we register our device needed to publish the vibration distance threshold */
-        UbiiClientService.registerDevice(this.device)
+        UbiiClientService.instance.registerDevice(this.device)
           .then(response => {
             if (response.id) {
               this.device = response;
@@ -68,18 +66,18 @@ export default {
           })
           .then(() => {
             /* we publish the vibration distance threshold */
-            UbiiClientService.publishRecord({
+            UbiiClientService.instance.publishRecord({
               topic: this.topicVibrationDistanceThreshold,
               double: 0.03
             });
 
-            UbiiClientService.subscribeTopic(
+            UbiiClientService.instance.subscribeTopic(
               this.topicTouchObjects,
               this.handleTouchObjects
             );
 
             /* we start the session with the specs created in createUbiiSpecs() */
-            UbiiClientService.client
+            UbiiClientService.instance
               .callService({
                 topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
                 session: this.ubiiSession
@@ -95,30 +93,30 @@ export default {
     stopExample: async function() {
       this.running = false;
 
-      UbiiClientService.unsubscribeTopic(
+      UbiiClientService.instance.unsubscribeTopic(
         this.topicTouchObjects,
         this.handleTouchObjects
       );
 
       if (this.ubiiSession) {
-        await UbiiClientService.client.callService({
+        await UbiiClientService.instance.callService({
           topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: this.ubiiSession
         });
       }
 
       if (this.device) {
-        await UbiiClientService.deregisterDevice(this.device);
+        await UbiiClientService.instance.deregisterDevice(this.device);
       }
     },
     createUbiiSpecs: function() {
       this.topicVibrationDistanceThreshold =
         '/' +
-        UbiiClientService.getClientID() +
+        UbiiClientService.instance.getClientID() +
         '/smart_device_gatherer_example/vibration_distance_threshold';
       this.topicTouchObjects =
         '/' +
-        UbiiClientService.getClientID() +
+        UbiiClientService.instance.getClientID() +
         '/smart_device_gatherer_example/touch_objects';
 
       this.device = {
@@ -246,9 +244,9 @@ export default {
         name: 'SmartDeviceGathererExample - TopicMux positions',
         dataType: 'vector2',
         topicSelector:
-          UbiiClientService.getUUIDv4Regex() +
+          UbiiClientService.instance.getUUIDv4Regex() +
           '/web-interface-smart-device/touch_position',
-        identityMatchPattern: UbiiClientService.getUUIDv4Regex()
+        identityMatchPattern: UbiiClientService.instance.getUUIDv4Regex()
       };
 
       /* our demuxer will publish to "<ID>/web-interface-smart-device/vibration_pattern" when provided the ID as outputTopicParams */

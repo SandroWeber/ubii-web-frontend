@@ -5,7 +5,6 @@
 </template>
 
 <script>
-/* eslint-disable no-console */
 
 import ModelViewerUbiiConnections from './model-viewer-ubii-connections';
 import ModelViewerRendering from './model-viewer-rendering';

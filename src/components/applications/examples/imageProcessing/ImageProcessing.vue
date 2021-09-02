@@ -81,7 +81,10 @@ export default {
         (this.subscribedCameraTopic && this.selectedCameraTopic !== this.subscribedCameraTopic) ||
         this.selectedCameraTopic === 'none'
       ) {
-        UbiiClientService.unsubscribeTopic(this.subscribedCameraTopic, this.drawImageTopicMirror);
+        UbiiClientService.instance.unsubscribeTopic(
+          this.subscribedCameraTopic,
+          this.drawImageTopicMirror
+        );
 
         if (this.selectedCameraTopic === 'none' || this.selectedCameraTopic === null) {
           let canvas = this.canvasImageMirror;
@@ -92,7 +95,10 @@ export default {
 
       if (this.selectedCameraTopic !== null && this.selectedCameraTopic !== 'none') {
         this.subscribedCameraTopic = this.selectedCameraTopic;
-        UbiiClientService.subscribeTopic(this.subscribedCameraTopic, this.drawImageTopicMirror);
+        UbiiClientService.instance.subscribeTopic(
+          this.subscribedCameraTopic,
+          this.drawImageTopicMirror
+        );
       }
     }
   },
@@ -128,7 +134,7 @@ export default {
     /* ubii methods */
     getImageTopicList: async function() {
       //TODO: get ubii components and search for image tags
-      let topicListReply = await UbiiClientService.callService({
+      let topicListReply = await UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST
       });
       this.cameraTopics = topicListReply.stringList.elements.filter(

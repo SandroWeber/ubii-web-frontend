@@ -34,7 +34,25 @@ export default class UbiiComponentCamera extends UbiiComponent {
       const track = this.mediaStream.getVideoTracks()[0];
       this.imageCapture = new ImageCapture(track);
 
+      await UbiiClientService.instance.waitForConnection();
       this.continuousPublishing();
+
+      /* develop code */
+      /*
+      UbiiClientService.instance.waitForConnection().then(() => {
+          let continuousPublishing = async () => {
+            let imageBitmap = await this.grabFrame();
+            this.publishFrame(imageBitmap);
+
+            if (this.running) {
+              setTimeout(continuousPublishing, this.publishFrequencyMS);
+            }
+          };
+          continuousPublishing();
+        });
+      })
+      .catch(error => console.error(error));
+      */
     } catch (error) {
       // eslint-disable-next-line no-console
       console.log(error);
@@ -56,8 +74,7 @@ export default class UbiiComponentCamera extends UbiiComponent {
   async grabFrame() {
     let imageBitmap = await this.imageCapture
       .grabFrame()
-      // eslint-disable-next-line no-console
-      .catch(error => console.log(error));
+      .catch(error => console.error(error));
     return imageBitmap;
   }
 
@@ -90,9 +107,9 @@ export default class UbiiComponentCamera extends UbiiComponent {
       });
     }
 
-    UbiiClientService.publishRecord({
+    UbiiClientService.instance.publishRecord({
       topic: this.topic,
-      timestamp: UbiiClientService.generateTimestamp(),
+      timestamp: UbiiClientService.instance.generateTimestamp(),
       image2D: {
         width: imageBuffer.width,
         height: imageBuffer.height,
