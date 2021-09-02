@@ -29,8 +29,15 @@ export default class UbiiSmartDevice {
   constructor(elementTouch) {
     Object.assign(this, UBII_SPECS_TEMPLATE);
     this.deviceData = {};
-    this.publishIntervalS = 0.02;
+    this.publishIntervalMilliseconds = 200;
     this.elementTouch = elementTouch;
+
+    this.accelDataLowerThreshold = 0.2;
+    this.accelRingbuffer = [];
+    this.accelRingbufferSize = 10;
+    this.accelRingbufferPos = 0;
+    this.velocityPrincipalDirectionMagnitudeThreshold = 30;
+    this.velocityPrincipalDirectionMinDifference = 10;
   }
 
   /* setup */
@@ -40,7 +47,7 @@ export default class UbiiSmartDevice {
 
     this.clientId = UbiiClientService.instance.getClientID();
 
-    navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
+    /*navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
     if (!navigator.vibrate) {
       let vibrateComponentIndex = this.components.findIndex(component =>
         component.topic.includes('/vibration_pattern')
@@ -49,7 +56,7 @@ export default class UbiiSmartDevice {
     } else {
       this.tNextVibrate = Date.now();
       navigator.vibrate(100);
-    }
+    }*/
 
     let topicPrefix = '/' + this.clientId + '/' + this.name;
     this.components.forEach(component => {
@@ -87,7 +94,7 @@ export default class UbiiSmartDevice {
 
     this.intervalPublishContinuousData = setInterval(() => {
       this.publishContinuousDeviceData();
-    }, this.publishIntervalS * 1000);
+    }, this.publishIntervalMilliseconds);
     if (this.componentVibrate) {
       UbiiClientService.instance.subscribeTopic(this.componentVibrate.topic, this.handleVibrationPattern);
     }
@@ -130,6 +137,25 @@ export default class UbiiSmartDevice {
   }
 
   onDeviceMotion(event) {
+    if (!this.deviceMotionInitialized) {
+      // adjust publishing frequency if API frequency is lower
+      if (event.interval && event.interval > this.publishIntervalMilliseconds) {
+        this.publishIntervalMilliseconds = event.interval;
+        this.accelRingbufferSize = 2000 / event.interval;
+      } else {
+        this.accelRingbufferSize = 2000 / this.publishIntervalMilliseconds;
+      }
+
+      this.deviceMotionInitialized = true;
+      return;
+    }
+
+    this.processAccelerationData(event.acceleration);
+    if (this.componentTouch && this.componentTouch.touches && this.componentTouch.touches.length > 0) {
+      let vel = this.velocityEstimate();
+      console.info(this.getVelocityPrincipalDirection(vel));
+    }
+
     // https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent
     let timestamp = UbiiClientService.instance.generateTimestamp();
     this.deviceData.accelerationData = {
@@ -140,6 +166,64 @@ export default class UbiiSmartDevice {
       rotationRate: event.rotationRate,
       timestamp: timestamp
     };
+  }
+
+  processAccelerationData(acceleration) {
+    // thresholding
+    let data = {
+      x: acceleration.x > this.accelDataLowerThreshold ? acceleration.x : 0,
+      y: acceleration.y > this.accelDataLowerThreshold ? acceleration.y : 0,
+      z: acceleration.z > this.accelDataLowerThreshold ? acceleration.z : 0
+    };
+    if (this.accelRingbuffer.length === this.accelRingbufferSize) {
+      this.accelRingbuffer[this.accelRingbufferPos] = data;
+    } else {
+      this.accelRingbuffer.push(data);
+    }
+    this.accelRingbufferPos = (this.accelRingbufferPos + 1) % this.accelRingbufferSize;
+
+    return data;
+  }
+
+  velocityEstimate() {
+    let summed = { x: 0, y: 0, z: 0 };
+    for (let element of this.accelRingbuffer) {
+      summed.x += element.x;
+      summed.y += element.y;
+      summed.z += element.z;
+    }
+
+    return summed;
+  }
+
+  getVelocityPrincipalDirection(velocityEstimate) {
+    let magnitude = velocityEstimate.x + velocityEstimate.y + velocityEstimate.z;
+    if (magnitude > this.velocityPrincipalDirectionMagnitudeThreshold) {
+      let diffXY = velocityEstimate.x - velocityEstimate.y;
+      let diffXZ = velocityEstimate.x - velocityEstimate.z;
+      let diffYZ = velocityEstimate.y - velocityEstimate.z;
+
+      if (
+        diffXY > this.velocityPrincipalDirectionMinDifference &&
+        diffXZ > this.velocityPrincipalDirectionMinDifference
+      ) {
+        return 'X';
+      } else if (
+        diffXY < -this.velocityPrincipalDirectionMinDifference &&
+        diffYZ > this.velocityPrincipalDirectionMinDifference
+      ) {
+        return 'Y';
+      } else if (
+        diffXZ < -this.velocityPrincipalDirectionMinDifference &&
+        diffYZ < -this.velocityPrincipalDirectionMinDifference
+      ) {
+        return 'Z';
+      } else {
+        return 'None';
+      }
+    } else {
+      return 'None';
+    }
   }
 
   /* ubii topic communication */
@@ -162,7 +246,7 @@ export default class UbiiSmartDevice {
     this.publishDeviceMotion();
 
     // call loop
-    setTimeout(this.publishContinuousDeviceData, this.publishIntervalS * 1000);
+    setTimeout(this.publishContinuousDeviceData, this.publishIntervalMilliseconds);
   }
 
   /* develop code */

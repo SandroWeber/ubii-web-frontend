@@ -11,8 +11,8 @@ export default class UbiiComponent {
     }
     this.running = true;
 
-    await UbiiClientService.waitForConnection();
-    this.clientId = UbiiClientService.getClientID();
+    await UbiiClientService.instance.waitForConnection();
+    this.clientId = UbiiClientService.instance.getClientID();
     this.topic = '/' + this.clientId + '/' + this.topicSuffix;
     
     await this.onStart();

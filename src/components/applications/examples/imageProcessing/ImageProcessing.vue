@@ -109,10 +109,10 @@ export default {
       }
       this.running = true;
 
-      await UbiiClientService.waitForConnection();
+      await UbiiClientService.instance.waitForConnection();
 
       // set up ubii camera interface
-      this.topicPrefix = '/' + UbiiClientService.getClientID() + '/image-processing';
+      this.topicPrefix = '/' + UbiiClientService.instance.getClientID() + '/image-processing';
       this.ubiiComponentCamera = new UbiiComponentCamera(100, ImageDataFormats.RGB8, document.getElementById('video'));
       this.ubiiComponentCamera.start();
 
