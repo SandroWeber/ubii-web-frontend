@@ -114,10 +114,10 @@ export default {
     });
 
     await UbiiClientService.instance.waitForConnection();
-    this.startInterface();
+    await this.startInterface();
 
-    UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, () => {
-      this.startInterface();
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, async () => {
+      await this.startInterface();
     });
     UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, async () => {
       await this.stopInterface();

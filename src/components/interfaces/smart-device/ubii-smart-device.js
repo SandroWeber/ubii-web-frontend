@@ -141,10 +141,11 @@ export default class UbiiSmartDevice {
       // adjust publishing frequency if API frequency is lower
       if (event.interval && event.interval > this.publishIntervalMilliseconds) {
         this.publishIntervalMilliseconds = event.interval;
-        this.accelRingbufferSize = 2000 / event.interval;
+        this.accelRingbufferSize = 100000 / event.interval;
       } else {
-        this.accelRingbufferSize = 2000 / this.publishIntervalMilliseconds;
+        this.accelRingbufferSize = 100000 / this.publishIntervalMilliseconds;
       }
+      console.info('this.accelRingbufferSize=' + this.accelRingbufferSize);
 
       this.deviceMotionInitialized = true;
       return;
@@ -153,6 +154,8 @@ export default class UbiiSmartDevice {
     this.processAccelerationData(event.acceleration);
     if (this.componentTouch && this.componentTouch.touches && this.componentTouch.touches.length > 0) {
       let vel = this.velocityEstimate();
+      //console.info(event.acceleration);
+      console.info(vel);
       console.info(this.getVelocityPrincipalDirection(vel));
     }
 
@@ -171,9 +174,9 @@ export default class UbiiSmartDevice {
   processAccelerationData(acceleration) {
     // thresholding
     let data = {
-      x: acceleration.x > this.accelDataLowerThreshold ? acceleration.x : 0,
-      y: acceleration.y > this.accelDataLowerThreshold ? acceleration.y : 0,
-      z: acceleration.z > this.accelDataLowerThreshold ? acceleration.z : 0
+      x: Math.abs(acceleration.x) > this.accelDataLowerThreshold ? acceleration.x : 0,
+      y: Math.abs(acceleration.y) > this.accelDataLowerThreshold ? acceleration.y : 0,
+      z: Math.abs(acceleration.z) > this.accelDataLowerThreshold ? acceleration.z : 0
     };
     if (this.accelRingbuffer.length === this.accelRingbufferSize) {
       this.accelRingbuffer[this.accelRingbufferPos] = data;
@@ -197,27 +200,30 @@ export default class UbiiSmartDevice {
   }
 
   getVelocityPrincipalDirection(velocityEstimate) {
-    let magnitude = velocityEstimate.x + velocityEstimate.y + velocityEstimate.z;
+    let absVelX = Math.abs(velocityEstimate.x), absVelY = Math.abs(velocityEstimate.y), absVelZ = Math.abs(velocityEstimate.z);
+    let magnitude = absVelX + absVelY + absVelZ;
     if (magnitude > this.velocityPrincipalDirectionMagnitudeThreshold) {
-      let diffXY = velocityEstimate.x - velocityEstimate.y;
-      let diffXZ = velocityEstimate.x - velocityEstimate.z;
-      let diffYZ = velocityEstimate.y - velocityEstimate.z;
+      // at least activity above threshold
+      // find biggest component (in absolute terms) that has threshold distance to other components 
+      let diffXY = absVelX - absVelY;
+      let diffXZ = absVelX - absVelZ;
+      let diffYZ = absVelY - absVelZ;
 
       if (
         diffXY > this.velocityPrincipalDirectionMinDifference &&
         diffXZ > this.velocityPrincipalDirectionMinDifference
       ) {
-        return 'X';
+        return Math.sign(velocityEstimate.x) + 'X';
       } else if (
         diffXY < -this.velocityPrincipalDirectionMinDifference &&
         diffYZ > this.velocityPrincipalDirectionMinDifference
       ) {
-        return 'Y';
+        return Math.sign(velocityEstimate.y) + 'Y';
       } else if (
         diffXZ < -this.velocityPrincipalDirectionMinDifference &&
         diffYZ < -this.velocityPrincipalDirectionMinDifference
       ) {
-        return 'Z';
+        return Math.sign(velocityEstimate.z) + 'Z';
       } else {
         return 'None';
       }
