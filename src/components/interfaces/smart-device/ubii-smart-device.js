@@ -146,19 +146,18 @@ export default class UbiiSmartDevice {
       } else {
         this.accelRingbufferSize = this.accelRingbufferSizeInMS / this.publishIntervalMilliseconds;
       }
-      console.info('this.accelRingbufferSize=' + this.accelRingbufferSize);
 
       this.deviceMotionInitialized = true;
       return;
     }
 
     this.processAccelerationData(event.acceleration);
-    if (this.componentTouch && this.componentTouch.touches && this.componentTouch.touches.length > 0) {
+    /*if (this.componentTouch && this.componentTouch.touches && this.componentTouch.touches.length > 0) {
       let vel = this.velocityEstimate();
-      //console.info(event.acceleration);
+      console.info(event.acceleration);
       console.info(vel);
       console.info(this.getVelocityPrincipalDirection(vel));
-    }
+    }*/
 
     // https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent
     let timestamp = UbiiClientService.instance.generateTimestamp();
