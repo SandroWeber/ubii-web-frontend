@@ -35,6 +35,7 @@ export default class UbiiSmartDevice {
     this.accelDataLowerThreshold = 0.2;
     this.accelRingbuffer = [];
     this.accelRingbufferSize = 10;
+    this.accelRingbufferSizeInMS = 100000;
     this.accelRingbufferPos = 0;
     this.velocityPrincipalDirectionMagnitudeThreshold = 30;
     this.velocityPrincipalDirectionMinDifference = 10;
@@ -141,9 +142,9 @@ export default class UbiiSmartDevice {
       // adjust publishing frequency if API frequency is lower
       if (event.interval && event.interval > this.publishIntervalMilliseconds) {
         this.publishIntervalMilliseconds = event.interval;
-        this.accelRingbufferSize = 100000 / event.interval;
+        this.accelRingbufferSize = this.accelRingbufferSizeInMS / event.interval;
       } else {
-        this.accelRingbufferSize = 100000 / this.publishIntervalMilliseconds;
+        this.accelRingbufferSize = this.accelRingbufferSizeInMS / this.publishIntervalMilliseconds;
       }
       console.info('this.accelRingbufferSize=' + this.accelRingbufferSize);
 
