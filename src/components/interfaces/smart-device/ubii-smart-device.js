@@ -151,8 +151,8 @@ export default class UbiiSmartDevice {
       return;
     }
 
-    this.processAccelerationData(event.acceleration);
-    /*if (this.componentTouch && this.componentTouch.touches && this.componentTouch.touches.length > 0) {
+    /*this.processAccelerationData(event.acceleration);
+    if (this.componentTouch && this.componentTouch.touches && this.componentTouch.touches.length > 0) {
       let vel = this.velocityEstimate();
       console.info(event.acceleration);
       console.info(vel);
