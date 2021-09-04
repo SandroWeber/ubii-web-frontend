@@ -61,9 +61,7 @@ class PMTestExecutionTriggerOnInput {
       outputs.outDouble = inputs.inDouble;
     }
 
-    let muxStringRecords =
-      inputs.inMuxStrings &&
-      inputs.inMuxStrings.elements;
+    let muxStringRecords = inputs.inMuxStrings && inputs.inMuxStrings.elements;
     if (muxStringRecords && muxStringRecords.length > 0) {
       outputs.outMuxStringLengths = { elements: [] };
       for (let muxStringRecord of muxStringRecords) {
@@ -222,7 +220,7 @@ class TestPMExecutionHelper {
       let token = {
         topic: session.topics.pmTriggerOnInput.topicOutDouble,
         type: 'topic',
-        callback: (record) => this.onOutputDoubleFromPMTriggerOnInput(record)
+        callback: (...params) => this.onOutputDoubleFromPMTriggerOnInput(...params)
       };
       await UbiiClientService.instance.subscribeTopic(token.topic, token.callback);
       this.subscriptionTokens.push(token);
@@ -231,7 +229,7 @@ class TestPMExecutionHelper {
         let token = {
           topic: topic,
           type: 'topic',
-          callback: (record) => this.onOutputStringLengthsFromPMTriggerOnInput(record)
+          callback: record => this.onOutputStringLengthsFromPMTriggerOnInput(record)
         };
         await UbiiClientService.instance.subscribeTopic(token.topic, token.callback);
         this.subscriptionTokens.push(token);
@@ -242,23 +240,24 @@ class TestPMExecutionHelper {
 
     this.expectedDoubles = new Map();
     this.expectedStringLenghts = new Map();
-    this.expectedTopicsReceived = [];
-    this.expectedTopicsReceived.push(session.topics.pmTriggerOnInput.topicOutDouble);
-    this.expectedTopicsReceived.push(...session.topics.pmTriggerOnInput.demuxStringLengthTopics);
-    console.info('expectedTopicsReceived:');
-    console.info(this.expectedTopicsReceived);
+    this.expectedTopics = [];
+    this.expectedTopics.push(session.topics.pmTriggerOnInput.topicOutDouble);
+    //this.expectedTopics.push(...session.topics.pmTriggerOnInput.demuxStringLengthTopics);
+    console.info('expectedTopics:');
+    console.info(this.expectedTopics);
 
     this.remainingSessionsIdsToStart = [];
     for (let session of this.settings.sessions) {
       let specSession = session.getProtobuf();
-      this.remainingSessionsIdsToStart.push(specSession.id);
       let reply = await UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_ADD,
         session: specSession
       });
       if (reply.session) {
         session.updateSpec(reply.session);
+        console.info('session added to runtime:');
         console.info(session.getProtobuf());
+        this.remainingSessionsIdsToStart.push(specSession.id);
       } else if (reply.error) {
         console.error(reply.error);
       }
@@ -271,15 +270,16 @@ class TestPMExecutionHelper {
     await this.prepareTest(nodeId);
 
     this.timeoutTestFailure = setTimeout(async () => {
+      console.info('test timeout');
       await this.stopTest();
       this.statistics.success = false;
       this.statistics.status = TestPMExecutionHelper.CONSTANTS.STATUS.TIMEOUT;
     }, TestPMExecutionHelper.CONSTANTS.TIMEOUT_MS);
 
     let token = {
-      topic: DEFAULT_TOPICS.INFO_TOPICS.START_SESSION,
+      topic: DEFAULT_TOPICS.INFO_TOPICS.RUNNING_SESSION,
       type: 'topic',
-      callback: (session) => {
+      callback: session => {
         this.remainingSessionsIdsToStart = this.remainingSessionsIdsToStart.filter(id => id !== session.id);
         if (this.remainingSessionsIdsToStart.length === 0) {
           this.runTest();
@@ -299,16 +299,16 @@ class TestPMExecutionHelper {
 
   async runTest() {
     if (this.statistics.status === TestPMExecutionHelper.CONSTANTS.STATUS.RUNNING) return;
+    console.info('running test');
 
     this.statistics.status = TestPMExecutionHelper.CONSTANTS.STATUS.RUNNING;
     this.statistics.startTime = Date.now();
 
     for (let session of this.settings.sessions) {
       let double = Math.random();
-      let topic = session.topics.pmTriggerOnInput.topicInDouble;
-      this.expectedDoubles.set(topic, double);
+      this.expectedDoubles.set(session.topics.pmTriggerOnInput.topicOutDouble, double);
       await UbiiClientService.instance.publishRecord({
-        topic: topic,
+        topic: session.topics.pmTriggerOnInput.topicInDouble,
         double: double
       });
 
@@ -329,7 +329,7 @@ class TestPMExecutionHelper {
     }
 
     this.intervalCheckDone = setInterval(() => {
-      if (this.expectedTopicsReceived.length === 0) {
+      if (this.expectedTopics.length === 0) {
         this.stopTest();
       }
     }, 100);
@@ -358,24 +358,41 @@ class TestPMExecutionHelper {
       }
     }
 
-    console.info('TestPMExecution stopped:');
+    console.info('TestPMExecution stopped, statistics:');
     console.info(this.statistics);
-    console.info(this.expectedTopicsReceived);
+    console.info('expectedTopics:');
+    console.info(this.expectedTopics);
   }
 
   onOutputDoubleFromPMTriggerOnInput(double, topic) {
     if (double !== this.expectedDoubles.get(topic)) {
+      console.error(
+        'expected double for ' +
+          topic +
+          ' does not match, received= ' +
+          double +
+          ' vs expected=' +
+          this.expectedDoubles.get(topic)
+      );
       this.statistics.success = false;
     }
 
-    this.expectedTopicsReceived.splice(this.expectedTopicsReceived.indexOf(topic), 1);
+    this.expectedTopics = this.expectedTopics.splice(this.expectedTopics.indexOf(topic), 1);
   }
 
   onOutputStringLengthsFromPMTriggerOnInput(length, topic) {
     if (length !== this.expectedStringLengthFromPMTriggerOnInput.get(topic)) {
+      console.error(
+        'expected string length for ' +
+          topic +
+          ' does not match, received= ' +
+          length +
+          ' vs expected=' +
+          this.expectedStringLengthFromPMTriggerOnInput.get(topic)
+      );
       this.statistics.success = false;
     }
-    this.expectedTopicsReceived.splice(this.expectedTopicsReceived.indexOf(topic), 1);
+    this.expectedTopics = this.expectedTopics.splice(this.expectedTopics.indexOf(topic), 1);
   }
 }
 
