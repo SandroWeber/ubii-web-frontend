@@ -1,19 +1,19 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
     <div ref="top-div">
-      <fullscreen ref="fullscreen" class="fullscreen" @change="onFullScreenChange" style="overflow: hidden;">
+      <fullscreen ref="fullscreen" class="fullscreen" @change="onFullScreenChange" style="overflow: hidden">
         <div class="content">
-          <button class="button-safari-permissions" v-show="isSafari" @click="safariRequestPermissions()">
+          <button
+            class="button-safari-permissions"
+            v-show="needsImuPermissions && !grantedImuPermission && calibrated"
+            @click="requestImuPermissions()"
+          >
             IMU Permissions
           </button>
 
-          <button class="button-debug" @click="showDebugView = !showDebugView">
-            Debug View
-          </button>
+          <button class="button-debug" @click="showDebugView = !showDebugView">Debug View</button>
 
-          <button class="button-calibrate" @click="calibrate()">
-            Calibrate
-          </button>
+          <button class="button-calibrate" @click="calibrate()">Calibrate</button>
 
           <button class="button-fullscreen" @click="toggleFullScreen()">
             <font-awesome-icon icon="compress" class="interface-icon" v-show="fullscreen" />
@@ -27,9 +27,7 @@
             <br />
             <span>Touch0: {{ getTouch0X() }} {{ getTouch0Y() }}</span>
             <br />
-            <span v-if="!debugDeviceOrientation">
-              IMU data only available via HTTPS
-            </span>
+            <span v-if="!debugDeviceOrientation"> IMU data only available via HTTPS </span>
             <br />
             <span>Orientation:</span>
             <span v-if="debugDeviceOrientation">
@@ -75,8 +73,6 @@
 <script>
 import Vue from 'vue';
 import Fullscreen from 'vue-fullscreen';
-import Bowser from 'bowser';
-const browser = Bowser.getParser(window.navigator.userAgent);
 
 import UbiiClientContent from '../../applications/sharedModules/UbiiClientContent';
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
@@ -105,10 +101,10 @@ export default {
       debugFixedCalibratedOrientation: undefined,
       debugAcceleration: undefined,
       debugRotationRate: undefined,
-      isSafari: undefined
+      grantedImuPermission: false,
     };
   },
-  mounted: function() {
+  mounted: async function () {
     this.initializing = false;
     this.hasRegisteredUbiiDevice = false;
 
@@ -117,88 +113,86 @@ export default {
       await this.stopInterface();
     });
 
-    UbiiClientService.instance.waitForConnection().then(() => {
-      this.startInterface();
+    await UbiiClientService.instance.waitForConnection();
+    await this.startInterface();
+
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, async () => {
+      await this.startInterface();
     });
-    UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, () => {
-      this.startInterface();
-    });
-    UbiiClientService.instance.onDisconnect(async () => {
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, async () => {
       await this.stopInterface();
     });
-
-    this.isSafari = browser.getBrowserName() === 'Safari';
   },
-  beforeDestroy: function() {
+  beforeDestroy: function () {
     this.stopInterface();
   },
-  /*computed: {
-    touch0X: function() {
+  computed: {
+    needsImuPermissions: function () {
       return (
-        this.ubiiDevice.deviceData &&
-        this.ubiiDevice.deviceData.touches &&
-        this.ubiiDevice.deviceData.touches[0] &&
-        this.round(this.ubiiDevice.deviceData.touches[0].clientX, 1)
+        typeof DeviceMotionEvent !== 'undefined' &&
+        DeviceMotionEvent.requestPermission !== undefined &&
+        typeof DeviceOrientationEvent !== 'undefined' &&
+        DeviceOrientationEvent.requestPermission !== undefined
       );
-    }
-  },*/
+    },
+  },
   methods: {
-    startInterface: async function() {
+    startInterface: async function () {
       if (this.initializing) return;
 
       this.initializing = true;
 
-      this.ubiiDevice = new UbiiSmartDevice();
+      this.elementTouch = document.getElementById('touch-area');
+      this.ubiiDevice = new UbiiSmartDevice(this.elementTouch);
       await this.ubiiDevice.init();
 
       this.intervalUpdateDebugView = setInterval(this.updateDebugView, 100);
     },
-    stopInterface: async function() {
+    stopInterface: async function () {
       this.ubiiDevice && (await this.ubiiDevice.deinit());
       this.intervalUpdateDebugView && clearInterval(this.intervalUpdateDebugView);
     },
-    safariRequestPermissions: async function() {
-      if (this.isSafari) {
-        let permissionDeviceMotion = 'denied',
-          permissionDeviceOrientation = 'denied';
-        
-        permissionDeviceMotion = await DeviceMotionEvent.requestPermission();
-        permissionDeviceOrientation = await DeviceOrientationEvent.requestPermission();
+    requestImuPermissions: async function () {
+      let permissionDeviceMotion = 'denied',
+        permissionDeviceOrientation = 'denied';
 
-        if (permissionDeviceMotion === 'granted' && permissionDeviceOrientation === 'granted') {
-          this.ubiiDevice.registerEventListeners();
-        }
+      permissionDeviceMotion = await DeviceMotionEvent.requestPermission();
+      permissionDeviceOrientation = await DeviceOrientationEvent.requestPermission();
+
+      if (permissionDeviceMotion === 'granted' && permissionDeviceOrientation === 'granted') {
+        this.grantedImuPermission = true;
+        this.ubiiDevice.registerEventListeners();
       }
     },
-    onTouchStart: function(event) {
+    onTouchStart: function (event) {
       this.debugOutput = 'event onTouchStart';
-      this.ubiiDevice.onTouchStart(event);
+      this.ubiiDevice && this.ubiiDevice.componentTouch && this.ubiiDevice.componentTouch.onTouchStart(event);
     },
-    onTouchMove: function(event) {
+    onTouchMove: function (event) {
       this.debugOutput = 'event onTouchMove';
-      this.ubiiDevice.onTouchMove(event);
+      this.ubiiDevice && this.ubiiDevice.componentTouch && this.ubiiDevice.componentTouch.onTouchMove(event);
     },
-    onTouchEnd: function(event) {
+    onTouchEnd: function (event) {
       this.debugOutput = 'event onTouchEnd';
-      this.ubiiDevice.onTouchEnd(event);
+      this.ubiiDevice && this.ubiiDevice.componentTouch && this.ubiiDevice.componentTouch.onTouchEnd(event);
     },
     /* helper methods */
-    round: function(value, digits) {
+    round: function (value, digits) {
       return Math.round(value * digits * 10) / (digits * 10);
     },
-    toggleFullScreen: function() {
+    toggleFullScreen: function () {
       this.$refs['fullscreen'].toggle();
     },
-    onFullScreenChange: function(fullscreen) {
+    onFullScreenChange: function (fullscreen) {
       this.fullscreen = fullscreen;
     },
-    calibrate: function() {
+    calibrate: function () {
       if (this.ubiiDevice.deviceData.currentOrientation) {
         this.ubiiDevice.deviceData.calibratedOrientation = this.ubiiDevice.deviceData.currentOrientation;
       }
     },
     /* GUI methods */
-    getTouch0X: function() {
+    getTouch0X: function () {
       return (
         this.ubiiDevice &&
         this.ubiiDevice.deviceData &&
@@ -207,7 +201,7 @@ export default {
         this.round(this.ubiiDevice.deviceData.touches[0].clientX, 1)
       );
     },
-    getTouch0Y: function() {
+    getTouch0Y: function () {
       return (
         this.ubiiDevice &&
         this.ubiiDevice.deviceData &&
@@ -216,7 +210,7 @@ export default {
         this.round(this.ubiiDevice.deviceData.touches[0].clientY, 1)
       );
     },
-    updateDebugView: function() {
+    updateDebugView: function () {
       if (this.showDebugView) {
         let ubiiDeviceData = this.ubiiDevice && this.ubiiDevice.deviceData;
 
@@ -224,12 +218,12 @@ export default {
           this.debugDeviceOrientation = {
             alpha: this.round(ubiiDeviceData.currentOrientation.alpha, 2),
             beta: this.round(ubiiDeviceData.currentOrientation.beta, 2),
-            gamma: this.round(ubiiDeviceData.currentOrientation.gamma, 2)
+            gamma: this.round(ubiiDeviceData.currentOrientation.gamma, 2),
           };
           this.debugFixedCalibratedOrientation = {
             alpha: this.round(ubiiDeviceData.fixedCalibratedOrientation.alpha, 2),
             beta: this.round(ubiiDeviceData.fixedCalibratedOrientation.beta, 2),
-            gamma: this.round(ubiiDeviceData.fixedCalibratedOrientation.gamma, 2)
+            gamma: this.round(ubiiDeviceData.fixedCalibratedOrientation.gamma, 2),
           };
         }
 
@@ -237,7 +231,7 @@ export default {
           this.debugAcceleration = {
             x: this.round(ubiiDeviceData.accelerationData.acceleration.x, 2),
             y: this.round(ubiiDeviceData.accelerationData.acceleration.y, 2),
-            z: this.round(ubiiDeviceData.accelerationData.acceleration.z, 2)
+            z: this.round(ubiiDeviceData.accelerationData.acceleration.z, 2),
           };
         }
 
@@ -245,12 +239,12 @@ export default {
           this.debugRotationRate = {
             alpha: this.round(ubiiDeviceData.rotationRateData.rotationRate.alpha, 2),
             beta: this.round(ubiiDeviceData.rotationRateData.rotationRate.beta, 2),
-            gamma: this.round(ubiiDeviceData.rotationRateData.rotationRate.gamma, 2)
+            gamma: this.round(ubiiDeviceData.rotationRateData.rotationRate.gamma, 2),
           };
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

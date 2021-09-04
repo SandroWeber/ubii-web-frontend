@@ -8,23 +8,11 @@
     ></multiselect>
 
     <div class="processing-options">
-      <input
-        type="radio"
-        id="processing-option-none"
-        value="none"
-        v-model="processingOption"
-      />
+      <input type="radio" id="processing-option-none" value="none" v-model="processingOption" />
       <label for="processing-option-none">none</label>
       <br />
-      <input
-        type="radio"
-        id="processing-option-coco-ssd"
-        value="coco-ssd"
-        v-model="processingOption"
-      />
-      <label for="processing-option-coco-ssd"
-        >CoCo SSD Object Recognition</label
-      >
+      <input type="radio" id="processing-option-coco-ssd" value="coco-ssd" v-model="processingOption" />
+      <label for="processing-option-coco-ssd">CoCo SSD Object Recognition</label>
       <br />
       <input
         type="radio"
@@ -33,9 +21,7 @@
         v-model="processingOption"
         :disabled="true"
       />
-      <label for="processing-option-tesseract-ocr"
-        >Tesseract OCR (coming soon)</label
-      >
+      <label for="processing-option-tesseract-ocr">Tesseract OCR (coming soon)</label>
       <app-button
         class="button round button-toggle-processing"
         :class="processing ? 'red-accent' : 'green-accent'"
@@ -61,7 +47,7 @@ import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 const ImageDataFormats = ProtobufLibrary.ubii.dataStructure.Image2D.DataFormat;
 
 import { AppButton } from '../../../appComponents/appComponents.js';
-import UbiiCameraInterface from '../../../interfaces/ubiiCameraInterface';
+import UbiiComponentCamera from '../../../../ubii/components/ubii-component-camera';
 import UbiiSessionCocoSSD from './ubiiSessionCocoSSD';
 
 export default {
@@ -92,8 +78,7 @@ export default {
     selectedCameraTopic: function() {
       // unsubscribe old topic first
       if (
-        (this.subscribedCameraTopic &&
-          this.selectedCameraTopic !== this.subscribedCameraTopic) ||
+        (this.subscribedCameraTopic && this.selectedCameraTopic !== this.subscribedCameraTopic) ||
         this.selectedCameraTopic === 'none'
       ) {
         UbiiClientService.instance.unsubscribeTopic(
@@ -101,20 +86,14 @@ export default {
           this.drawImageTopicMirror
         );
 
-        if (
-          this.selectedCameraTopic === 'none' ||
-          this.selectedCameraTopic === null
-        ) {
+        if (this.selectedCameraTopic === 'none' || this.selectedCameraTopic === null) {
           let canvas = this.canvasImageMirror;
           const context = canvas.getContext('2d');
           context.clearRect(0, 0, canvas.width, canvas.height);
         }
       }
 
-      if (
-        this.selectedCameraTopic !== null &&
-        this.selectedCameraTopic !== 'none'
-      ) {
+      if (this.selectedCameraTopic !== null && this.selectedCameraTopic !== 'none') {
         this.subscribedCameraTopic = this.selectedCameraTopic;
         UbiiClientService.instance.subscribeTopic(
           this.subscribedCameraTopic,
@@ -124,38 +103,32 @@ export default {
     }
   },
   methods: {
-    start: function() {
+    start: async function() {
       if (this.running) {
         return;
       }
       this.running = true;
 
-      UbiiClientService.instance.waitForConnection().then(() => {
-        // set up ubii camera interface
-        this.topicPrefix =
-          '/' + UbiiClientService.instance.getClientID() + '/image-processing';
-        this.ubiiCameraInterface = new UbiiCameraInterface(
-          ImageDataFormats.RGB8,
-          this.topicPrefix,
-          100,
-          document.getElementById('video')
-        );
-        this.ubiiCameraInterface.start();
+      await UbiiClientService.instance.waitForConnection();
 
-        // start polling a list of possible image topics
-        let pollImageTopicList = () => {
-          this.getImageTopicList();
-          if (this.running) {
-            setTimeout(pollImageTopicList, 1000);
-          }
-        };
-        pollImageTopicList();
-      });
+      // set up ubii camera interface
+      this.topicPrefix = '/' + UbiiClientService.instance.getClientID() + '/image-processing';
+      this.ubiiComponentCamera = new UbiiComponentCamera(100, ImageDataFormats.RGB8, document.getElementById('video'));
+      this.ubiiComponentCamera.start();
+
+      // start polling a list of possible image topics
+      let pollImageTopicList = () => {
+        this.getImageTopicList();
+        if (this.running) {
+          setTimeout(pollImageTopicList, 1000);
+        }
+      };
+      pollImageTopicList();
     },
     stop: function() {
       this.running = false;
 
-      this.ubiiCameraInterface && this.ubiiCameraInterface.stop();
+      this.ubiiComponentCamera && this.ubiiComponentCamera.stop();
       this.runningSession && this.runningSession.stopSession();
     },
     /* ubii methods */
@@ -165,8 +138,7 @@ export default {
         topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST
       });
       this.cameraTopics = topicListReply.stringList.elements.filter(
-        topic =>
-          topic.includes('camera_image') || topic.includes('camera-image')
+        topic => topic.includes('camera_image') || topic.includes('camera-image')
       );
       this.cameraTopics.push('none');
     },
@@ -182,8 +154,7 @@ export default {
       }
 
       if (this.processingOption === 'coco-ssd') {
-        this.predictionsOuptputTopic =
-          this.topicPrefix + '/coco-ssd/predictions';
+        this.predictionsOuptputTopic = this.topicPrefix + '/coco-ssd/predictions';
         this.runningSession = new UbiiSessionCocoSSD(
           this.subscribedCameraTopic,
           this.predictionsOuptputTopic,
@@ -202,10 +173,8 @@ export default {
       }
 
       // adjust overlay element
-      this.imageMirrorOverlay.style.width =
-        this.canvasImageMirror.clientWidth + 'px';
-      this.imageMirrorOverlay.style.height =
-        this.canvasImageMirror.clientHeight + 'px';
+      this.imageMirrorOverlay.style.width = this.canvasImageMirror.clientWidth + 'px';
+      this.imageMirrorOverlay.style.height = this.canvasImageMirror.clientHeight + 'px';
 
       let imageDataRGBA = undefined;
       if (image.dataFormat === ImageDataFormats.GRAY8) {
@@ -228,11 +197,7 @@ export default {
         imageDataRGBA = image.data;
       }
 
-      const imgData = new ImageData(
-        new Uint8ClampedArray(imageDataRGBA),
-        image.width,
-        image.height
-      );
+      const imgData = new ImageData(new Uint8ClampedArray(imageDataRGBA), image.width, image.height);
 
       const ctx = canvas.getContext('2d');
       let imageRatio = image.width / image.height;
