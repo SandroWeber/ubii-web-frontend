@@ -61,6 +61,7 @@ class PMTestExecutionTriggerOnInput {
       outputs.outDouble = inputs.inDouble;
     }
 
+    console.info('inputs.inMuxStrings = ' + inputs.inMuxStrings);
     let muxStringRecords = inputs.inMuxStrings && inputs.inMuxStrings.elements;
     if (muxStringRecords && muxStringRecords.length > 0) {
       outputs.outMuxStringLengths = { elements: [] };
@@ -199,7 +200,7 @@ class TestPMExecutionHelper {
     };
 
     this.subscriptionTokens = [];
-    this.expectedStringLengthFromPMTriggerOnInput = new Map();
+    this.stringsForPMTriggerOnInputMux = new Map();
   }
 
   addSession() {
@@ -212,10 +213,12 @@ class TestPMExecutionHelper {
   }
 
   async prepareTest(nodeId) {
+    console.info('reparing test ...');
     let session = this.addSession();
     session.addPMTriggerOnInput(nodeId);
 
     //TODO: after node-webbrowser includes new topicdata implementation, switch tokens
+    // subscribe to test output topics
     try {
       let token = {
         topic: session.topics.pmTriggerOnInput.topicOutDouble,
@@ -238,14 +241,38 @@ class TestPMExecutionHelper {
       console.error(error);
     }
 
+    // set some expectations
     this.expectedDoubles = new Map();
     this.expectedStringLenghts = new Map();
+
     this.expectedTopics = [];
-    this.expectedTopics.push(session.topics.pmTriggerOnInput.topicOutDouble);
-    //this.expectedTopics.push(...session.topics.pmTriggerOnInput.demuxStringLengthTopics);
+    for (let session of this.settings.sessions) {
+      this.expectedTopics.push(session.topics.pmTriggerOnInput.topicOutDouble);
+      this.expectedTopics.push(...session.topics.pmTriggerOnInput.demuxStringLengthTopics);
+
+      let double = Math.random();
+      this.expectedDoubles.set(session.topics.pmTriggerOnInput.topicOutDouble, double);
+      
+      for (let i = 0; i < session.topics.pmTriggerOnInput.muxStringTopics.length; i++) {
+        let stringTopic = session.topics.pmTriggerOnInput.muxStringTopics[i];
+        let lengthTopic = session.topics.pmTriggerOnInput.demuxStringLengthTopics[i];
+        // generate random string
+        let stringLength = Math.floor(Math.random() * 10 + 1);
+        let string = Math.random()
+          .toString(16)
+          .substr(2, stringLength);
+        // save string and length as expected
+        this.stringsForPMTriggerOnInputMux.set(stringTopic, string);
+        this.expectedStringLenghts.set(lengthTopic, string.length);
+      }
+    }
     console.info('expectedTopics:');
     console.info(this.expectedTopics);
+    console.info(this.expectedDoubles);
+    console.info(this.stringsForPMTriggerOnInputMux);
+    console.info(this.expectedStringLenghts);
 
+    // send sessions specs so we can run them later
     this.remainingSessionsIdsToStart = [];
     for (let session of this.settings.sessions) {
       let specSession = session.getProtobuf();
@@ -268,6 +295,8 @@ class TestPMExecutionHelper {
     if (this.statistics.status !== TestPMExecutionHelper.CONSTANTS.STATUS.READY) return;
 
     await this.prepareTest(nodeId);
+
+    console.info('starting test ...');
 
     this.timeoutTestFailure = setTimeout(async () => {
       console.info('test timeout');
@@ -305,26 +334,19 @@ class TestPMExecutionHelper {
     this.statistics.startTime = Date.now();
 
     for (let session of this.settings.sessions) {
-      let double = Math.random();
-      this.expectedDoubles.set(session.topics.pmTriggerOnInput.topicOutDouble, double);
       await UbiiClientService.instance.publishRecord({
         topic: session.topics.pmTriggerOnInput.topicInDouble,
-        double: double
+        double: this.expectedDoubles.get(session.topics.pmTriggerOnInput.topicInDouble)
       });
+      console.info('published ' + session.topics.pmTriggerOnInput.topicInDouble);
 
-      for (let topic of session.topics.pmTriggerOnInput.demuxStringLengthTopics) {
-        // generate random string
-        let stringLength = Math.floor(Math.random() * 10 + 1);
-        let string = Math.random()
-          .toString(16)
-          .substr(2, stringLength);
-        // save string length as expected
-        this.expectedStringLengthFromPMTriggerOnInput.set(topic, string.length);
+      for (let topic of session.topics.pmTriggerOnInput.muxStringTopics) {
         // publish random string
         await UbiiClientService.instance.publishRecord({
           topic: topic,
-          string: string
+          string: this.stringsForPMTriggerOnInputMux.get(topic)
         });
+        console.info('published ' + topic);
       }
     }
 
@@ -365,6 +387,7 @@ class TestPMExecutionHelper {
   }
 
   onOutputDoubleFromPMTriggerOnInput(double, topic) {
+    console.info('received: "' + topic + '" : ' + double);
     if (double !== this.expectedDoubles.get(topic)) {
       console.error(
         'expected double for ' +
@@ -381,14 +404,15 @@ class TestPMExecutionHelper {
   }
 
   onOutputStringLengthsFromPMTriggerOnInput(length, topic) {
-    if (length !== this.expectedStringLengthFromPMTriggerOnInput.get(topic)) {
+    console.info('received: "' + topic + '" : ' + length);
+    if (length !== this.stringsForPMTriggerOnInputMux.get(topic)) {
       console.error(
         'expected string length for ' +
           topic +
           ' does not match, received= ' +
           length +
           ' vs expected=' +
-          this.expectedStringLengthFromPMTriggerOnInput.get(topic)
+          this.stringsForPMTriggerOnInputMux.get(topic)
       );
       this.statistics.success = false;
     }
