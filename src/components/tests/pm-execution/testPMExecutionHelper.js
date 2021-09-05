@@ -53,7 +53,7 @@ class PMTestExecutionTriggerOnInput {
   static onProcessing(deltaTime, inputs, state) {
     let outputs = {};
 
-    console.info('inDouble = ' + inputs.inDouble);
+    console.info('inputs.inDouble: ' + inputs.inDouble);
 
     // check if changed, otherwise no output
     if (inputs.inDouble && inputs.inDouble !== state.lastInDouble) {
@@ -61,22 +61,25 @@ class PMTestExecutionTriggerOnInput {
       outputs.outDouble = inputs.inDouble;
     }
 
-    console.info('inputs.inMuxStrings = ' + inputs.inMuxStrings);
-    let muxStringRecords = inputs.inMuxStrings && inputs.inMuxStrings.elements;
-    if (muxStringRecords && muxStringRecords.length > 0) {
-      outputs.outMuxStringLengths = { elements: [] };
-      for (let muxStringRecord of muxStringRecords) {
-        let topic = muxStringRecord.topic;
-        let string = muxStringRecord[muxStringRecord.type];
-        // detect if string length is new or has changed, if not do not produce output
-        if (!state.mapStringLengths.has(topic) || state.mapStringLengths.get(topic) !== string.length) {
-          outputs.outMuxStringLengths.elements.push({
-            int32: string.length,
-            outputTopicParams: [muxStringRecord.identity]
-          });
+    console.info('inputs.inMuxStrings:');
+    console.info(inputs.inMuxStrings);
+    if (inputs.inMuxStrings && inputs.inMuxStrings.elements) {
+      let muxStringRecords = inputs.inMuxStrings.elements;
+      if (muxStringRecords && muxStringRecords.length > 0) {
+        outputs.outMuxStringLengths = { elements: [] };
+        for (let muxStringRecord of muxStringRecords) {
+          let topic = muxStringRecord.topic;
+          let string = muxStringRecord[muxStringRecord.type];
+          // detect if string length is new or has changed, if not do not produce output
+          if (!state.mapStringLengths.has(topic) || state.mapStringLengths.get(topic) !== string.length) {
+            outputs.outMuxStringLengths.elements.push({
+              int32: string.length,
+              outputTopicParams: [muxStringRecord.identity]
+            });
+          }
+          // update map
+          state.mapStringLengths.set(muxStringRecord.topic, string.length);
         }
-        // update map
-        state.mapStringLengths.set(muxStringRecord.topic, string.length);
       }
     }
 
