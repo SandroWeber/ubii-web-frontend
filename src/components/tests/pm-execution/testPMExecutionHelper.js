@@ -51,45 +51,55 @@ class PMTestExecutionTriggerOnInput {
   //static NAME_IN_MUX_STRINGS = 'inMuxStrings';
   //static NAME_OUT_MUX_STRING_LENGTHS = 'outMuxStringLengths';
   static onProcessing(deltaTime, inputs, state) {
+    console.info('\n ### onProcessing');
+    //console.info('state:');
+    //console.info(state);
+
     let outputs = {};
 
-    console.info('inputs.inDouble: ' + inputs.inDouble);
-
+    //console.info('inputs.inDouble: ' + inputs.inDouble);
     // check if changed, otherwise no output
     if (inputs.inDouble && inputs.inDouble !== state.lastInDouble) {
       state.lastInDouble = inputs.inDouble;
       outputs.outDouble = inputs.inDouble;
     }
 
-    console.info('inputs.inMuxStrings:');
-    console.info(inputs.inMuxStrings);
-    if (inputs.inMuxStrings && inputs.inMuxStrings.elements) {
-      let muxStringRecords = inputs.inMuxStrings.elements;
-      if (muxStringRecords && muxStringRecords.length > 0) {
-        outputs.outMuxStringLengths = { elements: [] };
-        for (let muxStringRecord of muxStringRecords) {
-          let topic = muxStringRecord.topic;
-          let string = muxStringRecord[muxStringRecord.type];
-          // detect if string length is new or has changed, if not do not produce output
-          if (!state.mapStringLengths.has(topic) || state.mapStringLengths.get(topic) !== string.length) {
-            outputs.outMuxStringLengths.elements.push({
-              int32: string.length,
-              outputTopicParams: [muxStringRecord.identity]
-            });
-          }
-          // update map
-          state.mapStringLengths.set(muxStringRecord.topic, string.length);
+    //console.info('inputs.inMuxStrings:');
+    //console.info(inputs.inMuxStrings);
+    if (inputs.inMuxStrings && inputs.inMuxStrings.elements && inputs.inMuxStrings.elements.length > 0) {
+      let muxRecords = inputs.inMuxStrings.elements;
+      //console.info('muxRecords:');
+      //console.info(muxRecords);
+      outputs.outMuxStringLengths = { elements: [] };
+      for (let i = 0; i < muxRecords.length; i++) {
+        let muxStringRecord = muxRecords[i];
+        //console.info('muxStringRecord:');
+        //console.info(muxStringRecord);
+        let topic = muxStringRecord.topic;
+        let inputString = muxStringRecord[muxStringRecord.type];
+        //console.info(inputString);
+        // detect if string length is new or has changed, if not do not produce output
+        if (!state.mapStringLengths.has(topic) || state.mapStringLengths.get(topic) !== inputString.length) {
+          outputs.outMuxStringLengths.elements.push({
+            int32: inputString.length,
+            outputTopicParams: [muxStringRecord.identity]
+          });
         }
+        // update map
+        state.mapStringLengths.set(topic, inputString.length);
       }
     }
 
+    console.info('outputs:');
     console.info(outputs);
+    console.info('### onProcessing done\n');
     return outputs;
   }
 
   static getProtobuf(nameSuffix, nodeId) {
     let specs = Object.assign({}, PMTestExecutionTriggerOnInput.TEMPLATE);
     specs.name += nameSuffix;
+    specs.onCreatedStringified = PMTestExecutionTriggerOnInput.onCreated.toString();
     specs.onProcessingStringified = PMTestExecutionTriggerOnInput.onProcessing.toString();
     specs.nodeId = nodeId;
 
@@ -132,7 +142,7 @@ class TestPMExecutionSession {
           this.topicPrefix + '/string_length/mux_string_3',
           this.topicPrefix + '/string_length/mux_string_4'
         ],
-        demuxTopicPattern: this.topicPrefix + '/string_length/{{#1}}'
+        demuxTopicPattern: this.topicPrefix + '/string_length/{{#0}}'
       }
     };
   }
@@ -199,7 +209,7 @@ class TestPMExecutionHelper {
 
     this.statistics = {
       status: TestPMExecutionHelper.CONSTANTS.STATUS.READY,
-      success: undefined
+      success: true
     };
 
     this.subscriptionTokens = [];
@@ -235,7 +245,7 @@ class TestPMExecutionHelper {
         let token = {
           topic: topic,
           type: 'topic',
-          callback: record => this.onOutputStringLengthsFromPMTriggerOnInput(record)
+          callback: (...params) => this.onOutputStringLengthsFromPMTriggerOnInput(...params)
         };
         await UbiiClientService.instance.subscribeTopic(token.topic, token.callback);
         this.subscriptionTokens.push(token);
@@ -246,7 +256,7 @@ class TestPMExecutionHelper {
 
     // set some expectations
     this.expectedDoubles = new Map();
-    this.expectedStringLenghts = new Map();
+    this.expectedStringLengths = new Map();
 
     this.expectedTopics = [];
     for (let session of this.settings.sessions) {
@@ -255,7 +265,7 @@ class TestPMExecutionHelper {
 
       let double = Math.random();
       this.expectedDoubles.set(session.topics.pmTriggerOnInput.topicOutDouble, double);
-      
+
       for (let i = 0; i < session.topics.pmTriggerOnInput.muxStringTopics.length; i++) {
         let stringTopic = session.topics.pmTriggerOnInput.muxStringTopics[i];
         let lengthTopic = session.topics.pmTriggerOnInput.demuxStringLengthTopics[i];
@@ -266,14 +276,14 @@ class TestPMExecutionHelper {
           .substr(2, stringLength);
         // save string and length as expected
         this.stringsForPMTriggerOnInputMux.set(stringTopic, string);
-        this.expectedStringLenghts.set(lengthTopic, string.length);
+        this.expectedStringLengths.set(lengthTopic, string.length);
       }
     }
     console.info('expectedTopics:');
     console.info(this.expectedTopics);
     console.info(this.expectedDoubles);
     console.info(this.stringsForPMTriggerOnInputMux);
-    console.info(this.expectedStringLenghts);
+    console.info(this.expectedStringLengths);
 
     // send sessions specs so we can run them later
     this.remainingSessionsIdsToStart = [];
@@ -337,11 +347,13 @@ class TestPMExecutionHelper {
     this.statistics.startTime = Date.now();
 
     for (let session of this.settings.sessions) {
-      await UbiiClientService.instance.publishRecord({
+      let record = {
         topic: session.topics.pmTriggerOnInput.topicInDouble,
-        double: this.expectedDoubles.get(session.topics.pmTriggerOnInput.topicInDouble)
-      });
-      console.info('published ' + session.topics.pmTriggerOnInput.topicInDouble);
+        double: this.expectedDoubles.get(session.topics.pmTriggerOnInput.topicOutDouble)
+      };
+      await UbiiClientService.instance.publishRecord(record);
+      console.info('published ' + record.topic);
+      console.info(record);
 
       for (let topic of session.topics.pmTriggerOnInput.muxStringTopics) {
         // publish random string
@@ -403,23 +415,30 @@ class TestPMExecutionHelper {
       this.statistics.success = false;
     }
 
-    this.expectedTopics = this.expectedTopics.splice(this.expectedTopics.indexOf(topic), 1);
+    if (this.expectedTopics.indexOf(topic) !== -1) {
+      this.expectedTopics.splice(this.expectedTopics.indexOf(topic), 1);
+    }
+    //console.info(this.expectedTopics);
   }
 
   onOutputStringLengthsFromPMTriggerOnInput(length, topic) {
     console.info('received: "' + topic + '" : ' + length);
-    if (length !== this.stringsForPMTriggerOnInputMux.get(topic)) {
+    if (length !== this.expectedStringLengths.get(topic)) {
       console.error(
         'expected string length for ' +
           topic +
-          ' does not match, received= ' +
+          ' does not match, received=' +
           length +
           ' vs expected=' +
-          this.stringsForPMTriggerOnInputMux.get(topic)
+          this.expectedStringLengths.get(topic)
       );
       this.statistics.success = false;
     }
-    this.expectedTopics = this.expectedTopics.splice(this.expectedTopics.indexOf(topic), 1);
+    
+    if (this.expectedTopics.indexOf(topic) !== -1) {
+      this.expectedTopics.splice(this.expectedTopics.indexOf(topic), 1);
+    }
+    //console.info(this.expectedTopics);
   }
 }
 
