@@ -2,28 +2,55 @@
   <div style="overflow: scroll">
   <Error :alert="trigger" :msg="msg"/>
   <div class="header-editor">
-    <span style="padding-right: 5px;">Sessions:</span>
-    <treeselect v-model="selectedSessionId" 
-      @input="showSessionPipeline()"
-      @open="loadOps"
-      :load-options="loadOps" 
-      :options="availableSessions" 
-      :auto-load-root-options="false" 
-      :multiple="false" 
-      placeholder="Sessions..."/>
+    <b-row>
+      <b-col>
+        <b-button @click="NewSession()" variant="outline-primary" >New Session</b-button>
+      </b-col>
+      <b-col>
+        <b-form-input v-model="SessionNameForNew" placeholder="Enter a new name for the session"></b-form-input>
+      </b-col>
+      <div class="w-100"><hr></div>
+      <b-col>
+      <treeselect v-model="selectedSessionId" 
+        @input="showSessionPipeline()"
+        @open="loadOps"
+        :load-options="loadOps" 
+        :options="availableSessions" 
+        :auto-load-root-options="false" 
+        :multiple="false" 
+        placeholder="Sessions..."/>
+      </b-col>
+    </b-row>
   </div>
   <div>
-    <b-container class="button-editor" fluid="xl">
+    <div class="button-editor flex-nowrap ">
       <b-row>
         <b-col>
-          <b-form-select v-model="selected_scene_order" :options="options_scene_order"></b-form-select>
+          <b-form-select
+          @change="reOrderGraph()"
+          v-model="selected_scene_order" :options="options_scene_order"></b-form-select>
+        </b-col>
+        <b-col align="center">
+          <b-button @click="playGraph()" variant="outline-primary" style="margin: 2px;">
+            <font-awesome-icon icon="play" style="color: green; display: flex;" class="tile-menu-icon" />  
+          </b-button>
+          <b-button @click="stopGraph()" variant="outline-primary" style="margin: 2px;">
+            <font-awesome-icon icon="stop" style="color: grey; display: flex;" class="tile-menu-icon" /> 
+          </b-button>
+          <b-button @click="saveGraph()" variant="outline-primary" style="margin: 2px;">
+            <font-awesome-icon icon="save" style="display: flex;" class="tile-menu-icon" /> 
+          </b-button>
+          <b-button @click="saveToLocalStorage()" variant="outline-primary" style="margin: 2px;">
+            <font-awesome-icon icon="save" style="display: flex;" class="tile-menu-icon" /> 
+          </b-button>
         </b-col>
         <b-col>
-          <b-button @click="playGraph()" variant="outline-primary" style="margin: 2px;">Play</b-button>
-          <b-button @click="stopGraph()" variant="outline-primary" style="margin: 2px;">Stop</b-button>
+          <b-form-select
+          @change="importSession()"
+          v-model="selected_session" :options="options_sessions_saved"></b-form-select>
         </b-col>
       </b-row>
-    </b-container>
+    </div>
   </div>
   <div align="center">
     <b-row no-gutters class="flex-nowrap" align="center">
@@ -31,14 +58,25 @@
         <b-tabs content-class="mt-3" class="ubii-graph-tabs">
           <b-tab title="Clients" active>
             <b-list-group>
-              <b-list-group-item variant="dark">Add Clients to the Graph.</b-list-group-item>
+              <b-list-group-item variant="dark">Add Clients to the Graph. 
+              <b-button @click="refresh('clients')" variant="outline-primary" style="margin: 2px;">
+                <font-awesome-icon icon="sync" style="display: flex;" class="tile-menu-icon" /> 
+              </b-button>
+              <b-button @click="filterList('clients')" variant="outline-primary" style="margin: 2px;">
+                <font-awesome-icon icon="filter" style="display: flex;" class="tile-menu-icon" /> 
+              </b-button>
+            </b-list-group-item>
               <b-list-group-item variant="dark" v-for="clientDev in addClientsList" :key="clientDev.id">
                 <b-card
                   title="Client.Device.Name"
                   bg-variant="dark" 
                   text-variant="white"
+                  v-on:dragstart="dragStart(clientDev)"
+                  v-on:drag="dragging"
+                  draggable="true"
                 >
                 <b-card-text>{{clientDev.id}}.{{clientDev.name}}</b-card-text>
+                <font-awesome-icon icon="arrows-alt" class="dragPos" />
                 <div >
                   <b-button @click="addClientToGraph(clientDev)" variant="outline-primary" style="margin: 2px;">Add Client to the Graph</b-button>
                   <b-button @click="removeClientNode(clientDev)" variant="outline-primary" style="margin: 2px;">Remove Client from the Graph</b-button>
@@ -49,23 +87,34 @@
           </b-tab>
           <b-tab title="Processing Modules">
             <b-list-group>
-              <b-list-group-item variant="dark">Add Processing Modules to the Graph.</b-list-group-item>
+              <b-list-group-item variant="dark">Add Processing Modules to the Graph.
+              <b-button @click="refresh('procs')" variant="outline-primary" style="margin: 2px;">
+                <font-awesome-icon icon="sync" style="display: flex;" class="tile-menu-icon" /> 
+              </b-button>
+              <b-button @click="filterList('procs')" variant="outline-primary" style="margin: 2px;">
+                <font-awesome-icon icon="filter" style="display: flex;" class="tile-menu-icon" /> 
+              </b-button>
+              </b-list-group-item>
               <b-list-group-item variant="dark" v-for="proc in addProcsList" :key="proc.id">
                 <b-card
                   title="Processing Module Name"
                   bg-variant="dark" 
                   text-variant="white"
+                  v-on:dragstart="dragStart(proc)"
+                  v-on:drag="dragging"
+                  draggable="true"
                 >
-                <b-card-text>{{proc.id}}.{{proc.name}}</b-card-text>
+                <b-card-text>{{proc.name}}</b-card-text>
+                <font-awesome-icon icon="arrows-alt" class="dragPos" />
                 <div >
                   <b-button @click="addProcToGraph(proc)" variant="outline-primary" style="margin: 2px;">Add PM the Graph</b-button>
-                  <b-button @click="removeProcNode(proc)" variant="outline-primary" style="margin: 2px;">Remove PM from the Graph</b-button>
+                  <!-- <b-button @click="removeProcNode(proc)" variant="outline-primary" style="margin: 2px;">Remove PM from the Graph</b-button> -->
                 </div>
                 </b-card>
               </b-list-group-item>
             </b-list-group>
           </b-tab>
-          <b-tab title="Debug">
+          <b-tab title="Message Inspector">
             <b-container class="debug-row">
               <b-row id="dIn" ref="DebugInputs" class="flex-nowrap justify-left" style="border: 1px solid; overflow: auto; padding: 1em"> 
               </b-row>
@@ -107,13 +156,26 @@
           </b-tab>  
         </b-tabs>
       </b-col><b-col>
-      <canvas id="canvas" class='litegraph' width='1024' height='720' style='border: 1px solid;'></canvas>
+      <canvas id="canvas" class='litegraph' width='1024' height='720' style='border: 1px solid;' v-on:drop="drop" v-on:dragover="allowDrop"></canvas>
       </b-col>
     </b-row>
   </div>
   </div>
 </template>
 <script>
+
+// Fontawesome.
+import { library } from '@fortawesome/fontawesome-svg-core';
+import {
+  faPlay,
+  faStop,
+  faSync,
+  faSave,
+  faFilter,
+  faArrowsAlt,
+
+} from '@fortawesome/free-solid-svg-icons';
+library.add(faPlay, faStop, faSync, faSave, faFilter, faArrowsAlt);
 
 import * as litegraph from "litegraph.js";
 // import uuid4 from "uuid";
@@ -169,10 +231,19 @@ export default {
       timer: null,
 
       options_scene_order:  [
-          { value: null, text: 'Select a GraphOrder' }
+          { value: null, text: 'Position Nodes by Saved Positions' },
+          { value: null, text: 'Position Nodes as List' },
+          { value: null, text: 'Position Nodes as Force graph' },
+
       ],
       selected_scene_order: null,
 
+      options_sessions_saved:  [
+          { value: null, text: 'Import a not wokring dummy Session' },
+
+      ],
+      selected_session: null,
+      SessionNameForNew: null,
 
       ClSeNodes: [],
       debug: { 
@@ -180,7 +251,9 @@ export default {
         active_inputs: [],
         func: null,
         active_outputs: []
-      }
+      },
+
+      draggedObject: null,
     };
   },
 
@@ -234,7 +307,8 @@ export default {
           this.addClientsList.push(
             {
               id: dev.clientId+'.'+dev.id,
-              name: dev.name
+              name: dev.name,
+              client: true 
             }
           )
         })
@@ -244,7 +318,7 @@ export default {
       const res = await this.ubiiGetResult(DEFAULT_TOPICS.SERVICES.PM_DATABASE_GET_LIST)
       const pList = res.processingModuleList.elements
 
-      this.addProcsList = pList.filter(val => val.sessionId === this.selectedSession.id)
+      this.addProcsList = pList //.filter(val => val.sessionId === this.selectedSession.id)
       // console.log(this.addProcsList)
     },
     loadLatenz: async function() {
@@ -254,7 +328,7 @@ export default {
     loadSession: async function () {
       const res = await this.ubiiGetResult(DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_GET_LIST)
       const sList = res.sessionList.elements
-      // console.log('Session:', sList)
+      //console.warn('Session:', sList)
       try { 
         this.selectedSession = sList.filter(val => val.status === 1 && this.selectedSessionId == val.id)[0]
         this.sessionUpdate = JSON.stringify(this.selectedSession, null, 2)
@@ -269,7 +343,7 @@ export default {
     // },
     loadClients: async function (filts) {
       const res = await this.ubiiGetResult(DEFAULT_TOPICS.SERVICES.CLIENT_GET_LIST)
-      const sList = res.clientList.elements
+      const cList = res.clientList.elements
  
       const clientFilts = filts.map(val => {
         return val.split('.')[0]
@@ -280,7 +354,7 @@ export default {
       })
 
       try {
-        this.clientsOfInterest = sList.filter(val => val.state === 0 && clientFilts.includes(val.id))
+        this.clientsOfInterest = cList.filter(val => val.state === 0 && clientFilts.includes(val.id))
         this.clientsOfInterest.forEach(client => {
           client.devices = client.devices.filter(val => deviceFilts.includes(val.name))
         })
@@ -310,13 +384,13 @@ export default {
     },
     registerInputTypes: async function() {
       
-//       import {
-// ProtobufTranslator,
-// MSG_TYPES,
-// DEFAULT_TOPICS,
-// proto
-// } from '@tum-far/ubii-msg-formats'
-// console.log(proto);
+      //       import {
+      // ProtobufTranslator,
+      // MSG_TYPES,
+      // DEFAULT_TOPICS,
+      // proto
+      // } from '@tum-far/ubii-msg-formats'
+      // console.log(proto);
 
 
       const types = ['double', 'bool', 'string', 'ubii.dataStructure.Vector2', 'ubii.dataStructure.Vector3', 'ubii.dataStructure.Vector4',
@@ -345,7 +419,7 @@ export default {
       function node()
       {
         this.size = [140, 80];
-  
+        this.id = proc.id
         inp.forEach(i => {
           this.addInput(i.internalName, i.messageFormat)
         })
@@ -360,16 +434,11 @@ export default {
       
       let that = this
       
-      node.prototype.onDrawForeground = function(ctx)
+      node.prototype.onDrawForeground = function()
       {
         this.size[0] = 400
         if(this.flags.collapsed)
-          return;
-        ctx.fillStyle = "#555";
-        ctx.fillRect(0,0,this.size[0],20);
-        
-        ctx.fillStyle = "#AAA";
-        ctx.fillText("Proc.ID: "+proc.id, 2, 15 );
+          return;        
       }
 
 
@@ -398,9 +467,16 @@ export default {
         ctx.lineTo(x + w * 0.8, -w * 0.6);
         ctx.lineTo(x + w * 0.5, -w * 0.3);
         ctx.fill();
+
+        ctx.fillStyle = "#555";
+        ctx.fillRect(0,0,this.size[0],20);
+
+        ctx.fillStyle = "#AAA";
+        ctx.fillText("Proc.ID:"+this.id, 2, 15 );
       };
 
       node.prototype.onConnectionsChange = function(inOrOut, slot, state, link_info, input_info) {
+          that.stopGraph()
           if (!that.debug.id) return
           // console.log('Input or Output', inOrOut);
           // console.log('slot', slot);
@@ -412,8 +488,6 @@ export default {
           // output remove
           // input add
           // output add
-          // play? active?
-          //
           let nodeIndex = -1
           if(inOrOut == 1 && !state) {
             that.debug.active_inputs.forEach((val,index) => {
@@ -467,7 +541,6 @@ export default {
             })
             // console.log(that.graph.status)
             if(that.graph.status == 2) that.playGraph();
-
         }
       };
 
@@ -507,17 +580,17 @@ export default {
       {
         
         latenz = that.latenz.filter(obj => this.id.split(".")[0] === obj.id)[0]
-        if (latenz !== undefined) latenz = latenz.latenz+'ms'; else latenz = 'NaN' 
+        if (latenz !== undefined) latenz = latenz.latenz+'ms'; else latenz = '' 
 
+        if(this.flags.collapsed)
+          return;
 
         var w = litegraph.LiteGraph.NODE_TITLE_HEIGHT;
         var x = this.size[0] - w;
         ctx.fillStyle = '#fff'
         ctx.fillText(latenz,x,-10)
 
-
-        if(this.flags.collapsed)
-          return;
+        
         ctx.fillStyle = "#555";
         ctx.fillRect(0,0,this.size[0],40);
         
@@ -539,16 +612,25 @@ export default {
       //register in the system
       litegraph.LiteGraph.registerNodeType("Clients/"+clientName+"/"+dev.name, node)
     },
-    addNode: function(name, pos, io, type, id) {
+    addNode: function(name, pos, io, type, id, realName, func, procMode, nodeId, sessionId, inputs, outputs) {
 
       var node_const = litegraph.LiteGraph.createNode(name);
       node_const.id = id
       node_const.pos = pos;
+
       this.ClSeNodes.push({
-            id: id,
-            type: type,
             edges: io,
+            type: type,
+            id: id,
+            name: realName,
+            func: func,
+            procMode: procMode,
+            nodeId: nodeId,
+            sessionId: sessionId,
+            inputs: inputs, 
+            outputs: outputs,
             node: node_const
+            
           })
       this.graph.add(node_const);
     },
@@ -590,7 +672,10 @@ export default {
       this.selectedSession.processingModules.forEach(proc => {
         const io = this.selectedSession.ioMappings.filter(val => proc.id === val.processingModuleId)[0]
         proc.position = [600,200];
-        this.addNode("Sessions/"+this.selectedSession.name+"/"+proc.name, proc.position, io, 'Proc', proc.id )
+        const inputs = proc.inputs
+        const outputs = proc.outputs
+        //function(name, pos, io, type, id, realName, func, procMode, nodeId, sessionId, inputs, outputs)
+        this.addNode("Sessions/"+this.selectedSession.name+"/"+proc.name, proc.position, io, 'Proc', proc.id, proc.name, proc.onProcessingStringified, proc.processingMode, proc.nodeId, proc.sessionId, inputs, outputs)
       })
     },
     addClientNodes: async function () {
@@ -630,11 +715,6 @@ export default {
         await this.addClientNodes()
         await this.addProcNodes()
         await this.connectNodes()
-        this.loadLatenz();
-        this.timer = setInterval(function () {
-          this.loadLatenz();
-        }.bind(this), 10000); 
-
       } catch (error) {
         // console.log(error)
       }
@@ -672,26 +752,31 @@ export default {
         this.ClSeNodes.splice(nodeIndex,1)
       }
     },
+    dragStart:function(proc)  {
+      this.draggedObject = proc
+    },
+    dragging:function() {
+    },
+    allowDrop:function(event) {
+      event.preventDefault();
+    },
+    drop:function(event) {
+      event.preventDefault();
+      console.warn(this.draggedObject)
+      if(this.draggedObject.client) this.addClientToGraph(this.draggedObject); else this.addProcToGraph(this.draggedObject)
+      this.draggedObject = null
+    },
     addProcToGraph: function (p) {
-      const pID = p.id.split('.')[0]
-      let nodeIndex = -1
-
-      this.ClSeNodes.forEach((val,index) => {
-        if(val.type === 'Proc' && val.id === pID)
-          nodeIndex = index
-      })
-
-      if (nodeIndex >= 0) {
-        const cNode = this.ClSeNodes[nodeIndex].node
-        this.lGraphCanvas.selectNode(cNode)
-        return
-      }
+      const pName = p.name
       // Use filter instead of continue
       this.addProcsList.forEach(proc => {
-        if (proc.id !== pID) return
-        const io = this.selectedSession.ioMappings.filter(val => proc.id === val.processingModuleId)[0]
-        proc.position = [600,200];
-        this.addNode("Sessions/"+this.selectedSession.name+"/"+proc.name, proc.position, io, 'Proc', proc.id )
+        if (proc.name !== pName) return
+        const id = 'NEW-'+crypto.randomUUID()
+        proc.position = [500,500];
+        const io = null
+        const inputs = proc.inputs
+        const outputs = proc.outputs
+        this.addNode("Sessions/"+this.selectedSession.name+"/"+proc.name, proc.position, io, 'Proc', id, proc.name, proc.onProcessingStringified, proc.processingMode, proc.nodeId, proc.sessionId, inputs, outputs)
       })
     },
     addClientToGraph: function (c) {
@@ -715,16 +800,17 @@ export default {
         client.devices.forEach(device => {
           if (device.id !== c.id.split('.')[1]) return
           
-          device.position = [200,200];
           this.addNode("Clients/"+client.name+"/"+device.name, device.position, device.components, 'ClientDevice', device.clientId+'.'+device.id)
         })
       })
     },
 
     playGraph: async function () {
-      // this.ws.onMessageReceived(this.wsCallback)
-      // const enc = new TextEncoder();
-      // this.ws.send(enc.encode("PING"))
+      this.loadLatenz();
+      this.timer = setInterval(function () {
+        this.loadLatenz();
+      }.bind(this), 10000);
+
       this.debug.active_inputs.forEach(val => {
         UbiiClientService.instance.unsubscribeTopic(
           val.topic
@@ -764,6 +850,7 @@ export default {
 
     },
     stopGraph: async function () {
+      clearInterval(this.timer)
       this.debug.active_inputs.forEach(val => {
         UbiiClientService.instance.unsubscribeTopic(
           val.topic
@@ -776,6 +863,122 @@ export default {
         );
       })
       this.graph.stop();
+    },
+    saveGraph: async function () {
+      // console.warn(this.ClSeNodes)
+      let session = {
+        "id": null,
+        "name": null,
+        "processingModules": [],
+        "ioMappings":[],
+        "status":null
+      }
+      if (this.selectedSession === null) {
+        //create new
+      } else {
+        session.id = this.selectedSession.id
+        session.name = this.selectedSession.name
+        session.status = this.selectedSession.status
+      }
+      const procs = this.ClSeNodes.filter(val => val.type === 'Proc')
+
+      procs.forEach(val => {
+          const p = {
+            "onProcessingStringified": null,
+            "name": null,
+            "processingMode": {
+              "frequency": {
+                "hertz": null
+              }
+            },
+            "inputs": [],
+            "outputs": [],
+            "sessionId": null,
+            "nodeId": null,
+            "id": null
+          }
+          p.id = val.id
+          p.sessionId = val.sessionId
+          p.nodeId = val.nodeId
+          p.name = val.name
+          p.onProcessingStringified = val.func
+          p.processingMode = val.procMode
+          p.inputs = val.inputs
+          p.outputs = val.outputs
+
+          session.processingModules.push(p)
+      })
+      procs.forEach(val => {
+          const io = this.findIOMappingsOf(val.id, val.node)
+          session.ioMappings.push(io)
+      })
+      console.warn(session)
+    },
+    findIOMappingsOf: function (procId, node) {
+
+      const inProcLinks = Object.values(node.graph.links).filter(val => procId === val.target_id)
+      const outProcLinks = Object.values(node.graph.links).filter(val => procId === val.origin_id) 
+
+      let inputMappings = []
+      let outputMappings = []
+
+
+      inProcLinks.forEach(val => {
+        const name = node.inputs[val.target_slot].name
+        const topicSource = "topic" // In the next version of Ubii this needs to change
+        
+        const client = node.graph._nodes.filter(nval => nval.id === val.origin_id)[0]
+        const topic = "/"+val.origin_id.split('.')[0]+"/"+client.title+"/"+client.outputs[val.origin_slot].name
+
+        inputMappings.push({
+          "inputName": name,
+          "topicSource": topicSource,
+          "topic": topic 
+        })
+      })
+
+      outProcLinks.forEach(val => {
+        const name = node.outputs[val.origin_slot].name
+        const topicSource = "topic" // In the next version of Ubii this needs to change
+        
+        const client = node.graph._nodes.filter(nval => nval.id === val.target_id)[0]
+        const topic = "/"+val.target_id.split('.')[0]+"/"+client.title+"/"+client.inputs[val.target_slot].name
+
+        outputMappings.push({
+          "outputName": name,
+          "topicDestination": topicSource,
+          "topic": topic 
+        })
+      })
+
+
+      return {
+        "processingModuleName": node.title,
+        "inputMappings": inputMappings,
+        "outputMappings": outputMappings,
+        "processingModuleId": procId
+      }
+
+    },
+    reOrderGraph: async function () {
+      this.graph.arrange()
+    },
+    refresh: async function (CoP) {
+      console.warn(CoP)
+    },
+    NewSession: async function () {
+      console.warn(this.ClSeNodes)
+
+    },
+    filterList: async function () {
+
+    },
+    saveToLocalStorage: async function () {
+
+      console.warn(this.ClSeNodes)
+
+      // const parsed = JSON.stringify();
+      // localStorage.setItem();
     }
   }
   
@@ -783,6 +986,13 @@ export default {
 </script>
 
 <style>
+
+  .dragPos {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
+
   .header-editor {
     border: 1px solid;
     padding: 20px;
