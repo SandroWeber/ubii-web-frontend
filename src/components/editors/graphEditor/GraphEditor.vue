@@ -105,6 +105,7 @@
                   draggable="true"
                 >
                 <b-card-text>{{proc.name}}</b-card-text>
+                <b-form-select v-model="selectedProcId" :options="proc.ids"></b-form-select>
                 <font-awesome-icon icon="arrows-alt" class="dragPos" />
                 <div >
                   <b-button @click="addProcToGraph(proc)" variant="outline-primary" style="margin: 2px;">Add PM the Graph</b-button>
@@ -226,6 +227,7 @@ export default {
 
       addClientsList: [],
       addProcsList: [],
+      selectedProcId: 'New',
 
       latenz: [],
       timer: null,
@@ -276,7 +278,7 @@ export default {
     clearBeforeRender: async function() {
       this.ClSeNodes = []
       this.addClientsList = []
-      this.addProcsList = []
+      this.addProcsList = [],
       this.latenz = []
       this.$refs.DebugInputs.innerHTML = ''
       this.$refs.DebugOutputs.innerHTML = ''
@@ -314,12 +316,26 @@ export default {
         })
       })
     },
+    addArray: async function(uniq) {
+      uniq.forEach(val => {
+        val.ids = ['New']
+      })
+      return uniq
+    },
+    addIds: async function(pList, uniq) {
+      pList.forEach(val => {
+        let p = uniq.filter(u => u.name === val.name)[0]
+        p.ids.push(val.id)
+      })
+
+      return await uniq
+    },
     addProcsToList: async function() {
       const res = await this.ubiiGetResult(DEFAULT_TOPICS.SERVICES.PM_DATABASE_GET_LIST)
-      const pList = res.processingModuleList.elements
-
-      this.addProcsList = pList //.filter(val => val.sessionId === this.selectedSession.id)
-      // console.log(this.addProcsList)
+      const pList = await res.processingModuleList.elements
+      let uniq = [...new Map(pList.map(item => [item['name'], item])).values()]; //.filter(val => val.sessionId === this.selectedSession.id)
+      uniq = await this.addArray(uniq)
+      this.addProcsList  = await this.addIds(pList, uniq)
     },
     loadLatenz: async function() {
       const res = await this.ubiiGetResult(DEFAULT_TOPICS.SERVICES.LATENZ_CLIENTS_LIST)
