@@ -202,6 +202,9 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 Vue.use(BootstrapVue)
 
+import cm from './funcsClientProcs/clientFuncs.js'
+import pm from './funcsClientProcs/procsFuncs.js'
+
 export default {
   name: "LiteGraph",
   components: {
@@ -303,8 +306,8 @@ export default {
 
     },
     addClientsToList: async function() {
-      
-      this.clientsOfInterest.filter(val => val.state === 0).forEach(client => {
+      this.addClientsList = []
+      this.clientsOfInterest.filter(val => val.state === 0).forEach(client => {   
         client.devices.forEach(dev => {
           this.addClientsList.push(
             {
@@ -316,27 +319,7 @@ export default {
         })
       })
     },
-    addArray: async function(uniq) {
-      uniq.forEach(val => {
-        val.ids = ['New']
-      })
-      return uniq
-    },
-    addIds: async function(pList, uniq) {
-      pList.forEach(val => {
-        let p = uniq.filter(u => u.name === val.name)[0]
-        p.ids.push(val.id)
-      })
-
-      return await uniq
-    },
-    addProcsToList: async function() {
-      const res = await this.ubiiGetResult(DEFAULT_TOPICS.SERVICES.PM_DATABASE_GET_LIST)
-      const pList = await res.processingModuleList.elements
-      let uniq = [...new Map(pList.map(item => [item['name'], item])).values()]; //.filter(val => val.sessionId === this.selectedSession.id)
-      uniq = await this.addArray(uniq)
-      this.addProcsList  = await this.addIds(pList, uniq)
-    },
+    
     loadLatenz: async function() {
       const res = await this.ubiiGetResult(DEFAULT_TOPICS.SERVICES.LATENZ_CLIENTS_LIST)
       this.latenz = res.clientList.elements
@@ -358,23 +341,21 @@ export default {
     //   console.log(res)
     // },
     loadClients: async function (filts) {
-      const res = await this.ubiiGetResult(DEFAULT_TOPICS.SERVICES.CLIENT_GET_LIST)
-      const cList = res.clientList.elements
- 
+
+      const cList = this.addClientsList
+
       const clientFilts = filts.map(val => {
         return val.split('.')[0]
       })
-
+      
       const deviceFilts = filts.map(val => {
         return val.split('.')[1]
       })
 
       try {
-        this.clientsOfInterest = cList.filter(val => val.state === 0 && clientFilts.includes(val.id))
-        this.clientsOfInterest.forEach(client => {
-          client.devices = client.devices.filter(val => deviceFilts.includes(val.name))
-        })
+        this.clientsOfInterest = cList.filter(val => val.state === 0 && clientFilts.includes(val.id.split('.')[0]) && deviceFilts.includes(val.device.name))
       } catch {
+        
         this.msg = 'No Clients are available for this session.'
         this.trigger= !this.trigger
       }
@@ -466,7 +447,7 @@ export default {
         })
       }
 
-      litegraph.LiteGraph.registerNodeType("Sessions/"+sname+"/"+proc.name, node)
+      litegraph.LiteGraph.registerNodeType("ProcessingModuleClasses/"+sname+"/"+proc.name, node)
       
       node.prototype.onDrawTitle = function(ctx) {
         if (this.flags.collapsed) {
@@ -651,12 +632,20 @@ export default {
       this.graph.add(node_const);
     },
     
-    registerProcNodesOfSession: async function () {
-      if (!this.selectedSession.processingModules || this.selectedSession.processingModules.length === 0) throw 'Session has no processing modules.'
-      this.selectedSession.processingModules.forEach(proc => {
-        // console.log(proc)
+    registerProcNodes: async function () {
+      this.addProcsList.forEach(proc => {
         this.registerProcessNode(this.selectedSession.name, proc, proc.inputs, proc.outputs)
       })
+    },
+    registerClientNodes: async function () {
+      this.addClientsList.forEach(client => {
+        this.registerClientNode(client.name, client.device, client.device.components)
+      })
+    },
+    registerGraphTypes: async function (){
+      this.registerInputTypes()
+      await this.registerClientNodes()
+      await this.registerProcNodes()
     },
     loadClientsOfSessionAndIO: async function () {
        
@@ -673,14 +662,6 @@ export default {
       })
       await this.loadClients(clientsDevices)
     },
-    
-    registerClientNodes: async function () {
-      this.clientsOfInterest.forEach(client => {
-        client.devices.forEach(device => {
-          this.registerClientNode(client.name, device, device.components)
-        })
-      })
-    },
     calcPostions: async function () {
       // console.log('TODO CALC POSITIONS')
     },
@@ -691,15 +672,13 @@ export default {
         const inputs = proc.inputs
         const outputs = proc.outputs
         //function(name, pos, io, type, id, realName, func, procMode, nodeId, sessionId, inputs, outputs)
-        this.addNode("Sessions/"+this.selectedSession.name+"/"+proc.name, proc.position, io, 'Proc', proc.id, proc.name, proc.onProcessingStringified, proc.processingMode, proc.nodeId, proc.sessionId, inputs, outputs)
+        this.addNode("ProcessingModuleClasses/"+this.selectedSession.name+"/"+proc.name, proc.position, io, 'Proc', proc.id, proc.name, proc.onProcessingStringified, proc.processingMode, proc.nodeId, proc.sessionId, inputs, outputs)
       })
     },
     addClientNodes: async function () {
       this.clientsOfInterest.forEach(client => {
-        client.devices.forEach(device => {
-          device.position = [200,200];
-          this.addNode("Clients/"+client.name+"/"+device.name, device.position, device.components, 'ClientDevice', device.clientId+'.'+device.id)
-        })
+        client.device.position = [200,200];
+        this.addNode("Clients/"+client.name+"/"+client.device.name, client.device.position, client.device.components, 'ClientDevice', client.device.clientId+'.'+client.device.id)
       })
     },
     connectNodes: async function () {
@@ -718,15 +697,13 @@ export default {
     },
     showSessionPipeline: async function() {
       await this.clearBeforeRender()
-      this.registerInputTypes()
       if(!this.selectedSessionId) return
       await this.loadSession()
+      this.addClientsList = cm.writeAllClientDevicesToList(await cm.getAllClients())
+      this.addProcsList = await pm.writeAllProcsToList()
+      await this.registerGraphTypes()
       try {
-        await this.registerProcNodesOfSession()
         await this.loadClientsOfSessionAndIO()
-        await this.registerClientNodes()
-        await this.addClientsToList()
-        await this.addProcsToList()
         await this.calcPostions()
         await this.addClientNodes()
         await this.addProcNodes()
@@ -980,7 +957,14 @@ export default {
       this.graph.arrange()
     },
     refresh: async function (CoP) {
-      console.warn(CoP)
+      if(CoP === 'clients') {
+        this.addClientsList = cm.writeAllClientDevicesToList(await cm.getAllClients())
+      } else {
+        this.addProcsList = await pm.writeAllProcsToList();
+      } 
+      litegraph.LiteGraph.clearRegisteredTypes()
+      this.registerGraphTypes()
+
     },
     NewSession: async function () {
       console.warn(this.ClSeNodes)
