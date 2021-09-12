@@ -539,7 +539,12 @@ export default {
             // console.log(that.graph.status)
             if(that.graph.status == 2) that.playGraph();
         }
-      };
+      },
+      node.prototype.onRemoved = function()
+      {
+        if(this.id === null) return
+        that.removeProcNode({id: this.id},true)
+      }
 
     },
     dynInComp: function (name, type, inOrOut) {
@@ -604,6 +609,12 @@ export default {
         for (let i = 0; i < comp.length; i++) {
           if (comp[i].ioType != 1) {this.triggerSlot(o); o++;}
         }
+      }
+
+      node.prototype.onRemoved = function()
+      {
+        if(this.id === null) return
+        that.removeClientNode({id:this.id}, true)
       }
 
       //register in the system
@@ -714,7 +725,8 @@ export default {
       
       // console.log(this.selectedSession)
     },
-    removeClientNode: async function (c) {
+    removeClientNode: async function (c, fromGraph) {
+      console.warn(c)
       const cID = c.id.split('.')[0]+'.'+c.id.split('.')[1]
       let nodeIndex = -1
       this.ClSeNodes.forEach((val,index) => {
@@ -724,11 +736,11 @@ export default {
     
       if (nodeIndex >= 0) {
         const cNode = this.ClSeNodes[nodeIndex].node
-        this.graph.remove(cNode)
+        if (!fromGraph) this.graph.remove(cNode)
         this.ClSeNodes.splice(nodeIndex,1)
       }
     },
-    removeProcNode: async function (p) {
+    removeProcNode: async function (p, fromGraph) {
       const pID = p.id.split('.')[0]
       let nodeIndex = -1
 
@@ -741,7 +753,7 @@ export default {
 
       if (nodeIndex >= 0) {
         const cNode = this.ClSeNodes[nodeIndex].node
-        this.graph.remove(cNode)
+        if (!fromGraph) this.graph.remove(cNode)
         this.ClSeNodes.splice(nodeIndex,1)
       }
     },
