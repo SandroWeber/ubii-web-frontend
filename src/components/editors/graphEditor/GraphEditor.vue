@@ -447,7 +447,7 @@ export default {
         })
       }
 
-      litegraph.LiteGraph.registerNodeType("ProcessingModuleClasses/"+sname+"/"+proc.name, node)
+      litegraph.LiteGraph.registerNodeType("ProcessingModuleClasses/"+proc.sessionId+"/"+proc.name, node)
       
       node.prototype.onDrawTitle = function(ctx) {
         if (this.flags.collapsed) {
@@ -672,7 +672,7 @@ export default {
         const inputs = proc.inputs
         const outputs = proc.outputs
         //function(name, pos, io, type, id, realName, func, procMode, nodeId, sessionId, inputs, outputs)
-        this.addNode("ProcessingModuleClasses/"+this.selectedSession.name+"/"+proc.name, proc.position, io, 'Proc', proc.id, proc.name, proc.onProcessingStringified, proc.processingMode, proc.nodeId, proc.sessionId, inputs, outputs)
+        this.addNode("ProcessingModuleClasses/"+proc.sessionId+"/"+proc.name, proc.position, io, 'Proc', proc.id, proc.name, proc.onProcessingStringified, proc.processingMode, proc.nodeId, proc.sessionId, inputs, outputs)
       })
     },
     addClientNodes: async function () {
@@ -760,6 +760,7 @@ export default {
       this.draggedObject = null
     },
     addProcToGraph: function (p) {
+      console.warn(p)
       const pName = p.name
       // Use filter instead of continue
       this.addProcsList.forEach(proc => {
@@ -769,7 +770,7 @@ export default {
         const io = null
         const inputs = proc.inputs
         const outputs = proc.outputs
-        this.addNode("Sessions/"+this.selectedSession.name+"/"+proc.name, proc.position, io, 'Proc', id, proc.name, proc.onProcessingStringified, proc.processingMode, proc.nodeId, proc.sessionId, inputs, outputs)
+        this.addNode("ProcessingModuleClasses/"+proc.sessionId+"/"+proc.name, proc.position, io, 'Proc', id, proc.name, proc.onProcessingStringified, proc.processingMode, proc.nodeId, proc.sessionId, inputs, outputs)
       })
     },
     addClientToGraph: function (c) {
@@ -786,15 +787,12 @@ export default {
         this.lGraphCanvas.selectNode(cNode)
         return
       }
+
       // Use filter instead of continue
       this.clientsOfInterest.forEach(client => {
-        if (client.id !== c.id.split('.')[0]) return
-        
-        client.devices.forEach(device => {
-          if (device.id !== c.id.split('.')[1]) return
-          
-          this.addNode("Clients/"+client.name+"/"+device.name, device.position, device.components, 'ClientDevice', device.clientId+'.'+device.id)
-        })
+        if (client.id !== c.id) return
+        this.addNode("Clients/"+client.name+"/"+client.device.name, client.device.position, client.device.components, 'ClientDevice', client.device.clientId+'.'+client.device.id)
+
       })
     },
 
