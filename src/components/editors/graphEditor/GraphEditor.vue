@@ -767,12 +767,10 @@ export default {
     },
     drop:function(event) {
       event.preventDefault();
-      console.warn(this.draggedObject)
       if(this.draggedObject.client) this.addClientToGraph(this.draggedObject); else this.addProcToGraph(this.draggedObject)
       this.draggedObject = null
     },
     addProcToGraph: function (p) {
-      console.warn(p)
       const pName = p.name
       // Use filter instead of continue
       this.addProcsList.forEach(proc => {
