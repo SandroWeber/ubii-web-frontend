@@ -77,10 +77,10 @@
                 >
                 <b-card-text>{{clientDev.id}}.{{clientDev.name}}</b-card-text>
                 <font-awesome-icon icon="arrows-alt" class="dragPos" />
-                <div >
+                <!-- <div >
                   <b-button @click="addClientToGraph(clientDev)" variant="outline-primary" style="margin: 2px;">Add Client to the Graph</b-button>
                   <b-button @click="removeClientNode(clientDev)" variant="outline-primary" style="margin: 2px;">Remove Client from the Graph</b-button>
-                </div>
+                </div> -->
                 </b-card>
               </b-list-group-item>
             </b-list-group>
@@ -107,10 +107,10 @@
                 <b-card-text>{{proc.name}}</b-card-text>
                 <b-form-select v-model="selectedProcId" :options="proc.ids"></b-form-select>
                 <font-awesome-icon icon="arrows-alt" class="dragPos" />
-                <div >
+                <!-- <div >
                   <b-button @click="addProcToGraph(proc)" variant="outline-primary" style="margin: 2px;">Add PM the Graph</b-button>
-                  <!-- <b-button @click="removeProcNode(proc)" variant="outline-primary" style="margin: 2px;">Remove PM from the Graph</b-button> -->
-                </div>
+                  <b-button @click="removeProcNode(proc)" variant="outline-primary" style="margin: 2px;">Remove PM from the Graph</b-button>
+                </div> -->
                 </b-card>
               </b-list-group-item>
             </b-list-group>
@@ -204,6 +204,7 @@ Vue.use(BootstrapVue)
 
 import cm from './funcsClientProcs/clientFuncs.js'
 import pm from './funcsClientProcs/procsFuncs.js'
+import pc from './nodePos/posCalc.js'
 
 export default {
   name: "LiteGraph",
@@ -236,12 +237,12 @@ export default {
       timer: null,
 
       options_scene_order:  [
-          { value: null, text: 'Position Nodes by Saved Positions' },
-          { value: null, text: 'Position Nodes as List' },
-          { value: null, text: 'Position Nodes as Force graph' },
+          { value: 'ps', text: 'Position Nodes by Saved Positions' },
+          { value: 'ls', text: 'Position Nodes as List' },
+          { value: 'fs', text: 'Position Nodes as Force graph' },
 
       ],
-      selected_scene_order: null,
+      selected_scene_order: 'ps',
 
       options_sessions_saved:  [
           { value: null, text: 'Import a not wokring dummy Session' },
@@ -379,6 +380,9 @@ export default {
       }
 
     },
+    callback: async function() {
+      console.warn('CALLBACK')
+    },
     registerInputTypes: async function() {
       
       //       import {
@@ -423,7 +427,7 @@ export default {
         out.forEach(o => {
           this.addOutput(o.internalName, o.messageFormat)
         })
-
+        this.combo = this.addWidget("combo","Running on Client:", "red", callback, { values:["red","green","blue"]} );
       }
       node.title = proc.name
       node.title_color = "#243";
@@ -431,6 +435,11 @@ export default {
       
       let that = this
       
+      
+      function callback(e) {
+        console.warn(e)
+      }
+
       node.prototype.onDrawForeground = function()
       {
         this.size[0] = 400
@@ -620,11 +629,12 @@ export default {
       //register in the system
       litegraph.LiteGraph.registerNodeType("Clients/"+clientName+"/"+dev.name, node)
     },
-    addNode: function(name, pos, io, type, id, realName, func, procMode, nodeId, sessionId, inputs, outputs) {
+    addNode: function(name, pos, io, type, id, realName, sessionName, func, procMode, nodeId, sessionId, inputs, outputs) {
 
       var node_const = litegraph.LiteGraph.createNode(name);
       node_const.id = id
       node_const.pos = pos;
+      node_const.name = name
 
       this.ClSeNodes.push({
             edges: io,
@@ -637,7 +647,8 @@ export default {
             sessionId: sessionId,
             inputs: inputs, 
             outputs: outputs,
-            node: node_const
+            node: node_const,
+            sessionName: sessionName
             
           })
       this.graph.add(node_const);
@@ -674,22 +685,22 @@ export default {
       await this.loadClients(clientsDevices)
     },
     calcPostions: async function () {
-      // console.log('TODO CALC POSITIONS')
+      this.reOrderGraph()
     },
     addProcNodes: async function () {
       this.selectedSession.processingModules.forEach(proc => {
         const io = this.selectedSession.ioMappings.filter(val => proc.id === val.processingModuleId)[0]
-        proc.position = [600,200];
+        proc.position = [0,0];
         const inputs = proc.inputs
         const outputs = proc.outputs
         //function(name, pos, io, type, id, realName, func, procMode, nodeId, sessionId, inputs, outputs)
-        this.addNode("ProcessingModuleClasses/"+proc.sessionId+"/"+proc.name, proc.position, io, 'Proc', proc.id, proc.name, proc.onProcessingStringified, proc.processingMode, proc.nodeId, proc.sessionId, inputs, outputs)
+        this.addNode("ProcessingModuleClasses/"+proc.sessionId+"/"+proc.name, proc.position, io, 'Proc', proc.id, proc.name, this.selectedSession.name, proc.onProcessingStringified, proc.processingMode, proc.nodeId, proc.sessionId, inputs, outputs)
       })
     },
     addClientNodes: async function () {
       this.clientsOfInterest.forEach(client => {
-        client.device.position = [200,200];
-        this.addNode("Clients/"+client.name+"/"+client.device.name, client.device.position, client.device.components, 'ClientDevice', client.device.clientId+'.'+client.device.id)
+        client.device.position = [0,0];
+        this.addNode("Clients/"+client.name+"/"+client.device.name, client.device.position, client.device.components, 'ClientDevice', client.device.clientId+'.'+client.device.id, client.name + '.' + client.device.name, this.selectedSession.name)
       })
     },
     connectNodes: async function () {
@@ -715,9 +726,9 @@ export default {
       await this.registerGraphTypes()
       try {
         await this.loadClientsOfSessionAndIO()
-        await this.calcPostions()
         await this.addClientNodes()
         await this.addProcNodes()
+        await this.calcPostions()
         await this.connectNodes()
       } catch (error) {
         // console.log(error)
@@ -780,7 +791,7 @@ export default {
         const io = null
         const inputs = proc.inputs
         const outputs = proc.outputs
-        this.addNode("ProcessingModuleClasses/"+proc.sessionId+"/"+proc.name, proc.position, io, 'Proc', id, proc.name, proc.onProcessingStringified, proc.processingMode, proc.nodeId, proc.sessionId, inputs, outputs)
+        this.addNode("ProcessingModuleClasses/"+proc.sessionId+"/"+proc.name, proc.position, io, 'Proc', id, proc.name, this.selectedSession.name, proc.onProcessingStringified, proc.processingMode, proc.nodeId, proc.sessionId, inputs, outputs)
       })
     },
     addClientToGraph: function (c) {
@@ -801,7 +812,7 @@ export default {
       // Use filter instead of continue
       this.clientsOfInterest.forEach(client => {
         if (client.id !== c.id) return
-        this.addNode("Clients/"+client.name+"/"+client.device.name, client.device.position, client.device.components, 'ClientDevice', client.device.clientId+'.'+client.device.id)
+        this.addNode("Clients/"+client.name+"/"+client.device.name, client.device.position, client.device.components, 'ClientDevice', client.device.clientId+'.'+client.device.id, client.name + '.' + client.device.name, this.selectedSession.name)
 
       })
     },
@@ -962,7 +973,25 @@ export default {
 
     },
     reOrderGraph: async function () {
-      this.graph.arrange()
+      if(this.selected_scene_order === 'ps') {
+        const list = pc.loadSessionFromLocal(this.selectedSession.name)
+
+        let cs = await this.ClSeNodes.filter(val => val.type === 'ClientDevice')
+        let ps = await this.ClSeNodes.filter(val => val.type === 'Proc')
+
+        cs.forEach(val => {
+          let found = list.clientNodes.filter(filt => filt.name === val.name)[0]
+          if(found) val.node.pos = found.pos
+        })
+
+        ps.forEach(val => {
+          let found = list.procNodes.filter(filt => filt.name === val.name)[0]
+          if(found) val.node.pos = found.pos
+        })
+        console.warn(this.ClSeNodes)
+      } else if (this.selected_scene_order === 'ls') {
+        this.graph.arrange()
+      }
     },
     refresh: async function (CoP) {
       if(CoP === 'clients') {
@@ -982,11 +1011,28 @@ export default {
 
     },
     saveToLocalStorage: async function () {
+      
+      let obj = {
+        sessionName: this.selectedSession.name,
+        clientNodes: [],
+        procNodes: [],
+      }
 
-      console.warn(this.ClSeNodes)
+      this.ClSeNodes.forEach(val => {
+        if(val.type === 'ClientDevice') {
+          obj.clientNodes.push({
+            name: val.name,
+            pos: val.node.pos
+          })
 
-      // const parsed = JSON.stringify();
-      // localStorage.setItem();
+        } else {
+          obj.procNodes.push({
+            name: val.name,
+            pos: val.node.pos
+          })
+        }
+      })
+      pc.saveSession(obj)
     }
   }
   
