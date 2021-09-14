@@ -733,7 +733,6 @@ export default {
       } catch (error) {
         // console.log(error)
       }
-      
       // console.log(this.selectedSession)
     },
     removeClientNode: async function (c, fromGraph) {
@@ -988,7 +987,7 @@ export default {
           let found = list.procNodes.filter(filt => filt.name === val.name)[0]
           if(found) val.node.pos = found.pos
         })
-        console.warn(this.ClSeNodes)
+        this.graph.setDirtyCanvas(true, true);
       } else if (this.selected_scene_order === 'ls') {
         this.graph.arrange()
       }
