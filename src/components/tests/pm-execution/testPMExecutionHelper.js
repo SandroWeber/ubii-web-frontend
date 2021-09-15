@@ -51,33 +51,21 @@ class PMTestExecutionTriggerOnInput {
   //static NAME_IN_MUX_STRINGS = 'inMuxStrings';
   //static NAME_OUT_MUX_STRING_LENGTHS = 'outMuxStringLengths';
   static onProcessing(deltaTime, inputs, state) {
-    console.info('\n ### onProcessing');
-    //console.info('state:');
-    //console.info(state);
-
     let outputs = {};
 
-    //console.info('inputs.inDouble: ' + inputs.inDouble);
     // check if changed, otherwise no output
     if (inputs.inDouble && inputs.inDouble !== state.lastInDouble) {
       state.lastInDouble = inputs.inDouble;
       outputs.outDouble = inputs.inDouble;
     }
 
-    //console.info('inputs.inMuxStrings:');
-    //console.info(inputs.inMuxStrings);
     if (inputs.inMuxStrings && inputs.inMuxStrings.elements && inputs.inMuxStrings.elements.length > 0) {
       let muxRecords = inputs.inMuxStrings.elements;
-      //console.info('muxRecords:');
-      //console.info(muxRecords);
       outputs.outMuxStringLengths = { elements: [] };
       for (let i = 0; i < muxRecords.length; i++) {
         let muxStringRecord = muxRecords[i];
-        //console.info('muxStringRecord:');
-        //console.info(muxStringRecord);
         let topic = muxStringRecord.topic;
         let inputString = muxStringRecord[muxStringRecord.type];
-        //console.info(inputString);
         // detect if string length is new or has changed, if not do not produce output
         if (!state.mapStringLengths.has(topic) || state.mapStringLengths.get(topic) !== inputString.length) {
           outputs.outMuxStringLengths.elements.push({
@@ -89,11 +77,8 @@ class PMTestExecutionTriggerOnInput {
         state.mapStringLengths.set(topic, inputString.length);
       }
     }
-
-    console.info('outputs:');
-    console.info(outputs);
-    console.info('### onProcessing done\n');
-    return outputs;
+    
+    return {outputs, state};
   }
 
   static getProtobuf(nameSuffix, nodeId) {
@@ -226,7 +211,6 @@ class TestPMExecutionHelper {
   }
 
   async prepareTest(nodeId) {
-    console.info('reparing test ...');
     let session = this.addSession();
     session.addPMTriggerOnInput(nodeId);
 
@@ -279,11 +263,6 @@ class TestPMExecutionHelper {
         this.expectedStringLengths.set(lengthTopic, string.length);
       }
     }
-    console.info('expectedTopics:');
-    console.info(this.expectedTopics);
-    console.info(this.expectedDoubles);
-    console.info(this.stringsForPMTriggerOnInputMux);
-    console.info(this.expectedStringLengths);
 
     // send sessions specs so we can run them later
     this.remainingSessionsIdsToStart = [];
@@ -295,8 +274,6 @@ class TestPMExecutionHelper {
       });
       if (reply.session) {
         session.updateSpec(reply.session);
-        console.info('session added to runtime:');
-        console.info(session.getProtobuf());
         this.remainingSessionsIdsToStart.push(specSession.id);
       } else if (reply.error) {
         console.error(reply.error);
@@ -309,10 +286,8 @@ class TestPMExecutionHelper {
 
     await this.prepareTest(nodeId);
 
-    console.info('starting test ...');
-
     this.timeoutTestFailure = setTimeout(async () => {
-      console.info('test timeout');
+      console.error('test timeout');
       await this.stopTest();
       this.statistics.success = false;
       this.statistics.status = TestPMExecutionHelper.CONSTANTS.STATUS.TIMEOUT;
@@ -341,7 +316,6 @@ class TestPMExecutionHelper {
 
   async runTest() {
     if (this.statistics.status === TestPMExecutionHelper.CONSTANTS.STATUS.RUNNING) return;
-    console.info('running test');
 
     this.statistics.status = TestPMExecutionHelper.CONSTANTS.STATUS.RUNNING;
     this.statistics.startTime = Date.now();
@@ -349,19 +323,18 @@ class TestPMExecutionHelper {
     for (let session of this.settings.sessions) {
       let record = {
         topic: session.topics.pmTriggerOnInput.topicInDouble,
-        double: this.expectedDoubles.get(session.topics.pmTriggerOnInput.topicOutDouble)
+        double: this.expectedDoubles.get(session.topics.pmTriggerOnInput.topicOutDouble),
+        type: 'double'
       };
       await UbiiClientService.instance.publishRecord(record);
-      console.info('published ' + record.topic);
-      console.info(record);
 
       for (let topic of session.topics.pmTriggerOnInput.muxStringTopics) {
         // publish random string
         await UbiiClientService.instance.publishRecord({
           topic: topic,
-          string: this.stringsForPMTriggerOnInputMux.get(topic)
+          string: this.stringsForPMTriggerOnInputMux.get(topic),
+          type: 'string'
         });
-        console.info('published ' + topic);
       }
     }
 
@@ -378,7 +351,7 @@ class TestPMExecutionHelper {
     this.timeoutTestFailure && clearTimeout(this.timeoutTestFailure);
     this.intervalCheckDone && clearInterval(this.intervalCheckDone);
 
-    this.statistics.status = TestPMExecutionHelper.CONSTANTS.STATUS.DONE;
+    this.statistics.status = TestPMExecutionHelper.CONSTANTS.STATUS.SUCCESS;
     this.statistics.stopTime = Date.now();
 
     for (let session of this.settings.sessions) {
@@ -394,15 +367,9 @@ class TestPMExecutionHelper {
         await UbiiClientService.instance.unsubscribeTopic(token.topic, token.callback);
       }
     }
-
-    console.info('TestPMExecution stopped, statistics:');
-    console.info(this.statistics);
-    console.info('expectedTopics:');
-    console.info(this.expectedTopics);
   }
 
   onOutputDoubleFromPMTriggerOnInput(double, topic) {
-    console.info('received: "' + topic + '" : ' + double);
     if (double !== this.expectedDoubles.get(topic)) {
       console.error(
         'expected double for ' +
@@ -418,11 +385,9 @@ class TestPMExecutionHelper {
     if (this.expectedTopics.indexOf(topic) !== -1) {
       this.expectedTopics.splice(this.expectedTopics.indexOf(topic), 1);
     }
-    //console.info(this.expectedTopics);
   }
 
   onOutputStringLengthsFromPMTriggerOnInput(length, topic) {
-    console.info('received: "' + topic + '" : ' + length);
     if (length !== this.expectedStringLengths.get(topic)) {
       console.error(
         'expected string length for ' +
@@ -438,7 +403,6 @@ class TestPMExecutionHelper {
     if (this.expectedTopics.indexOf(topic) !== -1) {
       this.expectedTopics.splice(this.expectedTopics.indexOf(topic), 1);
     }
-    //console.info(this.expectedTopics);
   }
 }
 
@@ -446,7 +410,7 @@ TestPMExecutionHelper.CONSTANTS = Object.freeze({
   STATUS: {
     READY: 'ready',
     RUNNING: 'running',
-    DONE: 'done',
+    SUCCESS: 'success',
     TIMEOUT: 'timeout'
   },
   TIMEOUT_MS: 3000
