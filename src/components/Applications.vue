@@ -34,6 +34,17 @@
         </router-link>
 
         <router-link
+          to="/applications/examples/hololayer-test"
+          class="tile-menu-item"
+          tag="div"
+        >
+          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
+            <font-awesome-icon icon="cube" class="tile-menu-icon" />
+            <p>Hololayer Demo</p>
+          </app-tile>
+        </router-link>
+
+        <router-link
           to="/applications/examples/threejs"
           class="tile-menu-item"
           tag="div"

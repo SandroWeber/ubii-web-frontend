@@ -122,6 +122,12 @@ export default new Router({
         import('./components/applications/examples/ExampleMousePointer.vue')
     },
     {
+      path: '/applications/examples/hololayer-test',
+      name: 'Example - Hololayer Test',
+      component: () =>
+        import('./components/applications/examples/HololayerTest.vue')
+    },
+    {
       path: '/applications/examples/threejs',
       name: 'Example - THREEjs',
       component: () =>
