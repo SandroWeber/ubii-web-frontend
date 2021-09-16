@@ -60,7 +60,7 @@
       />
 
       <label for="fibonacci-sequence-length" class="setting-label"
-        >fib sequence length (n):</label
+        >sequence length (n):</label
       >
       <app-input
         :id="'fibonacci-sequence-length'"
@@ -69,7 +69,7 @@
       />
 
       <label for="test-duration" class="setting-label"
-        >test duration (seconds):</label
+        >test duration (s):</label
       >
       <app-input
         :id="'test-duration'"
@@ -78,7 +78,7 @@
       />
 
       <label for="fibonacci-node-id" class="setting-label"
-        >run on node:</label
+        >run on node ID:</label
       >
       <app-input
         :id="'fibonacci-node-id'"
@@ -138,7 +138,7 @@ export default {
         settings: {
           sessionCount: '1',
           pmCountPerSession: '5',
-          fibSequenceLength: '999999',
+          fibSequenceLength: '9999999',
           testDurationSeconds: '5',
           nodeId: 'unset'
         },
@@ -320,7 +320,7 @@ export default {
   grid-area: settings;
   display: grid;
   grid-gap: 15px;
-  grid-template-columns: 200px 100px 200px 100px;
+  grid-template-columns: 200px 200px 200px 200px;
   grid-template-rows: 25px 25px 25px;
 }
 

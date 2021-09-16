@@ -4,6 +4,7 @@
       <div class="tile-menu-category-seperator">
         <span class="tile-menu-category-seperator-label">Visualization</span>
       </div>
+
       <div class="tile-menu-list">
         <router-link to="/applications/visualization/3d_pose_visualizer" class="tile-menu-item" tag="div">
           <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
@@ -35,7 +36,7 @@
         <router-link to="/applications/examples/threejs-webvr" class="tile-menu-item" tag="div">
           <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
             <font-awesome-icon icon="vr-cardboard" class="tile-menu-icon" />
-            <p>Three.js WebVR Rendering</p>
+            <p>Three.js WebVR</p>
           </app-tile>
         </router-link>
 
@@ -49,7 +50,7 @@
         <router-link to="/applications/examples/gatherer-web-interface-smart-devices" class="tile-menu-item" tag="div">
           <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
             <font-awesome-icon icon="tablet-alt" class="tile-menu-icon" />
-            <p>Interface Smart Device Playground</p>
+            <p>Playground - Interface Smart Device</p>
           </app-tile>
         </router-link>
 
@@ -75,6 +76,7 @@
         </router-link>
       </div>
     </div>
+
     <div class="tile-menu-category">
       <div class="tile-menu-category-seperator">
         <span class="tile-menu-category-seperator-label">Smartphone Assisted VR</span>
@@ -103,6 +105,7 @@
         </router-link>
       </div>
     </div>
+
     <div class="tile-menu-category">
       <div class="tile-menu-category-seperator">
         <span class="tile-menu-category-seperator-label">Misc</span>
@@ -169,5 +172,6 @@ export default {
 .wrapper-applications {
   overflow: auto;
   width: 100%;
+  height: 100%;
 }
 </style>

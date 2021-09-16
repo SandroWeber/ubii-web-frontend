@@ -1,6 +1,6 @@
 <template>
   <div class="test-pm-execution-wrapper">
-    <h3 class="test-title">PM Execution</h3>
+    <h3 class="test-title">PM Execution TriggerOnInput + Topic Muxer</h3>
 
     <app-button class="start-button" @click="startTest()" :disabled="!ubiiConnected">
       <font-awesome-icon icon="play" v-show="this.testHelper.statistics.status !== 'running'" />
@@ -17,45 +17,38 @@
 
     <div class="settings-grid">
       <label for="input-node-id" class="setting-label">run on node:</label>
-
-      <b-form-input id="input-node-id" list="input-list-node-ids" v-model="nodeId"></b-form-input>
-      <datalist id="input-list-node-ids">
-        <option v-for="nodeId in this.nodeIds" :key="nodeId">{{ nodeId }}</option>
-      </datalist>
+      <input-node-id v-model="nodeId"/>
     </div>
   </div>
 </template>
 
 <script>
-import { BFormInput } from 'bootstrap-vue';
 
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
-import { DEFAULT_TOPICS, proto } from '@tum-far/ubii-msg-formats';
-const CLIENT_STATE = proto.ubii.clients.Client.State;
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faPlay, faSpinner } from '@fortawesome/free-solid-svg-icons';
 library.add(faPlay, faSpinner);
 
-import { AppInput, AppButton } from '../../appComponents/appComponents';
+import { AppButton } from '../../appComponents/appComponents';
+import InputNodeId from '../../appComponents/InputNodeId.vue';
 import TestPMExecutionHelper from './testPMExecutionHelper';
 
 export default {
   name: 'Test-PM-Execution',
   components: {
-    AppInput: AppInput,
     AppButton: AppButton,
-    BFormInput,
+    InputNodeId
   },
   data: () => {
     return {
       ubiiConnected: false,
       testHelper: new TestPMExecutionHelper(),
-      nodeId: 'unset',
-      nodeIds: [],
+      nodeId: 'unset'/*,
+      nodeIds: []*/
     };
   },
-  mounted: async function () {
+  mounted: async function() {
     // unsubscribe before page is unloaded
     window.addEventListener('beforeunload', () => {
       this.stopTest();
@@ -70,45 +63,22 @@ export default {
     await UbiiClientService.instance.waitForConnection();
     this.onUbiiConnectionChange(UbiiClientService.instance.isConnected());
   },
-  beforeDestroy: function () {
+  beforeDestroy: function() {
     this.stopTest();
   },
   methods: {
-    onUbiiConnectionChange: function (connected) {
+    onUbiiConnectionChange: function(connected) {
       if (connected === this.ubiiConnected) return;
 
       this.ubiiConnected = connected;
-
-      if (connected) {
-        this.intervalUpdateNodeIds = setInterval(this.updateNodeIDs, 1000);
-        this.nodeId = UbiiClientService.instance.client.serverSpecification.id;
-      } else {
-        this.nodeId = 'unset';
-        this.intervalUpdateNodeIds && clearInterval(this.intervalUpdateNodeIds);
-      }
     },
-    updateNodeIDs: async function () {
-      let eligibleNodeIds = [];
-      eligibleNodeIds.push(UbiiClientService.instance.client.serverSpecification.id);
-      let clientListResponse = await UbiiClientService.instance.callService({
-        topic: DEFAULT_TOPICS.SERVICES.CLIENT_GET_LIST,
-      });
-      if (clientListResponse.clientList) {
-        eligibleNodeIds.push(
-          ...clientListResponse.clientList.elements
-            .filter((client) => client.state === CLIENT_STATE.ACTIVE)
-            .map((client) => client.id)
-        );
-      }
-      this.nodeIds = eligibleNodeIds;
-    },
-    startTest: function () {
+    startTest: function() {
       this.testHelper.startTest(this.nodeId);
     },
-    stopTest: function () {
+    stopTest: function() {
       this.testHelper.stopTest();
-    },
-  },
+    }
+  }
 };
 </script>
 

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="height: 100%">
     <div class="tile-menu-list">
       <router-link to="/tools/topic-inspector" class="tile-menu-item" tag="div">
         <app-tile class="layer-three background round shadow orange-accent">
