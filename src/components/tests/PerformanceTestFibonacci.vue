@@ -80,11 +80,7 @@
       <label for="fibonacci-node-id" class="setting-label"
         >run on node ID:</label
       >
-      <app-input
-        :id="'fibonacci-node-id'"
-        :type="'node id'"
-        v-model="testData.settings.nodeId"
-      />
+      <input-node-id :id="'fibonacci-node-id'" v-model="testData.settings.nodeId" />
     </div>
   </div>
 </template>
@@ -99,12 +95,14 @@ library.add(faPlay, faSpinner);
 
 import { AppInput, AppButton } from '../appComponents/appComponents';
 import PerformanceTestFibonacciHelper from './performanceTestFibonacciHelper';
+import InputNodeId from '../appComponents/InputNodeId.vue';
 
 export default {
   name: 'PerformanceTest-FibonacciProcessing',
   components: {
     AppInput: AppInput,
-    AppButton: AppButton
+    AppButton: AppButton,
+    InputNodeId
   },
   mounted: async function() {
     // unsubscribe before page is unloaded
