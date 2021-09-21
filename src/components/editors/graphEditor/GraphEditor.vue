@@ -1,53 +1,103 @@
 <template>
   <div style="overflow: scroll">
   <Error :alert="trigger" :msg="msg"/>
-  <div class="header-editor">
-    <b-row>
-      <b-col>
-        <b-button @click="NewSession()" variant="outline-primary" >New Session</b-button>
-      </b-col>
-      <b-col>
-        <b-form-input v-model="SessionNameForNew" placeholder="Enter a new name for the session"></b-form-input>
-      </b-col>
-      <div class="w-100"><hr></div>
-      <b-col>
-      <treeselect v-model="selectedSessionId" 
-        @input="showSessionPipeline()"
-        @open="loadOps"
-        :load-options="loadOps" 
-        :options="availableSessions" 
-        :auto-load-root-options="false" 
-        :multiple="false" 
-        placeholder="Sessions..."/>
-      </b-col>
-    </b-row>
-  </div>
+    <b-modal id="mocfunc" size="xl">
+      <b-form-textarea
+        id="textarea-auto-height"
+        rows="3"
+        max-rows="8"
+        v-model="ocfunc"
+        overflow-x:scroll
+      ></b-form-textarea>  
+    </b-modal>
+    <b-modal id="mohfunc" size="xl">
+      <b-form-textarea
+        id="textarea-auto-height"
+        rows="3"
+        max-rows="8"
+        v-model="ohfunc"
+        overflow-x:scroll
+      ></b-form-textarea>  
+    </b-modal>
+    <b-modal id="mopfunc" size="xl">
+      <b-form-textarea
+        id="textarea-auto-height"
+        rows="3"
+        max-rows="8"
+        v-model="opfunc"
+        overflow-x:scroll
+      ></b-form-textarea>  
+    </b-modal>
+    <b-modal id="modfunc" size="xl">
+      <b-form-textarea
+        id="textarea-auto-height"
+        rows="3"
+        max-rows="8"
+        v-model="odfunc"
+        overflow-x:scroll
+      ></b-form-textarea>  
+    </b-modal>
+    <b-tabs content-class="mt-3" class="ubii-graph-tabs">
+      <b-tab title="Select a Session" active>
+        <div class="header-editor">
+          <b-col>
+            <span>Select a Session from Runtime:</span>
+            <treeselect v-model="selectedSessionId" 
+              @input="showSessionPipeline()"
+              @open="loadOps"
+              :load-options="loadOps" 
+              :options="availableSessions" 
+              :auto-load-root-options="false" 
+              :multiple="false" 
+              placeholder="Sessions..."/>
+          </b-col>
+        </div>
+      </b-tab>
+      <b-tab title="New Session">
+        <div class="header-editor">
+          <b-col>
+            <span>Create a new session:</span>
+            <b-form-input v-model="SessionNameForNew" placeholder="Enter a new name for the session"></b-form-input>
+            <div class="w-100"><hr></div>
+            <b-button @click="NewSession()" variant="outline-primary" >New Session</b-button>
+          </b-col>
+        </div>
+      </b-tab>
+      <b-tab title="Test">
+        <div class="header-editor">
+          <b-col>
+            <span>Dummy Session for testing:</span>
+            <b-form-select
+              @change="importSession()"
+              v-model="selected_session" :options="options_sessions_saved">
+            </b-form-select>
+          </b-col>
+        </div>
+      </b-tab>
+    </b-tabs>
   <div>
     <div class="button-editor flex-nowrap ">
       <b-row>
         <b-col>
-          <b-form-select
-          @change="reOrderGraph()"
-          v-model="selected_scene_order" :options="options_scene_order"></b-form-select>
-        </b-col>
-        <b-col align="center">
-          <b-button @click="playGraph()" variant="outline-primary" style="margin: 2px;">
-            <font-awesome-icon icon="play" style="color: green; display: flex;" class="tile-menu-icon" />  
-          </b-button>
-          <b-button @click="stopGraph()" variant="outline-primary" style="margin: 2px;">
-            <font-awesome-icon icon="stop" style="color: grey; display: flex;" class="tile-menu-icon" /> 
-          </b-button>
-          <b-button @click="saveGraph()" variant="outline-primary" style="margin: 2px;">
-            <font-awesome-icon icon="save" style="display: flex;" class="tile-menu-icon" /> 
-          </b-button>
-          <b-button @click="saveToLocalStorage()" variant="outline-primary" style="margin: 2px;">
-            <font-awesome-icon icon="save" style="display: flex;" class="tile-menu-icon" /> 
-          </b-button>
-        </b-col>
-        <b-col>
-          <b-form-select
-          @change="importSession()"
-          v-model="selected_session" :options="options_sessions_saved"></b-form-select>
+          <div style="text-align: center;">
+            <b-form-select
+            @change="reOrderGraph()"
+            v-model="selected_scene_order" :options="options_scene_order"></b-form-select>
+          </div>
+          <div style="text-align: center; border-style: dashed;">
+            <b-button @click="playGraph()" variant="outline-primary" style="margin: 2px;">
+              <font-awesome-icon icon="play" style="color: green; display: flex;" class="tile-menu-icon" />  
+            </b-button>
+            <b-button @click="stopGraph()" variant="outline-primary" style="margin: 2px;">
+              <font-awesome-icon icon="stop" style="color: grey; display: flex;" class="tile-menu-icon" /> 
+            </b-button>
+            <b-button @click="saveGraph()" variant="outline-primary" style="margin: 2px;">
+              <font-awesome-icon icon="save" class="tile-menu-icon"/> Save Session
+            </b-button>
+            <b-button @click="saveToLocalStorage()" variant="outline-primary" style="margin: 2px;">
+              <font-awesome-icon icon="save" class="tile-menu-icon" /> Save Positions of Nodes
+            </b-button>
+          </div>
         </b-col>
       </b-row>
     </div>
@@ -58,7 +108,7 @@
         <b-tabs content-class="mt-3" class="ubii-graph-tabs">
           <b-tab title="Clients" active>
             <b-list-group>
-              <b-list-group-item variant="dark">Add Clients to the Graph. 
+              <b-list-group-item variant="dark">Add <span style="color: blue">Clients</span> to the Graph. 
               <b-button @click="refresh('clients')" variant="outline-primary" style="margin: 2px;">
                 <font-awesome-icon icon="sync" style="display: flex;" class="tile-menu-icon" /> 
               </b-button>
@@ -87,7 +137,7 @@
           </b-tab>
           <b-tab title="Processing Modules">
             <b-list-group>
-              <b-list-group-item variant="dark">Add Processing Modules to the Graph.
+              <b-list-group-item variant="dark">Add <span style="color: green">Processing Modules</span> to the Graph.
               <b-button @click="refresh('procs')" variant="outline-primary" style="margin: 2px;">
                 <font-awesome-icon icon="sync" style="display: flex;" class="tile-menu-icon" /> 
               </b-button>
@@ -121,7 +171,7 @@
               </b-row>
               <b-row id="dOut" ref="DebugOutputs" class="flex-nowrap justify-left" style="border: 1px solid; overflow: auto; padding: 1em"> 
               </b-row>
-              <b-row style="border: 1px solid">
+              <!-- <b-row style="border: 1px solid">
                 <b-col v-if="debug.func">
                   <div style="padding: 0.5em 0.5em 0.5em">
                     <b-card
@@ -133,17 +183,11 @@
                       <b-card-text style="font-size: small;">
                         function
                       </b-card-text>
-                      <b-form-textarea
-                        id="textarea-auto-height"
-                        rows="3"
-                        max-rows="8"
-                        v-model="debug.func"
-                        overflow-x:scroll
-                      ></b-form-textarea>
+                      
                     </b-card>
                   </div>
                 </b-col>
-              </b-row>
+              </b-row> -->
             </b-container>
           </b-tab>
           <b-tab title="Debug the Debugger">
@@ -249,15 +293,18 @@ export default {
 
       ],
       selected_session: null,
-      SessionNameForNew: null,
+      SessionNameForNew: 'New',
 
       ClSeNodes: [],
       debug: { 
         id: null,
         active_inputs: [],
-        func: null,
         active_outputs: []
       },
+      ocfunc: '',
+      opfunc: '',
+      ohfunc: '',
+      odfunc: '',
 
       draggedObject: null,
     };
@@ -419,7 +466,7 @@ export default {
       //node constructor class
       function node()
       {
-        this.size = [140, 80];
+        this.size = [400, 120];
         this.id = proc.id
         inp.forEach(i => {
           this.addInput(i.internalName, i.messageFormat)
@@ -427,7 +474,36 @@ export default {
         out.forEach(o => {
           this.addOutput(o.internalName, o.messageFormat)
         })
-        this.combo = this.addWidget("combo","Running on Client:", "red", callback, { values:["red","green","blue"]} );
+
+        this.options =  that.addClientsList.map(val => { return val.id.split('.')[0]})
+        //console.warn(this.options)
+        this.combo = this.addWidget("combo","Client:", this.options[0], (e) => {
+          console.warn(e)
+        }, { values:this.options} );
+        // this.combo = this.addWidget("combo","Running on Client:", "red", callback, { values:["red","green","blue"]} );
+        console.warn(proc)
+        this.chHz = this.addWidget("number","Frequency:", Number(proc.processingMode.frequency.hertz), function(/*value, widget, node*/){
+          // console.warn(value, widget, node)
+        }, { min: 0, max: 100, step: 100})
+        this.addWidget("button","Show onCreatedStringified",null,function(){
+          that.ocfunc = proc.onCreatedStringified
+          that.$bvModal.show('mocfunc')
+        });
+        this.addWidget("button","Show onProcessingStringified",null,function(){
+          that.opfunc = proc.onProcessingStringified
+          that.$bvModal.show('mopfunc')
+        });
+        this.addWidget("button","Show onHaltedStringified",null,function(){
+          that.ohfunc = proc.onHaltedStringified
+          that.$bvModal.show('mohfunc')
+        });
+        this.addWidget("button","Show onDeletedStringified",null,function(){
+          that.odfunc = proc.onDestroyedStringified
+          that.$bvModal.show('modfunc')
+        });
+
+        this.size = this.computeSize()
+        
       }
       node.title = proc.name
       node.title_color = "#243";
@@ -435,16 +511,13 @@ export default {
       
       let that = this
       
-      
-      function callback(e) {
-        console.warn(e)
-      }
-
+    
       node.prototype.onDrawForeground = function()
       {
         this.size[0] = 400
         if(this.flags.collapsed)
-          return;        
+          return; 
+        // ; 
       }
 
 
@@ -536,9 +609,9 @@ export default {
               that.debug.active_inputs.push({name: val.name, type: val.type, topic: topic, component: that.dynInComp(val.name, val.type, "in")})
             })
 
-            that.debug.func = that.selectedSession.processingModules.filter(val => val.id === this.id).map(val => {
-              return val.onProcessingStringified
-            })[0]
+            // that.debug.func = that.selectedSession.processingModules.filter(val => val.id === this.id).map(val => {
+            //   return val.onProcessingStringified
+            // })[0]
             
             this.outputs.filter(val => val.link !== null).forEach((val) => {
               // Still need connection to graph inputs and outputs, also [0] garanteed?
@@ -656,7 +729,9 @@ export default {
     
     registerProcNodes: async function () {
       this.addProcsList.forEach(proc => {
-        this.registerProcessNode(this.selectedSession.name, proc, proc.inputs, proc.outputs)
+        
+        const sname = (!this.selectedSession)? this.selectedSession.name : this.SessionNameForNew
+        this.registerProcessNode(sname, proc, proc.inputs, proc.outputs)
       })
     },
     registerClientNodes: async function () {
@@ -722,7 +797,7 @@ export default {
       if(!this.selectedSessionId) return
       await this.loadSession()
       this.addClientsList = cm.writeAllClientDevicesToList(await cm.getAllClients())
-      this.addProcsList = await pm.writeAllProcsToList()
+      this.addProcsList = await pm.writeAllProcsToList(this.selectedSession)
       await this.registerGraphTypes()
       try {
         await this.loadClientsOfSessionAndIO()
@@ -790,7 +865,8 @@ export default {
         const io = null
         const inputs = proc.inputs
         const outputs = proc.outputs
-        this.addNode("ProcessingModuleClasses/"+proc.sessionId+"/"+proc.name, proc.position, io, 'Proc', id, proc.name, this.selectedSession.name, proc.onProcessingStringified, proc.processingMode, proc.nodeId, proc.sessionId, inputs, outputs)
+        const mode = proc.processingMode
+        this.addNode("ProcessingModuleClasses/"+proc.sessionId+"/"+proc.name, proc.position, io, 'Proc', id, proc.name, this.selectedSession.name, '', mode, proc.nodeId, proc.sessionId, inputs, outputs)
       })
     },
     addClientToGraph: function (c) {
@@ -990,13 +1066,34 @@ export default {
         this.graph.setDirtyCanvas(true, true);
       } else if (this.selected_scene_order === 'ls') {
         this.graph.arrange()
+      } else if (this.selected_scene_order === 'fs') {
+        if(this.ClSeNodes.length <= 0) return 
+        let sim = pc.force(this.graph.links)
+        console.warn(this.graph)
+        sim.on("end", () => {
+            console.warn(sim.nodes())
+            let cs = this.ClSeNodes.filter(val => val.type === 'ClientDevice')
+            let ps = this.ClSeNodes.filter(val => val.type === 'Proc')
+
+            cs.forEach(val => {
+              let found = sim.nodes().filter(filt => filt.id === val.id)[0]
+              if(found) val.node.pos = [found.x, found.y]
+            })
+
+            ps.forEach(val => {
+              let found = sim.nodes().filter(filt => filt.id === val.id)[0]
+              if(found) val.node.pos = [found.x, found.y]
+            })
+
+            this.graph.setDirtyCanvas(true, true);
+        })
       }
     },
     refresh: async function (CoP) {
       if(CoP === 'clients') {
         this.addClientsList = cm.writeAllClientDevicesToList(await cm.getAllClients())
       } else {
-        this.addProcsList = await pm.writeAllProcsToList();
+        this.addProcsList = await pm.writeAllProcsToList(this.selectedSession);
       } 
       litegraph.LiteGraph.clearRegisteredTypes()
       this.registerGraphTypes()
