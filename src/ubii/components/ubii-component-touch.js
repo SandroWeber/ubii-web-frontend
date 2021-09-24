@@ -38,7 +38,6 @@ export default class UbiiComponentTouchscreen extends UbiiComponent {
         position: this.normalizeCoordinates(event.touches[i])
       });
     }
-    //console.info(touchList);
     this.publishTouchEventList(touchList);
   }
 
@@ -58,7 +57,6 @@ export default class UbiiComponentTouchscreen extends UbiiComponent {
         position: this.normalizeCoordinates(event.touches[i])
       });
     }
-    //console.info(touchList);
     this.publishTouchEventList(touchList);
   }
 

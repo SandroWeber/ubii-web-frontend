@@ -7,31 +7,19 @@
 
       <div class="options">
         <!-- a checkbox to toggle showing the client side pointer -->
-        <input
-          id="checkboxClientPointer"
-          type="checkbox"
-          v-model="showClientPointer"
-        />
+        <input id="checkboxClientPointer" type="checkbox" v-model="showClientPointer" />
         <label for="checkboxClientPointer">Show Client Pointer</label>
 
         <br />
 
         <!-- a checkbox to toggle showing the server side pointer -->
-        <input
-          id="checkboxServerPointer"
-          type="checkbox"
-          v-model="showServerPointer"
-        />
+        <input id="checkboxServerPointer" type="checkbox" v-model="showServerPointer" />
         <label for="checkboxServerPointer">Show Server Pointer</label>
 
         <br />
 
         <!-- a checkbox to toggle inverting the pointer position at the server before sending it back to client -->
-        <input
-          id="checkboxMirrorPointer"
-          type="checkbox"
-          v-model="mirrorPointer"
-        />
+        <input id="checkboxMirrorPointer" type="checkbox" v-model="mirrorPointer" />
         <label for="checkboxMirrorPointer">Mirror Pointer</label>
       </div>
 
@@ -65,34 +53,28 @@
       </div>
 
       <div class="description-general">
-        Placing your mouse inside the above area will show your mouse indicator
-        (arrow) as well as a red square. The basic idea of this demo is to send
-        the mouse position to the Ubi-Interact backend, which will send it back
-        to us so we can display it (red square).
-        <br />Reading the code of this example will show your how to register a
-        device with Ubi-Interact defining the topics for data communication. It
-        also shows you how to publish (send) and subcribe (receive) to topics. A
-        small session + processing module is also specified and communicated to
-        Ubi-Interact that can manipulate the communicated mouse position. You
-        can see in the code how to specify this processing module on the client
-        side, link it to the topics of our device and start it.
+        Placing your mouse inside the above area will show your mouse indicator (arrow) as well as a red square. The
+        basic idea of this demo is to send the mouse position to the Ubi-Interact backend, which will send it back to us
+        so we can display it (red square).
+        <br />Reading the code of this example will show your how to register a device with Ubi-Interact defining the
+        topics for data communication. It also shows you how to publish (send) and subcribe (receive) to topics. A small
+        session + processing module is also specified and communicated to Ubi-Interact that can manipulate the
+        communicated mouse position. You can see in the code how to specify this processing module on the client side,
+        link it to the topics of our device and start it.
       </div>
 
       <div class="description-options">
-        You can toggle whether the client/server side mouse indicator should be
-        shown. "Mirror Pointer" will tell the processing module to invert your
-        client mouse position in X and Y.
+        You can toggle whether the client/server side mouse indicator should be shown. "Mirror Pointer" will tell the
+        processing module to invert your client mouse position in X and Y.
       </div>
 
       <div class="description-mouse-area">
-        Moving your mouse inside this area will publish its current position
-        normalized to ([0;1] , [0;1]) on the topic ".../mouse_client_position".
-        A processing module in the backend will read this client position. If
-        the flag "mirror pointer" is set, the processing module will invert the
-        client position. The processing module will then write the new position
-        to the topic ".../mouse_server_position", which we subscribe to. Once we
-        receive data on the ".../mouse_server_position" topic, the position of
-        the server pointer indicator (red square) will be updated.
+        Moving your mouse inside this area will publish its current position normalized to ([0;1] , [0;1]) on the topic
+        ".../mouse_client_position". A processing module in the backend will read this client position. If the flag
+        "mirror pointer" is set, the processing module will invert the client position. The processing module will then
+        write the new position to the topic ".../mouse_server_position", which we subscribe to. Once we receive data on
+        the ".../mouse_server_position" topic, the position of the server pointer indicator (red square) will be
+        updated.
       </div>
     </div>
   </UbiiClientContent>
@@ -170,8 +152,7 @@ export default {
 
       // helper definitions that we can reference later
       let deviceName = 'web-example-mouse-pointer';
-      let topicPrefix =
-        '/' + UbiiClientService.instance.getClientID() + '/' + deviceName;
+      let topicPrefix = '/' + UbiiClientService.instance.getClientID() + '/' + deviceName;
 
       // define our abstract device and its components
 
@@ -210,24 +191,26 @@ export default {
       this.ubiiComponentServerPointer = this.ubiiDevice.components[2];
 
       // specification of a ubii.processing.ProcessingModule
-      let processingCallback = (deltaTime, input, output) => {
-        if (!input.clientPointer) {
-          return;
+      let processingCallback = (deltaTime, inputs, state) => {
+        if (!inputs.clientPointer) {
+          return {};
         }
 
-        if (input.mirrorPointer === true) {
-          output.serverPointer = {
-            x: 1 - input.clientPointer.x,
-            y: 1 - input.clientPointer.y
+        let outputs = {};
+
+        if (inputs.mirrorPointer === true) {
+          outputs.serverPointer = {
+            x: 1 - inputs.clientPointer.x,
+            y: 1 - inputs.clientPointer.y
           };
         } else {
-          output.serverPointer = {
-            x: input.clientPointer.x,
-            y: input.clientPointer.y
+          outputs.serverPointer = {
+            x: inputs.clientPointer.x,
+            y: inputs.clientPointer.y
           };
         }
 
-        return output;
+        return { outputs };
       };
 
       this.ubiiProcessingModule = {
@@ -269,22 +252,19 @@ export default {
             processingModuleName: this.ubiiProcessingModule.name,
             inputMappings: [
               {
-                inputName: this.ubiiProcessingModule.inputClientPointer
-                  .internalName,
+                inputName: this.ubiiProcessingModule.inputClientPointer.internalName,
                 topicSource: 'topic',
                 topic: this.ubiiComponentClientPointer.topic
               },
               {
-                inputName: this.ubiiProcessingModule.inputMirrorPointer
-                  .internalName,
+                inputName: this.ubiiProcessingModule.inputMirrorPointer.internalName,
                 topicSource: 'topic',
                 topic: this.ubiiComponentMirrorPointer.topic
               }
             ],
             outputMappings: [
               {
-                outputName: this.ubiiProcessingModule.outputServerPointer
-                  .internalName,
+                outputName: this.ubiiProcessingModule.outputServerPointer.internalName,
                 topicDestination: 'topic',
                 topic: this.ubiiComponentServerPointer.topic
               }
@@ -307,7 +287,8 @@ export default {
         this.createUbiiSpecs();
 
         // register the mouse pointer device
-        UbiiClientService.instance.registerDevice(this.ubiiDevice)
+        UbiiClientService.instance
+          .registerDevice(this.ubiiDevice)
           .then(response => {
             // the device specs we send to backend intentionally left out the device ID
             // if the backend accepts the device registration, it will send back our specs
@@ -368,9 +349,7 @@ export default {
     subscriptionServerPointerPosition: function(vec2) {
       // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
       // mouse area and set our red square indicator
-      let boundingRect = document
-        .getElementById('mouse-pointer-area')
-        .getBoundingClientRect();
+      let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
       this.$data.serverMousePosition = {
         x: vec2.x * boundingRect.width,
         y: vec2.y * boundingRect.height
@@ -397,9 +376,7 @@ export default {
       }
 
       // calculate the current mouse position, normalized to the bounds of the interactive area ([0;1], [0;1])
-      let boundingRect = document
-        .getElementById('mouse-pointer-area')
-        .getBoundingClientRect();
+      let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
       let relativeMousePosition = {
         x: (event.clientX - boundingRect.left) / boundingRect.width,
         y: (event.clientY - boundingRect.top) / boundingRect.height
@@ -420,12 +397,8 @@ export default {
 
       // calculate the current touch position, normalized to the bounds of the interactive area ([0;1], [0;1])
       let relativeMousePosition = {
-        x:
-          (event.touches[0].clientX - event.target.offsetLeft) /
-          event.target.offsetWidth,
-        y:
-          (event.touches[0].clientY - event.target.offsetTop) /
-          event.target.offsetHeight
+        x: (event.touches[0].clientX - event.target.offsetLeft) / event.target.offsetWidth,
+        y: (event.touches[0].clientY - event.target.offsetTop) / event.target.offsetHeight
       };
 
       if (

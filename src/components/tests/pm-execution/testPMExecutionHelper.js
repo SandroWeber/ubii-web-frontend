@@ -1,187 +1,7 @@
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
-class PMTestExecutionTriggerOnInput {
-  static NAME_IN_DOUBLE = 'inDouble';
-  static NAME_OUT_DOUBLE = 'outDouble';
-  static NAME_IN_MUX_STRINGS = 'inMuxStrings';
-  static NAME_OUT_MUX_STRING_LENGTHS = 'outMuxStringLengths';
-
-  static TEMPLATE = {
-    name: 'pm_test-exec_trigger-on-input',
-    tags: ['test', 'trigger on input'],
-    processingMode: {
-      triggerOnInput: {
-        minDelayMs: 0,
-        allInputsNeedUpdate: false
-      }
-    },
-    inputs: [
-      {
-        internalName: PMTestExecutionTriggerOnInput.NAME_IN_DOUBLE,
-        messageFormat: 'double'
-      },
-      {
-        internalName: PMTestExecutionTriggerOnInput.NAME_IN_MUX_STRINGS,
-        messageFormat: 'string',
-        isMuxed: true //TODO: add to msg-formats
-      }
-    ],
-    outputs: [
-      {
-        internalName: PMTestExecutionTriggerOnInput.NAME_OUT_DOUBLE,
-        messageFormat: 'double'
-      },
-      {
-        internalName: PMTestExecutionTriggerOnInput.NAME_OUT_MUX_STRING_LENGTHS,
-        messageFormat: 'int32',
-        isMuxed: true //TODO: add to msg-formats
-      }
-    ],
-    onProcessingStringified: undefined,
-    nodeId: undefined
-  };
-
-  static onCreated(state) {
-    state.mapStringLengths = new Map();
-  }
-
-  //static NAME_IN_DOUBLE = 'inDouble';
-  //static NAME_OUT_DOUBLE = 'outDouble';
-  //static NAME_IN_MUX_STRINGS = 'inMuxStrings';
-  //static NAME_OUT_MUX_STRING_LENGTHS = 'outMuxStringLengths';
-  static onProcessing(deltaTime, inputs, state) {
-    let outputs = {};
-
-    // check if changed, otherwise no output
-    if (inputs.inDouble && inputs.inDouble !== state.lastInDouble) {
-      state.lastInDouble = inputs.inDouble;
-      outputs.outDouble = inputs.inDouble;
-    }
-
-    if (inputs.inMuxStrings && inputs.inMuxStrings.elements && inputs.inMuxStrings.elements.length > 0) {
-      let muxRecords = inputs.inMuxStrings.elements;
-      outputs.outMuxStringLengths = { elements: [] };
-      for (let i = 0; i < muxRecords.length; i++) {
-        let muxStringRecord = muxRecords[i];
-        let topic = muxStringRecord.topic;
-        let inputString = muxStringRecord[muxStringRecord.type];
-        // detect if string length is new or has changed, if not do not produce output
-        if (!state.mapStringLengths.has(topic) || state.mapStringLengths.get(topic) !== inputString.length) {
-          outputs.outMuxStringLengths.elements.push({
-            int32: inputString.length,
-            outputTopicParams: [muxStringRecord.identity]
-          });
-        }
-        // update map
-        state.mapStringLengths.set(topic, inputString.length);
-      }
-    }
-    
-    return {outputs, state};
-  }
-
-  static getProtobuf(nameSuffix, nodeId) {
-    let specs = Object.assign({}, PMTestExecutionTriggerOnInput.TEMPLATE);
-    specs.name += nameSuffix;
-    specs.onCreatedStringified = PMTestExecutionTriggerOnInput.onCreated.toString();
-    specs.onProcessingStringified = PMTestExecutionTriggerOnInput.onProcessing.toString();
-    specs.nodeId = nodeId;
-
-    return specs;
-  }
-}
-
-class TestPMExecutionSession {
-  static TEMPLATE = {
-    name: 'session-test-pm-exec',
-    tags: ['test'],
-    processingModules: [],
-    ioMappings: []
-  };
-  static MUX_STRING_VARIATION_REGEX = 'mux_string_[0-9]+';
-
-  constructor(nameSuffix) {
-    this.specs = Object.assign({}, TestPMExecutionSession.TEMPLATE);
-    this.nameSuffix = nameSuffix;
-    this.specs.name += this.nameSuffix;
-
-    this.pmCount = 0;
-    this.topicPrefix = '/' + UbiiClientService.instance.getClientID() + '/' + this.specs.name;
-    this.topics = {
-      pmTriggerOnInput: {
-        topicInDouble: this.topicPrefix + '/in_double',
-        topicOutDouble: this.topicPrefix + '/out_double',
-        muxStringTopics: [
-          this.topicPrefix + '/mux_string_0',
-          this.topicPrefix + '/mux_string_1',
-          this.topicPrefix + '/mux_string_2',
-          this.topicPrefix + '/mux_string_3',
-          this.topicPrefix + '/mux_string_4'
-        ],
-        muxRegexStringTopics: this.topicPrefix + '/' + TestPMExecutionSession.MUX_STRING_VARIATION_REGEX,
-        demuxStringLengthTopics: [
-          this.topicPrefix + '/string_length/mux_string_0',
-          this.topicPrefix + '/string_length/mux_string_1',
-          this.topicPrefix + '/string_length/mux_string_2',
-          this.topicPrefix + '/string_length/mux_string_3',
-          this.topicPrefix + '/string_length/mux_string_4'
-        ],
-        demuxTopicPattern: this.topicPrefix + '/string_length/{{#0}}'
-      }
-    };
-  }
-
-  addPMTriggerOnInput(nodeId) {
-    this.pmCount++;
-    let pmNameSuffix = '_' + this.pmCount + '_' + this.specs.name;
-    let specPM = PMTestExecutionTriggerOnInput.getProtobuf(pmNameSuffix, nodeId);
-
-    let specIoMappings = {
-      processingModuleName: specPM.name,
-      inputMappings: [
-        {
-          inputName: PMTestExecutionTriggerOnInput.NAME_IN_DOUBLE,
-          topic: this.topics.pmTriggerOnInput.topicInDouble
-        },
-        {
-          inputName: PMTestExecutionTriggerOnInput.NAME_IN_MUX_STRINGS,
-          topicMux: {
-            name: 'mux_pm-test_trigger-on-input' + pmNameSuffix,
-            dataType: 'string',
-            topicSelector: this.topics.pmTriggerOnInput.muxRegexStringTopics,
-            identityMatchPattern: TestPMExecutionSession.MUX_STRING_VARIATION_REGEX
-          }
-        }
-      ],
-      outputMappings: [
-        {
-          outputName: PMTestExecutionTriggerOnInput.NAME_OUT_DOUBLE,
-          topic: this.topics.pmTriggerOnInput.topicOutDouble
-        },
-        {
-          outputName: PMTestExecutionTriggerOnInput.NAME_OUT_MUX_STRING_LENGTHS,
-          topicDemux: {
-            name: 'demux_pm-test_trigger-on-input' + pmNameSuffix,
-            dataType: 'int32',
-            outputTopicFormat: this.topics.pmTriggerOnInput.demuxTopicPattern
-          }
-        }
-      ]
-    };
-
-    this.specs.processingModules.push(specPM);
-    this.specs.ioMappings.push(specIoMappings);
-  }
-
-  updateSpec(sessionSpec) {
-    Object.assign(this.specs, sessionSpec);
-  }
-
-  getProtobuf() {
-    return this.specs;
-  }
-}
+import SessionTestExecution from './sessionTestExec';
 
 class TestPMExecutionHelper {
   constructor(numSessions = 1, numPMsPerSession = 1) {
@@ -204,7 +24,7 @@ class TestPMExecutionHelper {
   addSession() {
     this.settings.sessionCount++;
     let sessionNameSufix = '_' + this.settings.sessionCount;
-    let session = new TestPMExecutionSession(sessionNameSufix);
+    let session = new SessionTestExecution(sessionNameSufix);
     this.settings.sessions.push(session);
 
     return session;
@@ -288,6 +108,7 @@ class TestPMExecutionHelper {
 
     this.timeoutTestFailure = setTimeout(async () => {
       console.error('test timeout');
+      console.error('expected topics: ' + this.expectedTopics);
       await this.stopTest();
       this.statistics.success = false;
       this.statistics.status = TestPMExecutionHelper.CONSTANTS.STATUS.TIMEOUT;
