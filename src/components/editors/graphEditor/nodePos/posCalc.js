@@ -57,7 +57,7 @@ const cPos = {
         return forceSimulation(nodes)
         .force("link", forceLink(links).id(d => d.id))
         .force("collide", forceCollide().radius(d => d.radius + 1).iterations(3))
-        .force("center", forceCenter(640 / 2, 480 / 2))
+        .force("center", forceCenter(800 / 2, 600 / 2))
     }
 
 } 

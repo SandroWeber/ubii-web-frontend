@@ -85,16 +85,16 @@
             v-model="selected_scene_order" :options="options_scene_order"></b-form-select>
           </div>
           <div style="text-align: center; border-style: dashed;">
-            <b-button @click="playGraph()" variant="outline-primary" style="margin: 2px;">
+            <b-button @click="playGraph()" variant="outline-primary" style="margin: 2px;" :disabled="deactivatePlay">
               <font-awesome-icon icon="play" style="color: green; display: flex;" class="tile-menu-icon" />  
             </b-button>
             <b-button @click="stopGraph()" variant="outline-primary" style="margin: 2px;">
               <font-awesome-icon icon="stop" style="color: grey; display: flex;" class="tile-menu-icon" /> 
             </b-button>
-            <b-button @click="saveGraph()" variant="outline-primary" style="margin: 2px;">
+            <b-button @click="saveGraph()" variant="outline-primary" style="margin: 2px;" :disabled="playActive">
               <font-awesome-icon icon="save" class="tile-menu-icon"/> Save Session
             </b-button>
-            <b-button @click="saveToLocalStorage()" variant="outline-primary" style="margin: 2px;">
+            <b-button @click="saveToLocalStorage()" variant="outline-primary" style="margin: 2px;" :disabled="playActive">
               <font-awesome-icon icon="save" class="tile-menu-icon" /> Save Positions of Nodes
             </b-button>
           </div>
@@ -201,7 +201,9 @@
           </b-tab>  
         </b-tabs>
       </b-col><b-col>
-      <canvas id="canvas" class='litegraph' width='1024' height='720' style='border: 1px solid;' v-on:drop="drop" v-on:dragover="allowDrop"></canvas>
+        <b-overlay :show="lforce" rounded="sm">
+          <canvas id="canvas" class='litegraph' width='1024' height='720' style='border: 1px solid;' v-on:drop="drop" v-on:dragover="allowDrop"></canvas>
+        </b-overlay>
       </b-col>
     </b-row>
   </div>
@@ -258,6 +260,7 @@ export default {
   },
   data() {
     return {
+      lforce: false,
       outputContext: null,
       context: null,
       graph: null,
@@ -307,6 +310,8 @@ export default {
       odfunc: '',
 
       draggedObject: null,
+      playActive: false,
+      deactivatePlay: false,
     };
   },
 
@@ -339,6 +344,7 @@ export default {
         func: null,
         active_outputs: []
       }
+      this.deactivatePlay = false
       clearInterval(this.timer)
       this.graph.clear()
       litegraph.LiteGraph.clearRegisteredTypes()
@@ -476,6 +482,9 @@ export default {
         })
 
         this.options =  that.addClientsList.map(val => { return val.id.split('.')[0]})
+        this.lang = this.addWidget("combo","language:", 'JS', (e) => {
+          console.warn(e)
+        }, { values: ['CPP', 'PY', 'JS', 'CS', 'JAVA']});
         //console.warn(this.options)
         this.combo = this.addWidget("combo","Client:", this.options[0], (e) => {
           console.warn(e)
@@ -624,6 +633,7 @@ export default {
       },
       node.prototype.onRemoved = function()
       {
+        this.deactivatePlay = true
         if(this.id === null) return
         that.removeProcNode({id: this.id},true)
       }
@@ -695,6 +705,7 @@ export default {
 
       node.prototype.onRemoved = function()
       {
+        this.deactivatePlay = true
         if(this.id === null) return
         that.removeClientNode({id:this.id}, true)
       }
@@ -856,6 +867,8 @@ export default {
       this.draggedObject = null
     },
     addProcToGraph: function (p) {
+      this.deactivatePlay = true
+      this.stopGraph()
       const pName = p.name
       // Use filter instead of continue
       this.addProcsList.forEach(proc => {
@@ -887,12 +900,15 @@ export default {
       // Use filter instead of continue
       this.clientsOfInterest.forEach(client => {
         if (client.id !== c.id) return
+        this.deactivatePlay = true
+        this.stopGraph()
         this.addNode("Clients/"+client.name+"/"+client.device.name, client.device.position, client.device.components, 'ClientDevice', client.device.clientId+'.'+client.device.id, client.name + '.' + client.device.name, this.selectedSession.name)
 
       })
     },
 
     playGraph: async function () {
+      this.playActive = true
       this.loadLatenz();
       this.timer = setInterval(function () {
         this.loadLatenz();
@@ -937,6 +953,8 @@ export default {
 
     },
     stopGraph: async function () {
+
+      this.playActive = false
       clearInterval(this.timer)
       this.debug.active_inputs.forEach(val => {
         UbiiClientService.instance.unsubscribeTopic(
@@ -952,6 +970,7 @@ export default {
       this.graph.stop();
     },
     saveGraph: async function () {
+      this.deactivatePlay = false
       // console.warn(this.ClSeNodes)
       let session = {
         "id": null,
@@ -1048,7 +1067,9 @@ export default {
 
     },
     reOrderGraph: async function () {
+      this.lforce = true
       if(this.selected_scene_order === 'ps') {
+        if(this.ClSeNodes.length <= 0) {this.lforce = false; return } 
         const list = pc.loadSessionFromLocal(this.selectedSession.name)
 
         let cs = await this.ClSeNodes.filter(val => val.type === 'ClientDevice')
@@ -1064,14 +1085,15 @@ export default {
           if(found) val.node.pos = found.pos
         })
         this.graph.setDirtyCanvas(true, true);
+        this.lforce = false
       } else if (this.selected_scene_order === 'ls') {
         this.graph.arrange()
+        this.lforce = false
       } else if (this.selected_scene_order === 'fs') {
-        if(this.ClSeNodes.length <= 0) return 
+        if(this.ClSeNodes.length <= 0) {this.lforce = false; return } 
         let sim = pc.force(this.graph.links)
-        console.warn(this.graph)
         sim.on("end", () => {
-            console.warn(sim.nodes())
+            // console.warn(sim.nodes())
             let cs = this.ClSeNodes.filter(val => val.type === 'ClientDevice')
             let ps = this.ClSeNodes.filter(val => val.type === 'Proc')
 
@@ -1084,7 +1106,7 @@ export default {
               let found = sim.nodes().filter(filt => filt.id === val.id)[0]
               if(found) val.node.pos = [found.x, found.y]
             })
-
+            this.lforce = false
             this.graph.setDirtyCanvas(true, true);
         })
       }
