@@ -42,7 +42,7 @@ const cPos = {
     },
     saveSessionToLocal() {
         const parsed = JSON.stringify(this.ubii);
-        console.warn(parsed);
+        // console.warn(parsed);
         localStorage.setItem('ubii', parsed);
     },
     loadSessionFromLocal(name) {

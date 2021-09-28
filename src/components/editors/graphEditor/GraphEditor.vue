@@ -1,41 +1,11 @@
 <template>
   <div style="overflow: scroll">
   <Error :alert="trigger" :msg="msg"/>
-    <b-modal id="mocfunc" size="xl">
-      <b-form-textarea
-        id="textarea-auto-height"
-        rows="3"
-        max-rows="8"
-        v-model="ocfunc"
-        overflow-x:scroll
-      ></b-form-textarea>  
-    </b-modal>
-    <b-modal id="mohfunc" size="xl">
-      <b-form-textarea
-        id="textarea-auto-height"
-        rows="3"
-        max-rows="8"
-        v-model="ohfunc"
-        overflow-x:scroll
-      ></b-form-textarea>  
-    </b-modal>
-    <b-modal id="mopfunc" size="xl">
-      <b-form-textarea
-        id="textarea-auto-height"
-        rows="3"
-        max-rows="8"
-        v-model="opfunc"
-        overflow-x:scroll
-      ></b-form-textarea>  
-    </b-modal>
-    <b-modal id="modfunc" size="xl">
-      <b-form-textarea
-        id="textarea-auto-height"
-        rows="3"
-        max-rows="8"
-        v-model="odfunc"
-        overflow-x:scroll
-      ></b-form-textarea>  
+    <b-modal id="showNodeIds" size="xl">
+      <div class="settings-grid">
+        <label for="input-node-id" class="setting-label">run on node:</label>
+        <input-node-id v-model="nodeId"/>
+      </div> 
     </b-modal>
     <b-tabs content-class="mt-3" class="ubii-graph-tabs">
       <b-tab title="Select a Session" active>
@@ -58,8 +28,6 @@
           <b-col>
             <span>Create a new session:</span>
             <b-form-input v-model="SessionNameForNew" placeholder="Enter a new name for the session"></b-form-input>
-            <div class="w-100"><hr></div>
-            <b-button @click="NewSession()" variant="outline-primary" >New Session</b-button>
           </b-col>
         </div>
       </b-tab>
@@ -126,6 +94,7 @@
                   draggable="true"
                 >
                 <b-card-text>{{clientDev.id}}.{{clientDev.name}}</b-card-text>
+                <b-card-text>Status: {{clientDev.state}}</b-card-text>
                 <font-awesome-icon icon="arrows-alt" class="dragPos" />
                 <!-- <div >
                   <b-button @click="addClientToGraph(clientDev)" variant="outline-primary" style="margin: 2px;">Add Client to the Graph</b-button>
@@ -233,6 +202,7 @@ import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
 import Error from './components/Error.vue'
 import TopicViewer from './components/TopicViewer.vue'
+import InputNodeId from './components/InputNodeId.vue';
 
 import Vue from 'vue'
 import Treeselect from '@riophae/vue-treeselect'
@@ -256,7 +226,8 @@ export default {
   name: "LiteGraph",
   components: {
     Treeselect,
-    Error
+    Error,
+    InputNodeId
   },
   data() {
     return {
@@ -268,6 +239,7 @@ export default {
 
       trigger: 0,
       msg: '',
+      nodeId: 'unset',
 
       selectedSessionId: null,
       selectedSession: null,
@@ -304,11 +276,7 @@ export default {
         active_inputs: [],
         active_outputs: []
       },
-      ocfunc: '',
-      opfunc: '',
-      ohfunc: '',
-      odfunc: '',
-
+      
       draggedObject: null,
       playActive: false,
       deactivatePlay: false,
@@ -348,6 +316,7 @@ export default {
       clearInterval(this.timer)
       this.graph.clear()
       litegraph.LiteGraph.clearRegisteredTypes()
+      this.selectedSession = null
     },
     ubiiGetResult: async function(topic) {
       await UbiiClientService.instance.waitForConnection()
@@ -397,7 +366,7 @@ export default {
     loadClients: async function (filts) {
 
       const cList = this.addClientsList
-
+      
       const clientFilts = filts.map(val => {
         return val.split('.')[0]
       })
@@ -434,7 +403,7 @@ export default {
 
     },
     callback: async function() {
-      console.warn('CALLBACK')
+      // console.warn('CALLBACK')
     },
     registerInputTypes: async function() {
       
@@ -481,35 +450,17 @@ export default {
           this.addOutput(o.internalName, o.messageFormat)
         })
 
-        this.options =  that.addClientsList.map(val => { return val.id.split('.')[0]})
-        this.lang = this.addWidget("combo","language:", 'JS', (e) => {
-          console.warn(e)
-        }, { values: ['CPP', 'PY', 'JS', 'CS', 'JAVA']});
-        //console.warn(this.options)
-        this.combo = this.addWidget("combo","Client:", this.options[0], (e) => {
-          console.warn(e)
-        }, { values:this.options} );
-        // this.combo = this.addWidget("combo","Running on Client:", "red", callback, { values:["red","green","blue"]} );
-        console.warn(proc)
+        this.lang = ['CPP', 'PY', 'JS', 'CS', 'JAVA'][parseInt(proc.language)]
+        this.properties = { Language: this.lang }
+        this.nodeId = proc.nodeId;
+
         this.chHz = this.addWidget("number","Frequency:", Number(proc.processingMode.frequency.hertz), function(/*value, widget, node*/){
           // console.warn(value, widget, node)
         }, { min: 0, max: 100, step: 100})
-        this.addWidget("button","Show onCreatedStringified",null,function(){
-          that.ocfunc = proc.onCreatedStringified
-          that.$bvModal.show('mocfunc')
+        this.addWidget("button","Select the Client",null,function(){
+          that.$bvModal.show('showNodeIds')
         });
-        this.addWidget("button","Show onProcessingStringified",null,function(){
-          that.opfunc = proc.onProcessingStringified
-          that.$bvModal.show('mopfunc')
-        });
-        this.addWidget("button","Show onHaltedStringified",null,function(){
-          that.ohfunc = proc.onHaltedStringified
-          that.$bvModal.show('mohfunc')
-        });
-        this.addWidget("button","Show onDeletedStringified",null,function(){
-          that.odfunc = proc.onDestroyedStringified
-          that.$bvModal.show('modfunc')
-        });
+
 
         this.size = this.computeSize()
         
@@ -538,7 +489,7 @@ export default {
         })
       }
 
-      litegraph.LiteGraph.registerNodeType("ProcessingModuleClasses/"+proc.sessionId+"/"+proc.name, node)
+      litegraph.LiteGraph.registerNodeType("ProcessingModuleClasses/"+proc.id+"/"+proc.name, node)
       
       node.prototype.onDrawTitle = function(ctx) {
         if (this.flags.collapsed) {
@@ -562,6 +513,14 @@ export default {
         ctx.fillStyle = "#AAA";
         ctx.fillText("Proc.ID:"+this.id, 2, 15 );
       };
+
+      node.prototype.onConnectInput = function(topic,component,comp,node) {
+        if(node.type.split('/')[0] === 'ProcessingModuleClasses') {
+            that.msg = 'For now, it not possible to connect two Processing Modules.'
+            that.trigger= !that.trigger
+            return false
+          }
+      }
 
       node.prototype.onConnectionsChange = function(inOrOut, slot, state, link_info, input_info) {
           that.stopGraph()
@@ -693,6 +652,13 @@ export default {
         ctx.fillText("Dev.ID:    "+dev.id, 2, 30 );
       }
 
+      node.prototype.onConnectInput = function(topic,component,comp,node) {
+        if(node.type.split('/')[0] === 'Clients') {
+            that.msg = 'A Client can\'t be connected to another Client.'
+            that.trigger= !that.trigger
+            return false
+          }
+      }
 
       //function to call when the node is executed
       node.prototype.onExecute = function()
@@ -741,7 +707,7 @@ export default {
     registerProcNodes: async function () {
       this.addProcsList.forEach(proc => {
         
-        const sname = (!this.selectedSession)? this.selectedSession.name : this.SessionNameForNew
+        const sname = (this.selectedSession)? this.selectedSession.name : this.SessionNameForNew
         this.registerProcessNode(sname, proc, proc.inputs, proc.outputs)
       })
     },
@@ -780,7 +746,7 @@ export default {
         const inputs = proc.inputs
         const outputs = proc.outputs
         //function(name, pos, io, type, id, realName, func, procMode, nodeId, sessionId, inputs, outputs)
-        this.addNode("ProcessingModuleClasses/"+proc.sessionId+"/"+proc.name, proc.position, io, 'Proc', proc.id, proc.name, this.selectedSession.name, proc.onProcessingStringified, proc.processingMode, proc.nodeId, proc.sessionId, inputs, outputs)
+        this.addNode("ProcessingModuleClasses/"+proc.id+"/"+proc.name, proc.position, io, 'Proc', proc.id, proc.name, this.selectedSession.name, proc.onProcessingStringified, proc.processingMode, proc.nodeId, proc.sessionId, inputs, outputs)
       })
     },
     addClientNodes: async function () {
@@ -817,12 +783,12 @@ export default {
         await this.calcPostions()
         await this.connectNodes()
       } catch (error) {
-        // console.log(error)
+        // console.warn(error)
       }
       // console.log(this.selectedSession)
     },
     removeClientNode: async function (c, fromGraph) {
-      console.warn(c)
+      // console.warn(c)
       const cID = c.id.split('.')[0]+'.'+c.id.split('.')[1]
       let nodeIndex = -1
       this.ClSeNodes.forEach((val,index) => {
@@ -866,20 +832,58 @@ export default {
       if(this.draggedObject.client) this.addClientToGraph(this.draggedObject); else this.addProcToGraph(this.draggedObject)
       this.draggedObject = null
     },
+    findProcInGraph: function (p) {
+      let nodeIndex = -1
+      this.ClSeNodes.forEach((val,index) => {
+        if(val.type === 'Proc' && val.id === p)
+          nodeIndex = index
+      })
+
+      if (nodeIndex >= 0) {
+        
+        const cNode = this.ClSeNodes[nodeIndex].node
+        this.lGraphCanvas.selectNode(cNode)
+        return true
+      }
+
+      return false
+    },
     addProcToGraph: function (p) {
       this.deactivatePlay = true
       this.stopGraph()
       const pName = p.name
+      const sname = (this.selectedSession)? this.selectedSession.name : this.SessionNameForNew
       // Use filter instead of continue
       this.addProcsList.forEach(proc => {
         if (proc.name !== pName) return
-        const id = 'NEW-'+crypto.randomUUID()
+        const inGraph = (this.selectedProcId != 'New' && this.findProcInGraph(this.selectedProcId.split('"')[3])) ? true : false;
+        if(inGraph) return
+        let id = null
+        if(this.selectedProcId == 'New') {
+          this.registerProcessNode(sname, proc, proc.inputs, proc.outputs)
+          id = 'NEW-'+crypto.randomUUID() 
+        } else { id = this.selectedProcId.split('"')[3] }
+        
         proc.position = [500,500];
         const io = null
         const inputs = proc.inputs
         const outputs = proc.outputs
         const mode = proc.processingMode
-        this.addNode("ProcessingModuleClasses/"+proc.sessionId+"/"+proc.name, proc.position, io, 'Proc', id, proc.name, this.selectedSession.name, '', mode, proc.nodeId, proc.sessionId, inputs, outputs)
+        const name = proc.name
+        const nodeId = proc.nodeId
+        this.addNode("ProcessingModuleClasses/"+proc.id+"/"+proc.name, 
+          proc.position, 
+          io, 
+          'Proc', 
+          id, 
+          name, 
+          sname, 
+          '', 
+          mode, 
+          nodeId, 
+          (this.selectedSession)?this.selectedSession.id:null, 
+          inputs, 
+          outputs)
       })
     },
     addClientToGraph: function (c) {
@@ -896,14 +900,25 @@ export default {
         this.lGraphCanvas.selectNode(cNode)
         return
       }
-
-      // Use filter instead of continue
-      this.clientsOfInterest.forEach(client => {
+      let cList = null
+      if(this.selectedSession) {
+        cList = this.clientsOfInterest
+      } else {
+        cList = this.addClientsList
+      }
+      cList.forEach(client => {
         if (client.id !== c.id) return
         this.deactivatePlay = true
         this.stopGraph()
-        this.addNode("Clients/"+client.name+"/"+client.device.name, client.device.position, client.device.components, 'ClientDevice', client.device.clientId+'.'+client.device.id, client.name + '.' + client.device.name, this.selectedSession.name)
-
+        const sessionName = (this.selectedSession) ? this.selectedSession.name : this.SessionNameForNew
+        if (!this.selectedSession) client.device.position = [0,0];
+        this.addNode("Clients/"+client.name+"/"+client.device.name, 
+          client.device.position, 
+          client.device.components, 
+          'ClientDevice', 
+          client.device.clientId+'.'+client.device.id, 
+          client.name + '.' + client.device.name, 
+          sessionName)
       })
     },
 
@@ -980,7 +995,9 @@ export default {
         "status":null
       }
       if (this.selectedSession === null) {
-        //create new
+        session.id = 'NEW-'+crypto.randomUUID()
+        session.name = this.SessionNameForNew
+        session.status = 0
       } else {
         session.id = this.selectedSession.id
         session.name = this.selectedSession.name
@@ -1004,13 +1021,18 @@ export default {
             "id": null
           }
           p.id = val.id
-          p.sessionId = val.sessionId
-          p.nodeId = val.nodeId
+          
           p.name = val.name
+
           p.onProcessingStringified = val.func
-          p.processingMode = val.procMode
+          
           p.inputs = val.inputs
           p.outputs = val.outputs
+
+          p.sessionId = session.id
+          p.nodeId = val.node.nodeId
+          p.processingMode.frequency.hertz = val.node.chHz.value
+
 
           session.processingModules.push(p)
       })
@@ -1070,8 +1092,10 @@ export default {
       this.lforce = true
       if(this.selected_scene_order === 'ps') {
         if(this.ClSeNodes.length <= 0) {this.lforce = false; return } 
-        const list = pc.loadSessionFromLocal(this.selectedSession.name)
-
+        const list = pc.loadSessionFromLocal((this.selectedSession)?this.selectedSession.name:this.SessionNameForNew)
+        
+        if(!list) { this.lforce = false; return }
+        
         let cs = await this.ClSeNodes.filter(val => val.type === 'ClientDevice')
         let ps = await this.ClSeNodes.filter(val => val.type === 'Proc')
 
@@ -1116,14 +1140,10 @@ export default {
         this.addClientsList = cm.writeAllClientDevicesToList(await cm.getAllClients())
       } else {
         this.addProcsList = await pm.writeAllProcsToList(this.selectedSession);
+        console.warn(this.addProcsList)
       } 
       litegraph.LiteGraph.clearRegisteredTypes()
       this.registerGraphTypes()
-
-    },
-    NewSession: async function () {
-      console.warn(this.ClSeNodes)
-
     },
     filterList: async function () {
 

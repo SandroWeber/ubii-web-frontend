@@ -16,13 +16,13 @@ const cMan = {
     async getAllClients() {
         const res = await this.ubiiGetResult(DEFAULT_TOPICS.SERVICES.CLIENT_GET_LIST)
         const cList = await res.clientList.elements
-        return cList.filter(val => val.state === 0)
+        return cList//.filter(val => val.state === 0)
     },
     writeAllClientDevicesToList(clients) {
 
         let clientDevices = []
 
-        clients = clients.filter(val => val.state === 0)
+       // clients = clients.filter(val => val.state === 0)
         if(clients === null) return clientDevices
 
         clients.forEach(c => {

@@ -9,7 +9,7 @@ const pMan = {
                 topic: topic
             }
         )
-        console.warn(res)
+        //console.warn(res)
         return res
     },
 
@@ -38,8 +38,8 @@ const pMan = {
         if(session !== null ) { uniq = [...new Map(pList.filter(val => val.sessionId === session.id).map(item => [item['name'], item])).values()]; }
         else { uniq = [...new Map(pList.map(item => [item['name'], item])).values()]; }
         uniq = await this.addArray(uniq)
-        console.warn('HELLO')
-        console.warn(uniq)
+        //console.warn('HELLO')
+        //console.warn(uniq)
         return await this.addIds(pList, uniq)
     }
 }
