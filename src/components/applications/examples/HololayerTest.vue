@@ -4,6 +4,8 @@
       <div class="seperator header-demo">
         <span class="separator-label">Hololayer Demo</span>
       </div>
+
+      <div class="options">
         <!-- a checkbox to toggle showing the client side pointer -->
         <input
           id="checkboxClientPointer"
@@ -11,6 +13,7 @@
           v-model="hololayer"
         />
         <label for="checkboxClientPointer">Connect to Hololayer</label>
+      </div>
 
       <div class="seperator header-description">
         <span class="separator-label">Description</span>
@@ -20,7 +23,9 @@
         Click to call the Hololayer Layer API
       </div>
 
-      <div class="description-mouse-area">
+      <div 
+        id="feedback-area"
+        class="feedback-area">
         Message from Hololayer
       </div>
     </div>
@@ -130,26 +135,47 @@ export default {
       this.ubiiComponentHololayerPointer = this.ubiiDevice.components[0];
       this.ubiiComponentServerPointer = this.ubiiDevice.components[1];
 
-      // specification of a ubii.processing.ProcessingModule
-      let processingCallback = (deltaTime, input, output) => {
-        console.log("processing...");
-        if (!input.hololayer) {
-          console.log("Hololayer not connected!")
-          return "No connection to Hololayer";
-        }
-        const hololayerResponse =  fetch('https://siemens.hololayer.io/swagger/api/Layers');
-        output =  hololayerResponse.json();  
-        console.log("test");
+      let onCreatedPM =
+        state => {
+          state.timestampLastImage = 0;
+          state.tLastProcess = Date.now(); 
+        };
 
+      // specification of a ubii.processing.ProcessingModule
+      let processingCallback = (deltaTime, input, output, state) => {
+        if (!input.hololayer) {
+          output.response = "No connection to Hololayer";
+        }
+        else{
+
+          console.log("Calling Hololayer...");
+          state.modules['node-fetch']('https://siemens.hololayer.io/swagger/api/Users')
+          /*
+                .then(res => res.json())
+                .then(json => {
+                  output.response = json["username"]; 
+                  console.log("Response: " + output.response)})
+                .catch(error => console.error("Error: " + error));
+          */
+              
+                .then(res => res.text())
+                .then(out => {
+                  output.response = out; 
+                  console.log("Response: " + output.response);
+                  return output;})
+                .catch(error => console.error("Error: " + error));
+              
+        }
         return output;
       };
 
       this.ubiiProcessingModule = {
         name: 'hololayer-connection-test',
+        onCreated: onCreatedPM.toString(),
         onProcessingStringified: processingCallback.toString(),
         processingMode: {
           frequency: {
-            hertz: 60
+            hertz: 1
           }
         },
         inputs: [
@@ -275,17 +301,9 @@ export default {
       // when we get a response, we display it in the text box
 
       this.$data.hololayerResponse = response;
-      console.log(this.$data.hololayerResponse);
-      //document.getElementById('description-mouse-area').textContent = response;
-      /*
-      let boundingRect = document
-        .getElementById('mouse-pointer-area')
-        .getBoundingClientRect();
-      this.$data.serverResponse = {
-        x: vec2.x * boundingRect.width,
-        y: vec2.y * boundingRect.height
-      };
-      */
+      console.log("Response: "+ this.$data.hololayerResponse);
+
+      document.getElementById('feedback-area').textContent = this.$data.hololayerResponse;
     },
 
     publishHololayerPointer: function(boolean) {
@@ -295,6 +313,7 @@ export default {
         bool: boolean
       });
     }
+
     /* UI events */
     /*,
     onMouseMove: function(event) {
@@ -362,7 +381,7 @@ export default {
   grid-template-areas:
     'header-demo header-demo'
     'demo-options demo-mouse-area'
-    'description-options description-mouse-area'
+    'description-options feedback-area'
     'header-description header-description'
     'description-general description-general';
   height: 100%;
@@ -410,8 +429,8 @@ export default {
   padding: 20px;
 }
 
-.description-mouse-area {
-  grid-area: description-mouse-area;
+.feedback-area {
+  grid-area: feedback-area;
   padding: 20px;
 }
 
