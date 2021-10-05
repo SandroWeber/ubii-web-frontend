@@ -25,6 +25,8 @@ export default class UbiiComponentTouchscreen extends UbiiComponent {
     this.continuousPublishing();
   }
 
+  onStop() {}
+
   /* event callbacks */
 
   onTouchStart(event) {

@@ -97,7 +97,7 @@ export default {
   name: 'ExampleMousePointer',
   components: { UbiiClientContent },
   /* STEP 1: mounted() is our vue component entry point, start here! */
-  mounted: function() {
+  mounted: async function() {
     // unsubscribe before page is suddenly closed
     window.addEventListener('beforeunload', () => {
       this.stopExample();
@@ -111,12 +111,8 @@ export default {
     });
 
     // make sure we're connected, then start the example
-    UbiiClientService.instance.waitForConnection().then(() => {
-      this.startExample();
-    });
-    UbiiClientService.instance.onDisconnect(() => {
-      this.stopExample();
-    });
+    await UbiiClientService.instance.waitForConnection();
+    this.startExample();
   },
   beforeDestroy: function() {
     this.stopExample();

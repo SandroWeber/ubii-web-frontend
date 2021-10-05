@@ -59,6 +59,8 @@ export default class UbiiComponentCamera extends UbiiComponent {
     }
   }
 
+  onStop() {}
+
   async continuousPublishing() {
     let imageBitmap = await this.grabFrame();
     this.publishFrame(imageBitmap);

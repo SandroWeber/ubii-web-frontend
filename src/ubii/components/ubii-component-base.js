@@ -18,14 +18,16 @@ export default class UbiiComponent {
     await this.onStart();
   }
 
-  stop() {
+  async stop() {
     this.running = false;
+    await this.onStop();
   }
 
-  /**
-   * UbiiClientService can be assumed to be connected.
-   */
   async onStart() {
     throw new Error('base component class should not be created directly, extend instead and overwrite onStart for initialization');
+  }
+
+  async onStop() {
+    throw new Error('base component class should not be created directly, extend instead and overwrite onStop for de-initialization');
   }
 }

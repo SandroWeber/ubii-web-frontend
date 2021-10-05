@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper-applications">
     <div class="tile-menu-category">
-      <div class="tile-menu-category-seperator">
+      <!--<div class="tile-menu-category-seperator">
         <span class="tile-menu-category-seperator-label">Visualization</span>
       </div>
 
@@ -12,7 +12,7 @@
             <p>3D Pose Visualizer</p>
           </app-tile>
         </router-link>
-      </div>
+      </div>-->
 
       <div class="tile-menu-category-seperator">
         <span class="tile-menu-category-seperator-label">Tutorials, Learning Examples</span>
@@ -47,12 +47,12 @@
           </app-tile>
         </router-link>
 
-        <router-link to="/applications/examples/gatherer-web-interface-smart-devices" class="tile-menu-item" tag="div">
+        <!--<router-link to="/applications/examples/gatherer-web-interface-smart-devices" class="tile-menu-item" tag="div">
           <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
             <font-awesome-icon icon="tablet-alt" class="tile-menu-icon" />
             <p>Playground - Interface Smart Device</p>
           </app-tile>
-        </router-link>
+        </router-link>-->
 
         <router-link to="/applications/examples/model-viewer" class="tile-menu-item" tag="div">
           <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
@@ -61,12 +61,12 @@
           </app-tile>
         </router-link>
 
-        <router-link to="/applications/examples/opencv" class="tile-menu-item" tag="div">
+        <!--<router-link to="/applications/examples/opencv" class="tile-menu-item" tag="div">
           <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
             <font-awesome-icon icon="eye" class="tile-menu-icon" />
             <p>OpenCV</p>
           </app-tile>
-        </router-link>
+        </router-link>-->
 
         <router-link to="/applications/examples/image-processing" class="tile-menu-item" tag="div">
           <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
@@ -77,7 +77,7 @@
       </div>
     </div>
 
-    <div class="tile-menu-category">
+    <!--<div class="tile-menu-category">
       <div class="tile-menu-category-seperator">
         <span class="tile-menu-category-seperator-label">Smartphone Assisted VR</span>
       </div>
@@ -104,9 +104,9 @@
           </app-tile>
         </router-link>
       </div>
-    </div>
+    </div>-->
 
-    <div class="tile-menu-category">
+    <!--<div class="tile-menu-category">
       <div class="tile-menu-category-seperator">
         <span class="tile-menu-category-seperator-label">Misc</span>
       </div>
@@ -121,7 +121,7 @@
       </div>
 
       <div class="tile-menu-list"></div>
-    </div>
+    </div>-->
   </div>
 </template>
 
