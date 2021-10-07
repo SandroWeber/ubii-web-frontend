@@ -21,6 +21,24 @@
         <!-- a checkbox to toggle inverting the pointer position at the server before sending it back to client -->
         <input id="checkboxMirrorPointer" type="checkbox" v-model="mirrorPointer" />
         <label for="checkboxMirrorPointer">Mirror Pointer</label>
+
+        <br />
+
+        <!-- a checkbox to toggle immediate publishing of TopicDataRecords -->
+        <input id="checkboxPublishImmediately" type="checkbox" v-model="publishImmediately" />
+        <label for="checkboxPublishImmediately">Publish Immediately</label>
+
+        <br />
+
+        <!-- a checkbox to toggle immediate publishing of TopicDataRecords -->
+        <input
+          id="numberPublishInterval"
+          type="number"
+          v-model="publishIntervalMs"
+          :disabled="publishImmediately"
+          v-on:change="onPublishIntervalChange"
+        />
+        <label for="numberPublishInterval">Publish Interval (ms)</label>
       </div>
 
       <!-- the mouse area.
@@ -36,16 +54,15 @@
         v-on:touchend="clientPointerInside = false"
         v-on:touchmove="onTouchMove($event)"
       >
-        <!-- this is the red square indicator of the pointer position sent back to us by the server
-        you can see its position via style - top/left being linked to the data variable "serverMousePosition"-->
-        <div
+        <font-awesome-icon
           class="server-mouse-position-indicator"
+          icon="mouse-pointer"
           :style="{
-            top: serverMousePosition.y + 'px',
-            left: serverMousePosition.x + 'px'
+            top: serverMousePosition.y - 4 + 'px',
+            left: serverMousePosition.x - 4 + 'px'
           }"
           v-show="showServerPointer && clientPointerInside"
-        ></div>
+        />
       </div>
 
       <div class="seperator header-description">
@@ -89,9 +106,9 @@ import UbiiClientContent from '../sharedModules/UbiiClientContent';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faPlay } from '@fortawesome/free-solid-svg-icons';
+import { faMousePointer } from '@fortawesome/free-solid-svg-icons';
 
-library.add(faPlay);
+library.add(faMousePointer);
 
 export default {
   name: 'ExampleMousePointer',
@@ -122,6 +139,8 @@ export default {
       showClientPointer: false,
       showServerPointer: true,
       mirrorPointer: false,
+      publishImmediately: false,
+      publishIntervalMs: UbiiClientService.instance.getPublishIntervalMs(),
       ubiiClientService: UbiiClientService.instance,
       exampleStarted: false,
       clientMousePosition: { x: 0, y: 0 },
@@ -270,69 +289,59 @@ export default {
       };
     },
     /* STEP 2: making all calls related to ubi-interact backend */
-    startExample: function() {
+    startExample: async function() {
       if (this.exampleStarted) {
         return;
       }
       this.$data.exampleStarted = true;
+      this.publishIntervalMs = UbiiClientService.instance.getPublishIntervalMs();
 
-      // make sure we're connected, then continue
-      UbiiClientService.instance.waitForConnection().then(() => {
-        // create all the specifications we need to define our example application
-        // these are protobuf messages to be sent to the server (saved in this.$data)
-        this.createUbiiSpecs();
+      // create all the specifications we need to define our example application
+      // these are protobuf messages to be sent to the server (saved in this.$data)
+      this.createUbiiSpecs();
 
-        // register the mouse pointer device
-        UbiiClientService.instance
-          .registerDevice(this.ubiiDevice)
-          .then(response => {
-            // the device specs we send to backend intentionally left out the device ID
-            // if the backend accepts the device registration, it will send back our specs
-            // plus any necessary info (like the ID) filled in by the backend
-            // that way we make sure the ID is created by the backend and valid
-            if (response.id) {
-              // success, we accept the device specs sent back to us as the final specs
-              this.ubiiDevice = response;
-              return this.ubiiDevice;
-            } else {
-              // something went wrong, print to console
-              console.error(response);
-              return undefined;
-            }
-          })
-          .then(() => {
-            // subscribe to the device topics so we are notified when new data arrives on the topic
-            UbiiClientService.instance.subscribeTopic(
-              this.ubiiComponentServerPointer.topic,
-              // a callback to be called when new data on this topic arrives
-              this.subscriptionServerPointerPosition
-            );
+      // register the mouse pointer device
+      let replyRegisterDevice = await UbiiClientService.instance.registerDevice(this.ubiiDevice);
+      // the device specs we send to backend intentionally left out the device ID
+      // if the backend accepts the device registration, it will send back our specs
+      // plus any necessary info (like the ID) filled in by the backend
+      // that way we make sure the ID is created by the backend and valid
+      if (replyRegisterDevice.id) {
+        // success, we accept the device specs sent back to us as the final specs
+        this.ubiiDevice = replyRegisterDevice;
+      } else {
+        // something went wrong, print to console
+        console.error(replyRegisterDevice);
+      }
 
-            // start our session (registering not necessary as we do not want to save it permanently)
-            UbiiClientService.instance.client
-              .callService({
-                topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
-                session: this.ubiiSession
-              })
-              .then(response => {
-                if (response.session) {
-                  this.ubiiSession = response.session;
-                }
-              });
-          });
+      // subscribe to the device topics so we are notified when new data arrives on the topic
+      await UbiiClientService.instance.subscribeTopic(
+        this.ubiiComponentServerPointer.topic,
+        // a callback to be called when new data on this topic arrives
+        this.subscriptionServerPointerPosition
+      );
+
+      // start our session (registering not necessary as we do not want to save it permanently)
+      let replySessionStart = await UbiiClientService.instance.client.callService({
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
+        session: this.ubiiSession
       });
+      if (replySessionStart.session) {
+        this.ubiiSession = replySessionStart.session;
+      }
     },
     stopExample: async function() {
       if (!this.exampleStarted) return;
 
+      UbiiClientService.instance.setPublishIntervalMs(15);
       this.exampleStarted = false;
 
       // unsubscribe and stop session
-      UbiiClientService.instance.unsubscribeTopic(
+      await UbiiClientService.instance.unsubscribeTopic(
         this.ubiiComponentServerPointer.topic,
         this.subscriptionServerPointerPosition
       );
-      UbiiClientService.instance.callService({
+      await UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
         session: this.ubiiSession
       });
@@ -352,11 +361,18 @@ export default {
       };
     },
     publishClientPointerPosition: function(vec2) {
-      // publish our normalized client mouse position
-      UbiiClientService.instance.publishRecord({
-        topic: this.ubiiComponentClientPointer.topic,
-        vector2: vec2
-      });
+      if (this.publishImmediately) {
+        UbiiClientService.instance.publishRecordImmediately({
+          topic: this.ubiiComponentClientPointer.topic,
+          vector2: vec2
+        });
+      } else {
+        // publish our normalized client mouse position
+        UbiiClientService.instance.publishRecord({
+          topic: this.ubiiComponentClientPointer.topic,
+          vector2: vec2
+        });
+      }
     },
     publishMirrorPointer: function(boolean) {
       // if the checkbox is changed, we publish this info on the related topic
@@ -364,6 +380,9 @@ export default {
         topic: this.ubiiComponentMirrorPointer.topic,
         bool: boolean
       });
+    },
+    onPublishIntervalChange: function(event) {
+      UbiiClientService.instance.setPublishIntervalMs(event.target.value);
     },
     /* UI events */
     onMouseMove: function(event) {
@@ -447,9 +466,6 @@ export default {
 
 .server-mouse-position-indicator {
   position: relative;
-  width: 10px;
-  height: 10px;
-  background-color: red;
 }
 
 .start-example {

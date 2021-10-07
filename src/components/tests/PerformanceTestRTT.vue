@@ -143,7 +143,7 @@ export default {
     },
     rttSendPackage: function() {
       this.$data.testRTT.tSent = Date.now();
-      UbiiClientService.instance.publishRecord({
+      UbiiClientService.instance.publishRecordImmediately({
         topic: this.$data.testRTT.topic,
         double: 1
       });

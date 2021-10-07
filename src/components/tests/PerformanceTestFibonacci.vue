@@ -174,7 +174,7 @@ export default {
                 PerformanceTestFibonacciHelper.SEQENCE_LENGTH_INPUT_SUFFIX
               ) !== -1
             ) {
-              UbiiClientService.instance.publishRecord({
+              UbiiClientService.instance.publishRecordImmediately({
                 topic: inputMapping.topic,
                 double: parseFloat(this.testData.settings.fibSequenceLength)
               });
