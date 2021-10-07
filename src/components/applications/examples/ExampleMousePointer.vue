@@ -25,7 +25,11 @@
         <br />
 
         <!-- a checkbox to toggle immediate publishing of TopicDataRecords -->
-        <input id="checkboxPublishImmediately" type="checkbox" v-model="publishImmediately" />
+        <input
+          id="checkboxPublishImmediately"
+          type="checkbox"
+          v-model="publishImmediately"
+        />
         <label for="checkboxPublishImmediately">Publish Immediately</label>
 
         <br />
@@ -59,7 +63,7 @@
           icon="mouse-pointer"
           :style="{
             top: serverMousePosition.y - 4 + 'px',
-            left: serverMousePosition.x - 4 + 'px'
+            left: serverMousePosition.x - 4 + 'px',
           }"
           v-show="showServerPointer && clientPointerInside"
         />
@@ -70,53 +74,58 @@
       </div>
 
       <div class="description-general">
-        Placing your mouse inside the above area will show your mouse indicator (arrow) as well as a red square. The
-        basic idea of this demo is to send the mouse position to the Ubi-Interact backend, which will send it back to us
-        so we can display it (red square).
-        <br />Reading the code of this example will show your how to register a device with Ubi-Interact defining the
-        topics for data communication. It also shows you how to publish (send) and subcribe (receive) to topics. A small
-        session + processing module is also specified and communicated to Ubi-Interact that can manipulate the
-        communicated mouse position. You can see in the code how to specify this processing module on the client side,
-        link it to the topics of our device and start it.
+        Placing your mouse inside the above area will show your mouse indicator (arrow) as
+        well as a red square. The basic idea of this demo is to send the mouse position to
+        the Ubi-Interact backend, which will send it back to us so we can display it (red
+        square).
+        <br />Reading the code of this example will show your how to register a device
+        with Ubi-Interact defining the topics for data communication. It also shows you
+        how to publish (send) and subcribe (receive) to topics. A small session +
+        processing module is also specified and communicated to Ubi-Interact that can
+        manipulate the communicated mouse position. You can see in the code how to specify
+        this processing module on the client side, link it to the topics of our device and
+        start it.
       </div>
 
       <div class="description-options">
-        You can toggle whether the client/server side mouse indicator should be shown. "Mirror Pointer" will tell the
-        processing module to invert your client mouse position in X and Y.
+        You can toggle whether the client/server side mouse indicator should be shown.
+        "Mirror Pointer" will tell the processing module to invert your client mouse
+        position in X and Y.
       </div>
 
       <div class="description-mouse-area">
-        Moving your mouse inside this area will publish its current position normalized to ([0;1] , [0;1]) on the topic
-        ".../mouse_client_position". A processing module in the backend will read this client position. If the flag
-        "mirror pointer" is set, the processing module will invert the client position. The processing module will then
-        write the new position to the topic ".../mouse_server_position", which we subscribe to. Once we receive data on
-        the ".../mouse_server_position" topic, the position of the server pointer indicator (red square) will be
-        updated.
+        Moving your mouse inside this area will publish its current position normalized to
+        ([0;1] , [0;1]) on the topic ".../mouse_client_position". A processing module in
+        the backend will read this client position. If the flag "mirror pointer" is set,
+        the processing module will invert the client position. The processing module will
+        then write the new position to the topic ".../mouse_server_position", which we
+        subscribe to. Once we receive data on the ".../mouse_server_position" topic, the
+        position of the server pointer indicator (red square) will be updated.
       </div>
     </div>
   </UbiiClientContent>
 </template>
 
 <script>
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
-import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
-import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
+import ProtobufLibrary from "@tum-far/ubii-msg-formats/dist/js/protobuf";
+import { DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
+import { UbiiClientService } from "@tum-far/ubii-node-webbrowser";
 
-import UbiiClientContent from '../sharedModules/UbiiClientContent';
+import UbiiClientContent from "../sharedModules/UbiiClientContent";
 
 /* fontawesome */
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faMousePointer } from '@fortawesome/free-solid-svg-icons';
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faMousePointer } from "@fortawesome/free-solid-svg-icons";
 
 library.add(faMousePointer);
 
 export default {
-  name: 'ExampleMousePointer',
+  name: "ExampleMousePointer",
   components: { UbiiClientContent },
   /* STEP 1: mounted() is our vue component entry point, start here! */
-  mounted: async function() {
+  mounted: async function () {
     // unsubscribe before page is suddenly closed
-    window.addEventListener('beforeunload', () => {
+    window.addEventListener("beforeunload", () => {
       this.stopExample();
     });
 
@@ -131,7 +140,7 @@ export default {
     await UbiiClientService.instance.waitForConnection();
     this.startExample();
   },
-  beforeDestroy: function() {
+  beforeDestroy: function () {
     this.stopExample();
   },
   data: () => {
@@ -145,11 +154,11 @@ export default {
       exampleStarted: false,
       clientMousePosition: { x: 0, y: 0 },
       serverMousePosition: { x: 0, y: 0 },
-      clientPointerInside: false
+      clientPointerInside: false,
     };
   },
   watch: {
-    mirrorPointer: function(value) {
+    mirrorPointer: function (value) {
       if (
         !UbiiClientService.instance.isConnected() ||
         !this.ubiiDevice.name ||
@@ -159,15 +168,15 @@ export default {
       }
 
       this.publishMirrorPointer(value);
-    }
+    },
   },
   methods: {
-    createUbiiSpecs: function() {
+    createUbiiSpecs: function () {
       // create specifications for ubi-interact
 
       // helper definitions that we can reference later
-      let deviceName = 'web-example-mouse-pointer';
-      let topicPrefix = '/' + UbiiClientService.instance.getClientID() + '/' + deviceName;
+      let deviceName = "web-example-mouse-pointer";
+      let topicPrefix = "/" + UbiiClientService.instance.getClientID() + "/" + deviceName;
 
       // define our abstract device and its components
 
@@ -180,33 +189,33 @@ export default {
         components: [
           // component publishing our mouse pointer position
           {
-            name: '2D pointer original',
+            name: "2D pointer original",
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
-            topic: topicPrefix + '/mouse_client_position',
-            messageFormat: 'ubii.dataStructure.Vector2'
+            topic: topicPrefix + "/mouse_client_position",
+            messageFormat: "ubii.dataStructure.Vector2",
           },
           // component publishing the flag to invert the pointer position
           {
-            name: '2D pointer mirroring around center',
+            name: "2D pointer mirroring around center",
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
-            topic: topicPrefix + '/mirror_mouse',
-            messageFormat: 'bool'
+            topic: topicPrefix + "/mirror_mouse",
+            messageFormat: "bool",
           },
           // component subscribing to the pointer position returned by the server processing module
           {
-            name: '2D pointer processed',
+            name: "2D pointer processed",
             ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER,
-            topic: topicPrefix + '/mouse_server_position',
-            messageFormat: 'ubii.dataStructure.Vector2'
-          }
-        ]
+            topic: topicPrefix + "/mouse_server_position",
+            messageFormat: "ubii.dataStructure.Vector2",
+          },
+        ],
       };
       this.ubiiComponentClientPointer = this.ubiiDevice.components[0];
       this.ubiiComponentMirrorPointer = this.ubiiDevice.components[1];
       this.ubiiComponentServerPointer = this.ubiiDevice.components[2];
 
       // specification of a ubii.processing.ProcessingModule
-      let processingCallback = (deltaTime, inputs, state) => {
+      let processingCallback = (deltaTime, inputs /*state*/) => {
         if (!inputs.clientPointer) {
           return {};
         }
@@ -216,12 +225,12 @@ export default {
         if (inputs.mirrorPointer === true) {
           outputs.serverPointer = {
             x: 1 - inputs.clientPointer.x,
-            y: 1 - inputs.clientPointer.y
+            y: 1 - inputs.clientPointer.y,
           };
         } else {
           outputs.serverPointer = {
             x: inputs.clientPointer.x,
-            y: inputs.clientPointer.y
+            y: inputs.clientPointer.y,
           };
         }
 
@@ -229,29 +238,29 @@ export default {
       };
 
       this.ubiiProcessingModule = {
-        name: 'mirror-mouse-pointer',
+        name: "mirror-mouse-pointer",
         onProcessingStringified: processingCallback.toString(),
         processingMode: {
           frequency: {
-            hertz: 60
-          }
+            hertz: 60,
+          },
         },
         inputs: [
           {
-            internalName: 'clientPointer',
-            messageFormat: 'ubii.dataStructure.Vector2'
+            internalName: "clientPointer",
+            messageFormat: "ubii.dataStructure.Vector2",
           },
           {
-            internalName: 'mirrorPointer',
-            messageFormat: 'bool'
-          }
+            internalName: "mirrorPointer",
+            messageFormat: "bool",
+          },
         ],
         outputs: [
           {
-            internalName: 'serverPointer',
-            messageFormat: 'ubii.dataStructure.Vector2'
-          }
-        ]
+            internalName: "serverPointer",
+            messageFormat: "ubii.dataStructure.Vector2",
+          },
+        ],
       };
       this.ubiiProcessingModule.inputClientPointer = this.ubiiProcessingModule.inputs[0];
       this.ubiiProcessingModule.inputMirrorPointer = this.ubiiProcessingModule.inputs[1];
@@ -260,7 +269,7 @@ export default {
       // specification of a ubii.sessions.Session
       // https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/sessions/session.proto
       this.ubiiSession = {
-        name: 'web-mouse-example-session',
+        name: "web-mouse-example-session",
         processingModules: [this.ubiiProcessingModule],
         ioMappings: [
           {
@@ -268,28 +277,28 @@ export default {
             inputMappings: [
               {
                 inputName: this.ubiiProcessingModule.inputClientPointer.internalName,
-                topicSource: 'topic',
-                topic: this.ubiiComponentClientPointer.topic
+                topicSource: "topic",
+                topic: this.ubiiComponentClientPointer.topic,
               },
               {
                 inputName: this.ubiiProcessingModule.inputMirrorPointer.internalName,
-                topicSource: 'topic',
-                topic: this.ubiiComponentMirrorPointer.topic
-              }
+                topicSource: "topic",
+                topic: this.ubiiComponentMirrorPointer.topic,
+              },
             ],
             outputMappings: [
               {
                 outputName: this.ubiiProcessingModule.outputServerPointer.internalName,
-                topicDestination: 'topic',
-                topic: this.ubiiComponentServerPointer.topic
-              }
-            ]
-          }
-        ]
+                topicDestination: "topic",
+                topic: this.ubiiComponentServerPointer.topic,
+              },
+            ],
+          },
+        ],
       };
     },
     /* STEP 2: making all calls related to ubi-interact backend */
-    startExample: async function() {
+    startExample: async function () {
       if (this.exampleStarted) {
         return;
       }
@@ -301,7 +310,9 @@ export default {
       this.createUbiiSpecs();
 
       // register the mouse pointer device
-      let replyRegisterDevice = await UbiiClientService.instance.registerDevice(this.ubiiDevice);
+      let replyRegisterDevice = await UbiiClientService.instance.registerDevice(
+        this.ubiiDevice
+      );
       // the device specs we send to backend intentionally left out the device ID
       // if the backend accepts the device registration, it will send back our specs
       // plus any necessary info (like the ID) filled in by the backend
@@ -324,13 +335,13 @@ export default {
       // start our session (registering not necessary as we do not want to save it permanently)
       let replySessionStart = await UbiiClientService.instance.client.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
-        session: this.ubiiSession
+        session: this.ubiiSession,
       });
       if (replySessionStart.session) {
         this.ubiiSession = replySessionStart.session;
       }
     },
-    stopExample: async function() {
+    stopExample: async function () {
       if (!this.exampleStarted) return;
 
       UbiiClientService.instance.setPublishIntervalMs(15);
@@ -343,7 +354,7 @@ export default {
       );
       await UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
-        session: this.ubiiSession
+        session: this.ubiiSession,
       });
 
       if (this.ubiiDevice) {
@@ -351,69 +362,75 @@ export default {
       }
     },
     /* publishing and subscribing */
-    subscriptionServerPointerPosition: function(vec2) {
+    subscriptionServerPointerPosition: function (vec2) {
       // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
       // mouse area and set our red square indicator
-      let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
+      let boundingRect = document
+        .getElementById("mouse-pointer-area")
+        .getBoundingClientRect();
       this.$data.serverMousePosition = {
         x: vec2.x * boundingRect.width,
-        y: vec2.y * boundingRect.height
+        y: vec2.y * boundingRect.height,
       };
     },
-    publishClientPointerPosition: function(vec2) {
+    publishClientPointerPosition: function (vec2) {
       if (this.publishImmediately) {
         UbiiClientService.instance.publishRecordImmediately({
           topic: this.ubiiComponentClientPointer.topic,
-          vector2: vec2
+          vector2: vec2,
         });
       } else {
         // publish our normalized client mouse position
         UbiiClientService.instance.publishRecord({
           topic: this.ubiiComponentClientPointer.topic,
-          vector2: vec2
+          vector2: vec2,
         });
       }
     },
-    publishMirrorPointer: function(boolean) {
+    publishMirrorPointer: function (boolean) {
       // if the checkbox is changed, we publish this info on the related topic
       UbiiClientService.instance.publishRecord({
         topic: this.ubiiComponentMirrorPointer.topic,
-        bool: boolean
+        bool: boolean,
       });
     },
-    onPublishIntervalChange: function(event) {
+    onPublishIntervalChange: function (event) {
       UbiiClientService.instance.setPublishIntervalMs(event.target.value);
     },
     /* UI events */
-    onMouseMove: function(event) {
+    onMouseMove: function (event) {
       if (!this.exampleStarted) {
         return;
       }
 
       // calculate the current mouse position, normalized to the bounds of the interactive area ([0;1], [0;1])
-      let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
+      let boundingRect = document
+        .getElementById("mouse-pointer-area")
+        .getBoundingClientRect();
       let relativeMousePosition = {
         x: (event.clientX - boundingRect.left) / boundingRect.width,
-        y: (event.clientY - boundingRect.top) / boundingRect.height
+        y: (event.clientY - boundingRect.top) / boundingRect.height,
       };
 
       this.$data.clientMousePosition = relativeMousePosition;
       // publish our normalized client mouse position
       this.publishClientPointerPosition(this.$data.clientMousePosition);
     },
-    onTouchStart: function(event) {
+    onTouchStart: function (event) {
       this.$data.clientPointerInside = true;
       this.onTouchMove(event);
     },
-    onTouchMove: function(event) {
+    onTouchMove: function (event) {
       if (!this.exampleStarted) {
         return;
       }
 
       // calculate the current touch position, normalized to the bounds of the interactive area ([0;1], [0;1])
       let relativeMousePosition = {
-        x: (event.touches[0].clientX - event.target.offsetLeft) / event.target.offsetWidth,
-        y: (event.touches[0].clientY - event.target.offsetTop) / event.target.offsetHeight
+        x:
+          (event.touches[0].clientX - event.target.offsetLeft) / event.target.offsetWidth,
+        y:
+          (event.touches[0].clientY - event.target.offsetTop) / event.target.offsetHeight,
       };
 
       if (
@@ -429,8 +446,8 @@ export default {
       this.$data.clientMousePosition = relativeMousePosition;
       // publish our normalized client touch position
       this.publishClientPointerPosition(this.$data.clientMousePosition);
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -441,11 +458,11 @@ export default {
   grid-template-columns: 2fr 6fr;
   grid-template-rows: 30px 300px auto 30px auto;
   grid-template-areas:
-    'header-demo header-demo'
-    'demo-options demo-mouse-area'
-    'description-options description-mouse-area'
-    'header-description header-description'
-    'description-general description-general';
+    "header-demo header-demo"
+    "demo-options demo-mouse-area"
+    "description-options description-mouse-area"
+    "header-description header-description"
+    "description-general description-general";
   height: 100%;
 }
 
