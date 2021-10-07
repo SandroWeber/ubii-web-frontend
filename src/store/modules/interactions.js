@@ -210,8 +210,6 @@ const actions = {
     interactionsToSync.set(payload.interaction.id, payload.interaction);
   },
   async updateImmediately(context, payload) {
-    //console.info('updateImmediately');
-    //console.info(payload);
     // Update immediately locally ...
     context.commit('setInteraction', payload);
 

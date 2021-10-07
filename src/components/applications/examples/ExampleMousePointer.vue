@@ -7,32 +7,38 @@
 
       <div class="options">
         <!-- a checkbox to toggle showing the client side pointer -->
-        <input
-          id="checkboxClientPointer"
-          type="checkbox"
-          v-model="showClientPointer"
-        />
+        <input id="checkboxClientPointer" type="checkbox" v-model="showClientPointer" />
         <label for="checkboxClientPointer">Show Client Pointer</label>
 
         <br />
 
         <!-- a checkbox to toggle showing the server side pointer -->
-        <input
-          id="checkboxServerPointer"
-          type="checkbox"
-          v-model="showServerPointer"
-        />
+        <input id="checkboxServerPointer" type="checkbox" v-model="showServerPointer" />
         <label for="checkboxServerPointer">Show Server Pointer</label>
 
         <br />
 
         <!-- a checkbox to toggle inverting the pointer position at the server before sending it back to client -->
-        <input
-          id="checkboxMirrorPointer"
-          type="checkbox"
-          v-model="mirrorPointer"
-        />
+        <input id="checkboxMirrorPointer" type="checkbox" v-model="mirrorPointer" />
         <label for="checkboxMirrorPointer">Mirror Pointer</label>
+
+        <br />
+
+        <!-- a checkbox to toggle immediate publishing of TopicDataRecords -->
+        <input id="checkboxPublishImmediately" type="checkbox" v-model="publishImmediately" />
+        <label for="checkboxPublishImmediately">Publish Immediately</label>
+
+        <br />
+
+        <!-- a checkbox to toggle immediate publishing of TopicDataRecords -->
+        <input
+          id="numberPublishInterval"
+          type="number"
+          v-model="publishIntervalMs"
+          :disabled="publishImmediately"
+          v-on:change="onPublishIntervalChange"
+        />
+        <label for="numberPublishInterval">Publish Interval (ms)</label>
       </div>
 
       <!-- the mouse area.
@@ -48,16 +54,15 @@
         v-on:touchend="clientPointerInside = false"
         v-on:touchmove="onTouchMove($event)"
       >
-        <!-- this is the red square indicator of the pointer position sent back to us by the server
-        you can see its position via style - top/left being linked to the data variable "serverMousePosition"-->
-        <div
+        <font-awesome-icon
           class="server-mouse-position-indicator"
+          icon="mouse-pointer"
           :style="{
-            top: serverMousePosition.y + 'px',
-            left: serverMousePosition.x + 'px'
+            top: serverMousePosition.y - 4 + 'px',
+            left: serverMousePosition.x - 4 + 'px'
           }"
           v-show="showServerPointer && clientPointerInside"
-        ></div>
+        />
       </div>
 
       <div class="seperator header-description">
@@ -65,34 +70,28 @@
       </div>
 
       <div class="description-general">
-        Placing your mouse inside the above area will show your mouse indicator
-        (arrow) as well as a red square. The basic idea of this demo is to send
-        the mouse position to the Ubi-Interact backend, which will send it back
-        to us so we can display it (red square).
-        <br />Reading the code of this example will show your how to register a
-        device with Ubi-Interact defining the topics for data communication. It
-        also shows you how to publish (send) and subcribe (receive) to topics. A
-        small session + processing module is also specified and communicated to
-        Ubi-Interact that can manipulate the communicated mouse position. You
-        can see in the code how to specify this processing module on the client
-        side, link it to the topics of our device and start it.
+        Placing your mouse inside the above area will show your mouse indicator (arrow) as well as a red square. The
+        basic idea of this demo is to send the mouse position to the Ubi-Interact backend, which will send it back to us
+        so we can display it (red square).
+        <br />Reading the code of this example will show your how to register a device with Ubi-Interact defining the
+        topics for data communication. It also shows you how to publish (send) and subcribe (receive) to topics. A small
+        session + processing module is also specified and communicated to Ubi-Interact that can manipulate the
+        communicated mouse position. You can see in the code how to specify this processing module on the client side,
+        link it to the topics of our device and start it.
       </div>
 
       <div class="description-options">
-        You can toggle whether the client/server side mouse indicator should be
-        shown. "Mirror Pointer" will tell the processing module to invert your
-        client mouse position in X and Y.
+        You can toggle whether the client/server side mouse indicator should be shown. "Mirror Pointer" will tell the
+        processing module to invert your client mouse position in X and Y.
       </div>
 
       <div class="description-mouse-area">
-        Moving your mouse inside this area will publish its current position
-        normalized to ([0;1] , [0;1]) on the topic ".../mouse_client_position".
-        A processing module in the backend will read this client position. If
-        the flag "mirror pointer" is set, the processing module will invert the
-        client position. The processing module will then write the new position
-        to the topic ".../mouse_server_position", which we subscribe to. Once we
-        receive data on the ".../mouse_server_position" topic, the position of
-        the server pointer indicator (red square) will be updated.
+        Moving your mouse inside this area will publish its current position normalized to ([0;1] , [0;1]) on the topic
+        ".../mouse_client_position". A processing module in the backend will read this client position. If the flag
+        "mirror pointer" is set, the processing module will invert the client position. The processing module will then
+        write the new position to the topic ".../mouse_server_position", which we subscribe to. Once we receive data on
+        the ".../mouse_server_position" topic, the position of the server pointer indicator (red square) will be
+        updated.
       </div>
     </div>
   </UbiiClientContent>
@@ -107,15 +106,15 @@ import UbiiClientContent from '../sharedModules/UbiiClientContent';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faPlay } from '@fortawesome/free-solid-svg-icons';
+import { faMousePointer } from '@fortawesome/free-solid-svg-icons';
 
-library.add(faPlay);
+library.add(faMousePointer);
 
 export default {
   name: 'ExampleMousePointer',
   components: { UbiiClientContent },
   /* STEP 1: mounted() is our vue component entry point, start here! */
-  mounted: function() {
+  mounted: async function() {
     // unsubscribe before page is suddenly closed
     window.addEventListener('beforeunload', () => {
       this.stopExample();
@@ -129,12 +128,8 @@ export default {
     });
 
     // make sure we're connected, then start the example
-    UbiiClientService.instance.waitForConnection().then(() => {
-      this.startExample();
-    });
-    UbiiClientService.instance.onDisconnect(() => {
-      this.stopExample();
-    });
+    await UbiiClientService.instance.waitForConnection();
+    this.startExample();
   },
   beforeDestroy: function() {
     this.stopExample();
@@ -144,6 +139,8 @@ export default {
       showClientPointer: false,
       showServerPointer: true,
       mirrorPointer: false,
+      publishImmediately: false,
+      publishIntervalMs: UbiiClientService.instance.getPublishIntervalMs(),
       ubiiClientService: UbiiClientService.instance,
       exampleStarted: false,
       clientMousePosition: { x: 0, y: 0 },
@@ -170,8 +167,7 @@ export default {
 
       // helper definitions that we can reference later
       let deviceName = 'web-example-mouse-pointer';
-      let topicPrefix =
-        '/' + UbiiClientService.instance.getClientID() + '/' + deviceName;
+      let topicPrefix = '/' + UbiiClientService.instance.getClientID() + '/' + deviceName;
 
       // define our abstract device and its components
 
@@ -210,24 +206,26 @@ export default {
       this.ubiiComponentServerPointer = this.ubiiDevice.components[2];
 
       // specification of a ubii.processing.ProcessingModule
-      let processingCallback = (deltaTime, input, output) => {
-        if (!input.clientPointer) {
-          return;
+      let processingCallback = (deltaTime, inputs, state) => {
+        if (!inputs.clientPointer) {
+          return {};
         }
 
-        if (input.mirrorPointer === true) {
-          output.serverPointer = {
-            x: 1 - input.clientPointer.x,
-            y: 1 - input.clientPointer.y
+        let outputs = {};
+
+        if (inputs.mirrorPointer === true) {
+          outputs.serverPointer = {
+            x: 1 - inputs.clientPointer.x,
+            y: 1 - inputs.clientPointer.y
           };
         } else {
-          output.serverPointer = {
-            x: input.clientPointer.x,
-            y: input.clientPointer.y
+          outputs.serverPointer = {
+            x: inputs.clientPointer.x,
+            y: inputs.clientPointer.y
           };
         }
 
-        return output;
+        return { outputs };
       };
 
       this.ubiiProcessingModule = {
@@ -269,22 +267,19 @@ export default {
             processingModuleName: this.ubiiProcessingModule.name,
             inputMappings: [
               {
-                inputName: this.ubiiProcessingModule.inputClientPointer
-                  .internalName,
+                inputName: this.ubiiProcessingModule.inputClientPointer.internalName,
                 topicSource: 'topic',
                 topic: this.ubiiComponentClientPointer.topic
               },
               {
-                inputName: this.ubiiProcessingModule.inputMirrorPointer
-                  .internalName,
+                inputName: this.ubiiProcessingModule.inputMirrorPointer.internalName,
                 topicSource: 'topic',
                 topic: this.ubiiComponentMirrorPointer.topic
               }
             ],
             outputMappings: [
               {
-                outputName: this.ubiiProcessingModule.outputServerPointer
-                  .internalName,
+                outputName: this.ubiiProcessingModule.outputServerPointer.internalName,
                 topicDestination: 'topic',
                 topic: this.ubiiComponentServerPointer.topic
               }
@@ -294,68 +289,59 @@ export default {
       };
     },
     /* STEP 2: making all calls related to ubi-interact backend */
-    startExample: function() {
+    startExample: async function() {
       if (this.exampleStarted) {
         return;
       }
       this.$data.exampleStarted = true;
+      this.publishIntervalMs = UbiiClientService.instance.getPublishIntervalMs();
 
-      // make sure we're connected, then continue
-      UbiiClientService.instance.waitForConnection().then(() => {
-        // create all the specifications we need to define our example application
-        // these are protobuf messages to be sent to the server (saved in this.$data)
-        this.createUbiiSpecs();
+      // create all the specifications we need to define our example application
+      // these are protobuf messages to be sent to the server (saved in this.$data)
+      this.createUbiiSpecs();
 
-        // register the mouse pointer device
-        UbiiClientService.instance.registerDevice(this.ubiiDevice)
-          .then(response => {
-            // the device specs we send to backend intentionally left out the device ID
-            // if the backend accepts the device registration, it will send back our specs
-            // plus any necessary info (like the ID) filled in by the backend
-            // that way we make sure the ID is created by the backend and valid
-            if (response.id) {
-              // success, we accept the device specs sent back to us as the final specs
-              this.ubiiDevice = response;
-              return this.ubiiDevice;
-            } else {
-              // something went wrong, print to console
-              console.error(response);
-              return undefined;
-            }
-          })
-          .then(() => {
-            // subscribe to the device topics so we are notified when new data arrives on the topic
-            UbiiClientService.instance.subscribeTopic(
-              this.ubiiComponentServerPointer.topic,
-              // a callback to be called when new data on this topic arrives
-              this.subscriptionServerPointerPosition
-            );
+      // register the mouse pointer device
+      let replyRegisterDevice = await UbiiClientService.instance.registerDevice(this.ubiiDevice);
+      // the device specs we send to backend intentionally left out the device ID
+      // if the backend accepts the device registration, it will send back our specs
+      // plus any necessary info (like the ID) filled in by the backend
+      // that way we make sure the ID is created by the backend and valid
+      if (replyRegisterDevice.id) {
+        // success, we accept the device specs sent back to us as the final specs
+        this.ubiiDevice = replyRegisterDevice;
+      } else {
+        // something went wrong, print to console
+        console.error(replyRegisterDevice);
+      }
 
-            // start our session (registering not necessary as we do not want to save it permanently)
-            UbiiClientService.instance.client
-              .callService({
-                topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
-                session: this.ubiiSession
-              })
-              .then(response => {
-                if (response.session) {
-                  this.ubiiSession = response.session;
-                }
-              });
-          });
+      // subscribe to the device topics so we are notified when new data arrives on the topic
+      await UbiiClientService.instance.subscribeTopic(
+        this.ubiiComponentServerPointer.topic,
+        // a callback to be called when new data on this topic arrives
+        this.subscriptionServerPointerPosition
+      );
+
+      // start our session (registering not necessary as we do not want to save it permanently)
+      let replySessionStart = await UbiiClientService.instance.client.callService({
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
+        session: this.ubiiSession
       });
+      if (replySessionStart.session) {
+        this.ubiiSession = replySessionStart.session;
+      }
     },
     stopExample: async function() {
       if (!this.exampleStarted) return;
 
+      UbiiClientService.instance.setPublishIntervalMs(15);
       this.exampleStarted = false;
 
       // unsubscribe and stop session
-      UbiiClientService.instance.unsubscribeTopic(
+      await UbiiClientService.instance.unsubscribeTopic(
         this.ubiiComponentServerPointer.topic,
         this.subscriptionServerPointerPosition
       );
-      UbiiClientService.instance.callService({
+      await UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
         session: this.ubiiSession
       });
@@ -368,20 +354,25 @@ export default {
     subscriptionServerPointerPosition: function(vec2) {
       // when we get a normalized server pointer position, we calculate back to absolute (x,y) within the
       // mouse area and set our red square indicator
-      let boundingRect = document
-        .getElementById('mouse-pointer-area')
-        .getBoundingClientRect();
+      let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
       this.$data.serverMousePosition = {
         x: vec2.x * boundingRect.width,
         y: vec2.y * boundingRect.height
       };
     },
     publishClientPointerPosition: function(vec2) {
-      // publish our normalized client mouse position
-      UbiiClientService.instance.publishRecord({
-        topic: this.ubiiComponentClientPointer.topic,
-        vector2: vec2
-      });
+      if (this.publishImmediately) {
+        UbiiClientService.instance.publishRecordImmediately({
+          topic: this.ubiiComponentClientPointer.topic,
+          vector2: vec2
+        });
+      } else {
+        // publish our normalized client mouse position
+        UbiiClientService.instance.publishRecord({
+          topic: this.ubiiComponentClientPointer.topic,
+          vector2: vec2
+        });
+      }
     },
     publishMirrorPointer: function(boolean) {
       // if the checkbox is changed, we publish this info on the related topic
@@ -390,6 +381,9 @@ export default {
         bool: boolean
       });
     },
+    onPublishIntervalChange: function(event) {
+      UbiiClientService.instance.setPublishIntervalMs(event.target.value);
+    },
     /* UI events */
     onMouseMove: function(event) {
       if (!this.exampleStarted) {
@@ -397,9 +391,7 @@ export default {
       }
 
       // calculate the current mouse position, normalized to the bounds of the interactive area ([0;1], [0;1])
-      let boundingRect = document
-        .getElementById('mouse-pointer-area')
-        .getBoundingClientRect();
+      let boundingRect = document.getElementById('mouse-pointer-area').getBoundingClientRect();
       let relativeMousePosition = {
         x: (event.clientX - boundingRect.left) / boundingRect.width,
         y: (event.clientY - boundingRect.top) / boundingRect.height
@@ -420,12 +412,8 @@ export default {
 
       // calculate the current touch position, normalized to the bounds of the interactive area ([0;1], [0;1])
       let relativeMousePosition = {
-        x:
-          (event.touches[0].clientX - event.target.offsetLeft) /
-          event.target.offsetWidth,
-        y:
-          (event.touches[0].clientY - event.target.offsetTop) /
-          event.target.offsetHeight
+        x: (event.touches[0].clientX - event.target.offsetLeft) / event.target.offsetWidth,
+        y: (event.touches[0].clientY - event.target.offsetTop) / event.target.offsetHeight
       };
 
       if (
@@ -478,9 +466,6 @@ export default {
 
 .server-mouse-position-indicator {
   position: relative;
-  width: 10px;
-  height: 10px;
-  background-color: red;
 }
 
 .start-example {

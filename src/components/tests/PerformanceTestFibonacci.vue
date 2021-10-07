@@ -60,7 +60,7 @@
       />
 
       <label for="fibonacci-sequence-length" class="setting-label"
-        >fib sequence length (n):</label
+        >sequence length (n):</label
       >
       <app-input
         :id="'fibonacci-sequence-length'"
@@ -69,7 +69,7 @@
       />
 
       <label for="test-duration" class="setting-label"
-        >test duration (seconds):</label
+        >test duration (s):</label
       >
       <app-input
         :id="'test-duration'"
@@ -77,14 +77,10 @@
         v-model="testData.settings.testDurationSeconds"
       />
 
-      <label for="fibonacci-session-count" class="setting-label"
-        >run on node:</label
+      <label for="fibonacci-node-id" class="setting-label"
+        >run on node ID:</label
       >
-      <app-input
-        :id="'fibonacci-session-count'"
-        :type="'# sessions'"
-        v-model="testData.settings.nodeId"
-      />
+      <input-node-id :id="'fibonacci-node-id'" v-model="testData.settings.nodeId" />
     </div>
   </div>
 </template>
@@ -97,14 +93,16 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faPlay, faSpinner } from '@fortawesome/free-solid-svg-icons';
 library.add(faPlay, faSpinner);
 
-import { AppInput, AppButton } from '../../appComponents/appComponents';
+import { AppInput, AppButton } from '../appComponents/appComponents';
 import PerformanceTestFibonacciHelper from './performanceTestFibonacciHelper';
+import InputNodeId from '../appComponents/InputNodeId.vue';
 
 export default {
   name: 'PerformanceTest-FibonacciProcessing',
   components: {
     AppInput: AppInput,
-    AppButton: AppButton
+    AppButton: AppButton,
+    InputNodeId
   },
   mounted: async function() {
     // unsubscribe before page is unloaded
@@ -138,7 +136,7 @@ export default {
         settings: {
           sessionCount: '1',
           pmCountPerSession: '5',
-          fibSequenceLength: '999999',
+          fibSequenceLength: '9999999',
           testDurationSeconds: '5',
           nodeId: 'unset'
         },
@@ -176,7 +174,7 @@ export default {
                 PerformanceTestFibonacciHelper.SEQENCE_LENGTH_INPUT_SUFFIX
               ) !== -1
             ) {
-              UbiiClientService.instance.publishRecord({
+              UbiiClientService.instance.publishRecordImmediately({
                 topic: inputMapping.topic,
                 double: parseFloat(this.testData.settings.fibSequenceLength)
               });
@@ -320,7 +318,7 @@ export default {
   grid-area: settings;
   display: grid;
   grid-gap: 15px;
-  grid-template-columns: 200px 100px 200px 100px;
+  grid-template-columns: 200px 200px 200px 200px;
   grid-template-rows: 25px 25px 25px;
 }
 

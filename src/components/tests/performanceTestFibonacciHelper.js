@@ -3,6 +3,8 @@ class PerformanceTestFibonacciHelper {
   static PROCESSED_OUTPUT_SUFFIX = 'fibonacciResult';
 
   static processingCallback(deltaTime, inputs) {
+    let outputs = {};
+
     let fibonacci = num => {
       var a = 1,
         b = 0,
@@ -18,9 +20,11 @@ class PerformanceTestFibonacciHelper {
       return b;
     };
 
-    let result = fibonacci(inputs.fibonacciInput);
+    if (inputs.fibonacciInput) {
+      outputs.fibonacciResult = fibonacci(inputs.fibonacciInput);
+    }
 
-    return { fibonacciResult: result };
+    return { outputs };
   }
 
   static createProcessingModuleSpecs(index, nodeId) {

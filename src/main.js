@@ -5,11 +5,14 @@ import store from './store/index.js';
 
 /* font-awesome */
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { VBTooltip } from 'bootstrap-vue';
-
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
+import { VBTooltip } from 'bootstrap-vue';
 Vue.directive('b-tooltip', VBTooltip);
+
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap-vue/dist/bootstrap-vue.css';
+
 
 /* vue app */
 Vue.config.productionTip = false;

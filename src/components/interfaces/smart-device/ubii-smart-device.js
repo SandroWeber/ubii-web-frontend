@@ -1,16 +1,12 @@
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
+import UbiiComponentTouchscreen from '../../../ubii/components/ubii-component-touch';
 
 const UBII_SPECS_TEMPLATE = {
   name: 'web-interface-smart-device',
   tags: ['smart device', 'web interface'],
   deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
   components: [
-    {
-      topic: '<placeholder-topic-prefix>/touch_position',
-      messageFormat: 'ubii.dataStructure.Vector2',
-      ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
-    },
     {
       topic: '<placeholder-topic-prefix>/orientation',
       messageFormat: 'ubii.dataStructure.Vector3',
@@ -22,11 +18,6 @@ const UBII_SPECS_TEMPLATE = {
       ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
     },
     {
-      topic: '<placeholder-topic-prefix>/touch_events',
-      messageFormat: 'ubii.dataStructure.TouchEventList',
-      ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
-    },
-    {
       topic: '<placeholder-topic-prefix>/vibration_pattern',
       messageFormat: 'double',
       ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
@@ -35,10 +26,19 @@ const UBII_SPECS_TEMPLATE = {
 };
 
 export default class UbiiSmartDevice {
-  constructor() {
+  constructor(elementTouch) {
     Object.assign(this, UBII_SPECS_TEMPLATE);
     this.deviceData = {};
-    this.publishIntervalS = 0.02;
+    this.publishIntervalMilliseconds = 200;
+    this.elementTouch = elementTouch;
+
+    this.accelDataLowerThreshold = 0.2;
+    this.accelRingbuffer = [];
+    this.accelRingbufferSize = 10;
+    this.accelRingbufferSizeInMS = 100000;
+    this.accelRingbufferPos = 0;
+    this.velocityPrincipalDirectionMagnitudeThreshold = 30;
+    this.velocityPrincipalDirectionMinDifference = 10;
   }
 
   /* setup */
@@ -48,7 +48,7 @@ export default class UbiiSmartDevice {
 
     this.clientId = UbiiClientService.instance.getClientID();
 
-    navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
+    /*navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
     if (!navigator.vibrate) {
       let vibrateComponentIndex = this.components.findIndex(component =>
         component.topic.includes('/vibration_pattern')
@@ -57,20 +57,21 @@ export default class UbiiSmartDevice {
     } else {
       this.tNextVibrate = Date.now();
       navigator.vibrate(100);
-    }
+    }*/
 
     let topicPrefix = '/' + this.clientId + '/' + this.name;
     this.components.forEach(component => {
       component.topic = component.topic.replace('<placeholder-topic-prefix>', topicPrefix);
     });
 
-    this.componentTouchPosition = this.components[0];
-    this.componentOrientation = this.components[1];
-    this.componentLinearAcceleration = this.components[2];
-    this.componentTouchEvents = this.components[3];
-    if (this.components.length === 5) {
-      this.componentVibrate = this.components[4];
+    this.componentOrientation = this.components[0];
+    this.componentLinearAcceleration = this.components[1];
+    if (this.components.length === 3) {
+      this.componentVibrate = this.components[2];
     }
+    this.componentTouch = new UbiiComponentTouchscreen(33, this.elementTouch);
+    this.components.push(this.componentTouch);
+    await this.componentTouch.start();
 
     await this.register();
   }
@@ -94,7 +95,7 @@ export default class UbiiSmartDevice {
 
     this.intervalPublishContinuousData = setInterval(() => {
       this.publishContinuousDeviceData();
-    }, this.publishIntervalS * 1000);
+    }, this.publishIntervalMilliseconds);
     if (this.componentVibrate) {
       UbiiClientService.instance.subscribeTopic(this.componentVibrate.topic, this.handleVibrationPattern);
     }
@@ -137,6 +138,27 @@ export default class UbiiSmartDevice {
   }
 
   onDeviceMotion(event) {
+    if (!this.deviceMotionInitialized) {
+      // adjust publishing frequency if API frequency is lower
+      if (event.interval && event.interval > this.publishIntervalMilliseconds) {
+        this.publishIntervalMilliseconds = event.interval;
+        this.accelRingbufferSize = this.accelRingbufferSizeInMS / event.interval;
+      } else {
+        this.accelRingbufferSize = this.accelRingbufferSizeInMS / this.publishIntervalMilliseconds;
+      }
+
+      this.deviceMotionInitialized = true;
+      return;
+    }
+
+    /*this.processAccelerationData(event.acceleration);
+    if (this.componentTouch && this.componentTouch.touches && this.componentTouch.touches.length > 0) {
+      let vel = this.velocityEstimate();
+      console.info(event.acceleration);
+      console.info(vel);
+      console.info(this.getVelocityPrincipalDirection(vel));
+    }*/
+
     // https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent
     let timestamp = UbiiClientService.instance.generateTimestamp();
     this.deviceData.accelerationData = {
@@ -149,43 +171,65 @@ export default class UbiiSmartDevice {
     };
   }
 
-  onTouchStart(event) {
-    this.deviceData.touches = event.touches;
-
-    let touchList = [];
-    for (let i = 0; i < event.touches.length; i++) {
-      touchList.push({
-        id: event.touches[i].identifier.toString(),
-        type: ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN,
-        position: this.normalizeCoordinates(event, i)
-      });
+  processAccelerationData(acceleration) {
+    // thresholding
+    let data = {
+      x: Math.abs(acceleration.x) > this.accelDataLowerThreshold ? acceleration.x : 0,
+      y: Math.abs(acceleration.y) > this.accelDataLowerThreshold ? acceleration.y : 0,
+      z: Math.abs(acceleration.z) > this.accelDataLowerThreshold ? acceleration.z : 0
+    };
+    if (this.accelRingbuffer.length === this.accelRingbufferSize) {
+      this.accelRingbuffer[this.accelRingbufferPos] = data;
+    } else {
+      this.accelRingbuffer.push(data);
     }
-    //console.info(touchList);
-    this.publishTouchEventList(touchList);
+    this.accelRingbufferPos = (this.accelRingbufferPos + 1) % this.accelRingbufferSize;
+
+    return data;
   }
 
-  onTouchMove(event) {
-    this.deviceData.touches = event.touches;
-    /*console.info('touch move');
-    console.info(event.touches);*/
+  velocityEstimate() {
+    let summed = { x: 0, y: 0, z: 0 };
+    for (let element of this.accelRingbuffer) {
+      summed.x += element.x;
+      summed.y += element.y;
+      summed.z += element.z;
+    }
 
-    this.deviceData.touchPosition = this.normalizeCoordinates(event, 0);
+    return summed;
   }
 
-  onTouchEnd(event) {
-    this.deviceData.touches = event.touches;
-    this.deviceData.touchPosition = undefined;
+  getVelocityPrincipalDirection(velocityEstimate) {
+    let absVelX = Math.abs(velocityEstimate.x), absVelY = Math.abs(velocityEstimate.y), absVelZ = Math.abs(velocityEstimate.z);
+    let magnitude = absVelX + absVelY + absVelZ;
+    if (magnitude > this.velocityPrincipalDirectionMagnitudeThreshold) {
+      // at least activity above threshold
+      // find biggest component (in absolute terms) that has threshold distance to other components 
+      let diffXY = absVelX - absVelY;
+      let diffXZ = absVelX - absVelZ;
+      let diffYZ = absVelY - absVelZ;
 
-    let touchList = [];
-    for (let i = 0; i < event.touches.length; i++) {
-      touchList.push({
-        id: event.touches[i].identifier.toString(),
-        type: ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP,
-        position: this.normalizeCoordinates(event, i)
-      });
+      if (
+        diffXY > this.velocityPrincipalDirectionMinDifference &&
+        diffXZ > this.velocityPrincipalDirectionMinDifference
+      ) {
+        return Math.sign(velocityEstimate.x) + 'X';
+      } else if (
+        diffXY < -this.velocityPrincipalDirectionMinDifference &&
+        diffYZ > this.velocityPrincipalDirectionMinDifference
+      ) {
+        return Math.sign(velocityEstimate.y) + 'Y';
+      } else if (
+        diffXZ < -this.velocityPrincipalDirectionMinDifference &&
+        diffYZ < -this.velocityPrincipalDirectionMinDifference
+      ) {
+        return Math.sign(velocityEstimate.z) + 'Z';
+      } else {
+        return 'None';
+      }
+    } else {
+      return 'None';
     }
-    //console.info(touchList);
-    this.publishTouchEventList(touchList);
   }
 
   /* ubii topic communication */
@@ -203,16 +247,16 @@ export default class UbiiSmartDevice {
     }
     //console.info('publishContinuousDeviceData');
 
-    this.deviceData.touchPosition && this.publishTouchPosition(this.deviceData.touchPosition);
-
     this.deviceData.currentOrientation && this.publishDeviceOrientation();
 
     this.publishDeviceMotion();
 
     // call loop
-    setTimeout(this.publishContinuousDeviceData, this.publishIntervalS * 1000);
+    setTimeout(this.publishContinuousDeviceData, this.publishIntervalMilliseconds);
   }
 
+  /* develop code */
+  /*
   publishTouchPosition(position) {
     if (this.hasRegisteredUbiiDevice) {
       UbiiClientService.instance.publish({
@@ -245,6 +289,7 @@ export default class UbiiSmartDevice {
       });
     }
   }
+  */
 
   publishDeviceOrientation() {
     if (!this.deviceData.currentOrientation) {

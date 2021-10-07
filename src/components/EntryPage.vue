@@ -15,6 +15,13 @@
         </app-tile>
       </router-link>
 
+      <router-link to="/tests" class="tile-menu-item" tag="div">
+        <app-tile class="layer-three background round shadow yellow-accent tile-menu-item-background">
+          <font-awesome-icon icon="clipboard-list" class="tile-menu-icon" />
+          <p>Tests</p>
+        </app-tile>
+      </router-link>
+
       <router-link to="/interfaces" class="tile-menu-item" tag="div">
         <app-tile class="layer-three background round shadow blue-accent tile-menu-item-background">
           <font-awesome-icon icon="link" class="tile-menu-icon" />
@@ -34,13 +41,8 @@
 
 <script>
 import { library } from '@fortawesome/fontawesome-svg-core';
-import {
-  faCogs,
-  faToolbox,
-  faLink,
-  faPlayCircle
-} from '@fortawesome/free-solid-svg-icons';
-library.add(faCogs, faToolbox, faLink, faPlayCircle);
+import { faCogs, faToolbox, faLink, faPlayCircle, faClipboardList } from '@fortawesome/free-solid-svg-icons';
+library.add(faCogs, faToolbox, faLink, faPlayCircle, faClipboardList);
 
 import { AppLayer, AppTile } from './appComponents/appComponents.js';
 
@@ -61,5 +63,4 @@ export default {
   height: 100%;
   padding: 25px;
 }
-
 </style>

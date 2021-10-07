@@ -29,12 +29,12 @@
         </app-tile>
       </router-link>
 
-      <router-link to="/interfaces/myo" class="tile-menu-item" tag="div">
+      <!--<router-link to="/interfaces/myo" class="tile-menu-item" tag="div">
         <app-tile class="layer-three background round shadow blue-accent tile-menu-item-background">
           <font-awesome-icon icon="ring" class="tile-menu-icon" />
           <p>Myo</p>
         </app-tile>
-      </router-link>
+      </router-link>-->
     </div>
   </div>
 </template>

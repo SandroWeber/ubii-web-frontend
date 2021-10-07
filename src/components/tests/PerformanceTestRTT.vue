@@ -40,7 +40,7 @@
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 
-import { AppInput, AppButton } from '../../appComponents/appComponents';
+import { AppInput, AppButton } from '../appComponents/appComponents';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -143,7 +143,7 @@ export default {
     },
     rttSendPackage: function() {
       this.$data.testRTT.tSent = Date.now();
-      UbiiClientService.instance.publishRecord({
+      UbiiClientService.instance.publishRecordImmediately({
         topic: this.$data.testRTT.topic,
         double: 1
       });

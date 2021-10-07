@@ -3,11 +3,7 @@
     <div class="category-header header-services orange-accent">Services</div>
 
     <div class="category-content content-services" v-show="serviceList">
-      <div
-        class="list-element"
-        v-for="service in serviceList"
-        :key="service.topic"
-      >
+      <div class="list-element" v-for="service in serviceList" :key="service.topic">
         <service-viewer
           :topic="service.topic"
           :requestMessageFormat="service.requestMessageFormat"
@@ -40,20 +36,17 @@ export default {
   name: 'ServiceTopicInspector',
   components: {
     TopicDataViewer,
-    ServiceViewer
+    ServiceViewer,
   },
-  mounted: function() {
+  mounted: function () {
     UbiiClientService.instance.waitForConnection().then(() => {
       this.getTopicList();
       this.getServiceList();
     });
     this.open = true;
   },
-  beforeDestroy: function() {
-    UbiiClientService.instance.unsubscribeRegex(
-      this.regexAllTopics,
-      this.handleTopicData
-    );
+  beforeDestroy: function () {
+    UbiiClientService.instance.unsubscribeRegex(this.regexAllTopics, this.handleTopicData);
     this.open = false;
   },
   data: () => {
@@ -62,48 +55,49 @@ export default {
       serviceList: [],
       serviceTopicList: [],
       topicData: {},
-      regexAllTopics: '.*'
+      regexAllTopics: '.*',
     };
   },
   methods: {
-    getTopicList: function() {
-      UbiiClientService.instance.callService({
-        topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST
-      }).then(reply => {
-        let topics = reply.stringList.elements;
-        this.$data.serviceTopicList = topics.filter(topic => {
-          return topic.indexOf('/services/') === 0;
+    getTopicList: function () {
+      UbiiClientService.instance
+        .callService({
+          topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST,
+        })
+        .then((reply) => {
+          let topics = reply.stringList.elements;
+          this.$data.serviceTopicList = topics.filter((topic) => {
+            return topic.indexOf('/services/') === 0;
+          });
         });
-      });
 
-      UbiiClientService.instance.subscribeRegex(
-        this.regexAllTopics,
-        this.handleTopicData
-      );
+      UbiiClientService.instance.subscribeRegex(this.regexAllTopics, this.handleTopicData);
     },
-    handleTopicData: function(data, topic) {
+    handleTopicData: function (data, topic) {
       Vue.set(this.topicData, topic, util.inspect(data));
     },
-    getServiceList: function() {
-      UbiiClientService.instance.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SERVICE_LIST
-      }).then(reply => {
-        let services = reply.serviceList.elements;
-        this.$data.serviceList = services;
-      });
-    }
-  }
+    getServiceList: function () {
+      UbiiClientService.instance
+        .callService({
+          topic: DEFAULT_TOPICS.SERVICES.SERVICE_LIST,
+        })
+        .then((reply) => {
+          let services = reply.serviceList.elements;
+          this.$data.serviceList = services;
+        });
+    },
+  },
 };
 </script>
 
 <style scoped>
 .topic-list-grid {
   display: grid;
-  grid-template-rows: auto 1fr;
-  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr auto 1fr;
+  grid-template-columns: 1fr;
   grid-gap: 15px;
   padding: 10px;
-  grid-template-areas: 'header-services header-topicdata' 'content-services content-topicdata';
+  grid-template-areas: 'header-topicdata' 'content-topicdata' 'header-services' 'content-services';
 }
 .category-header {
   border-bottom: 2px solid;
