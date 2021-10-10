@@ -9,7 +9,7 @@ const pMan = {
                 topic: topic
             }
         )
-        //console.warn(res)
+        console.warn(res)
         return res
     },
 

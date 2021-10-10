@@ -21,20 +21,23 @@ const cMan = {
     writeAllClientDevicesToList(clients) {
 
         let clientDevices = []
-
+        console.warn(clients)
        // clients = clients.filter(val => val.state === 0)
         if(clients === null) return clientDevices
 
         clients.forEach(c => {
-            c.devices.forEach(dev => {
-                clientDevices.push({
-                    id: dev.clientId+'.'+dev.id,
-                    name: dev.name,
-                    client: true,
-                    device: dev,
-                    state: c.state 
+            if(c.devices) {
+                c.devices.forEach(dev => {
+                    clientDevices.push({
+                        id: dev.clientId+'.'+dev.id,
+                        name: dev.name,
+                        client: true,
+                        device: dev,
+                        state: c.state 
+                    })
                 })
-            })
+            }
+           
         })
         return clientDevices
     }

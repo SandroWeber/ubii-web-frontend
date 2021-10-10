@@ -191,20 +191,20 @@
                 </b-list-group-item>
                 <b-list-group-item
                   variant="dark"
-                  v-for="proc in addProcsList"
+                  v-for="(proc, index) in addProcsList"
                   :key="proc.id"
                 >
                   <b-card
                     title="Processing Module Name"
                     bg-variant="dark"
                     text-variant="white"
-                    v-on:dragstart="dragStart(proc)"
+                    v-on:dragstart="dragStart(proc, index)"
                     v-on:drag="dragging"
                     draggable="true"
                   >
                     <b-card-text>{{ proc.name }}</b-card-text>
                     <b-form-select
-                      v-model="selectedProcId"
+                      v-model="selectedProcId[index]"
                       :options="proc.ids"
                     ></b-form-select>
                     <font-awesome-icon icon="arrows-alt" class="dragPos" />
@@ -346,7 +346,7 @@ export default {
 
       addClientsList: [],
       addProcsList: [],
-      selectedProcId: "New",
+      selectedProcId: [],
 
       latenz: [],
       timer: null,
@@ -422,13 +422,15 @@ export default {
       this.clientsOfInterest
         .filter((val) => val.state === 0)
         .forEach((client) => {
-          client.devices.forEach((dev) => {
-            this.addClientsList.push({
-              id: dev.clientId + "." + dev.id,
-              name: dev.name,
-              client: true,
+          if (client.devices) {
+            client.devices.forEach((dev) => {
+              this.addClientsList.push({
+                id: dev.clientId + "." + dev.id,
+                name: dev.name,
+                client: true,
+              });
             });
-          });
+          }
         });
     },
 
@@ -441,7 +443,7 @@ export default {
         DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_GET_LIST
       );
       const sList = res.sessionList.elements;
-      //console.warn('Session:', sList)
+      // console.warn("Session:", sList);
       try {
         this.selectedSession = sList.filter(
           (val) => val.status === 1 && this.selectedSessionId == val.id
@@ -458,7 +460,6 @@ export default {
     // },
     loadClients: async function (filts) {
       const cList = this.addClientsList;
-
       const clientFilts = filts.map((val) => {
         return val.split(".")[0];
       });
@@ -555,7 +556,7 @@ export default {
         litegraph.LiteGraph.registerNodeType("Input/" + val, node);
       });
     },
-    registerProcessNode: function (sname, proc, inp, out) {
+    registerProcessNode: function (sname, proc, inp, out, name) {
       //node constructor class
       function node() {
         this.size = [400, 120];
@@ -586,7 +587,7 @@ export default {
 
         this.size = this.computeSize();
       }
-      node.title = proc.name;
+      node.title = name;
       node.title_color = "#243";
       node.slot_start_y = 20;
 
@@ -707,11 +708,16 @@ export default {
             pos[0] > this.size[0] - litegraph.LiteGraph.NODE_TITLE_HEIGHT &&
             pos[1] < 0
           ) {
+            if (that.selectedSession === null) {
+              that.msg =
+                "There is no Session Selected, so no active Mapping can be loaded.";
+              that.trigger = !that.trigger;
+              return;
+            }
             that.debug.id = this.id;
             this.inputs
               .filter((val) => val.link !== null)
               .forEach((val) => {
-                // Still need connection to graph inputs and outputs, also [0] garanteed?
                 const topic = that.selectedSession.ioMappings
                   .filter((pval) => pval.processingModuleId === this.id)[0]
                   .inputMappings.filter((io) => io.inputName === val.name)[0].topic;
@@ -723,14 +729,9 @@ export default {
                 });
               });
 
-            // that.debug.func = that.selectedSession.processingModules.filter(val => val.id === this.id).map(val => {
-            //   return val.onProcessingStringified
-            // })[0]
-
             this.outputs
               .filter((val) => val.link !== null)
               .forEach((val) => {
-                // Still need connection to graph inputs and outputs, also [0] garanteed?
                 const topic = that.selectedSession.ioMappings
                   .filter((pval) => pval.processingModuleId === this.id)[0]
                   .outputMappings.filter((io) => io.outputName === val.name)[0].topic;
@@ -741,7 +742,6 @@ export default {
                   component: that.dynInComp(val.name, val.type, "out"),
                 });
               });
-            // console.log(that.graph.status)
             if (that.graph.status == 2) that.playGraph();
           }
         }),
@@ -768,11 +768,16 @@ export default {
     registerClientNode: function (clientName, dev, comp) {
       //node constructor class
       function node() {
-        comp.forEach((c) => {
-          if (c.ioType == 1) this.addInput(c.topic.split("/").pop(), c.messageFormat);
-          else this.addOutput(c.topic.split("/").pop(), c.messageFormat);
-        });
+        if (comp !== undefined) {
+          comp.forEach((c) => {
+            if (c.ioType == 1) this.addInput(c.topic.split("/").pop(), c.messageFormat);
+            else this.addOutput(c.topic.split("/").pop(), c.messageFormat);
+          });
+        } else {
+          this.size = [400, 50];
+        }
       }
+
       // this.properties = { precision: 1 };
       node.title = dev.name;
       node.title_color = "#345";
@@ -783,13 +788,12 @@ export default {
 
       node.prototype.onDrawForeground = function (ctx) {
         latenz = that.latenz.filter((obj) => this.id.split(".")[0] === obj.id)[0];
-        if (latenz !== undefined) latenz = latenz.latenz + "ms";
+        if (latenz !== undefined) latenz = latenz.latency + "ms";
         else latenz = "";
 
         if (this.flags.collapsed) return;
-
-        var w = litegraph.LiteGraph.NODE_TITLE_HEIGHT;
-        var x = this.size[0] - w;
+        var count = latenz.length;
+        var x = this.size[0] - count * 10;
         ctx.fillStyle = "#fff";
         ctx.fillText(latenz, x, -10);
 
@@ -848,6 +852,7 @@ export default {
       outputs
     ) {
       var node_const = litegraph.LiteGraph.createNode(name);
+
       node_const.id = id;
       node_const.pos = pos;
       node_const.name = name;
@@ -866,6 +871,7 @@ export default {
         node: node_const,
         sessionName: sessionName,
       });
+
       this.graph.add(node_const);
     },
 
@@ -874,7 +880,7 @@ export default {
         const sname = this.selectedSession
           ? this.selectedSession.name
           : this.SessionNameForNew;
-        this.registerProcessNode(sname, proc, proc.inputs, proc.outputs);
+        this.registerProcessNode(sname, proc, proc.inputs, proc.outputs, proc.name);
       });
     },
     registerClientNodes: async function () {
@@ -964,6 +970,7 @@ export default {
       await this.loadSession();
       this.addClientsList = cm.writeAllClientDevicesToList(await cm.getAllClients());
       this.addProcsList = await pm.writeAllProcsToList(this.selectedSession);
+      this.selectedProcId = Array(this.addProcsList.length).fill("New");
       await this.registerGraphTypes();
       try {
         await this.loadClientsOfSessionAndIO();
@@ -1006,8 +1013,9 @@ export default {
         this.ClSeNodes.splice(nodeIndex, 1);
       }
     },
-    dragStart: function (proc) {
+    dragStart: function (proc, index) {
       this.draggedObject = proc;
+      this.draggedObject.index = index;
     },
     dragging: function () {},
     allowDrop: function (event) {
@@ -1016,7 +1024,7 @@ export default {
     drop: function (event) {
       event.preventDefault();
       if (this.draggedObject.client) this.addClientToGraph(this.draggedObject);
-      else this.addProcToGraph(this.draggedObject);
+      else this.addProcToGraph(this.draggedObject, this.draggedObject.index);
       this.draggedObject = null;
     },
     findProcInGraph: function (p) {
@@ -1033,7 +1041,7 @@ export default {
 
       return false;
     },
-    addProcToGraph: function (p) {
+    addProcToGraph: function (p, i) {
       this.deactivatePlay = true;
       this.stopGraph();
       const pName = p.name;
@@ -1044,17 +1052,30 @@ export default {
       this.addProcsList.forEach((proc) => {
         if (proc.name !== pName) return;
         const inGraph =
-          this.selectedProcId != "New" &&
-          this.findProcInGraph(this.selectedProcId.split('"')[3])
+          this.selectedProcId[i] != "New" &&
+          this.findProcInGraph(this.selectedProcId[i].split('"')[3])
             ? true
             : false;
         if (inGraph) return;
         let id = null;
-        if (this.selectedProcId == "New") {
-          this.registerProcessNode(sname, proc, proc.inputs, proc.outputs);
-          id = "NEW-" + crypto.randomUUID();
+        let realname = null;
+        if (this.selectedProcId[i] == "New") {
+          // const newName =
+          let node_names = this.ClSeNodes.filter((val) => val.type === "Proc").map(
+            (val) => {
+              return val.name;
+            }
+          );
+          node_names = node_names.filter((val) => val === pName);
+          realname = node_names.includes(pName)
+            ? pName + " v." + node_names.length
+            : pName;
+
+          this.registerProcessNode(sname, proc, proc.inputs, proc.outputs, realname);
+          id = crypto.randomUUID();
         } else {
-          id = this.selectedProcId.split('"')[3];
+          id = this.selectedProcId[i].split('"')[3];
+          realname = proc.name;
         }
 
         proc.position = [500, 500];
@@ -1062,7 +1083,7 @@ export default {
         const inputs = proc.inputs;
         const outputs = proc.outputs;
         const mode = proc.processingMode;
-        const name = proc.name;
+        const name = realname;
         const nodeId = proc.nodeId;
         this.addNode(
           "ProcessingModuleClasses/" + proc.id + "/" + proc.name,
@@ -1100,6 +1121,7 @@ export default {
       } else {
         cList = this.addClientsList;
       }
+
       cList.forEach((client) => {
         if (client.id !== c.id) return;
         this.deactivatePlay = true;
@@ -1187,7 +1209,7 @@ export default {
         status: null,
       };
       if (this.selectedSession === null) {
-        session.id = "NEW-" + crypto.randomUUID();
+        session.id = crypto.randomUUID();
         session.name = this.SessionNameForNew;
         session.status = 0;
       } else {
@@ -1354,7 +1376,8 @@ export default {
         this.addClientsList = cm.writeAllClientDevicesToList(await cm.getAllClients());
       } else {
         this.addProcsList = await pm.writeAllProcsToList(this.selectedSession);
-        console.warn(this.addProcsList);
+        this.selectedProcId = Array(this.addProcsList.length).fill("New");
+        // console.warn(this.addProcsList);
       }
       litegraph.LiteGraph.clearRegisteredTypes();
       this.registerGraphTypes();
