@@ -1,7 +1,7 @@
 <template>
   <div style="overflow: scroll">
     <Error :alert="trigger" :msg="msg" />
-    <b-modal id="showNodeIds" size="xl">
+    <b-modal id="showNodeIds" ok-only @ok="NodeIDSelected">
       <div class="settings-grid">
         <label for="input-node-id" class="setting-label">run on node:</label>
         <input-node-id v-model="nodeId" />
@@ -300,7 +300,7 @@ import { DEFAULT_TOPICS } from "@tum-far/ubii-msg-formats";
 
 import Error from "./components/Error.vue";
 import TopicViewer from "./components/TopicViewer.vue";
-import InputNodeId from "./components/InputNodeId.vue";
+import InputNodeId from "../../appComponents/InputNodeId.vue";
 
 import Vue from "vue";
 import Treeselect from "@riophae/vue-treeselect";
@@ -336,6 +336,7 @@ export default {
       trigger: 0,
       msg: "",
       nodeId: "unset",
+      selectedPMIDForNodeID: "",
 
       selectedSessionId: null,
       selectedSession: null,
@@ -581,10 +582,11 @@ export default {
           },
           { min: 0, max: 100, step: 100 }
         );
-        this.addWidget("button", "Select the Client", null, function () {
+        this.addWidget("button", "Select the Client", null, function (wid, graph, node) {
           that.$bvModal.show("showNodeIds");
+          that.selectedPMIDForNodeID = node.id;
+          console.warn(that.selectedPMIDForNodeID);
         });
-
         this.size = this.computeSize();
       }
       node.title = name;
@@ -835,6 +837,10 @@ export default {
         "Clients/" + clientName + "/" + dev.name,
         node
       );
+    },
+    NodeIDSelected: function () {
+      let ref = this.graph._nodes.filter((v) => v.id === this.selectedPMIDForNodeID);
+      ref.nodeId = this.nodeId;
     },
     addNode: function (
       name,
