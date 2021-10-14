@@ -14,8 +14,8 @@
             <span>Select a Session from Runtime:</span>
             <treeselect
               v-model="selectedSessionId"
-              @input="showSessionPipeline()"
               @open="loadOps"
+              @input="showSessionPipeline()"
               :load-options="loadOps"
               :options="availableSessions"
               :auto-load-root-options="false"
@@ -113,8 +113,8 @@
           <b-tabs content-class="mt-3" class="ubii-graph-tabs">
             <b-tab title="Clients" active>
               <b-list-group>
-                <b-list-group-item variant="dark"
-                  >Add <span style="color: blue">Devices of Clients</span> to the Graph.
+                <b-list-group-item variant="dark">
+                  Add <span style="color: blue">Devices of Clients</span> to the Graph.
                   <b-button
                     @click="refresh('clients')"
                     variant="outline-primary"
@@ -126,7 +126,7 @@
                       class="tile-menu-icon"
                     />
                   </b-button>
-                  <b-button
+                  <!-- <b-button
                     @click="filterList('clients')"
                     variant="outline-primary"
                     style="margin: 2px"
@@ -135,8 +135,8 @@
                       icon="filter"
                       style="display: flex"
                       class="tile-menu-icon"
-                    />
-                  </b-button>
+                    /> 
+                  </b-button>-->
                 </b-list-group-item>
                 <b-list-group-item
                   variant="dark"
@@ -177,7 +177,7 @@
                       class="tile-menu-icon"
                     />
                   </b-button>
-                  <b-button
+                  <!-- <b-button
                     @click="filterList('procs')"
                     variant="outline-primary"
                     style="margin: 2px"
@@ -187,7 +187,7 @@
                       style="display: flex"
                       class="tile-menu-icon"
                     />
-                  </b-button>
+                  </b-button> -->
                 </b-list-group-item>
                 <b-list-group-item
                   variant="dark"
@@ -365,7 +365,7 @@ export default {
       selected_session: null,
       SessionNameForNew: "New",
 
-      ClSeNodes: [],
+      ClDePmNodes: [],
       debug: {
         id: null,
         active_inputs: [],
@@ -394,7 +394,7 @@ export default {
   },
   methods: {
     clearBeforeRender: async function () {
-      this.ClSeNodes = [];
+      this.ClDePmNodes = [];
       this.addClientsList = [];
       (this.addProcsList = []), (this.latenz = []);
       this.$refs.DebugInputs.innerHTML = "";
@@ -580,12 +580,12 @@ export default {
           function (/*value, widget, node*/) {
             // console.warn(value, widget, node)
           },
-          { min: 0, max: 100, step: 100 }
+          { min: 0, max: 100000000, step: 100 }
         );
         this.addWidget("button", "Select the Client", null, function (wid, graph, node) {
           that.$bvModal.show("showNodeIds");
           that.selectedPMIDForNodeID = node.id;
-          console.warn(that.selectedPMIDForNodeID);
+          // console.warn(that.selectedPMIDForNodeID);
         });
         this.size = this.computeSize();
       }
@@ -863,7 +863,7 @@ export default {
       node_const.pos = pos;
       node_const.name = name;
 
-      this.ClSeNodes.push({
+      this.ClDePmNodes.push({
         edges: io,
         type: type,
         id: id,
@@ -957,16 +957,16 @@ export default {
       });
     },
     connectNodes: async function () {
-      const c = this.ClSeNodes.filter((val) => val.type === "ClientDevice");
-      const s = this.ClSeNodes.filter((val) => val.type === "Proc");
-      s.forEach((session) => {
-        session.edges.inputMappings.forEach((i, index) => {
+      const c = this.ClDePmNodes.filter((val) => val.type === "ClientDevice");
+      const pm = this.ClDePmNodes.filter((val) => val.type === "Proc");
+      pm.forEach((p) => {
+        p.edges.inputMappings.forEach((i, index) => {
           const dc = c.filter((val) => val.edges.filter((e) => e.topic === i.topic))[0];
-          if (dc !== null) dc.node.connect(index, session.node, index);
+          if (dc !== null) dc.node.connect(index, p.node, index);
         });
-        session.edges.outputMappings.forEach((o, index) => {
+        p.edges.outputMappings.forEach((o, index) => {
           const dc = c.filter((val) => val.edges.filter((e) => e.topic === o.topic))[0];
-          if (dc !== null) session.node.connect(index, dc.node, index);
+          if (dc !== null) p.node.connect(index, dc.node, index);
         });
       });
     },
@@ -982,8 +982,8 @@ export default {
         await this.loadClientsOfSessionAndIO();
         await this.addClientNodes();
         await this.addProcNodes();
-        await this.calcPostions();
         await this.connectNodes();
+        await this.calcPostions();
       } catch (error) {
         // console.warn(error)
       }
@@ -993,30 +993,30 @@ export default {
       // console.warn(c)
       const cID = c.id.split(".")[0] + "." + c.id.split(".")[1];
       let nodeIndex = -1;
-      this.ClSeNodes.forEach((val, index) => {
+      this.ClDePmNodes.forEach((val, index) => {
         if (val.type === "ClientDevice" && val.id === cID) nodeIndex = index;
       });
 
       if (nodeIndex >= 0) {
-        const cNode = this.ClSeNodes[nodeIndex].node;
+        const cNode = this.ClDePmNodes[nodeIndex].node;
         if (!fromGraph) this.graph.remove(cNode);
-        this.ClSeNodes.splice(nodeIndex, 1);
+        this.ClDePmNodes.splice(nodeIndex, 1);
       }
     },
     removeProcNode: async function (p, fromGraph) {
       const pID = p.id.split(".")[0];
       let nodeIndex = -1;
 
-      // console.log(this.ClSeNodes)
+      // console.log(this.ClDePmNodes)
 
-      this.ClSeNodes.forEach((val, index) => {
+      this.ClDePmNodes.forEach((val, index) => {
         if (val.type === "Proc" && val.id === pID) nodeIndex = index;
       });
 
       if (nodeIndex >= 0) {
-        const cNode = this.ClSeNodes[nodeIndex].node;
+        const cNode = this.ClDePmNodes[nodeIndex].node;
         if (!fromGraph) this.graph.remove(cNode);
-        this.ClSeNodes.splice(nodeIndex, 1);
+        this.ClDePmNodes.splice(nodeIndex, 1);
       }
     },
     dragStart: function (proc, index) {
@@ -1035,12 +1035,12 @@ export default {
     },
     findProcInGraph: function (p) {
       let nodeIndex = -1;
-      this.ClSeNodes.forEach((val, index) => {
+      this.ClDePmNodes.forEach((val, index) => {
         if (val.type === "Proc" && val.id === p) nodeIndex = index;
       });
 
       if (nodeIndex >= 0) {
-        const cNode = this.ClSeNodes[nodeIndex].node;
+        const cNode = this.ClDePmNodes[nodeIndex].node;
         this.lGraphCanvas.selectNode(cNode);
         return true;
       }
@@ -1067,7 +1067,7 @@ export default {
         let realname = null;
         if (this.selectedProcId[i] == "New") {
           // const newName =
-          let node_names = this.ClSeNodes.filter((val) => val.type === "Proc").map(
+          let node_names = this.ClDePmNodes.filter((val) => val.type === "Proc").map(
             (val) => {
               return val.name;
             }
@@ -1112,12 +1112,12 @@ export default {
       const cID = c.id.split(".")[0] + "." + c.id.split(".")[1];
 
       let nodeIndex = -1;
-      this.ClSeNodes.forEach((val, index) => {
+      this.ClDePmNodes.forEach((val, index) => {
         if (val.type === "ClientDevice" && val.id === cID) nodeIndex = index;
       });
 
       if (nodeIndex >= 0) {
-        const cNode = this.ClSeNodes[nodeIndex].node;
+        const cNode = this.ClDePmNodes[nodeIndex].node;
         this.lGraphCanvas.selectNode(cNode);
         return;
       }
@@ -1206,7 +1206,7 @@ export default {
     },
     saveGraph: async function () {
       this.deactivatePlay = false;
-      // console.warn(this.ClSeNodes)
+      // console.warn(this.ClDePmNodes)
       let session = {
         id: null,
         name: null,
@@ -1223,7 +1223,7 @@ export default {
         session.name = this.selectedSession.name;
         session.status = this.selectedSession.status;
       }
-      const procs = this.ClSeNodes.filter((val) => val.type === "Proc");
+      const procs = this.ClDePmNodes.filter((val) => val.type === "Proc");
 
       procs.forEach((val) => {
         const p = {
@@ -1322,7 +1322,7 @@ export default {
     reOrderGraph: async function () {
       this.lforce = true;
       if (this.selected_scene_order === "ps") {
-        if (this.ClSeNodes.length <= 0) {
+        if (this.ClDePmNodes.length <= 0) {
           this.lforce = false;
           return;
         }
@@ -1335,8 +1335,8 @@ export default {
           return;
         }
 
-        let cs = await this.ClSeNodes.filter((val) => val.type === "ClientDevice");
-        let ps = await this.ClSeNodes.filter((val) => val.type === "Proc");
+        let cs = await this.ClDePmNodes.filter((val) => val.type === "ClientDevice");
+        let ps = await this.ClDePmNodes.filter((val) => val.type === "Proc");
 
         cs.forEach((val) => {
           let found = list.clientNodes.filter((filt) => filt.name === val.name)[0];
@@ -1353,15 +1353,15 @@ export default {
         this.graph.arrange();
         this.lforce = false;
       } else if (this.selected_scene_order === "fs") {
-        if (this.ClSeNodes.length <= 0) {
+        if (this.ClDePmNodes.length <= 0) {
           this.lforce = false;
           return;
         }
         let sim = pc.force(this.graph.links);
         sim.on("end", () => {
           // console.warn(sim.nodes())
-          let cs = this.ClSeNodes.filter((val) => val.type === "ClientDevice");
-          let ps = this.ClSeNodes.filter((val) => val.type === "Proc");
+          let cs = this.ClDePmNodes.filter((val) => val.type === "ClientDevice");
+          let ps = this.ClDePmNodes.filter((val) => val.type === "Proc");
 
           cs.forEach((val) => {
             let found = sim.nodes().filter((filt) => filt.id === val.id)[0];
@@ -1396,7 +1396,7 @@ export default {
         procNodes: [],
       };
 
-      this.ClSeNodes.forEach((val) => {
+      this.ClDePmNodes.forEach((val) => {
         if (val.type === "ClientDevice") {
           obj.clientNodes.push({
             name: val.name,
