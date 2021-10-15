@@ -36,7 +36,7 @@
           </b-col>
         </div>
       </b-tab>
-      <b-tab title="Test">
+      <!-- <b-tab title="Test">
         <div class="header-editor">
           <b-col>
             <span>Dummy Session for testing:</span>
@@ -48,7 +48,7 @@
             </b-form-select>
           </b-col>
         </div>
-      </b-tab>
+      </b-tab> -->
     </b-tabs>
     <div>
       <div class="button-editor flex-nowrap">
@@ -319,6 +319,7 @@ import cm from "./funcsClientProcs/clientFuncs.js";
 import pm from "./funcsClientProcs/procsFuncs.js";
 import pc from "./nodePos/posCalc.js";
 import ss from "./funcsSessionUpdate/saveSession.js";
+// import ts from "./perfEval/perfeval.js";
 
 export default {
   name: "LiteGraph",
@@ -361,6 +362,7 @@ export default {
 
       options_sessions_saved: [
         { value: null, text: "Import a not wokring dummy Session" },
+        { value: 2, text: "2 Nodes" },
       ],
       selected_session: null,
       SessionNameForNew: "New",
@@ -1320,6 +1322,7 @@ export default {
       };
     },
     reOrderGraph: async function () {
+      // const startTime = new Date().getTime();
       this.lforce = true;
       if (this.selected_scene_order === "ps") {
         if (this.ClDePmNodes.length <= 0) {
@@ -1349,9 +1352,11 @@ export default {
         });
         this.graph.setDirtyCanvas(true, true);
         this.lforce = false;
+        // console.warn(new Date().getTime() - startTime);
       } else if (this.selected_scene_order === "ls") {
         this.graph.arrange();
         this.lforce = false;
+        // console.warn(new Date().getTime() - startTime);
       } else if (this.selected_scene_order === "fs") {
         if (this.ClDePmNodes.length <= 0) {
           this.lforce = false;
@@ -1374,6 +1379,7 @@ export default {
           });
           this.lforce = false;
           this.graph.setDirtyCanvas(true, true);
+          // console.warn(new Date().getTime() - startTime);
         });
       }
     },
@@ -1411,6 +1417,23 @@ export default {
       });
       pc.saveSession(obj);
     },
+    // importSession: async function () {
+    //   const data = await ts.returnProcs();
+    //   await this.clearBeforeRender();
+    //   this.addClientsList = cm.writeAllClientDevicesToList(ts.exampleClients);
+    //   this.addProcsList = await pm.writeAllProcsToList(ts.exampleSession, data);
+    //   this.selectedProcId = Array(this.addProcsList.length).fill("New");
+    //   await this.registerGraphTypes();
+    //   try {
+    //     await this.loadClientsOfSessionAndIO();
+    //     await this.addClientNodes();
+    //     await this.addProcNodes();
+    //     await this.connectNodes();
+    //     await this.calcPostions();
+    //   } catch (error) {
+    //     // console.warn(error)
+    //   }
+    // },
   },
 };
 </script>

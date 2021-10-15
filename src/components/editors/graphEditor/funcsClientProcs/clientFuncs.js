@@ -21,7 +21,6 @@ const cMan = {
     writeAllClientDevicesToList(clients) {
 
         let clientDevices = []
-        console.warn(clients)
        // clients = clients.filter(val => val.state === 0)
         if(clients === null) return clientDevices
 
