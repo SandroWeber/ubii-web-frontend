@@ -86,11 +86,9 @@ export default class UbiiComponentTouchscreen extends UbiiComponent {
   }
 
   publishTouchEventList(touches) {
-    UbiiClientService.instance.publish({
-      topicDataRecord: {
+    UbiiClientService.instance.publishRecord({
         topic: this.topic,
         touchEventList: { elements: touches }
-      }
     });
   }
 
