@@ -2,6 +2,7 @@ import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 import UbiiComponentTouchscreen from '../../../ubii/components/ubii-component-touch';
 import UbiiComponentOrientation from '../../../ubii/components/ubii-component-orientation';
+import UbiiComponentVibration from '../../../ubii/components/ubii-component-vibration';
 
 const PLACEHOLDER_TOPIC_PREFIX = '<placeholder-topic-prefix>';
 const UBII_SPECS_TEMPLATE = {
@@ -45,30 +46,19 @@ export default class UbiiSmartDevice {
 
     this.clientId = UbiiClientService.instance.getClientID();
 
-    /*navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
-    if (!navigator.vibrate) {
-      let vibrateComponentIndex = this.components.findIndex(component =>
-        component.topic.includes('/vibration_pattern')
-      );
-      this.components.splice(vibrateComponentIndex, 1);
-    } else {
-      this.tNextVibrate = Date.now();
-      navigator.vibrate(100);
-    }*/
-
     let topicPrefix = '/' + this.clientId + '/' + this.name;
     this.components.forEach(component => {
       component.topic = component.topic.replace(PLACEHOLDER_TOPIC_PREFIX, topicPrefix);
     });
 
     this.componentLinearAcceleration = this.components[0];
-    if (this.components.length === 2) {
-      this.componentVibrate = this.components[1];
-    }
-    this.componentOrientation = new UbiiComponentOrientation(33); 
+
+    this.componentVibrate = new UbiiComponentVibration();
+    this.components.push(this.componentVibrate);
+    await this.componentVibrate.start();
+    this.componentOrientation = new UbiiComponentOrientation(33);
     this.components.push(this.componentOrientation);
     await this.componentOrientation.start();
-
     this.componentTouch = new UbiiComponentTouchscreen(33, this.elementTouch);
     this.components.push(this.componentTouch);
     await this.componentTouch.start();
@@ -99,16 +89,10 @@ export default class UbiiSmartDevice {
     this.intervalPublishContinuousData = setInterval(() => {
       this.publishContinuousDeviceData();
     }, this.publishIntervalMilliseconds);
-    if (this.componentVibrate) {
-      UbiiClientService.instance.subscribeTopic(this.componentVibrate.topic, this.handleVibrationPattern);
-    }
   }
 
   async deregister() {
     this.intervalPublishContinuousData && clearInterval(this.intervalPublishContinuousData);
-    if (this.componentVibrate) {
-      await UbiiClientService.instance.unsubscribeTopic(this.componentVibrate.topic, this.handleVibrationPattern);
-    }
 
     await UbiiClientService.instance.deregisterDevice(this);
     this.hasRegisteredUbiiDevice = false;
@@ -226,55 +210,16 @@ export default class UbiiSmartDevice {
 
   /* ubii topic communication */
 
-  handleVibrationPattern(vibrationPattern) {
-    if (Date.now() >= this.tNextVibrate) {
-      navigator.vibrate(vibrationPattern);
-      this.tNextVibrate = Date.now() + 2 * vibrationPattern;
-    }
-  }
-
   publishContinuousDeviceData() {
     if (!this.running) {
       return;
     }
-    //console.info('publishContinuousDeviceData');
 
-    //this.publishDeviceOrientation();
     this.publishDeviceMotion();
 
     // call loop
     setTimeout(this.publishContinuousDeviceData, this.publishIntervalMilliseconds);
   }
-
-  /* develop code */
-  /*
-  publishTouchPosition(position) {
-    if (this.hasRegisteredUbiiDevice) {
-      UbiiClientService.instance.publishRecord({
-          topic: this.componentTouchPosition.topic,
-          vector2: position
-      });
-    }
-  }
-
-  publishTouchEvent(type, position) {
-    if (this.hasRegisteredUbiiDevice) {
-      UbiiClientService.instance.publishRecord({
-          topic: this.componentTouchEvents.topic,
-          touchEvent: { type: type, position: position }
-      });
-    }
-  }
-
-  publishTouchEventList(touches) {
-    if (this.hasRegisteredUbiiDevice) {
-      UbiiClientService.instance.publishRecord({
-          topic: this.componentTouchEvents.topic,
-          touchEventList: { elements: touches }
-      });
-    }
-  }
-  */
 
   publishDeviceMotion() {
     if (!this.deviceData.accelerationData) {

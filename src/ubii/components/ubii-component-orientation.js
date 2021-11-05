@@ -9,13 +9,12 @@ const UBII_SPECS = {
   messageFormat: 'ubii.dataStructure.Vector3',
   ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
   tags: ['imu', 'orientation'],
-  description: 'web interface - orientation'
+  description: 'web interface component - orientation'
 };
 
 export default class UbiiComponentOrientation extends UbiiComponent {
   constructor(publishFrequencyMS) {
-    super(TOPIC_SUFFIX);
-    this.ubiiSpecs = UBII_SPECS;
+    super(TOPIC_SUFFIX, UBII_SPECS);
 
     this.publishFrequencyMS = publishFrequencyMS;
   }
@@ -85,7 +84,7 @@ export default class UbiiComponentOrientation extends UbiiComponent {
     };
 
     UbiiClientService.instance.publishRecord({
-      topic: this.topic,
+      topic: this.ubiiSpecs.topic,
       timestamp: UbiiClientService.instance.generateTimestamp(),
       vector3: {
         x: this.fixedCalibratedOrientation.alpha,

@@ -16,8 +16,7 @@ const UBII_SPECS = {
 
 export default class UbiiComponentCamera extends UbiiComponent {
   constructor(publishFrequencyMS, ubiiImageFormat, videoPlaybackElement) {
-    super(TOPIC_SUFFIX);
-    Object.assign(this, UBII_SPECS);
+    super(TOPIC_SUFFIX, UBII_SPECS);
 
     this.publishFrequencyMS = publishFrequencyMS;
     this.ubiiImageFormat = ubiiImageFormat;
@@ -36,23 +35,6 @@ export default class UbiiComponentCamera extends UbiiComponent {
 
       await UbiiClientService.instance.waitForConnection();
       this.continuousPublishing();
-
-      /* develop code */
-      /*
-      UbiiClientService.instance.waitForConnection().then(() => {
-          let continuousPublishing = async () => {
-            let imageBitmap = await this.grabFrame();
-            this.publishFrame(imageBitmap);
-
-            if (this.running) {
-              setTimeout(continuousPublishing, this.publishFrequencyMS);
-            }
-          };
-          continuousPublishing();
-        });
-      })
-      .catch(error => console.error(error));
-      */
     } catch (error) {
       // eslint-disable-next-line no-console
       console.log(error);
@@ -110,7 +92,7 @@ export default class UbiiComponentCamera extends UbiiComponent {
     }
 
     UbiiClientService.instance.publishRecord({
-      topic: this.topic,
+      topic: this.ubiiSpecs.topic,
       timestamp: UbiiClientService.instance.generateTimestamp(),
       image2D: {
         width: imageBuffer.width,

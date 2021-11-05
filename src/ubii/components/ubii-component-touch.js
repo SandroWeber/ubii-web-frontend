@@ -14,8 +14,7 @@ const UBII_SPECS = {
 
 export default class UbiiComponentTouchscreen extends UbiiComponent {
   constructor(publishFrequencyMS, touchElement) {
-    super(TOPIC_SUFFIX);
-    Object.assign(this, UBII_SPECS);
+    super(TOPIC_SUFFIX, UBII_SPECS);
 
     this.publishFrequencyMS = publishFrequencyMS;
     this.touchElement = touchElement;
@@ -87,7 +86,7 @@ export default class UbiiComponentTouchscreen extends UbiiComponent {
 
   publishTouchEventList(touches) {
     UbiiClientService.instance.publishRecord({
-      topic: this.topic,
+      topic: this.ubiiSpecs.topic,
       touchEventList: { elements: touches }
     });
   }
