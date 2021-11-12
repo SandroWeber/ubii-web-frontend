@@ -1,5 +1,7 @@
 <template>
   <div class="wrapper-interfaces">
+    <page-header />
+
     <div class="tile-menu-list">
       <router-link to="/interfaces/smart-device" class="tile-menu-item" tag="div">
         <app-tile class="layer-three background round shadow blue-accent tile-menu-item-background">
@@ -41,6 +43,7 @@
 
 <script>
 import { AppTile } from './appComponents/appComponents.js';
+import PageHeader from './PageHeader.vue';
 
 // Fontawesome.
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -55,7 +58,8 @@ library.add(faMobileAlt, faCamera, faRing, faGamepad);
 export default {
   name: 'Interfaces',
   components: {
-    AppTile
+    AppTile,
+    PageHeader
   }
 };
 </script>

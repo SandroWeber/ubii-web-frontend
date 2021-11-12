@@ -6,6 +6,7 @@ import UbiiComponent from './ubii-component-base';
 const TOPIC_SUFFIX = 'touch_events';
 
 const UBII_SPECS = {
+  name: 'web-component-touch',
   messageFormat: 'ubii.dataStructure.TouchEventList',
   ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
   tags: ['touch'],

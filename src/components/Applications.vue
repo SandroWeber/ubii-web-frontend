@@ -1,5 +1,7 @@
 <template>
   <div class="wrapper-applications">
+    <page-header />
+    
     <div class="tile-menu-category">
       <!--<div class="tile-menu-category-seperator">
         <span class="tile-menu-category-seperator-label">Visualization</span>
@@ -127,6 +129,7 @@
 
 <script>
 import { AppTile } from './appComponents/appComponents.js';
+import PageHeader from './PageHeader.vue';
 
 // Fontawesome.
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -160,7 +163,8 @@ library.add(
 export default {
   name: 'Applications',
   components: {
-    AppTile
+    AppTile,
+    PageHeader
   }
 };
 </script>

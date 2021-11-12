@@ -6,6 +6,7 @@ import UbiiComponent from './ubii-component-base';
 const TOPIC_SUFFIX = 'vibration_pattern';
 
 const UBII_SPECS = {
+  name: 'web-component-vibration',
   messageFormat: 'double',
   ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER,
   tags: ['vibration'],
@@ -23,7 +24,12 @@ export default class UbiiComponentVibration extends UbiiComponent {
       console.info(this.ubiiSpecs);
 
       this.tNextVibrate = Date.now();
-      navigator.vibrate(100);
+      try {
+        let success = navigator.vibrate(100);
+        console.info('navigator.vibrate success = ' + success);
+      } catch (error) {
+        console.info('navigator.vibrate error = ' + error);
+      }
 
       this.subToken = await UbiiClientService.instance.subscribeTopic(this.ubiiSpecs.topic, (pattern) => this.handleVibrationPattern(pattern));
 
@@ -40,6 +46,8 @@ export default class UbiiComponentVibration extends UbiiComponent {
   /* topic communication */
 
   handleVibrationPattern(vibrationPattern) {
+    console.info('handleVibrationPattern: ' + vibrationPattern);
+
     if (Date.now() >= this.tNextVibrate) {
       console.info('handleVibrationPattern');
       console.info(vibrationPattern);

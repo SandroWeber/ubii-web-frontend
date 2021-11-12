@@ -8,6 +8,7 @@ import UbiiComponent from './ubii-component-base';
 const TOPIC_SUFFIX = 'camera_image';
 
 const UBII_SPECS = {
+  name: 'web-component-camera',
   messageFormat: MSG_TYPES.DATASTRUCTURE_IMAGE,
   ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
   tags: ['camera', 'image', '2D'],

@@ -1,5 +1,7 @@
 <template>
   <div style="height: 100%">
+    <page-header />
+
     <div class="tile-menu-list">
       <router-link to="/tests/performance_tests" class="tile-menu-item" tag="div">
         <app-tile class="layer-three background round shadow yellow-accent">
@@ -20,6 +22,7 @@
 
 <script>
 import { AppTile } from '../appComponents/appComponents.js';
+import PageHeader from '../PageHeader.vue';
 
 // Fontawesome.
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -29,7 +32,8 @@ library.add(faStopwatch, faTasks);
 export default {
   name: 'Tests',
   components: {
-    AppTile
+    AppTile,
+    PageHeader
   }
 };
 </script>

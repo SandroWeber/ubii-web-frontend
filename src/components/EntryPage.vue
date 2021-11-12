@@ -1,5 +1,7 @@
 <template>
   <app-layer class="canvas layer-two background horizontal-shadow">
+    <page-header />
+
     <div class="tile-menu-list">
       <router-link to="/administration" class="tile-menu-item" tag="div">
         <app-tile class="layer-three background round shadow green-accent tile-menu-item-background">
@@ -45,12 +47,14 @@ import { faCogs, faToolbox, faLink, faPlayCircle, faClipboardList } from '@forta
 library.add(faCogs, faToolbox, faLink, faPlayCircle, faClipboardList);
 
 import { AppLayer, AppTile } from './appComponents/appComponents.js';
+import PageHeader from './PageHeader.vue';
 
 export default {
   name: 'EntryPage',
   components: {
     AppTile,
-    AppLayer
+    AppLayer,
+    PageHeader
   }
 };
 </script>
@@ -61,6 +65,5 @@ export default {
 
 .canvas {
   height: 100%;
-  padding: 25px;
 }
 </style>

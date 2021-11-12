@@ -6,6 +6,7 @@ import UbiiComponent from './ubii-component-base';
 const TOPIC_SUFFIX = 'orientation';
 
 const UBII_SPECS = {
+  name: 'web-component-orientation',
   messageFormat: 'ubii.dataStructure.Vector3',
   ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
   tags: ['imu', 'orientation'],
