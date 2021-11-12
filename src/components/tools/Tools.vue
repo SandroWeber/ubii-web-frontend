@@ -1,5 +1,7 @@
 <template>
   <div style="height: 100%">
+    <page-header />
+
     <div class="tile-menu-list">
       <router-link to="/tools/topic-inspector" class="tile-menu-item" tag="div">
         <app-tile class="layer-three background round shadow orange-accent">
@@ -34,6 +36,7 @@
 
 <script>
 import { AppTile } from '../appComponents/appComponents.js';
+import PageHeader from '../PageHeader.vue';
 
 // Fontawesome.
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -43,7 +46,8 @@ library.add(faEye, faSitemap, faStopwatch, faQrcode, faPaperPlane);
 export default {
   name: 'Tools',
   components: {
-    AppTile
+    AppTile,
+    PageHeader
   }
 };
 </script>

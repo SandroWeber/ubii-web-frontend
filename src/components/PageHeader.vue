@@ -1,13 +1,18 @@
 <template>
-  <app-layer class="header-wrapper layer-two background low-contrast horizontal-shadow">
-    <h3>Ubi-Interact Web Frontend</h3>
-    <server-status />
+  <app-layer class="layer-two background low-contrast horizontal-shadow">
+    <div class="header-wrapper">
+      <h3>Ubi-Interact Web Frontend</h3>
+      <server-status />
+    </div>
+    
+    <navigation />
   </app-layer>
 </template>
 
 <script>
 import { AppLayer } from './appComponents/appComponents.js';
 import ServerStatus from './ServerStatus.vue';
+import Navigation from './Navigation.vue';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -18,7 +23,8 @@ export default {
   name: 'PageHeader',
   components: {
     AppLayer,
-    ServerStatus
+    ServerStatus,
+    Navigation
   }
 };
 </script>

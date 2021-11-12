@@ -1,23 +1,5 @@
 <template>
   <app-layer id="app" class="layer-one background">
-    <div class="page-header-wrapper">
-      <!--<server-status id="server-status" />-->
-      <page-header />
-    </div>
-    <app-layer class="navigation-wrapper layer-one background border shadow">
-      <nav class="navigation-bar">
-        <router-link to="/" class="navigation-item">Home</router-link>|
-        <router-link to="/administration" class="navigation-item">Administration</router-link>
-        | <router-link to="/tools" class="navigation-item">Tools</router-link> |
-        <router-link to="/tests" class="navigation-item">Tests</router-link> |
-        <router-link to="/interfaces" class="navigation-item">Interfaces</router-link> |<router-link
-          to="/applications"
-          class="navigation-item"
-          >Applications</router-link
-        >
-      </nav>
-    </app-layer>
-
     <div class="router-view-wrapper">
       <router-view class="router-view" />
     </div>
@@ -26,14 +8,13 @@
 
 <script>
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
-import PageHeader from './components/PageHeader.vue';
+
 import { AppLayer } from './components/appComponents/appComponents.js';
 
 export default {
   name: 'app',
   components: {
-    AppLayer,
-    PageHeader
+    AppLayer
   },
   mounted: () => {
     let useHTTPS = window.location.protocol.includes('https');
@@ -78,26 +59,8 @@ html, body {
   overflow: hidden;
 }
 
-.navigation-bar {
-  padding: 15px;
-  text-align: center;
-}
-
-.navigation-item {
-  padding: 0px 20px 0px 20px;
-  text-decoration: none;
-}
-
 #server-status {
   position: relative;
-}
-
-.navigation-wrapper {
-  flex-grow: 0;
-}
-
-.page-header-wrapper {
-  flex-grow: 0;
 }
 
 .router-view-wrapper {

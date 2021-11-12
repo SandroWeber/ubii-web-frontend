@@ -1,12 +1,24 @@
 <template>
   <div class="client-list-wrapper">
-    <div class="client" v-for="client in clientList" :key="client.id">
+    <div class="client" v-for="client in clientListActive" :key="client.id">
       <ubii-client-viewer :client="client" />
+    </div>
+    <div>
+      <button @click="toggleListUnresponsive()">
+        <div v-show="!showUnresponsive">Show unresponsive clients</div>
+        <div v-show="showUnresponsive">Hide unresponsive clients</div>
+      </button>
+      
+      <div v-show="showUnresponsive" class="client" v-for="client in clientListUnresponsive" :key="client.id">
+        <ubii-client-viewer :client="client" />
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import { proto } from '@tum-far/ubii-msg-formats';
+const CLIENT_STATE = proto.ubii.clients.Client.State;
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
@@ -25,7 +37,9 @@ export default {
   data: () => {
     return {
       expanded: false,
-      clientList: undefined
+      clientListActive: undefined,
+      clientListUnresponsive: undefined,
+      showUnresponsive: false
     };
   },
   mounted: async function() {
@@ -37,8 +51,8 @@ export default {
     this.intervalPollClientList && clearInterval(this.intervalPollClientList);
   },
   methods: {
-    toggleClientDetails() {
-      this.expanded = !this.expanded;
+    toggleListUnresponsive() {
+      this.showUnresponsive = !this.showUnresponsive;
     },
     getClientList: async function() {
       let reply = await UbiiClientService.instance.callService({
@@ -46,7 +60,8 @@ export default {
       });
 
       if (reply.clientList) {
-        this.$data.clientList = reply.clientList.elements;
+        this.clientListActive = reply.clientList.elements.filter(client => client.state === CLIENT_STATE.ACTIVE);
+        this.clientListUnresponsive = reply.clientList.elements.filter(client => client.state !== CLIENT_STATE.ACTIVE);
       }
     }
   }
@@ -67,6 +82,7 @@ export default {
 
 .client-list-wrapper {
   padding: 15px;
+  overflow: scroll;
 }
 
 .client {

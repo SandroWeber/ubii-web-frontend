@@ -1,11 +1,14 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
-    <div ref="top-div">
+    <div v-if="!enabled" class="wrapper-button-enable">
+      <button @click="onClickEnable()">Enable</button>
+    </div>
+    <div ref="top-div" v-if="enabled">
       <fullscreen ref="fullscreen" class="fullscreen" @change="onFullScreenChange" style="overflow: hidden">
         <div class="content">
           <button
             class="button-safari-permissions"
-            v-show="needsImuPermissions && !grantedImuPermission && calibrated"
+            v-show="needsImuPermissions && !grantedImuPermission"
             @click="requestImuPermissions()"
           >
             IMU Permissions
@@ -102,57 +105,65 @@ export default {
       debugAcceleration: undefined,
       debugRotationRate: undefined,
       grantedImuPermission: false,
+      enabled: false
     };
   },
-  mounted: async function () {
+  mounted: function() {
     this.initializing = false;
     this.hasRegisteredUbiiDevice = false;
+    this.enabled = false;
 
     // unsubscribe before page is unloaded
     window.addEventListener('beforeunload', async () => {
       await this.stopInterface();
     });
-
-    await UbiiClientService.instance.waitForConnection();
-    await this.startInterface();
-
-    UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, async () => {
-      await this.startInterface();
-    });
-    UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, async () => {
-      await this.stopInterface();
-    });
   },
-  beforeDestroy: function () {
+  beforeDestroy: function() {
     this.stopInterface();
   },
   computed: {
-    needsImuPermissions: function () {
+    needsImuPermissions: function() {
       return (
         typeof DeviceMotionEvent !== 'undefined' &&
         DeviceMotionEvent.requestPermission !== undefined &&
         typeof DeviceOrientationEvent !== 'undefined' &&
         DeviceOrientationEvent.requestPermission !== undefined
       );
-    },
+    }
   },
   methods: {
-    startInterface: async function () {
-      if (this.initializing) return;
+    onClickEnable: function() {
+      this.enabled = true;
 
+      UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, async () => {
+        await this.startInterface();
+      });
+      UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, async () => {
+        await this.stopInterface();
+      });
+      this.startInterface();
+    },
+    startInterface: async function() {
+      if (this.initializing) return;
       this.initializing = true;
 
-      this.elementTouch = document.getElementById('touch-area');
-      this.ubiiDevice = new UbiiSmartDevice(this.elementTouch);
-      await this.ubiiDevice.init();
+      try {
+        await UbiiClientService.instance.waitForConnection();
+
+        this.elementTouch = document.getElementById('touch-area');
+        this.ubiiDevice = new UbiiSmartDevice(this.elementTouch);
+        await this.ubiiDevice.init();
+      } catch (error) {
+        console.error(error);
+      }
 
       this.intervalUpdateDebugView = setInterval(this.updateDebugView, 100);
     },
-    stopInterface: async function () {
+    stopInterface: async function() {
       this.ubiiDevice && (await this.ubiiDevice.deinit());
       this.intervalUpdateDebugView && clearInterval(this.intervalUpdateDebugView);
     },
-    requestImuPermissions: async function () {
+    requestImuPermissions: async function() {
       let permissionDeviceMotion = 'denied',
         permissionDeviceOrientation = 'denied';
 
@@ -164,35 +175,33 @@ export default {
         this.ubiiDevice.registerEventListeners();
       }
     },
-    onTouchStart: function (event) {
+    onTouchStart: function(event) {
       this.debugOutput = 'event onTouchStart';
       this.ubiiDevice && this.ubiiDevice.componentTouch && this.ubiiDevice.componentTouch.onTouchStart(event);
     },
-    onTouchMove: function (event) {
+    onTouchMove: function(event) {
       this.debugOutput = 'event onTouchMove';
       this.ubiiDevice && this.ubiiDevice.componentTouch && this.ubiiDevice.componentTouch.onTouchMove(event);
     },
-    onTouchEnd: function (event) {
+    onTouchEnd: function(event) {
       this.debugOutput = 'event onTouchEnd';
       this.ubiiDevice && this.ubiiDevice.componentTouch && this.ubiiDevice.componentTouch.onTouchEnd(event);
     },
     /* helper methods */
-    round: function (value, digits) {
+    round: function(value, digits) {
       return Math.round(value * digits * 10) / (digits * 10);
     },
-    toggleFullScreen: function () {
+    toggleFullScreen: function() {
       this.$refs['fullscreen'].toggle();
     },
-    onFullScreenChange: function (fullscreen) {
+    onFullScreenChange: function(fullscreen) {
       this.fullscreen = fullscreen;
     },
-    calibrate: function () {
-      if (this.ubiiDevice.deviceData.currentOrientation) {
-        this.ubiiDevice.deviceData.calibratedOrientation = this.ubiiDevice.deviceData.currentOrientation;
-      }
+    calibrate: function() {
+      this.ubiiDevice.componentOrientation && this.ubiiDevice.componentOrientation.calibrate();
     },
     /* GUI methods */
-    getTouch0X: function () {
+    getTouch0X: function() {
       return (
         this.ubiiDevice &&
         this.ubiiDevice.deviceData &&
@@ -201,7 +210,7 @@ export default {
         this.round(this.ubiiDevice.deviceData.touches[0].clientX, 1)
       );
     },
-    getTouch0Y: function () {
+    getTouch0Y: function() {
       return (
         this.ubiiDevice &&
         this.ubiiDevice.deviceData &&
@@ -210,28 +219,33 @@ export default {
         this.round(this.ubiiDevice.deviceData.touches[0].clientY, 1)
       );
     },
-    updateDebugView: function () {
+    updateDebugView: function() {
       if (this.showDebugView) {
         let ubiiDeviceData = this.ubiiDevice && this.ubiiDevice.deviceData;
 
-        if (ubiiDeviceData && ubiiDeviceData.currentOrientation) {
-          this.debugDeviceOrientation = {
-            alpha: this.round(ubiiDeviceData.currentOrientation.alpha, 2),
-            beta: this.round(ubiiDeviceData.currentOrientation.beta, 2),
-            gamma: this.round(ubiiDeviceData.currentOrientation.gamma, 2),
-          };
-          this.debugFixedCalibratedOrientation = {
-            alpha: this.round(ubiiDeviceData.fixedCalibratedOrientation.alpha, 2),
-            beta: this.round(ubiiDeviceData.fixedCalibratedOrientation.beta, 2),
-            gamma: this.round(ubiiDeviceData.fixedCalibratedOrientation.gamma, 2),
-          };
+        let componentOrientation = this.ubiiDevice && this.ubiiDevice.componentOrientation;
+        if (componentOrientation) {
+          if (componentOrientation.currentOrientation) {
+            this.debugDeviceOrientation = {
+              alpha: this.round(componentOrientation.currentOrientation.alpha, 2),
+              beta: this.round(componentOrientation.currentOrientation.beta, 2),
+              gamma: this.round(componentOrientation.currentOrientation.gamma, 2)
+            };
+          }
+          if (componentOrientation.fixedCalibratedOrientation) {
+            this.debugFixedCalibratedOrientation = {
+              alpha: this.round(componentOrientation.fixedCalibratedOrientation.alpha, 2),
+              beta: this.round(componentOrientation.fixedCalibratedOrientation.beta, 2),
+              gamma: this.round(componentOrientation.fixedCalibratedOrientation.gamma, 2)
+            };
+          }
         }
 
         if (ubiiDeviceData && ubiiDeviceData.accelerationData) {
           this.debugAcceleration = {
             x: this.round(ubiiDeviceData.accelerationData.acceleration.x, 2),
             y: this.round(ubiiDeviceData.accelerationData.acceleration.y, 2),
-            z: this.round(ubiiDeviceData.accelerationData.acceleration.z, 2),
+            z: this.round(ubiiDeviceData.accelerationData.acceleration.z, 2)
           };
         }
 
@@ -239,12 +253,12 @@ export default {
           this.debugRotationRate = {
             alpha: this.round(ubiiDeviceData.rotationRateData.rotationRate.alpha, 2),
             beta: this.round(ubiiDeviceData.rotationRateData.rotationRate.beta, 2),
-            gamma: this.round(ubiiDeviceData.rotationRateData.rotationRate.gamma, 2),
+            gamma: this.round(ubiiDeviceData.rotationRateData.rotationRate.gamma, 2)
           };
         }
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -269,6 +283,12 @@ export default {
     'btn-safari-permissions btn-debug btn-calibrate btn-fullscreen'
     'debug-view debug-view debug-view debug-view'
     'touch touch touch touch';
+}
+
+.wrapper-button-enable {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .notification {
