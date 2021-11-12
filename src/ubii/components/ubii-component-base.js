@@ -14,7 +14,7 @@ export default class UbiiComponent {
 
     await UbiiClientService.instance.waitForConnection();
     this.clientId = UbiiClientService.instance.getClientID();
-    this.ubiiSpecs.topic = '/' + this.clientId + '/' + this.topicSuffix;
+    this.ubiiSpecs.topic = this.clientId + '/' + this.topicSuffix;
     
     await this.onStart();
   }
@@ -30,5 +30,9 @@ export default class UbiiComponent {
 
   async onStop() {
     throw new Error('base component class should not be created directly, extend instead and overwrite onStop for de-initialization');
+  }
+
+  getUbiiSpecs() {
+    return this.ubiiSpecs;
   }
 }

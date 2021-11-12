@@ -14,11 +14,6 @@ const UBII_SPECS_TEMPLATE = {
       topic: PLACEHOLDER_TOPIC_PREFIX + '/linear_acceleration',
       messageFormat: 'ubii.dataStructure.Vector3',
       ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
-    },
-    {
-      topic: PLACEHOLDER_TOPIC_PREFIX + '/vibration_pattern',
-      messageFormat: 'double',
-      ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
     }
   ]
 };
@@ -54,13 +49,13 @@ export default class UbiiSmartDevice {
     this.componentLinearAcceleration = this.components[0];
 
     this.componentVibrate = new UbiiComponentVibration();
-    this.components.push(this.componentVibrate);
+    this.components.push(this.componentVibrate.getUbiiSpecs());
     await this.componentVibrate.start();
     this.componentOrientation = new UbiiComponentOrientation(33);
-    this.components.push(this.componentOrientation);
+    this.components.push(this.componentOrientation.getUbiiSpecs());
     await this.componentOrientation.start();
     this.componentTouch = new UbiiComponentTouchscreen(33, this.elementTouch);
-    this.components.push(this.componentTouch);
+    this.components.push(this.componentTouch.getUbiiSpecs());
     await this.componentTouch.start();
 
     await this.register();

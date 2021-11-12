@@ -1,6 +1,9 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
-    <div ref="top-div">
+    <div v-if="!enabled" class="wrapper-button-enable">
+      <button @click="onClickEnable()">Enable</button>
+    </div>
+    <div ref="top-div" v-if="enabled">
       <fullscreen ref="fullscreen" class="fullscreen" @change="onFullScreenChange" style="overflow: hidden">
         <div class="content">
           <button
@@ -101,12 +104,14 @@ export default {
       debugFixedCalibratedOrientation: undefined,
       debugAcceleration: undefined,
       debugRotationRate: undefined,
-      grantedImuPermission: false
+      grantedImuPermission: false,
+      enabled: false
     };
   },
   mounted: function() {
     this.initializing = false;
     this.hasRegisteredUbiiDevice = false;
+    this.enabled = false;
 
     // unsubscribe before page is unloaded
     window.addEventListener('beforeunload', async () => {
@@ -119,8 +124,6 @@ export default {
     UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, async () => {
       await this.stopInterface();
     });
-
-    this.startInterface();
   },
   beforeDestroy: function() {
     this.stopInterface();
@@ -136,6 +139,10 @@ export default {
     }
   },
   methods: {
+    onClickEnable: function() {
+      this.enabled = true;
+      this.startInterface();
+    },
     startInterface: async function() {
       if (this.initializing) return;
       this.initializing = true;
@@ -276,6 +283,12 @@ export default {
     'btn-safari-permissions btn-debug btn-calibrate btn-fullscreen'
     'debug-view debug-view debug-view debug-view'
     'touch touch touch touch';
+}
+
+.wrapper-button-enable {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .notification {
