@@ -117,13 +117,6 @@ export default {
     window.addEventListener('beforeunload', async () => {
       await this.stopInterface();
     });
-
-    UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, async () => {
-      await this.startInterface();
-    });
-    UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, async () => {
-      await this.stopInterface();
-    });
   },
   beforeDestroy: function() {
     this.stopInterface();
@@ -141,6 +134,13 @@ export default {
   methods: {
     onClickEnable: function() {
       this.enabled = true;
+
+      UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, async () => {
+        await this.startInterface();
+      });
+      UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, async () => {
+        await this.stopInterface();
+      });
       this.startInterface();
     },
     startInterface: async function() {

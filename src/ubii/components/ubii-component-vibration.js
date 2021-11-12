@@ -46,7 +46,7 @@ export default class UbiiComponentVibration extends UbiiComponent {
   /* topic communication */
 
   handleVibrationPattern(vibrationPattern) {
-    console.info('handleVibrationPattern: ' + vibrationPattern);
+    console.info('handleVibrationPattern - tNextVibrate: ' + this.tNextVibrate);
 
     if (Date.now() >= this.tNextVibrate) {
       console.info('handleVibrationPattern');

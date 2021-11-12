@@ -11,6 +11,7 @@ const UBII_SPECS_TEMPLATE = {
   deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
   components: [
     {
+      name: 'web-component-linear-acceleration',
       topic: PLACEHOLDER_TOPIC_PREFIX + '/linear_acceleration',
       messageFormat: 'ubii.dataStructure.Vector3',
       ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
