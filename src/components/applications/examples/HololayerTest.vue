@@ -150,14 +150,6 @@ export default {
 
           console.log("Calling Hololayer...");
           state.modules['node-fetch']('https://siemens.hololayer.io/swagger/api/Users')
-          /*
-                .then(res => res.json())
-                .then(json => {
-                  output.response = json["username"]; 
-                  console.log("Response: " + output.response)})
-                .catch(error => console.error("Error: " + error));
-          */
-              
                 .then(res => res.text())
                 .then(out => {
                   output.response = out; 
@@ -313,61 +305,6 @@ export default {
         bool: boolean
       });
     }
-
-    /* UI events */
-    /*,
-    onMouseMove: function(event) {
-      if (!this.exampleStarted) {
-        return;
-      }
-
-      // calculate the current mouse position, normalized to the bounds of the interactive area ([0;1], [0;1])
-      let boundingRect = document
-        .getElementById('mouse-pointer-area')
-        .getBoundingClientRect();
-      let relativeMousePosition = {
-        x: (event.clientX - boundingRect.left) / boundingRect.width,
-        y: (event.clientY - boundingRect.top) / boundingRect.height
-      };
-
-      this.$data.clientMousePosition = relativeMousePosition;
-      // publish our normalized client mouse position
-      this.publishClientPointerPosition(this.$data.clientMousePosition);
-    },
-    onTouchStart: function(event) {
-      this.$data.clientPointerInside = true;
-      this.onTouchMove(event);
-    },
-    onTouchMove: function(event) {
-      if (!this.exampleStarted) {
-        return;
-      }
-
-      // calculate the current touch position, normalized to the bounds of the interactive area ([0;1], [0;1])
-      let relativeMousePosition = {
-        x:
-          (event.touches[0].clientX - event.target.offsetLeft) /
-          event.target.offsetWidth,
-        y:
-          (event.touches[0].clientY - event.target.offsetTop) /
-          event.target.offsetHeight
-      };
-
-      if (
-        relativeMousePosition.x < 0 ||
-        relativeMousePosition.x > 1 ||
-        relativeMousePosition.y < 0 ||
-        relativeMousePosition.y > 1
-      ) {
-        this.$data.clientPointerInside = false;
-        return;
-      }
-
-      this.$data.clientMousePosition = relativeMousePosition;
-      // publish our normalized client touch position
-      this.publishClientPointerPosition(this.$data.clientMousePosition);
-    }
-    */
   }
 };
 </script>
