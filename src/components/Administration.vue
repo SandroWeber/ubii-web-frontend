@@ -1,5 +1,6 @@
 <template>
   <div>
+    <page-header />
     <!--<treeselect 
       v-model="treeSelect.value"
       :multiple="false"
@@ -66,6 +67,7 @@
 
 <script>
 import { AppTile } from './appComponents/appComponents.js';
+import PageHeader from './PageHeader.vue';
 
 // Treeselect.
 //import Treeselect from '@riophae/vue-treeselect';
@@ -123,7 +125,8 @@ export default {
   props: {},
   components: {
     //Treeselect,
-    AppTile
+    AppTile,
+    PageHeader
   },
   data: () => {
     return {
