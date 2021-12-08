@@ -1,6 +1,5 @@
 <template>
   <div>
-    <div class="update-signal" v-bind:class="{ flash: flashing }"></div>
     <font-awesome-icon
       class="expand-icon"
       v-show="!expanded"
@@ -14,6 +13,7 @@
       @click="toggleTopicDataDisplay(topic)"
     />
     <div class="topic-title">{{ topic }}</div>
+    <div class="update-signal" v-show="expanded" v-bind:class="{ flash: flashing }"></div>
     <div class="topic-data green-accent" v-show="expanded && topicData">
       {{ topicData }}
     </div>
@@ -26,24 +26,39 @@
 <script>
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
-import {
-  faChevronRight,
-  faChevronDown
-} from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 library.add(faChevronRight, faChevronDown);
+
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
+
+import util from 'util';
 
 export default {
   name: 'TopicViewer',
   props: {
-    topic: { type: String, default: '' },
-    topicData: { type: String, default: '... no data received yet ...' }
+    topic: { type: String, default: '' }
   },
   data: () => {
-    return { expanded: false, flashing: false };
+    return { expanded: false, flashing: false, topicData: '... no data received yet ...' };
   },
   methods: {
-    toggleTopicDataDisplay() {
+    async toggleTopicDataDisplay() {
       this.expanded = !this.expanded;
+      if (this.expanded) {
+        await UbiiClientService.instance.subscribeTopic(this.topic, this.onTopicDataRecord);
+      } else {
+        await UbiiClientService.instance.unsubscribeTopic(this.topic, this.onTopicDataRecord);
+      }
+    },
+    onTopicDataRecord(data) {
+      this.flash();
+      this.topicData = util.inspect(data);
+    },
+    flash() {
+      this.flashing = true;
+      setTimeout(() => {
+        this.flashing = false;
+      }, 100);
     }
   },
   watch: {
