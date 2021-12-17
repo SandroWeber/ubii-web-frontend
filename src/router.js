@@ -18,27 +18,14 @@ export default new Router({
     },
     /* editors */
     {
-      path: '/administration/nodeEditor',
-      name: 'Node Editor',
-      component: () => import('./components/editors/nodeEditor/NodeEditor.vue')
-    },
-    {
       path: '/administration/interactionEditor',
       name: 'Interaction Editor',
-      component: () =>
-        import('./components/editors/interactionEditor/InteractionEditor.vue')
-    },
-    {
-      path: '/administration/sessionEditor',
-      name: 'Session Editor',
-      component: () =>
-        import('./components/editors/sessionEditor/SessionEditor.vue')
+      component: () => import('./components/editors/interactionEditor/InteractionEditor.vue')
     },
     {
       path: '/administration/graphEditor',
       name: 'Graph Editor',
-      component: () =>
-        import('./components/editors/graphEditor/GraphEditor.vue')
+      component: () => import('./components/editors/graphEditor/GraphEditor.vue')
     },
     /* interfaces */
     {
@@ -112,50 +99,38 @@ export default new Router({
     {
       path: '/applications/visualization/3d_pose_visualizer',
       name: 'Application - 3D Pose Visualizer',
-      component: () =>
-        import('./components/applications/visualization/3DPoseVisualizer.vue')
+      component: () => import('./components/applications/visualization/3DPoseVisualizer.vue')
     },
     /* applications - examples */
     {
       path: '/applications/examples/mouse-pointer',
       name: 'Example - Mouse Pointer',
-      component: () =>
-        import('./components/applications/examples/ExampleMousePointer.vue')
+      component: () => import('./components/applications/examples/ExampleMousePointer.vue')
     },
     {
       path: '/applications/examples/threejs',
       name: 'Example - THREEjs',
-      component: () =>
-        import('./components/applications/examples/ExampleThreejs.vue')
+      component: () => import('./components/applications/examples/ExampleThreejs.vue')
     },
     {
       path: '/applications/examples/threejs-webvr',
       name: 'Example - THREEjs WebVR',
-      component: () =>
-        import('./components/applications/examples/ExampleThreejsWebVR.vue')
+      component: () => import('./components/applications/examples/ExampleThreejsWebVR.vue')
     },
     {
       path: '/applications/examples/aframe',
       name: 'Example - A-Frame',
-      component: () =>
-        import('./components/applications/examples/ExampleAframe.vue')
+      component: () => import('./components/applications/examples/ExampleAframe.vue')
     },
     {
       path: '/applications/examples/gatherer-web-interface-smart-devices',
-      name:
-        'Example - Gathering from Smart Devices connected via Web Interface',
-      component: () =>
-        import(
-          './components/applications/examples/ExampleWebInterfaceSmartDevices.vue'
-        )
+      name: 'Example - Gathering from Smart Devices connected via Web Interface',
+      component: () => import('./components/applications/examples/ExampleWebInterfaceSmartDevices.vue')
     },
     {
       path: '/applications/examples/model-viewer',
       name: 'Example - Model Viewer',
-      component: () =>
-        import(
-          './components/applications/examples/model-viewer/ExampleModelViewer.vue'
-        )
+      component: () => import('./components/applications/examples/model-viewer/ExampleModelViewer.vue')
     },
     {
       path: '/applications/examples/opencv',
@@ -165,41 +140,28 @@ export default new Router({
     {
       path: '/applications/examples/image-processing',
       name: 'Example - Image Processing',
-      component: () =>
-        import(
-          './components/applications/examples/imageProcessing/ImageProcessing.vue'
-        )
+      component: () => import('./components/applications/examples/imageProcessing/ImageProcessing.vue')
     },
     /* applications - smartphone VR */
     {
       path: '/applications/smartphone-assisted-vr/savr-model-inspector',
       name: 'VR Model Inspector - Inspect 3D Models',
-      component: () =>
-        import(
-          './components/applications/smartphoneAssistedVR/SAVRModelInspector.vue'
-        )
+      component: () => import('./components/applications/smartphoneAssistedVR/SAVRModelInspector.vue')
     },
     {
       path: '/applications/smartphone-assisted-vr/savr-laser-pointer',
       name: 'VR Laser Pointer - Select elements by pointing at them',
-      component: () =>
-        import(
-          './components/applications/smartphoneAssistedVR/SAVRLaserPointer.vue'
-        )
+      component: () => import('./components/applications/smartphoneAssistedVR/SAVRLaserPointer.vue')
     },
     {
       path: '/applications/smartphone-assisted-vr/savr-keyboard',
       name: 'VR Keyboard - A virtual keyboard',
-      component: () =>
-        import(
-          './components/applications/smartphoneAssistedVR/SAVRKeyboard.vue'
-        )
+      component: () => import('./components/applications/smartphoneAssistedVR/SAVRKeyboard.vue')
     },
     {
       path: '/applications/misc/rock-paper-scissors',
       name: 'Rock Paper Scissors',
-      component: () =>
-        import('./components/applications/misc/RockPaperScissors.vue')
+      component: () => import('./components/applications/misc/RockPaperScissors.vue')
     },
     /* tests */
     {
