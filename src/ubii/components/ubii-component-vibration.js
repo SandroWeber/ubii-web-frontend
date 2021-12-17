@@ -21,24 +21,29 @@ export default class UbiiComponentVibration extends UbiiComponent {
   async onStart() {
     navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
     if (navigator.vibrate) {
+      // eslint-disable-next-line no-console
       console.info(this.ubiiSpecs);
 
       this.tNextVibrate = Date.now();
       try {
         let success = navigator.vibrate(100);
+        // eslint-disable-next-line no-console
         console.info('navigator.vibrate success = ' + success);
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.info('navigator.vibrate error = ' + error);
       }
 
-      this.subToken = await UbiiClientService.instance.subscribeTopic(this.ubiiSpecs.topic, (pattern) => this.handleVibrationPattern(pattern));
+      this.subToken = await UbiiClientService.instance.subscribeTopic(this.ubiiSpecs.topic, pattern =>
+        this.handleVibrationPattern(pattern)
+      );
 
       this.available = true;
     }
   }
 
   async onStop() {
-    this.subToken && await UbiiClientService.instance.unsubscribe(this.subToken);
+    this.subToken && (await UbiiClientService.instance.unsubscribe(this.subToken));
   }
 
   /* event callbacks */
@@ -46,10 +51,13 @@ export default class UbiiComponentVibration extends UbiiComponent {
   /* topic communication */
 
   handleVibrationPattern(vibrationPattern) {
+    // eslint-disable-next-line no-console
     console.info('handleVibrationPattern - tNextVibrate: ' + this.tNextVibrate);
 
     if (Date.now() >= this.tNextVibrate) {
+      // eslint-disable-next-line no-console
       console.info('handleVibrationPattern');
+      // eslint-disable-next-line no-console
       console.info(vibrationPattern);
       navigator.vibrate(vibrationPattern);
       this.tNextVibrate = Date.now() + 2 * vibrationPattern;
