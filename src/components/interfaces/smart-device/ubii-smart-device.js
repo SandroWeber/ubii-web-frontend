@@ -141,6 +141,9 @@ export default class UbiiSmartDevice {
       return;
     }
 
+    console.info('onDeviceMotion');
+    console.info(event);
+
     /*this.processAccelerationData(event.acceleration);
     if (this.componentTouch && this.componentTouch.touches && this.componentTouch.touches.length > 0) {
       let vel = this.velocityEstimate();
@@ -155,7 +158,7 @@ export default class UbiiSmartDevice {
       acceleration: event.acceleration,
       timestamp: timestamp
     };
-    this.deviceData.rotationRateData = {
+    this.deviceData.rotationRate = {
       rotationRate: event.rotationRate,
       timestamp: timestamp
     };
@@ -246,41 +249,13 @@ export default class UbiiSmartDevice {
     setTimeout(this.publishContinuousDeviceData, this.publishIntervalMilliseconds);
   }
 
-  /* develop code */
-  /*
-  publishTouchPosition(position) {
-    if (this.hasRegisteredUbiiDevice) {
-      UbiiClientService.instance.publishRecord({
-          topic: this.componentTouchPosition.topic,
-          vector2: position
-      });
-    }
-  }
-
-  publishTouchEvent(type, position) {
-    if (this.hasRegisteredUbiiDevice) {
-      UbiiClientService.instance.publishRecord({
-          topic: this.componentTouchEvents.topic,
-          touchEvent: { type: type, position: position }
-      });
-    }
-  }
-
-  publishTouchEventList(touches) {
-    if (this.hasRegisteredUbiiDevice) {
-      UbiiClientService.instance.publishRecord({
-          topic: this.componentTouchEvents.topic,
-          touchEventList: { elements: touches }
-      });
-    }
-  }
-  */
-
   publishDeviceMotion() {
     if (!this.deviceData.accelerationData) {
       return;
     }
 
+    console.info('publishDeviceMotion');
+    console.info(this.deviceData.accelerationData);
     UbiiClientService.instance.publishRecord({
       topic: this.componentLinearAcceleration.topic,
       timestamp: this.deviceData.accelerationData.timestamp,

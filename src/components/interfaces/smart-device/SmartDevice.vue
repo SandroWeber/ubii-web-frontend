@@ -104,7 +104,7 @@ export default {
       grantedImuPermission: false
     };
   },
-  mounted: function() {
+  mounted: async function() {
     this.initializing = false;
     this.hasRegisteredUbiiDevice = false;
 
@@ -120,7 +120,7 @@ export default {
       await this.stopInterface();
     });
 
-    this.startInterface();
+    await this.startInterface();
   },
   beforeDestroy: function() {
     this.stopInterface();
@@ -142,11 +142,21 @@ export default {
 
       try {
         await UbiiClientService.instance.waitForConnection();
-
+      } catch (error) {
+        console.error('waitForConnection error');
+        console.error(error);
+      }
+      try {
         this.elementTouch = document.getElementById('touch-area');
         this.ubiiDevice = new UbiiSmartDevice(this.elementTouch);
+      } catch (error) {
+        console.error('ubii device creation error');
+        console.error(error);
+      }
+      try {
         await this.ubiiDevice.init();
       } catch (error) {
+        console.error('ubii device init error');
         console.error(error);
       }
 
@@ -242,11 +252,11 @@ export default {
           };
         }
 
-        if (ubiiDeviceData && ubiiDeviceData.rotationRateData) {
+        if (ubiiDeviceData && ubiiDeviceData.rotationRate) {
           this.debugRotationRate = {
-            alpha: this.round(ubiiDeviceData.rotationRateData.rotationRate.alpha, 2),
-            beta: this.round(ubiiDeviceData.rotationRateData.rotationRate.beta, 2),
-            gamma: this.round(ubiiDeviceData.rotationRateData.rotationRate.gamma, 2)
+            alpha: this.round(ubiiDeviceData.rotationRate.rotationRate.alpha, 2),
+            beta: this.round(ubiiDeviceData.rotationRate.rotationRate.beta, 2),
+            gamma: this.round(ubiiDeviceData.rotationRate.rotationRate.gamma, 2)
           };
         }
       }
