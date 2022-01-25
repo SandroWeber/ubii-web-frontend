@@ -195,6 +195,13 @@ export default new Router({
           './components/applications/smartphoneAssistedVR/SAVRKeyboard.vue'
         )
     },
+    /* misc */
+    {
+      path: '/applications/misc/fitts-law',
+      name: 'Fitts Law',
+      component: () =>
+        import('./components/applications/misc/fitts-law/FittsLaw.vue')
+    },
     {
       path: '/applications/misc/rock-paper-scissors',
       name: 'Rock Paper Scissors',

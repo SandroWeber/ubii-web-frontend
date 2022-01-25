@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper-applications">
     <page-header />
-    
+
     <div class="tile-menu-category">
       <!--<div class="tile-menu-category-seperator">
         <span class="tile-menu-category-seperator-label">Visualization</span>
@@ -108,22 +108,29 @@
       </div>
     </div>-->
 
-    <!--<div class="tile-menu-category">
+    <div class="tile-menu-category">
       <div class="tile-menu-category-seperator">
         <span class="tile-menu-category-seperator-label">Misc</span>
       </div>
 
-      <div class="tile-menu-list">
+      <!--<div class="tile-menu-list">
         <router-link to="/applications/misc/rock-paper-scissors" class="tile-menu-item" tag="div">
           <app-tile class="layer-three background round shadow purple-accent">
             <font-awesome-icon icon="hand-scissors" class="tile-menu-icon" />
             <p>Rock Paper Scissors</p>
           </app-tile>
         </router-link>
-      </div>
+      </div>-->
+
+      <router-link to="/applications/misc/fitts-law" class="tile-menu-item" tag="div">
+        <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
+          <font-awesome-icon icon="bullseye" class="tile-menu-icon" />
+          <p>Fitts' Law</p>
+        </app-tile>
+      </router-link>
 
       <div class="tile-menu-list"></div>
-    </div>-->
+    </div>
   </div>
 </template>
 
@@ -144,7 +151,8 @@ import {
   faHandPointer,
   faHandScissors,
   faEye,
-  faCamera
+  faCamera,
+  faBullseye
 } from '@fortawesome/free-solid-svg-icons';
 library.add(
   faMousePointer,
@@ -157,7 +165,8 @@ library.add(
   faHandPointer,
   faHandScissors,
   faEye,
-  faCamera
+  faCamera,
+  faBullseye
 );
 
 export default {
