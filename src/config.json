@@ -1,0 +1,10 @@
+{
+    "masterNode": {
+        "services": {
+            "url": "http://localhost/ubii/services"
+        },
+        "topicdata": {
+            "url": "ws://localhost/ubii/topicdata"
+        }
+    }
+}

@@ -11,6 +11,8 @@ import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
 import { AppLayer } from './components/appComponents/appComponents.js';
 
+import config from './config.json';
+
 export default {
   name: 'app',
   components: {
@@ -20,7 +22,20 @@ export default {
     let useHTTPS = window.location.protocol.includes('https');
     UbiiClientService.instance.setHTTPS(useHTTPS);
     UbiiClientService.instance.setName('Ubi-Interact Web Frontend');
-    UbiiClientService.instance.connect();
+
+    let urlServices = useHTTPS ? 'https://' : 'http://';
+    if (config && config.masterNode && config.masterNode.services && config.masterNode.services.url) {
+      urlServices += config.masterNode.services.url.replace(/.*:\/\//, '');
+    } else {
+      urlServices += window.location.hostname + ':8102/services';
+    }
+    let urlTopicData = useHTTPS ? 'wss://' : 'ws://';
+    if (config && config.masterNode && config.masterNode.topicdata && config.masterNode.topicdata.url) {
+      urlTopicData += config.masterNode.topicdata.url.replace(/.*:\/\//, '');
+    } else {
+      urlTopicData += window.location.hostname + ':8104';
+    }
+    UbiiClientService.instance.connect(urlServices, urlTopicData);
     window.addEventListener('beforeunload', () => {
       UbiiClientService.instance.disconnect();
     });
