@@ -33,7 +33,7 @@
     "rete-connection-plugin": "^0.4.3",
     "rete-context-menu-plugin": "^0.3.6",
     "rete-vue-render-plugin": "^0.3.0",
-    "three": "0.127.0",
+    "three": "0.137.0",
     "three-dragcontrols": "0.88.2",
     "three-orbit-controls": "82.1.0",
     "three-outlinepass": "1.2.0",
