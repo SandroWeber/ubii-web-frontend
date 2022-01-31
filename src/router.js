@@ -108,21 +108,6 @@ export default new Router({
       component: () => import('./components/applications/examples/ExampleMousePointer.vue')
     },
     {
-      path: '/applications/examples/threejs',
-      name: 'Example - THREEjs',
-      component: () => import('./components/applications/examples/ExampleThreejs.vue')
-    },
-    {
-      path: '/applications/examples/threejs-webvr',
-      name: 'Example - THREEjs WebVR',
-      component: () => import('./components/applications/examples/ExampleThreejsWebVR.vue')
-    },
-    {
-      path: '/applications/examples/aframe',
-      name: 'Example - A-Frame',
-      component: () => import('./components/applications/examples/ExampleAframe.vue')
-    },
-    {
       path: '/applications/examples/gatherer-web-interface-smart-devices',
       name: 'Example - Gathering from Smart Devices connected via Web Interface',
       component: () => import('./components/applications/examples/ExampleWebInterfaceSmartDevices.vue')
