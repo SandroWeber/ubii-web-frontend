@@ -1,10 +1,10 @@
 <template>
-  <div class="grid">
+  <div class="topic-pub-tool-grid">
     <div>
       TopicDataRecord:
       <br />
       <button @click="publish">Publish</button>
-      <div class="info-text">
+      <div class="topic-pub-tool-info-text">
         Enter your record in the form of a JSON following the schema of
         <a
           href="https://github.com/SandroWeber/ubii-msg-formats/blob/develop/src/proto/topicData/topicDataRecord/topicDataRecord.proto"
@@ -16,7 +16,7 @@
         A timestamp will be automatically added if not given here.
       </div>
     </div>
-    <codemirror v-model="localValue" :options="codemirror.options"></codemirror>
+    <codemirror class="topic-pub-tool-cm" v-model="localValue" :options="codemirror.options"></codemirror>
   </div>
 </template>
 
@@ -51,7 +51,8 @@ export default {
           theme: 'base16-dark',
           lineNumbers: true,
           line: true,
-          readOnly: false
+          readOnly: false,
+          viewportMargin: Infinity
         }
       }
     };
@@ -79,16 +80,25 @@ export default {
 };
 </script>
 
-<style scoped>
-.grid {
+<style>
+.topic-pub-tool-grid {
   display: grid;
   grid-gap: 25px;
-  grid-template-rows: auto 50px;
-  grid-template-columns: 20% 75%;
+  grid-template-rows: auto;
+  grid-template-columns: 250px 1fr;
   margin: 25px;
 }
 
-.info-text {
+.topic-pub-tool-info-text {
   margin-top: 15px;
+}
+
+.topic-pub-tool-cm {
+  padding: 25px;
+  overflow: auto;
+}
+
+.CodeMirror {
+  height: 100% !important;
 }
 </style>

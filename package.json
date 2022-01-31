@@ -13,7 +13,7 @@
     "@fortawesome/vue-fontawesome": "2.0.2",
     "@riophae/vue-treeselect": "^0.4.0",
     "@tum-far/ubii-msg-formats": "0.15.16",
-    "@tum-far/ubii-node-webbrowser": "0.2.3",
+    "@tum-far/ubii-node-webbrowser": "0.2.5",
     "aframe": "0.9.2",
     "bootstrap": "^4.5.0",
     "bootstrap-vue": "^2.15.0",
