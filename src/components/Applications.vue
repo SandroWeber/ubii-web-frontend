@@ -28,27 +28,6 @@
           </app-tile>
         </router-link>
 
-        <router-link to="/applications/examples/threejs" class="tile-menu-item" tag="div">
-          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
-            <font-awesome-icon icon="cube" class="tile-menu-icon" />
-            <p>Three.js Web Rendering</p>
-          </app-tile>
-        </router-link>
-
-        <router-link to="/applications/examples/threejs-webvr" class="tile-menu-item" tag="div">
-          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
-            <font-awesome-icon icon="vr-cardboard" class="tile-menu-icon" />
-            <p>Three.js WebVR</p>
-          </app-tile>
-        </router-link>
-
-        <router-link to="/applications/examples/aframe" class="tile-menu-item" tag="div">
-          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
-            <font-awesome-icon icon="vr-cardboard" class="tile-menu-icon" />
-            <p>A-Frame</p>
-          </app-tile>
-        </router-link>
-
         <!--<router-link to="/applications/examples/gatherer-web-interface-smart-devices" class="tile-menu-item" tag="div">
           <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
             <font-awesome-icon icon="tablet-alt" class="tile-menu-icon" />

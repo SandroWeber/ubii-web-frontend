@@ -16,7 +16,6 @@
 
 <script>
 import { AppLayer } from './appComponents/appComponents.js';
-import ServerStatus from './ServerStatus.vue';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -26,8 +25,7 @@ library.add(faPlug);
 export default {
   name: 'Navigation',
   components: {
-    AppLayer,
-    ServerStatus
+    AppLayer
   }
 };
 </script>
