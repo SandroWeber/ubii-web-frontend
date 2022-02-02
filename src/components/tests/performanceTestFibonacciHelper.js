@@ -20,8 +20,10 @@ class PerformanceTestFibonacciHelper {
       return b;
     };
 
-    if (inputs.fibonacciInput) {
-      outputs.fibonacciResult = fibonacci(inputs.fibonacciInput);
+    if (inputs.fibonacciInput && inputs.fibonacciInput.double) {
+      outputs.fibonacciResult = {
+        double: fibonacci(inputs.fibonacciInput.double)
+      }
     }
 
     return { outputs };
