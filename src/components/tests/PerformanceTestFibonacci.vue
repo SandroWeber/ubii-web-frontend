@@ -278,7 +278,6 @@ export default {
         processingIterations / (passedTime / 1000);
     },
     onProcessingFinishedCallback: function(result, topic) {
-      console.info(result);
       if (this.testData.status === 'running') {
         let indexSuffix = topic.indexOf(
           PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX
