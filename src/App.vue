@@ -1,22 +1,27 @@
 <template>
-  <app-layer id="app" class="layer-one background">
-    <div class="router-view-wrapper">
-      <router-view class="router-view" />
-    </div>
-  </app-layer>
+  <div class="app-wrapper">
+    <app-layer id="app" class="layer-one background">
+      <div class="router-view-wrapper">
+        <router-view class="router-view" />
+      </div>
+    </app-layer>
+    <connection-status />
+  </div>
 </template>
 
 <script>
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
 import { AppLayer } from './components/appComponents/appComponents.js';
+import ConnectionStatus from './components/ConnectionStatus.vue';
 
 import config from './config.json';
 
 export default {
   name: 'app',
   components: {
-    AppLayer
+    AppLayer,
+    ConnectionStatus
   },
   mounted: () => {
     let useHTTPS = window.location.protocol.includes('https');
@@ -74,8 +79,8 @@ html, body {
   overflow: hidden;
 }
 
-#server-status {
-  position: relative;
+.app-wrapper {
+  height: 100%;
 }
 
 .router-view-wrapper {
