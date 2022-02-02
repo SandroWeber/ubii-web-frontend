@@ -20,9 +20,11 @@ class PerformanceTestFibonacciHelper {
       return b;
     };
 
-    if (inputs.fibonacciInput && inputs.fibonacciInput.double) {
+    if (inputs.fibonacciInput && inputs.fibonacciInput.int32) {
+      result = fibonacci(inputs.fibonacciInput.int32);
+      result = result === Infinity ? Number.MAX_SAFE_INTEGER : result;
       outputs.fibonacciResult = {
-        double: fibonacci(inputs.fibonacciInput.double)
+        int32: result
       }
     }
 
@@ -41,13 +43,13 @@ class PerformanceTestFibonacciHelper {
         {
           internalName:
             PerformanceTestFibonacciHelper.SEQENCE_LENGTH_INPUT_SUFFIX,
-          messageFormat: 'double'
+          messageFormat: 'int32'
         }
       ],
       outputs: [
         {
           internalName: PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX,
-          messageFormat: 'double'
+          messageFormat: 'int32'
         }
       ],
       onProcessingStringified: PerformanceTestFibonacciHelper.processingCallback.toString(),

@@ -176,7 +176,7 @@ export default {
             ) {
               UbiiClientService.instance.publishRecordImmediately({
                 topic: inputMapping.topic,
-                double: parseFloat(this.testData.settings.fibSequenceLength)
+                int32: parseInt(this.testData.settings.fibSequenceLength)
               });
             }
           });
@@ -277,7 +277,8 @@ export default {
       this.testData.statistics.processingPerSecond =
         processingIterations / (passedTime / 1000);
     },
-    onProcessingFinishedCallback: function(float, topic) {
+    onProcessingFinishedCallback: function(result, topic) {
+      console.info(result);
       if (this.testData.status === 'running') {
         let indexSuffix = topic.indexOf(
           PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX
