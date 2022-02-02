@@ -216,21 +216,23 @@ export default {
 
       // specification of a ubii.processing.ProcessingModule
       let processingCallback = (deltaTime, inputs /*state*/) => {
-        if (!inputs.clientPointer) {
+        if (!inputs.clientPointer || !inputs.clientPointer.vector2) {
           return {};
         }
 
-        let outputs = {};
+        let outputs = {
+          serverPointer: {}
+        };
 
         if (inputs.mirrorPointer === true) {
-          outputs.serverPointer = {
-            x: 1 - inputs.clientPointer.x,
-            y: 1 - inputs.clientPointer.y,
+          outputs.serverPointer.vector2 = {
+            x: 1 - inputs.clientPointer.vector2.x,
+            y: 1 - inputs.clientPointer.vector2.y,
           };
         } else {
-          outputs.serverPointer = {
-            x: inputs.clientPointer.x,
-            y: inputs.clientPointer.y,
+          outputs.serverPointer.vector2 = {
+            x: inputs.clientPointer.vector2.x,
+            y: inputs.clientPointer.vector2.y,
           };
         }
 
