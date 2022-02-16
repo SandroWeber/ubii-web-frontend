@@ -8,6 +8,27 @@
     ></multiselect>
 
     <div class="processing-options">
+      <multiselect
+        class="multiselect-pm-list"
+        v-model="selectedProcessingModule"
+        :options="imageProcessingModules"
+        label="name"
+        placeholder="Pick a processing module"
+        @select="onPmSelected"
+      ></multiselect>
+
+      <div>{{selectedProcessingModuleDescription}}</div>
+
+      <app-button
+        class="button round button-toggle-processing"
+        :class="processing ? 'red-accent' : 'green-accent'"
+        @click="toggleProcessing"
+      >
+        {{ textProcessingButton }}
+      </app-button>
+    </div>
+
+    <!--div class="processing-options">
       <input type="radio" id="processing-option-none" value="none" v-model="processingOption" />
       <label for="processing-option-none">none</label>
       <br />
@@ -29,7 +50,7 @@
       >
         {{ textProcessingButton }}
       </app-button>
-    </div>
+    </div-->
 
     <video id="video" class="video-playback" autoplay></video>
 
@@ -69,6 +90,9 @@ export default {
     return {
       selectedCameraTopic: null,
       cameraTopics: [],
+      selectedProcessingModule: null,
+      selectedProcessingModuleDescription: '',
+      imageProcessingModules: [],
       processingOption: null,
       textProcessingButton: 'Start',
       processing: false
@@ -81,10 +105,7 @@ export default {
         (this.subscribedCameraTopic && this.selectedCameraTopic !== this.subscribedCameraTopic) ||
         this.selectedCameraTopic === 'none'
       ) {
-        UbiiClientService.instance.unsubscribeTopic(
-          this.subscribedCameraTopic,
-          this.drawImageTopicMirror
-        );
+        UbiiClientService.instance.unsubscribeTopic(this.subscribedCameraTopic, this.drawImageTopicMirror);
 
         if (this.selectedCameraTopic === 'none' || this.selectedCameraTopic === null) {
           let canvas = this.canvasImageMirror;
@@ -95,10 +116,7 @@ export default {
 
       if (this.selectedCameraTopic !== null && this.selectedCameraTopic !== 'none') {
         this.subscribedCameraTopic = this.selectedCameraTopic;
-        UbiiClientService.instance.subscribeTopic(
-          this.subscribedCameraTopic,
-          this.drawImageTopicMirror
-        );
+        UbiiClientService.instance.subscribeTopic(this.subscribedCameraTopic, this.drawImageTopicMirror);
       }
     }
   },
@@ -110,6 +128,8 @@ export default {
       this.running = true;
 
       await UbiiClientService.instance.waitForConnection();
+
+      await this.getImageProcessingModules();
 
       // set up ubii camera interface
       this.topicPrefix = '/' + UbiiClientService.instance.getClientID() + '/image-processing';
@@ -141,6 +161,27 @@ export default {
         topic => topic.includes('camera_image') || topic.includes('camera-image')
       );
       this.cameraTopics.push('none');
+    },
+    getImageProcessingModules: async function() {
+      let reply = await UbiiClientService.instance.callService({
+        topic: DEFAULT_TOPICS.SERVICES.PM_DATABASE_GET_LIST,
+        processingModuleList: {
+          elements: [
+            {
+              inputs: [{ messageFormat: 'ubii.dataStructure.Image2D' }],
+              outputs: [{ messageFormat: 'ubii.dataStructure.Object2DList' }]
+            }
+          ]
+        }
+      });
+      if (reply && reply.processingModuleList) {
+        this.imageProcessingModules = reply.processingModuleList.elements;
+      }
+      console.info(this.imageProcessingModules);
+    },
+    onPmSelected: function(selectedOption, id) {
+      console.info([selectedOption, id]);
+      this.selectedProcessingModuleDescription = selectedOption.description;
     },
     toggleProcessing: function() {
       if (this.processing) {
@@ -211,6 +252,7 @@ export default {
 
 <style scoped>
 .img-processing-wrapper {
+  margin-top: 20px;
   display: grid;
   grid-gap: 5px;
   padding: 5px;
@@ -241,13 +283,10 @@ export default {
 
 .image-mirror-canvas {
   grid-area: image-mirror;
-  height: 480px;
 }
 
 .image-mirror-overlay {
   grid-area: image-mirror;
-  width: 100%;
-  height: 100%;
   justify-self: center;
   overflow: hidden;
 }
