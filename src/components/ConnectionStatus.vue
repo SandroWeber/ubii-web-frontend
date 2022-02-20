@@ -1,5 +1,5 @@
 <template>
-  <app-layer class="layer-two background low-contrast horizontal-shadow">
+  <div class="connection-status-wrapper">
     <app-button
       class="button round"
       :class="connected ? 'green-accent' : 'red-accent'"
@@ -9,7 +9,7 @@
         icon="plug"
         class="icon"
         v-b-tooltip.hover
-        title="Server Connection Config"
+        title="Connection Config"
       />
     </app-button>
     <div
@@ -39,14 +39,13 @@
         >{{ connected ? 'reconnect' : 'connect' }}</app-button
       >
     </div>
-  </app-layer>
+  </div>
 </template>
 
 <script>
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import {
   AppButton,
-  AppLayer,
   AppInput
 } from './appComponents/appComponents.js';
 
@@ -56,10 +55,9 @@ import { faPlug } from '@fortawesome/free-solid-svg-icons';
 library.add(faPlug);
 
 export default {
-  name: 'ServerStatus',
+  name: 'ConnectionStatus',
   components: {
     AppButton,
-    AppLayer,
     AppInput
   },
   data: () => {
@@ -99,7 +97,13 @@ export default {
 </script>
 
 <style scoped>
-.server-info {
+.connection-status-wrapper {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+.connection-info {
   padding: 8px;
   display: grid;
   grid-gap: 5px;
