@@ -8,20 +8,17 @@
     ></multiselect>
 
     <div class="processing-options">
-      <input type="radio" id="processing-option-none" value="none" v-model="processingOption" />
-      <label for="processing-option-none">none</label>
-      <br />
-      <input type="radio" id="processing-option-coco-ssd" value="coco-ssd" v-model="processingOption" />
-      <label for="processing-option-coco-ssd">CoCo SSD Object Recognition</label>
-      <br />
-      <input
-        type="radio"
-        id="processing-option-tesseract-ocr"
-        value="tesseract-ocr"
-        v-model="processingOption"
-        :disabled="true"
-      />
-      <label for="processing-option-tesseract-ocr">Tesseract OCR (coming soon)</label>
+      <multiselect
+        class="multiselect-pm-list"
+        v-model="selectedProcessingModule"
+        :options="imageProcessingModules"
+        label="name"
+        placeholder="Pick a processing module"
+        @select="onPmSelected"
+      ></multiselect>
+
+      <div>{{ selectedProcessingModuleDescription }}</div>
+
       <app-button
         class="button round button-toggle-processing"
         :class="processing ? 'red-accent' : 'green-accent'"
@@ -33,8 +30,8 @@
 
     <video id="video" class="video-playback" autoplay></video>
 
-    <canvas id="canvas-image-mirror" class="image-mirror-canvas"></canvas>
-    <div id="image-mirror-overlay" class="image-mirror-overlay"></div>
+    <canvas id="canvas-image-topic-mirror" class="canvas-image-topic-mirror"></canvas>
+    <div id="output-object-list-overlay" class="output-object-list-overlay"></div>
   </div>
 </template>
 
@@ -48,7 +45,7 @@ const ImageDataFormats = ProtobufLibrary.ubii.dataStructure.Image2D.DataFormat;
 
 import { AppButton } from '../../../appComponents/appComponents.js';
 import UbiiComponentCamera from '../../../../ubii/components/ubii-component-camera';
-import UbiiSessionCocoSSD from './ubiiSessionCocoSSD';
+import ImageProcessingSession from './imageProcessingSession';
 
 export default {
   name: 'ImageProcessing',
@@ -57,8 +54,8 @@ export default {
     AppButton
   },
   mounted: function() {
-    this.canvasImageMirror = document.getElementById('canvas-image-mirror');
-    this.imageMirrorOverlay = document.getElementById('image-mirror-overlay');
+    this.imageTopicDisplay = document.getElementById('canvas-image-topic-mirror');
+    this.imageTopicDisplayOverlay = document.getElementById('output-object-list-overlay');
 
     this.start();
   },
@@ -69,6 +66,9 @@ export default {
     return {
       selectedCameraTopic: null,
       cameraTopics: [],
+      selectedProcessingModule: null,
+      selectedProcessingModuleDescription: '',
+      imageProcessingModules: [],
       processingOption: null,
       textProcessingButton: 'Start',
       processing: false
@@ -78,27 +78,21 @@ export default {
     selectedCameraTopic: function() {
       // unsubscribe old topic first
       if (
-        (this.subscribedCameraTopic && this.selectedCameraTopic !== this.subscribedCameraTopic) ||
+        (this.topicCameraImage && this.selectedCameraTopic !== this.topicCameraImage) ||
         this.selectedCameraTopic === 'none'
       ) {
-        UbiiClientService.instance.unsubscribeTopic(
-          this.subscribedCameraTopic,
-          this.drawImageTopicMirror
-        );
+        UbiiClientService.instance.unsubscribeTopic(this.topicCameraImage, this.drawImageTopicMirror);
 
         if (this.selectedCameraTopic === 'none' || this.selectedCameraTopic === null) {
-          let canvas = this.canvasImageMirror;
+          let canvas = this.imageTopicDisplay;
           const context = canvas.getContext('2d');
           context.clearRect(0, 0, canvas.width, canvas.height);
         }
       }
 
       if (this.selectedCameraTopic !== null && this.selectedCameraTopic !== 'none') {
-        this.subscribedCameraTopic = this.selectedCameraTopic;
-        UbiiClientService.instance.subscribeTopic(
-          this.subscribedCameraTopic,
-          this.drawImageTopicMirror
-        );
+        this.topicCameraImage = this.selectedCameraTopic;
+        UbiiClientService.instance.subscribeTopic(this.topicCameraImage, this.drawImageTopicMirror);
       }
     }
   },
@@ -110,6 +104,8 @@ export default {
       this.running = true;
 
       await UbiiClientService.instance.waitForConnection();
+
+      await this.getImageProcessingModules();
 
       // set up ubii camera interface
       this.topicPrefix = '/' + UbiiClientService.instance.getClientID() + '/image-processing';
@@ -142,30 +138,56 @@ export default {
       );
       this.cameraTopics.push('none');
     },
+    getImageProcessingModules: async function() {
+      let reply = await UbiiClientService.instance.callService({
+        topic: DEFAULT_TOPICS.SERVICES.PM_DATABASE_GET_LIST,
+        processingModuleList: {
+          elements: [
+            {
+              inputs: [{ messageFormat: 'ubii.dataStructure.Image2D' }],
+              outputs: [{ messageFormat: 'ubii.dataStructure.Object2DList' }]
+            }
+          ]
+        }
+      });
+      if (reply && reply.processingModuleList) {
+        this.imageProcessingModules = reply.processingModuleList.elements;
+      }
+    },
+    onPmSelected: function(selectedOption) {
+      this.selectedProcessingModuleDescription = selectedOption.description;
+    },
     toggleProcessing: function() {
-      if (this.processing) {
-        this.processing = false;
-        this.textProcessingButton = 'Start';
-        this.runningSession.stopSession();
-        return;
-      } else {
-        this.processing = true;
-        this.textProcessingButton = 'Stop';
-      }
+      this.processing = !this.processing;
 
-      if (this.processingOption === 'coco-ssd') {
-        this.predictionsOuptputTopic = this.topicPrefix + '/coco-ssd/predictions';
-        this.runningSession = new UbiiSessionCocoSSD(
-          this.subscribedCameraTopic,
-          this.predictionsOuptputTopic,
-          this.imageMirrorOverlay
+      if (this.processing) {
+        this.textProcessingButton = 'Stop';
+        this.object2DDivs = [];
+
+        this.topicObject2DList = this.topicPrefix + '/objects';
+
+        UbiiClientService.instance.subscribeTopic(this.topicObject2DList, this.handleObject2DList.bind(this));
+
+        this.runningSession = new ImageProcessingSession(
+          this.topicCameraImage,
+          this.topicObject2DList,
+          this.selectedProcessingModule
         );
+        this.runningSession.startSession();
+      } else {
+        this.textProcessingButton = 'Start';
+        this.runningSession && this.runningSession.stopSession();
+
+        while (this.imageTopicDisplayOverlay.hasChildNodes()) {
+          this.imageTopicDisplayOverlay.removeChild(
+            this.imageTopicDisplayOverlay.childNodes[0]
+          );
+        }
       }
-      this.runningSession.startSession();
     },
     /* interface methods */
     drawImageTopicMirror: function(image) {
-      this.drawImage(image, this.canvasImageMirror);
+      this.drawImage(image, this.imageTopicDisplay);
     },
     drawImage: async function(image, canvas) {
       if (!image || !canvas) {
@@ -173,8 +195,8 @@ export default {
       }
 
       // adjust overlay element
-      this.imageMirrorOverlay.style.width = this.canvasImageMirror.clientWidth + 'px';
-      this.imageMirrorOverlay.style.height = this.canvasImageMirror.clientHeight + 'px';
+      this.imageTopicDisplayOverlay.style.width = this.imageTopicDisplay.clientWidth + 'px';
+      this.imageTopicDisplayOverlay.style.height = this.imageTopicDisplay.clientHeight + 'px';
 
       let imageDataRGBA = undefined;
       if (image.dataFormat === ImageDataFormats.GRAY8) {
@@ -204,6 +226,38 @@ export default {
       let drawWidth = imageRatio * canvas.height;
       let imageBitmap = await createImageBitmap(imgData);
       ctx.drawImage(imageBitmap, 0, 0, drawWidth, canvas.height);
+    },
+    handleObject2DList(object2DList) {
+      let outputObjects = object2DList.elements;
+
+      while (this.object2DDivs.length < outputObjects.length) {
+        let divElement = document.createElement('div');
+        divElement.style.color = 'black';
+        divElement.style.border = '5px solid rgba(255, 255, 0, 0.4)';
+        divElement.style.position = 'relative';
+        divElement.style.textAlign = 'left';
+        divElement.style.fontWeight = 'bold';
+        this.imageTopicDisplayOverlay.appendChild(divElement);
+        this.object2DDivs.push(divElement);
+      }
+
+      let overlayBoundings = this.imageTopicDisplayOverlay.getBoundingClientRect();
+      this.object2DDivs.forEach((div, index) => {
+        if (index < outputObjects.length) {
+          div.innerHTML = outputObjects[index].id;
+          // set position
+          div.style.left = Math.floor(outputObjects[index].pose.position.x * overlayBoundings.width) + 'px';
+          div.style.top = Math.floor(outputObjects[index].pose.position.y * overlayBoundings.height) + 'px';
+          // set size
+          div.style.width = Math.floor(outputObjects[index].size.x * overlayBoundings.width) + 'px';
+          div.style.height = Math.floor(outputObjects[index].size.y * overlayBoundings.height) + 'px';
+          div.style.textShadow = '0px 0px 10px yellow';
+
+          div.style.visibility = 'visible';
+        } else {
+          div.style.visibility = 'hidden';
+        }
+      });
     }
   }
 };
@@ -211,6 +265,7 @@ export default {
 
 <style scoped>
 .img-processing-wrapper {
+  margin-top: 20px;
   display: grid;
   grid-gap: 5px;
   padding: 5px;
@@ -239,15 +294,13 @@ export default {
   grid-area: video-playback;
 }
 
-.image-mirror-canvas {
-  grid-area: image-mirror;
-  height: 480px;
-}
-
-.image-mirror-overlay {
+.canvas-image-topic-mirror {
   grid-area: image-mirror;
   width: 100%;
-  height: 100%;
+}
+
+.output-object-list-overlay {
+  grid-area: image-mirror;
   justify-self: center;
   overflow: hidden;
 }
