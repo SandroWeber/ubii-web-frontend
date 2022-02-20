@@ -215,7 +215,7 @@ export default {
       this.ubiiComponentServerPointer = this.ubiiDevice.components[2];
 
       // specification of a ubii.processing.ProcessingModule
-      let processingCallback = (deltaTime, inputs /*state*/) => {
+      let processingCallback = (deltaTime, inputs /*, state*/) => {
         if (!inputs.clientPointer || !inputs.clientPointer.vector2) {
           return {};
         }
@@ -224,7 +224,7 @@ export default {
           serverPointer: {}
         };
 
-        if (inputs.mirrorPointer === true) {
+        if (inputs.mirrorPointer && inputs.mirrorPointer.bool === true) {
           outputs.serverPointer.vector2 = {
             x: 1 - inputs.clientPointer.vector2.x,
             y: 1 - inputs.clientPointer.vector2.y,
