@@ -2,19 +2,9 @@
   <div class="performance-test-rtt">
     <h3>Round-Trip-Time</h3>
 
-    <app-button
-      class="start-button"
-      @click="startTestRTT()"
-      :disabled="!ubiiConnected"
-    >
-      <font-awesome-icon
-        icon="play"
-        v-show="this.$data.testRTT.status !== 'running'"
-      />
-      <font-awesome-icon
-        icon="spinner"
-        v-show="this.$data.testRTT.status === 'running'"
-      />
+    <app-button class="start-button" @click="startTestRTT()" :disabled="!ubiiConnected">
+      <font-awesome-icon icon="play" v-show="this.$data.testRTT.status !== 'running'" />
+      <font-awesome-icon icon="spinner" v-show="this.$data.testRTT.status === 'running'" />
     </app-button>
 
     <div class="statistics-grid">
@@ -27,11 +17,7 @@
 
     <div class="settings-grid">
       <label for="rtt-message-count"># messages:</label>
-      <app-input
-        :id="'rtt-message-count'"
-        :type="'# messages'"
-        v-model="testRTT.messageCount"
-      />
+      <app-input :id="'rtt-message-count'" :type="'# messages'" v-model="testRTT.messageCount" />
     </div>
   </div>
 </template>
@@ -82,8 +68,7 @@ export default {
         topic: undefined,
         device: {
           name: 'RTT_test_device',
-          deviceType:
-            ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
+          deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
           components: []
         }
       }
@@ -92,13 +77,11 @@ export default {
   methods: {
     ubiiSetupRTT: async function() {
       if (!this.$data.testRTT.device.registered) {
-        return UbiiClientService.instance.registerDevice(this.$data.testRTT.device).then(
-          device => {
-            this.$data.testRTT.device = device;
-            this.$data.testRTT.device.registered = true;
-            return device;
-          }
-        );
+        return UbiiClientService.instance.registerDevice(this.$data.testRTT.device).then(device => {
+          this.$data.testRTT.device = device;
+          this.$data.testRTT.device.registered = true;
+          return device;
+        });
       } else {
         return this.$data.testRTT.device;
       }
@@ -119,25 +102,35 @@ export default {
       let counter = 0;
       let maxMessages = parseInt(this.$data.testRTT.messageCount);
 
-      UbiiClientService.instance.subscribeTopic(this.$data.testRTT.topic, () => {
-        this.$data.testRTT.timings.push(Date.now() - this.$data.testRTT.tSent);
-        counter++;
-        if (counter < maxMessages) {
+      UbiiClientService.instance
+        .subscribeTopic(this.$data.testRTT.topic, () => {
+          const timing = Date.now() - this.$data.testRTT.tSent;
+          this.$data.testRTT.timings.push(timing);
+          if (typeof this.$data.testRTT.minimum === 'undefined' || this.$data.testRTT.minimum > timing) {
+            this.$data.testRTT.minimum = timing;
+          }
+          if (typeof this.$data.testRTT.maximum === 'undefined' || this.$data.testRTT.maximum < timing) {
+            this.$data.testRTT.maximum = timing;
+          }
+          counter++;
+          if (counter < maxMessages) {
+            this.rttSendPackage();
+          } else {
+            let sum = this.$data.testRTT.timings.reduce((partial_sum, a) => partial_sum + a);
+            this.$data.testRTT.avgRTT = sum / this.$data.testRTT.timings.length;
+            this.stopTestRTT();
+          }
+        })
+        .then(() => {
           this.rttSendPackage();
-        } else {
-          let sum = this.$data.testRTT.timings.reduce(
-            (partial_sum, a) => partial_sum + a
-          );
-          this.$data.testRTT.avgRTT = sum / this.$data.testRTT.timings.length;
-          this.stopTestRTT();
-        }
-      }).then(() => {
-        this.rttSendPackage();
-      });
+        });
     },
     stopTestRTT: function() {
       if (this.$data.testRTT && this.$data.testRTT.avgRTT) {
-        this.$data.testRTT.status = this.$data.testRTT.avgRTT.toString() + 'ms';
+        let statusMsg = 'avg RTT: ' + this.$data.testRTT.avgRTT.toString() + 'ms';
+        statusMsg += ' | min: ' + this.$data.testRTT.minimum.toString() + 'ms';
+        statusMsg += ', max: ' + this.$data.testRTT.maximum.toString() + 'ms';
+        this.$data.testRTT.status = statusMsg;
         UbiiClientService.instance.unsubscribeTopic(this.$data.testRTT.topic);
       }
     },
