@@ -277,7 +277,7 @@ export default {
   height: 100%;
   display: grid;
   grid-gap: 5px;
-  grid-template-columns: 25px 100px 75px auto;
+  grid-template-columns: 25px 75px 75px auto;
   grid-template-rows: 25px auto 1fr;
   grid-template-areas:
     ' btn-fullscreen btn-debug btn-calibrate btn-permissions'
