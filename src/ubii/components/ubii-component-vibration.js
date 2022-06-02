@@ -29,16 +29,16 @@ export default class UbiiComponentVibration extends UbiiComponent {
         let success = navigator.vibrate(100);
         // eslint-disable-next-line no-console
         console.info('navigator.vibrate success = ' + success);
+        if (success) {
+          this.subToken = await UbiiClientService.instance.subscribeTopic(this.ubiiSpecs.topic, pattern =>
+            this.handleVibrationPattern(pattern)
+          );
+          this.available = true;
+        }
       } catch (error) {
         // eslint-disable-next-line no-console
         console.info('navigator.vibrate error = ' + error);
       }
-
-      this.subToken = await UbiiClientService.instance.subscribeTopic(this.ubiiSpecs.topic, pattern =>
-        this.handleVibrationPattern(pattern)
-      );
-
-      this.available = true;
     }
   }
 
