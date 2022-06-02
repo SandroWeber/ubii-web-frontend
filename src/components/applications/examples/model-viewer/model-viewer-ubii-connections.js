@@ -4,6 +4,10 @@ import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 
 const TouchEventType = ProtobufLibrary.ubii.dataStructure.TouchEvent.TouchEventType;
 
+const TAG_COMPONENT_TOUCH = 'touch';
+const TAG_COMPONENT_ORIENTATION = 'orientation';
+
+
 export default class ModelViewerUbiiConnections {
   constructor(modelViewerRendering) {
     this.modelViewerRendering = modelViewerRendering;
@@ -21,10 +25,10 @@ export default class ModelViewerUbiiConnections {
             {
               components: [
                 {
-                  tags: ['touch']
+                  tags: [TAG_COMPONENT_TOUCH]
                 },
                 {
-                  tags: ['orientation']
+                  tags: [TAG_COMPONENT_ORIENTATION]
                 }
               ]
             }
@@ -44,12 +48,12 @@ export default class ModelViewerUbiiConnections {
   }
 
   async subscribeTopics(ubiiDevice) {
-    this.componentTouchEvents = ubiiDevice.components.find(component => component.topic.includes('/touch_events'));
+    this.componentTouchEvents = ubiiDevice.components.find(component => component.tags && component.tags.includes(TAG_COMPONENT_TOUCH));
     await UbiiClientService.instance.subscribeTopic(this.componentTouchEvents.topic, touchEventList => {
       this.onTouchEvents(touchEventList);
     });
 
-    this.componentOrientation = ubiiDevice.components.find(component => component.topic.includes('/orientation'));
+    this.componentOrientation = ubiiDevice.components.find(component => component.tags.includes(TAG_COMPONENT_ORIENTATION));
     this.subscriptionTokenOrientation = await UbiiClientService.instance.subscribeTopic(
       this.componentOrientation.topic,
       orientation => {
