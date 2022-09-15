@@ -46,7 +46,7 @@ export default {
       this.expanded = !this.expanded;
     },
     getIOTypeString() {
-      return proto.ubii.devices.Component.IOType[this.component.ioType];
+      return this.component.ioType ? this.component.ioType : proto.ubii.devices.Component.IOType[0];
     }
   }
 };
