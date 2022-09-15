@@ -104,7 +104,7 @@ export default {
 
       UbiiClientService.instance
         .subscribeTopic(this.$data.testRTT.topic, () => {
-          const timing = Date.now() - this.$data.testRTT.tSent;
+          const timing = performance.now() - this.$data.testRTT.tSent;
           this.$data.testRTT.timings.push(timing);
           if (typeof this.$data.testRTT.minimum === 'undefined' || this.$data.testRTT.minimum > timing) {
             this.$data.testRTT.minimum = timing;
@@ -135,7 +135,7 @@ export default {
       }
     },
     rttSendPackage: function() {
-      this.$data.testRTT.tSent = Date.now();
+      this.$data.testRTT.tSent = performance.now();
       UbiiClientService.instance.publishRecordImmediately({
         topic: this.$data.testRTT.topic,
         double: 1
