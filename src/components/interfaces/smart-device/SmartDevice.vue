@@ -7,14 +7,14 @@
       <fullscreen ref="fullscreen" class="fullscreen" @change="onFullScreenChange" style="overflow: hidden">
         <div class="content">
           <button
-            class="button-safari-permissions"
+            class="button-permissions"
             v-show="needsImuPermissions && !grantedImuPermission"
             @click="requestImuPermissions()"
           >
             IMU Permissions
           </button>
 
-          <button class="button-debug" @click="showDebugView = !showDebugView">Debug View</button>
+          <button class="button-debug" @click="showDebugView = !showDebugView">Debug</button>
 
           <button class="button-calibrate" @click="calibrate()">Calibrate</button>
 
@@ -277,10 +277,10 @@ export default {
   height: 100%;
   display: grid;
   grid-gap: 5px;
-  grid-template-columns: auto 100px 75px 25px;
+  grid-template-columns: 25px 75px 75px auto;
   grid-template-rows: 25px auto 1fr;
   grid-template-areas:
-    'btn-safari-permissions btn-debug btn-calibrate btn-fullscreen'
+    ' btn-fullscreen btn-debug btn-calibrate btn-permissions'
     'debug-view debug-view debug-view debug-view'
     'touch touch touch touch';
 }
@@ -295,8 +295,8 @@ export default {
   color: red;
 }
 
-.button-safari-permissions {
-  grid-area: btn-safari-permissions;
+.button-permissions {
+  grid-area: btn-permissions;
 }
 
 .button-debug {
