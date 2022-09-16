@@ -58,7 +58,6 @@
 
 <script>
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
 
 import { AppInput, AppButton } from '../appComponents/appComponents';
 
@@ -145,6 +144,7 @@ export default {
     },
     startTest: async function() {
       if (this.testData.status === TEST_STATUS_RUNNING) return;
+      this.timeoutStopTest && clearTimeout(this.timeoutStopTest);
 
       this.prepareTest();
       await this.ubiiSetup();
@@ -158,15 +158,15 @@ export default {
 
       this.testData.status = TEST_STATUS_RUNNING;
 
-      console.info('running test ...');
+      console.info('running test ...');  // eslint-disable-line no-console
     },
     stopTest: async function() {
       this.testData.tTestStop = performance.now();
       this.intervalSendMessage && clearInterval(this.intervalSendMessage);
+      await this.deinit();
+
       this.testData.status = TEST_STATUS_STOPPED;
       this.testData.durationMs = this.testData.tTestStop - this.testData.tTestStart;
-
-      await this.deinit();
 
       let retriesAwaitingFinished = 0;
       let checkFinished = () => {
@@ -177,19 +177,20 @@ export default {
           this.testData.status = TEST_STATUS_FINISHED;
           this.testData.actualMessagesPerSecond =
             (this.testData.numMessagesReceived / (this.testData.tTestStop - this.testData.tTestStart)) * 1000;
-          console.info('... test finished');
-          console.info(this.testData);
+          console.info('... test finished');  // eslint-disable-line no-console
+          console.info(this.testData);  // eslint-disable-line no-console
           let rttSum = this.testData.timings.reduce((partial_sum, a) => partial_sum + a);
           this.testData.rttAvg = rttSum / this.testData.timings.length;
         } else if (retriesAwaitingFinished < 5) {
           retriesAwaitingFinished++;
           setTimeout(checkFinished, 500);
+        } else {
+          this.testData.status = TEST_STATUS_UNMEASURED;
         }
       };
       checkFinished();
     },
     deinit: async function() {
-      this.timeoutStopTest && clearTimeout(this.timeoutStopTest);
       await UbiiClientService.instance.unsubscribeTopic(this.testData.topic, this.onMessageReceived);
     },
     sendMessage: function() {
