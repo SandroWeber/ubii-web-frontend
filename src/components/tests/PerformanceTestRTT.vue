@@ -3,14 +3,14 @@
     <h3>Round-Trip-Time</h3>
 
     <app-button class="start-button" @click="startTestRTT()" :disabled="!ubiiConnected">
-      <font-awesome-icon icon="play" v-show="this.$data.testRTT.status !== 'running'" />
-      <font-awesome-icon icon="spinner" v-show="this.$data.testRTT.status === 'running'" />
+      <font-awesome-icon icon="play" v-show="this.testRTT.status !== 'running'" />
+      <font-awesome-icon icon="spinner" v-show="this.testRTT.status === 'running'" />
     </app-button>
 
     <div class="statistics-grid">
       <!-- status -->
       <span>Status:</span>
-      <span class="test-status">{{ this.$data.testRTT.status }}</span>
+      <span class="test-status">{{ this.testRTT.status }}</span>
     </div>
 
     <div class="separator"></div>
@@ -59,7 +59,6 @@ export default {
   data: () => {
     return {
       ubiiConnected: false,
-      testRunningRTT: false,
       testRTT: {
         status: 'unmeasured',
         timings: [],
@@ -76,48 +75,48 @@ export default {
   },
   methods: {
     ubiiSetupRTT: async function() {
-      if (!this.$data.testRTT.device.registered) {
-        return UbiiClientService.instance.registerDevice(this.$data.testRTT.device).then(device => {
-          this.$data.testRTT.device = device;
-          this.$data.testRTT.device.registered = true;
+      if (!this.testRTT.device.registered) {
+        return UbiiClientService.instance.registerDevice(this.testRTT.device).then(device => {
+          this.testRTT.device = device;
+          this.testRTT.device.registered = true;
           return device;
         });
       } else {
-        return this.$data.testRTT.device;
+        return this.testRTT.device;
       }
     },
     prepareTestRTT: function() {
-      this.$data.testRTT.status = 'running';
-      this.$data.testRTT.topic = UbiiClientService.instance.getClientID() + '/test_rtt';
-      this.$data.testRTT.timings = [];
-      this.$data.testRTT.tSent = 0;
-      this.$data.testRTT.avgRTT = undefined;
+      this.testRTT.status = 'running';
+      this.testRTT.topic = UbiiClientService.instance.getClientID() + '/test_rtt';
+      this.testRTT.timings = [];
+      this.testRTT.tSent = 0;
+      this.testRTT.avgRTT = undefined;
     },
     startTestRTT: async function() {
-      if (this.$data.testRTT.status === 'running') return;
+      if (this.testRTT.status === 'running') return;
 
       this.prepareTestRTT();
       await this.ubiiSetupRTT();
 
       let counter = 0;
-      let maxMessages = parseInt(this.$data.testRTT.messageCount);
+      let maxMessages = parseInt(this.testRTT.messageCount);
 
       UbiiClientService.instance
-        .subscribeTopic(this.$data.testRTT.topic, () => {
-          const timing = performance.now() - this.$data.testRTT.tSent;
-          this.$data.testRTT.timings.push(timing);
-          if (typeof this.$data.testRTT.minimum === 'undefined' || this.$data.testRTT.minimum > timing) {
-            this.$data.testRTT.minimum = timing;
+        .subscribeTopic(this.testRTT.topic, () => {
+          const timing = performance.now() - this.testRTT.tSent;
+          this.testRTT.timings.push(timing);
+          if (typeof this.testRTT.minimum === 'undefined' || this.testRTT.minimum > timing) {
+            this.testRTT.minimum = timing;
           }
-          if (typeof this.$data.testRTT.maximum === 'undefined' || this.$data.testRTT.maximum < timing) {
-            this.$data.testRTT.maximum = timing;
+          if (typeof this.testRTT.maximum === 'undefined' || this.testRTT.maximum < timing) {
+            this.testRTT.maximum = timing;
           }
           counter++;
           if (counter < maxMessages) {
             this.rttSendPackage();
           } else {
-            let sum = this.$data.testRTT.timings.reduce((partial_sum, a) => partial_sum + a);
-            this.$data.testRTT.avgRTT = sum / this.$data.testRTT.timings.length;
+            let sum = this.testRTT.timings.reduce((partial_sum, a) => partial_sum + a);
+            this.testRTT.avgRTT = sum / this.testRTT.timings.length;
             this.stopTestRTT();
           }
         })
@@ -126,18 +125,18 @@ export default {
         });
     },
     stopTestRTT: function() {
-      if (this.$data.testRTT && this.$data.testRTT.avgRTT) {
-        let statusMsg = 'avg RTT: ' + this.$data.testRTT.avgRTT.toString() + 'ms';
-        statusMsg += ' | min: ' + this.$data.testRTT.minimum.toString() + 'ms';
-        statusMsg += ', max: ' + this.$data.testRTT.maximum.toString() + 'ms';
-        this.$data.testRTT.status = statusMsg;
-        UbiiClientService.instance.unsubscribeTopic(this.$data.testRTT.topic);
+      if (this.testRTT && this.testRTT.avgRTT) {
+        let statusMsg = 'avg RTT: ' + this.testRTT.avgRTT.toString() + 'ms';
+        statusMsg += ' | min: ' + this.testRTT.minimum.toString() + 'ms';
+        statusMsg += ', max: ' + this.testRTT.maximum.toString() + 'ms';
+        this.testRTT.status = statusMsg;
+        UbiiClientService.instance.unsubscribeTopic(this.testRTT.topic);
       }
     },
     rttSendPackage: function() {
-      this.$data.testRTT.tSent = performance.now();
+      this.testRTT.tSent = performance.now();
       UbiiClientService.instance.publishRecordImmediately({
-        topic: this.$data.testRTT.topic,
+        topic: this.testRTT.topic,
         double: 1
       });
     }
