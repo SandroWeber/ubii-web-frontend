@@ -2,6 +2,7 @@
   <div class="performance-tests-grid">
     <div class="performance-tests-section">
       <performance-test-rtt class="performance-test"></performance-test-rtt>
+      <performance-test-message-load class="performance-test" />
       <performance-test-fibonacci class="performance-test"></performance-test-fibonacci>
     </div>
   </div>
@@ -10,12 +11,14 @@
 <script>
 import PerformanceTestRTT from './PerformanceTestRTT.vue';
 import PerformanceTestFibonacci from './PerformanceTestFibonacci.vue';
+import PerformanceTestMessageLoad from './PerformanceTestMessageLoad.vue';
 
 export default {
   name: 'PerformanceTests',
   components: {
     PerformanceTestRtt: PerformanceTestRTT,
-    PerformanceTestFibonacci: PerformanceTestFibonacci
+    PerformanceTestFibonacci: PerformanceTestFibonacci,
+    PerformanceTestMessageLoad
   }
 };
 </script>
