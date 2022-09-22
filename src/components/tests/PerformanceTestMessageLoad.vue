@@ -126,7 +126,7 @@ export default {
       };
     },
     ubiiSetup: async function() {
-      this.onMessageReceived = (doubleTimeSent) => {
+      this.onMessageReceived = doubleTimeSent => {
         let tNow = performance.now();
         this.testData.tLastMessageReceived = tNow;
         this.testData.numMessagesReceived++;
@@ -158,7 +158,7 @@ export default {
 
       this.testData.status = TEST_STATUS_RUNNING;
 
-      console.info('running test ...');  // eslint-disable-line no-console
+      console.info('running test ...'); // eslint-disable-line no-console
     },
     stopTest: async function() {
       this.testData.tTestStop = performance.now();
@@ -169,26 +169,35 @@ export default {
       this.testData.durationMs = this.testData.tTestStop - this.testData.tTestStart;
 
       let retriesAwaitingFinished = 0;
-      let checkFinished = () => {
+      let waitForMessages = () => {
         if (
           this.testData.status === TEST_STATUS_STOPPED &&
           this.testData.numMessagesReceived === this.testData.numMessagesSent
         ) {
-          this.testData.status = TEST_STATUS_FINISHED;
-          this.testData.actualMessagesPerSecond =
-            (this.testData.numMessagesReceived / (this.testData.tTestStop - this.testData.tTestStart)) * 1000;
-          console.info('... test finished');  // eslint-disable-line no-console
-          console.info(this.testData);  // eslint-disable-line no-console
-          let rttSum = this.testData.timings.reduce((partial_sum, a) => partial_sum + a);
-          this.testData.rttAvg = rttSum / this.testData.timings.length;
+          this.finalizeTest();
         } else if (retriesAwaitingFinished < 5) {
           retriesAwaitingFinished++;
-          setTimeout(checkFinished, 500);
+          setTimeout(waitForMessages, 500);
         } else {
-          this.testData.status = TEST_STATUS_UNMEASURED;
+          console.info(
+            'test messages sent / received: ' +
+              this.testData.numMessagesSent +
+              ' / ' +
+              this.testData.numMessagesReceived
+          );
+          this.finalizeTest();
         }
       };
-      checkFinished();
+      waitForMessages();
+    },
+    finalizeTest: function() {
+      this.testData.status = TEST_STATUS_FINISHED;
+      this.testData.actualMessagesPerSecond =
+        (this.testData.numMessagesReceived / (this.testData.tTestStop - this.testData.tTestStart)) * 1000;
+      console.info('... test finished'); // eslint-disable-line no-console
+      console.info(this.testData); // eslint-disable-line no-console
+      let rttSum = this.testData.timings.reduce((partial_sum, a) => partial_sum + a);
+      this.testData.rttAvg = rttSum / this.testData.timings.length;
     },
     deinit: async function() {
       await UbiiClientService.instance.unsubscribeTopic(this.testData.topic, this.onMessageReceived);
