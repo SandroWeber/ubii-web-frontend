@@ -1,5 +1,5 @@
 <template>
-  <div class="performance-test-rtt">
+  <div class="performance-test-message-load">
     <h3>Message Load</h3>
 
     <app-button class="start-button" @click="startTest()" :disabled="!ubiiConnected">
@@ -41,10 +41,10 @@
     <div class="separator"></div>
 
     <div class="settings-grid">
-      <label for="test-duration">duration (s):</label>
+      <label for="test-duration">seconds (0 = infinite):</label>
       <app-input :id="'test-duration'" :type="'duration'" v-model="targetDurationSeconds" />
 
-      <label for="test-msgs-erp-second">messages / s:</label>
+      <label for="test-msgs-erp-second">messages / second (target max):</label>
       <app-input :id="'test-msgs-erp-second'" :type="'msgs-per-second'" v-model="targetMessagesPerSecond" />
 
       <label for="publish-method">publish method:</label>
@@ -107,9 +107,9 @@ export default {
       TEST_STATUS_UNMEASURED,
       PUBLISH_METHOD_IMMEDIATELY,
       PUBLISH_METHOD_NORMAL,
-      targetMessagesPerSecond: '100',
+      targetMessagesPerSecond: '500',
       targetDurationSeconds: '5',
-      publishMethod: PUBLISH_METHOD_NORMAL,
+      publishMethod: PUBLISH_METHOD_IMMEDIATELY,
       testData: {
         status: TEST_STATUS_UNMEASURED
       }
@@ -151,7 +151,9 @@ export default {
 
       this.testData.tTestStart = performance.now();
       let testDurationMs = parseInt(this.targetDurationSeconds) * 1000;
-      this.timeoutStopTest = setTimeout(() => this.stopTest(), testDurationMs);
+      if (testDurationMs > 0) {
+        this.timeoutStopTest = setTimeout(() => this.stopTest(), testDurationMs);
+      }
 
       let messageIntervalMs = 1000 / parseInt(this.targetMessagesPerSecond);
       this.intervalSendMessage = setInterval(() => this.sendMessage(), messageIntervalMs);
@@ -179,12 +181,12 @@ export default {
           retriesAwaitingFinished++;
           setTimeout(waitForMessages, 500);
         } else {
-          console.info(
+          /*console.info(
             'test messages sent / received: ' +
               this.testData.numMessagesSent +
               ' / ' +
               this.testData.numMessagesReceived
-          );
+          );*/
           this.finalizeTest();
         }
       };
@@ -236,7 +238,7 @@ export default {
   animation: spinner 1s linear infinite;
 }
 
-.performance-test-rtt {
+.performance-test-message-load {
   display: grid;
   grid-gap: 15px;
   grid-template-columns: 50px 1fr 3px 1fr;
@@ -250,7 +252,7 @@ export default {
   grid-area: statistics;
   display: grid;
   grid-gap: 15px;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 150px 200px;
   grid-template-rows: 25px;
 }
 
@@ -263,7 +265,7 @@ export default {
   grid-area: settings;
   display: grid;
   grid-gap: 15px;
-  grid-template-columns: 200px 150px;
+  grid-template-columns: 250px 150px;
   grid-template-rows: 25px;
 }
 </style>
