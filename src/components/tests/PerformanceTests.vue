@@ -34,6 +34,7 @@ export default {
 }
 
 .performance-tests-section {
+  overflow: scroll;
 }
 
 .performance-test {

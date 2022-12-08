@@ -305,7 +305,7 @@ export default {
   grid-area: statistics;
   display: grid;
   grid-gap: 15px;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 250px 1fr;
   grid-template-rows: 25px 25px 25px 25px;
 }
 
@@ -318,7 +318,7 @@ export default {
   grid-area: settings;
   display: grid;
   grid-gap: 15px;
-  grid-template-columns: 200px 200px 200px 200px;
+  grid-template-columns: 200px 200px;
   grid-template-rows: 25px 25px 25px;
 }
 
