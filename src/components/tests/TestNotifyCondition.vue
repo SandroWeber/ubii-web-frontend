@@ -20,6 +20,8 @@
 </template>
 
 <script>
+/* eslint-disable no-console */
+
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import { DEFAULT_TOPICS, proto } from '@tum-far/ubii-msg-formats';
 
@@ -95,27 +97,57 @@ export default {
     prepareTest: async function() {
       this.testData = {
         status: TEST_STATUS_RUNNING,
-        topic: UbiiClientService.instance.getClientID() + '/test/message_load'
+        topicA: UbiiClientService.instance.getClientID() + '/test/notify-condition/topic-based/entity-a',
+        topicB: UbiiClientService.instance.getClientID() + '/test/notify-condition/topic-based/entity-b',
+        recvMsgs: {},
+        curValues: {},
+        subTokens: []
       };
-
-      // publishing entities with components
-      let topicA = UbiiClientService.instance.getClientID() + '/test-notify-condition/entity-a';
-      let topicB = UbiiClientService.instance.getClientID() + '/test-notify-condition/entity-b';
+      this.testData.recvMsgs[this.testData.topicA] = 0;
+      this.testData.recvMsgs[this.testData.topicB] = 0;
 
       // notify condition
-      let reply = await UbiiClientService.instance.callService({
+      let replyNotifyConditionAdd = await UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.NOTIFY_CONDITION_ADD,
-        notifyCondition: this.createNotifyCondition(topicA, topicB)
+        notifyCondition: this.createNotifyCondition(this.testData.topicA, this.testData.topicB)
       });
-      console.info(reply);
-      if (reply.notifyCondition) {
-        this.notifyConditionSpecs = reply.notifyCondition;
+      if (replyNotifyConditionAdd.notifyCondition) {
+        this.notifyConditionSpecs = replyNotifyConditionAdd.notifyCondition;
+        console.info('NotifyCondition registered:');
+        console.info(this.notifyConditionSpecs);
       } else {
-        console.warn(reply);
+        console.warn(replyNotifyConditionAdd);
+        this.deinit();
+        return;
       }
 
-      this.entityA = this.createTestEntity(topicA, [this.notifyConditionSpecs.id]);
-      this.entityB = this.createTestEntity(topicB, [this.notifyConditionSpecs.id]);
+      this.testData.entityA = this.createTestEntity(this.testData.topicA, [this.notifyConditionSpecs.id]);
+      this.testData.entityB = this.createTestEntity(this.testData.topicB, [this.notifyConditionSpecs.id]);
+
+      let replyDeviceRegistration = await UbiiClientService.instance.callService({
+        topic: DEFAULT_TOPICS.SERVICES.DEVICE_REGISTRATION,
+        device: {
+          name: 'test-notify-condition-topic-based',
+          clientId: UbiiClientService.instance.getClientID(),
+          components: [this.testData.entityA.component, this.testData.entityB.component]
+        }
+      });
+      if (replyDeviceRegistration.device) {
+        this.testData.device = replyDeviceRegistration.device;
+        console.info('device registered:');
+        console.info(this.testData.device);
+      } else {
+        console.error(replyDeviceRegistration);
+        this.deinit();
+        return;
+      }
+
+      this.subTokens.push(
+        await UbiiClientService.instance.subscribeTopic(this.testData.topicA, record => this.onMessageReceived(record))
+      );
+      this.subTokens.push(
+        await UbiiClientService.instance.subscribeTopic(this.testData.topicB, record => this.onMessageReceived(record))
+      );
     },
     startTest: async function() {
       if (this.testData.status === TEST_STATUS_RUNNING) return;
@@ -135,15 +167,18 @@ export default {
       this.testData.durationMs = this.testData.tTestStop - this.testData.tTestStart;
     },
     deinit: async function() {
-      await UbiiClientService.instance.unsubscribeTopic(this.testData.topic, this.onMessageReceived);
+      for (let token of this.subTokens) {
+        await UbiiClientService.instance.unsubscribe(token);
+      }
     },
     createNotifyCondition: function(topicA, topicB) {
       let condition = Object.assign({}, NOTIFY_CONDITION_TEMPLATE);
       let evaluate = () => {
         let intA = getTopicDataRecord({ topic: topicA }); // eslint-disable-line no-undef
         let intB = getTopicDataRecord({ topic: topicB }); // eslint-disable-line no-undef
+        console.info('evaluating for A=' + intA + ', B=' + intB);
 
-        return Math.abs(intA - intB) < 5;
+        return intA && intB && Math.abs(intA - intB) < 5;
       };
       condition.evaluationFunctionStringified = evaluate.toString();
 
@@ -157,6 +192,40 @@ export default {
       entity.component.notifyConditionIds.push(...notifyConditionIds);
 
       return entity;
+    },
+    testCondition: function() {
+      if (this.testData.curValTopicA && this.testData.curValTopicB) {
+        return Math.abs(this.testData.curValTopicA - this.testData.curValTopicB) < 5;
+      }
+    },
+    publish: function(integer, topicA, topicB) {
+      let timestamp = UbiiClientService.instance.generateTimestamp();
+      if (topicA) {
+        UbiiClientService.instance.publishRecordImmediately({
+          topic: topicA,
+          timestamp: timestamp,
+          int32: integer
+        });
+        //this.testData.curValTopicA = integer;
+      }
+      if (topicB) {
+        UbiiClientService.instance.publishRecordImmediately({
+          topic: topicB,
+          timestamp: timestamp,
+          int32: integer
+        });
+        //this.testData.curValTopicA = integer;
+      }
+    },
+    onMessageReceived: function(record) {
+      this.testData.recvMsgs[record.topic]++;
+      this.testData.curValues[record.topic] = record.int32;
+      if (!this.testCondition()) {
+        console.error(
+          `received data on "${record.topic}" but the notify condition should not be fulfilled:` +
+            `A=${this.testData.curValues[this.testData.topicA]}, B=${this.testData.curValues[this.testData.topicB]}`
+        );
+      }
     }
   }
 };
