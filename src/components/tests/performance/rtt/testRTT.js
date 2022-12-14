@@ -1,5 +1,7 @@
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
+import CONSTANTS from '../../constants';
+
 export default class TestRTT {
   constructor() {
     this.config = {
@@ -7,7 +9,7 @@ export default class TestRTT {
       topic: undefined
     };
 
-    this.status = TestRTT.CONSTANTS.STATUS.UMNEASURED;
+    this.status = CONSTANTS.TEST_STATUS.UMNEASURED;
   }
 
   async prepare() {
@@ -42,23 +44,25 @@ export default class TestRTT {
   }
 
   async start() {
-    if (this.status === TestRTT.CONSTANTS.STATUS.RUNNING) return;
+    if (this.status === CONSTANTS.TEST_STATUS.RUNNING) return;
     
     await this.prepare();
 
-    this.status = TestRTT.CONSTANTS.STATUS.RUNNING;
+    this.status = CONSTANTS.TEST_STATUS.RUNNING;
   }
 
   stop() {
     this.subToken && UbiiClientService.instance.unsubscribe(this.subToken);
 
-    let sum = this.data.timings.reduce((partial_sum, a) => partial_sum + a);
-    this.data.avgRTT = sum / this.data.timings.length;
-
-    let statusMsg = 'avg RTT: ' + this.data.avgRTT.toString() + 'ms';
-    statusMsg += ' | min: ' + this.data.minimum.toString() + 'ms';
-    statusMsg += ', max: ' + this.data.maximum.toString() + 'ms';
-    this.status = statusMsg;
+    if (this.data) {
+      let sum = this.data.timings.reduce((partial_sum, a) => partial_sum + a);
+      this.data.avgRTT = sum / this.data.timings.length;
+  
+      let statusMsg = 'avg RTT: ' + this.data.avgRTT.toString() + 'ms';
+      statusMsg += ' | min: ' + this.data.minimum.toString() + 'ms';
+      statusMsg += ', max: ' + this.data.maximum.toString() + 'ms';
+      this.status = statusMsg;
+    }
   }
 
   sendMessage() {
@@ -69,12 +73,3 @@ export default class TestRTT {
     });
   }
 }
-
-TestRTT.CONSTANTS = Object.freeze({
-  STATUS: {
-    UMNEASURED: 'unmeasured',
-    RUNNING: 'running',
-    STOPPED: 'stopped',
-    FINISHED: 'finished'
-  }
-});

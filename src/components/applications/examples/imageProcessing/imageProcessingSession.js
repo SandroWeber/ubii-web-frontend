@@ -49,28 +49,19 @@ export default class ImageProcessingSession {
     }
   }
 
-  stopSession() {
+  async stopSession() {
     this.sessionRunning = false;
 
-    UbiiClientService.instance.waitForConnection().then(() => {
-      UbiiClientService.instance
-        .unsubscribeTopic(this.topicPredictionsOutput, this.handleObjectPredictions)
-        .then(() => {
-          while (this.predictionsOverlayElement.hasChildNodes()) {
-            this.predictionsOverlayElement.removeChild(this.predictionsOverlayElement.childNodes[0]);
-          }
-        });
+    await UbiiClientService.instance.waitForConnection();
 
-      UbiiClientService.instance
-        .callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
-          session: this
-        })
-        .then(response => {
-          if (response.error) {
-            console.warn(response.error);
-          }
-        });
+    await UbiiClientService.instance.unsubscribe();
+
+    let replyStopSession = await UbiiClientService.instance.callService({
+      topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
+      session: this
     });
+    if (replyStopSession.error) {
+      console.warn(replyStopSession.error);
+    }
   }
 }

@@ -2,19 +2,9 @@
   <div class="performance-test-fibonacci">
     <h3 class="test-title">Fibonacci Processing</h3>
 
-    <app-button
-      class="start-button"
-      @click="startTest()"
-      :disabled="!ubiiConnected"
-    >
-      <font-awesome-icon
-        icon="play"
-        v-show="this.testData.status !== 'running'"
-      />
-      <font-awesome-icon
-        icon="spinner"
-        v-show="this.testData.status === 'running'"
-      />
+    <app-button class="start-button" @click="startTest()" :disabled="!ubiiConnected">
+      <font-awesome-icon icon="play" v-show="this.testData.status !== 'running'" />
+      <font-awesome-icon icon="spinner" v-show="this.testData.status === 'running'" />
     </app-button>
 
     <div class="statistics-grid">
@@ -28,58 +18,36 @@
       </span>
       <!-- number of iterations processed -->
       <span>Number of processed iterations:</span>
-      <span class="test-status">{{
-        this.testData.statistics.processingIterations
-      }}</span>
+      <span class="test-status">{{ this.testData.statistics.processingIterations }}</span>
       <!-- iterations per seconds -->
       <span>Iterations per second:</span>
-      <span class="test-status">{{
-        this.testData.statistics.processingPerSecond
-      }}</span>
+      <span class="test-status">{{ this.testData.statistics.processingPerSecond }}</span>
     </div>
 
     <div class="separator"></div>
 
     <div class="settings-grid">
-      <label for="fibonacci-session-count" class="setting-label"
-        ># sessions:</label
-      >
-      <app-input
-        :id="'fibonacci-session-count'"
-        :type="'# sessions'"
-        v-model="testData.settings.sessionCount"
-      />
+      <label for="fibonacci-session-count" class="setting-label"># sessions:</label>
+      <app-input :id="'fibonacci-session-count'" :type="'# sessions'" v-model="testData.settings.sessionCount" />
 
-      <label for="fibonacci-pm-count" class="setting-label"
-        ># processing modules:</label
-      >
+      <label for="fibonacci-pm-count" class="setting-label"># processing modules:</label>
       <app-input
         :id="'fibonacci-pm-count'"
         :type="'# processing modules'"
         v-model="testData.settings.pmCountPerSession"
       />
 
-      <label for="fibonacci-sequence-length" class="setting-label"
-        >sequence length (n):</label
-      >
+      <label for="fibonacci-sequence-length" class="setting-label">sequence length (n):</label>
       <app-input
         :id="'fibonacci-sequence-length'"
         :type="'# processing modules'"
         v-model="testData.settings.fibSequenceLength"
       />
 
-      <label for="test-duration" class="setting-label"
-        >test duration (s):</label
-      >
-      <app-input
-        :id="'test-duration'"
-        :type="'test duration'"
-        v-model="testData.settings.testDurationSeconds"
-      />
+      <label for="test-duration" class="setting-label">test duration (s):</label>
+      <app-input :id="'test-duration'" :type="'test duration'" v-model="testData.settings.testDurationSeconds" />
 
-      <label for="fibonacci-node-id" class="setting-label"
-        >run on node ID:</label
-      >
+      <label for="fibonacci-node-id" class="setting-label">run on node ID:</label>
       <input-node-id :id="'fibonacci-node-id'" v-model="testData.settings.nodeId" />
     </div>
   </div>
@@ -105,10 +73,11 @@ export default {
     InputNodeId
   },
   mounted: async function() {
-    // unsubscribe before page is unloaded
     window.addEventListener('beforeunload', () => {
       this.stopTest();
     });
+
+    this.subTokens = [];
 
     UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, () => {
       this.ubiiConnected = true;
@@ -151,7 +120,7 @@ export default {
     };
   },
   methods: {
-    prepareTest: function() {
+    prepareTest: async function() {
       this.testData.statistics.processingFinished = [];
       this.testData.statistics.processingCountMap.clear();
       this.testData.statistics.processingIterations = 'N/A';
@@ -165,15 +134,11 @@ export default {
         this.testData.settings.nodeId
       );
 
-      this.testData.allSessionsSpecs.forEach(sessionSpec => {
-        sessionSpec.ioMappings.forEach(ioMapping => {
+      for (let sessionSpec of this.testData.allSessionsSpecs) {
+        for (let ioMapping of sessionSpec.ioMappings) {
           // publish the sequence lengths to be calculated for each processing module
           ioMapping.inputMappings.forEach(inputMapping => {
-            if (
-              inputMapping.inputName.indexOf(
-                PerformanceTestFibonacciHelper.SEQENCE_LENGTH_INPUT_SUFFIX
-              ) !== -1
-            ) {
+            if (inputMapping.inputName.indexOf(PerformanceTestFibonacciHelper.SEQENCE_LENGTH_INPUT_SUFFIX) !== -1) {
               UbiiClientService.instance.publishRecordImmediately({
                 topic: inputMapping.topic,
                 int32: parseInt(this.testData.settings.fibSequenceLength)
@@ -181,25 +146,18 @@ export default {
             }
           });
 
-          // subscribe to all processing module output topics
-          ioMapping.outputMappings.forEach(outputMapping => {
-            if (
-              outputMapping.outputName.indexOf(
-                PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX
-              ) !== -1
-            ) {
-              let subscriptionTopic = outputMapping.topic;
-              UbiiClientService.instance.subscribeTopic(
-                subscriptionTopic,
-                this.onProcessingFinishedCallback
+          for (let outputMapping of ioMapping.outputMappings) {
+            if (outputMapping.outputName.indexOf(PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX) !== -1) {
+              this.subTokens.push(
+                await UbiiClientService.instance.subscribeTopic(outputMapping.topic, this.onProcessingFinishedCallback)
               );
             }
-          });
-        });
-      });
+          }
+        }
+      }
     },
     startTest: async function() {
-      this.prepareTest();
+      await this.prepareTest();
 
       let sessionSpecs = [];
       this.testData.allSessionsSpecs.forEach(session => {
@@ -237,35 +195,17 @@ export default {
 
       this.testData.statistics.processingFinished.forEach(id => {
         if (!this.testData.statistics.processingCountMap.has(id)) {
-          let count = this.testData.statistics.processingFinished.reduce(
-            (n, x) => n + (x === id),
-            0
-          );
+          let count = this.testData.statistics.processingFinished.reduce((n, x) => n + (x === id), 0);
           this.testData.statistics.processingCountMap.set(id, count);
         }
       });
 
-      // unsubscribe from all processing finished topics
-      this.testData.allSessionsSpecs.forEach(sessionSpec => {
-        sessionSpec.ioMappings.forEach(ioMapping => {
-          ioMapping.outputMappings.forEach(outputMapping => {
-            if (
-              outputMapping.outputName.indexOf(
-                PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX
-              ) !== -1
-            ) {
-              let subscriptionTopic = outputMapping.topic;
-              UbiiClientService.instance.unsubscribeTopic(
-                subscriptionTopic,
-                this.onProcessingFinishedCallback
-              );
-            }
-          });
-        });
-      });
+      for (let token of this.subTokens) {
+        await UbiiClientService.instance.unsubscribe(token);
+      }
+      this.subTokens = [];
 
-      let passedTime =
-        this.testData.statistics.stopTime - this.testData.statistics.startTime;
+      let passedTime = this.testData.statistics.stopTime - this.testData.statistics.startTime;
       this.testData.statistics.processingTime = passedTime;
 
       let processingIterations = 0;
@@ -274,14 +214,11 @@ export default {
       });
       this.testData.statistics.processingIterations = processingIterations;
 
-      this.testData.statistics.processingPerSecond =
-        processingIterations / (passedTime / 1000);
+      this.testData.statistics.processingPerSecond = processingIterations / (passedTime / 1000);
     },
     onProcessingFinishedCallback: function(result, topic) {
       if (this.testData.status === 'running') {
-        let indexSuffix = topic.indexOf(
-          PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX
-        );
+        let indexSuffix = topic.indexOf(PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX);
         let id = topic.substring(0, indexSuffix);
         this.testData.statistics.processingFinished.push(id);
       }

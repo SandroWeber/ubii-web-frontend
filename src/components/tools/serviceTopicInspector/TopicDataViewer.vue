@@ -45,9 +45,9 @@ export default {
     async toggleTopicDataDisplay() {
       this.expanded = !this.expanded;
       if (this.expanded) {
-        await UbiiClientService.instance.subscribeTopic(this.topic, this.onTopicDataRecord);
+        this.subToken = await UbiiClientService.instance.subscribeTopic(this.topic, this.onTopicDataRecord);
       } else {
-        await UbiiClientService.instance.unsubscribeTopic(this.topic, this.onTopicDataRecord);
+        await UbiiClientService.instance.unsubscribe(this.subToken);
       }
     },
     onTopicDataRecord(data) {

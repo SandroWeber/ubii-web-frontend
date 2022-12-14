@@ -3,8 +3,8 @@
     <h3>Round-Trip-Time</h3>
 
     <app-button class="start-button" @click="startTest()" :disabled="!ubiiConnected">
-      <font-awesome-icon icon="play" v-show="this.test.status !== CONSTANTS.STATUS.RUNNING" />
-      <font-awesome-icon icon="spinner" v-show="this.test.status === CONSTANTS.STATUS.RUNNING" />
+      <font-awesome-icon icon="play" v-show="this.test.status !== TEST_STATUS.RUNNING" />
+      <font-awesome-icon icon="spinner" v-show="this.test.status === TEST_STATUS.RUNNING" />
     </app-button>
 
     <div class="statistics-grid">
@@ -26,6 +26,7 @@ import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
 import { AppInput, AppButton } from '../../../appComponents/appComponents';
 import TestRTT from './testRTT';
+import CONSTANTS from '../../constants';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -59,7 +60,7 @@ export default {
     return {
       ubiiConnected: false,
       test: new TestRTT(),
-      CONSTANTS: TestRTT.CONSTANTS
+      TEST_STATUS: CONSTANTS.TEST_STATUS
     };
   },
   methods: {

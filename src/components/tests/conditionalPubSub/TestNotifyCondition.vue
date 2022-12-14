@@ -3,8 +3,8 @@
     <h3>NotifyCondition (topic dependency)</h3>
 
     <app-button class="start-button" @click="startTest()" :disabled="!ubiiConnected">
-      <font-awesome-icon icon="play" v-show="this.testData.status !== TEST_STATUS_RUNNING" />
-      <font-awesome-icon icon="spinner" v-show="this.testData.status === TEST_STATUS_RUNNING" />
+      <font-awesome-icon icon="play" v-show="this.testData.status !== TEST_STATUS.RUNNING" />
+      <font-awesome-icon icon="spinner" v-show="this.testData.status === TEST_STATUS.RUNNING" />
     </app-button>
 
     <div class="statistics-grid">
@@ -25,17 +25,18 @@
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import { DEFAULT_TOPICS, proto } from '@tum-far/ubii-msg-formats';
 
-import { AppButton } from '../appComponents/appComponents';
+import { AppButton } from '../../appComponents/appComponents';
+import CONSTANTS from '../constants';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faPlay, faSpinner } from '@fortawesome/free-solid-svg-icons';
 library.add(faPlay, faSpinner);
 
-const TEST_STATUS_UNMEASURED = 'unmeasured';
+/*const TEST_STATUS_UNMEASURED = 'unmeasured';
 const TEST_STATUS_RUNNING = 'running';
 const TEST_STATUS_STOPPED = 'stopped';
-const TEST_STATUS_FINISHED = 'finished';
+const TEST_STATUS_FINISHED = 'finished';*/
 
 const NOTIFY_CONDITION_TEMPLATE = {
   name: 'frontend.test-notify-condition',
@@ -51,11 +52,11 @@ const COMPONENT_TEMPLATE = {
   notifyConditionIds: []
 };
 
-const DEVICE_TEMPLATE = {
+/*const DEVICE_TEMPLATE = {
   name: 'frontend.test-notify-condition.device',
   tags: ['test', 'NotifyCondition'],
   components: []
-};
+};*/
 
 export default {
   name: 'TestNotifyCondition',
@@ -76,7 +77,7 @@ export default {
     });
     this.ubiiConnected = UbiiClientService.instance.isConnected();
 
-    this.testData.status = TEST_STATUS_UNMEASURED;
+    this.testData.status = CONSTANTS.TEST_STATUS.UNMEASURED;
   },
   beforeDestroy: function() {
     this.deinit();
@@ -84,19 +85,20 @@ export default {
   data: () => {
     return {
       ubiiConnected: false,
-      TEST_STATUS_RUNNING,
+      /*TEST_STATUS_RUNNING,
       TEST_STATUS_UNMEASURED,
       TEST_STATUS_STOPPED,
-      TEST_STATUS_FINISHED,
+      TEST_STATUS_FINISHED,*/
+      TEST_STATUS: CONSTANTS.TEST_STATUS,
       testData: {
-        status: TEST_STATUS_UNMEASURED
+        status: CONSTANTS.TEST_STATUS.UNMEASURED
       }
     };
   },
   methods: {
     prepareTest: async function() {
       this.testData = {
-        status: TEST_STATUS_RUNNING,
+        status: CONSTANTS.TEST_STATUS.RUNNING,
         topicA: UbiiClientService.instance.getClientID() + '/test/notify-condition/topic-based/entity-a',
         topicB: UbiiClientService.instance.getClientID() + '/test/notify-condition/topic-based/entity-b',
         recvMsgs: {},
@@ -150,12 +152,12 @@ export default {
       );
     },
     startTest: async function() {
-      if (this.testData.status === TEST_STATUS_RUNNING) return;
+      if (this.testData.status === CONSTANTS.TEST_STATUS.RUNNING) return;
 
       await this.prepareTest();
 
       this.testData.tTestStart = performance.now();
-      this.testData.status = TEST_STATUS_RUNNING;
+      this.testData.status = CONSTANTS.TEST_STATUS.RUNNING;
 
       console.info('running test ...'); // eslint-disable-line no-console
     },
@@ -163,7 +165,7 @@ export default {
       this.testData.tTestStop = performance.now();
       await this.deinit();
 
-      this.testData.status = TEST_STATUS_STOPPED;
+      this.testData.status = CONSTANTS.TEST_STATUS.STOPPED;
       this.testData.durationMs = this.testData.tTestStop - this.testData.tTestStart;
     },
     deinit: async function() {

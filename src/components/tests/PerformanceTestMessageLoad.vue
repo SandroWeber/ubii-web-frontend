@@ -80,7 +80,6 @@ export default {
     AppButton: AppButton
   },
   mounted: async function() {
-    // unsubscribe before page is unloaded
     window.addEventListener('beforeunload', () => {
       this.deinit();
     });
@@ -94,6 +93,7 @@ export default {
     this.ubiiConnected = UbiiClientService.instance.isConnected();
 
     this.testData.status = TEST_STATUS_UNMEASURED;
+    this.subTokens = [];
   },
   beforeDestroy: function() {
     this.deinit();
@@ -140,7 +140,7 @@ export default {
           this.testData.rttMax = timing;
         }
       };
-      await UbiiClientService.instance.subscribeTopic(this.testData.topic, this.onMessageReceived);
+      this.subTokens.push(await UbiiClientService.instance.subscribeTopic(this.testData.topic, this.onMessageReceived));
     },
     startTest: async function() {
       if (this.testData.status === TEST_STATUS_RUNNING) return;
@@ -202,7 +202,10 @@ export default {
       this.testData.rttAvg = rttSum / this.testData.timings.length;
     },
     deinit: async function() {
-      await UbiiClientService.instance.unsubscribeTopic(this.testData.topic, this.onMessageReceived);
+      for (let token of this.subTokens) {
+        await UbiiClientService.instance.unsubscribe(token);
+      }
+      this.subTokens = [];
     },
     sendMessage: function() {
       let tNow = performance.now();

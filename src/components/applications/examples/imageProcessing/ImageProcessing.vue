@@ -57,6 +57,8 @@ export default {
     this.imageTopicDisplay = document.getElementById('canvas-image-topic-mirror');
     this.imageTopicDisplayOverlay = document.getElementById('output-object-list-overlay');
 
+    this.subTokens = [];
+
     this.start();
   },
   beforeDestroy: function() {
@@ -75,13 +77,13 @@ export default {
     };
   },
   watch: {
-    selectedCameraTopic: function() {
+    selectedCameraTopic: async function() {
       // unsubscribe old topic first
       if (
         (this.topicCameraImage && this.selectedCameraTopic !== this.topicCameraImage) ||
         this.selectedCameraTopic === 'none'
       ) {
-        UbiiClientService.instance.unsubscribeTopic(this.topicCameraImage, this.drawImageTopicMirror);
+        this.subTokenCamera && (await UbiiClientService.instance.unsubscribe(this.subTokenCamera));
 
         if (this.selectedCameraTopic === 'none' || this.selectedCameraTopic === null) {
           let canvas = this.imageTopicDisplay;
@@ -92,7 +94,11 @@ export default {
 
       if (this.selectedCameraTopic !== null && this.selectedCameraTopic !== 'none') {
         this.topicCameraImage = this.selectedCameraTopic;
-        UbiiClientService.instance.subscribeTopic(this.topicCameraImage, this.drawImageTopicMirror);
+        this.subTokenCamera = await UbiiClientService.instance.subscribeTopic(
+          this.topicCameraImage,
+          this.drawImageTopicMirror
+        );
+        this.subTokens.push(this.subTokenCamera);
       }
     }
   },
@@ -110,11 +116,25 @@ export default {
       // set up ubii camera interface
       this.topicPrefix = '/' + UbiiClientService.instance.getClientID() + '/image-processing';
       this.ubiiComponentCamera = new UbiiComponentCamera(100, ImageDataFormats.RGB8, document.getElementById('video'));
-      this.ubiiComponentCamera.start();
+      await this.ubiiComponentCamera.start();
+
+      let deviceRegistration = await UbiiClientService.instance.callService({
+        topic: DEFAULT_TOPICS.SERVICES.DEVICE_REGISTRATION,
+        device: {
+          name: 'frontend-image-processing-example',
+          clientId: UbiiClientService.instance.getClientID(),
+          components: [this.ubiiComponentCamera.ubiiSpecs]
+        }
+      });
+      if (deviceRegistration.error) {
+        console.warn(deviceRegistration.error);
+      } else {
+        this.ubiiDevice = deviceRegistration.device;
+      }
 
       // start polling a list of possible image topics
-      let pollImageTopicList = () => {
-        this.getImageTopicList();
+      let pollImageTopicList = async () => {
+        await this.getImageTopicList();
         if (this.running) {
           setTimeout(pollImageTopicList, 1000);
         }
@@ -129,14 +149,23 @@ export default {
     },
     /* ubii methods */
     getImageTopicList: async function() {
-      //TODO: get ubii components and search for image tags
-      let topicListReply = await UbiiClientService.instance.callService({
-        topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST
+      let replyComponents = await UbiiClientService.instance.callService({
+        topic: DEFAULT_TOPICS.SERVICES.COMPONENT_GET_LIST,
+        component: {
+          messageFormat: 'ubii.dataStructure.Image2D',
+          tags: ['camera']
+        }
       });
-      this.cameraTopics = topicListReply.stringList.elements.filter(
-        topic => topic.includes('camera_image') || topic.includes('camera-image')
-      );
-      this.cameraTopics.push('none');
+      if (replyComponents.error) {
+        console.warn(replyComponents.error);
+      } else {
+        let list = [];
+        for (let component of replyComponents.componentList.elements) {
+          list.push(component.topic);
+        }
+        list.push('none');
+        this.cameraTopics = list;
+      }
     },
     getImageProcessingModules: async function() {
       let reply = await UbiiClientService.instance.callService({
@@ -150,14 +179,15 @@ export default {
           ]
         }
       });
-      if (reply && reply.processingModuleList) {
-        this.imageProcessingModules = reply.processingModuleList.elements;
+      if (reply && reply.processingModuleList && reply.processingModuleList.elements) {
+        this.imageProcessingModules = [];
+        this.imageProcessingModules.push(...reply.processingModuleList.elements);
       }
     },
     onPmSelected: function(selectedOption) {
       this.selectedProcessingModuleDescription = selectedOption.description;
     },
-    toggleProcessing: function() {
+    toggleProcessing: async function() {
       this.processing = !this.processing;
 
       if (this.processing) {
@@ -166,28 +196,28 @@ export default {
 
         this.topicObject2DList = this.topicPrefix + '/objects';
 
-        UbiiClientService.instance.subscribeTopic(this.topicObject2DList, this.handleObject2DList.bind(this));
+        this.subTokens.push(
+          await UbiiClientService.instance.subscribeTopic(this.topicObject2DList, this.handleObject2DList.bind(this))
+        );
 
         this.runningSession = new ImageProcessingSession(
           this.topicCameraImage,
           this.topicObject2DList,
           this.selectedProcessingModule
         );
-        this.runningSession.startSession();
+        await this.runningSession.startSession();
       } else {
         this.textProcessingButton = 'Start';
-        this.runningSession && this.runningSession.stopSession();
+        this.runningSession && (await this.runningSession.stopSession());
 
         while (this.imageTopicDisplayOverlay.hasChildNodes()) {
-          this.imageTopicDisplayOverlay.removeChild(
-            this.imageTopicDisplayOverlay.childNodes[0]
-          );
+          this.imageTopicDisplayOverlay.removeChild(this.imageTopicDisplayOverlay.childNodes[0]);
         }
       }
     },
     /* interface methods */
-    drawImageTopicMirror: function(image) {
-      this.drawImage(image, this.imageTopicDisplay);
+    drawImageTopicMirror: function(record) {
+      this.drawImage(record.image2D, this.imageTopicDisplay);
     },
     drawImage: async function(image, canvas) {
       if (!image || !canvas) {

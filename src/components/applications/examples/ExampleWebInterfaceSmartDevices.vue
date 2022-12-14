@@ -1,9 +1,6 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
-    <div
-      id="example-web-smart-devices-touch-positions"
-      class="touch-position-area"
-    ></div>
+    <div id="example-web-smart-devices-touch-positions" class="touch-position-area"></div>
   </UbiiClientContent>
 </template>
 
@@ -35,6 +32,8 @@ export default {
     UbiiClientService.instance.onDisconnect(async () => {
       await this.stopExample();
     });
+
+    this.subTokens = [];
   },
   beforeDestroy: async function() {
     await this.stopExample();
@@ -46,57 +45,49 @@ export default {
     };
   },
   methods: {
-    startExample: function() {
+    startExample: async function() {
       if (this.running) return;
 
       this.running = true;
 
       this.createUbiiSpecs();
 
-      UbiiClientService.instance.waitForConnection().then(() => {
-        /* we register our device needed to publish the vibration distance threshold */
-        UbiiClientService.instance.registerDevice(this.device)
-          .then(response => {
-            if (response.id) {
-              this.device = response;
-              return response;
-            } else {
-              console.warn(response);
-            }
-          })
-          .then(() => {
-            /* we publish the vibration distance threshold */
-            UbiiClientService.instance.publishRecord({
-              topic: this.topicVibrationDistanceThreshold,
-              double: 0.03
-            });
+      await UbiiClientService.instance.waitForConnection();
 
-            UbiiClientService.instance.subscribeTopic(
-              this.topicTouchObjects,
-              this.handleTouchObjects
-            );
+      /* we register our device needed to publish the vibration distance threshold */
+      let replyRegisterDevice = await UbiiClientService.instance.registerDevice(this.device);
+      if (replyRegisterDevice.id) {
+        this.device = replyRegisterDevice;
+      } else {
+        console.warn(replyRegisterDevice);
+      }
 
-            /* we start the session with the specs created in createUbiiSpecs() */
-            UbiiClientService.instance
-              .callService({
-                topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
-                session: this.ubiiSession
-              })
-              .then(response => {
-                if (response.session) {
-                  this.ubiiSession = response.session;
-                }
-              });
-          });
+      /* we publish the vibration distance threshold */
+      UbiiClientService.instance.publishRecord({
+        topic: this.topicVibrationDistanceThreshold,
+        double: 0.03
       });
+
+      this.subTokens.push(
+        await UbiiClientService.instance.subscribeTopic(this.topicTouchObjects, this.handleTouchObjects)
+      );
+
+      /* we start the session with the specs created in createUbiiSpecs() */
+      let replyStartSession = await UbiiClientService.instance.callService({
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
+        session: this.ubiiSession
+      });
+      if (replyStartSession.session) {
+        this.ubiiSession = replyStartSession.session;
+      }
     },
     stopExample: async function() {
       this.running = false;
 
-      UbiiClientService.instance.unsubscribeTopic(
-        this.topicTouchObjects,
-        this.handleTouchObjects
-      );
+      for (let token of this.subTokens) {
+        await UbiiClientService.instance.unsubscribe(token);
+      }
+      this.subTokens = [];
 
       if (this.ubiiSession) {
         await UbiiClientService.instance.callService({
@@ -111,13 +102,9 @@ export default {
     },
     createUbiiSpecs: function() {
       this.topicVibrationDistanceThreshold =
-        '/' +
-        UbiiClientService.instance.getClientID() +
-        '/smart_device_gatherer_example/vibration_distance_threshold';
+        '/' + UbiiClientService.instance.getClientID() + '/smart_device_gatherer_example/vibration_distance_threshold';
       this.topicTouchObjects =
-        '/' +
-        UbiiClientService.instance.getClientID() +
-        '/smart_device_gatherer_example/touch_objects';
+        '/' + UbiiClientService.instance.getClientID() + '/smart_device_gatherer_example/touch_objects';
 
       this.device = {
         name: 'SmartDeviceGathererExample - Device',
@@ -145,17 +132,11 @@ export default {
         positionRecords.forEach((current, currentIndex) => {
           // compare to the remaining other positions
           let closeIndices = [];
-          for (
-            let compareIndex = currentIndex + 1;
-            compareIndex < positionRecords.length;
-            compareIndex++
-          ) {
+          for (let compareIndex = currentIndex + 1; compareIndex < positionRecords.length; compareIndex++) {
             let pos1 = current.data;
             let pos2 = positionRecords[compareIndex].data;
             if (pos1 && pos2) {
-              let distance = Math.sqrt(
-                Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2)
-              );
+              let distance = Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
               if (distance < threshold) {
                 closeIndices.push(compareIndex);
               }
@@ -243,9 +224,7 @@ export default {
       this.muxerTouchPositions = {
         name: 'SmartDeviceGathererExample - TopicMux positions',
         dataType: 'vector2',
-        topicSelector:
-          UbiiClientService.instance.getUUIDv4Regex() +
-          '/web-interface-smart-device/touch_position',
+        topicSelector: UbiiClientService.instance.getUUIDv4Regex() + '/web-interface-smart-device/touch_position',
         identityMatchPattern: UbiiClientService.instance.getUUIDv4Regex()
       };
 
@@ -302,18 +281,12 @@ export default {
 
           let client = this.$data.clients.get(obj2D.id);
           // update position
-          client.touchPosition.x = Math.floor(
-            obj2D.pose.position.x * touchPosAreaBoundingRect.width
-          );
-          client.touchPosition.y = Math.floor(
-            obj2D.pose.position.y * touchPosAreaBoundingRect.height
-          );
+          client.touchPosition.x = Math.floor(obj2D.pose.position.x * touchPosAreaBoundingRect.width);
+          client.touchPosition.y = Math.floor(obj2D.pose.position.y * touchPosAreaBoundingRect.height);
 
           // update indicator
-          client.touchPosIndicator.style.left =
-            client.touchPosition.x.toString() + 'px';
-          client.touchPosIndicator.style.top =
-            client.touchPosition.y.toString() + 'px';
+          client.touchPosIndicator.style.left = client.touchPosition.x.toString() + 'px';
+          client.touchPosIndicator.style.top = client.touchPosition.y.toString() + 'px';
         });
 
         // remove all that are gone since last update
@@ -342,9 +315,7 @@ export default {
       touchPosElement.style.height = '10px';
       touchPosElement.style.position = 'relative';
       touchPosElement.style.backgroundColor = this.getRandomColor();
-      document
-        .getElementById('example-web-smart-devices-touch-positions')
-        .appendChild(touchPosElement);
+      document.getElementById('example-web-smart-devices-touch-positions').appendChild(touchPosElement);
 
       // create client object with necessary info
       let client = {
