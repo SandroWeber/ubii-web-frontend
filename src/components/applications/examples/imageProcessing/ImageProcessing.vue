@@ -28,10 +28,13 @@
       </app-button>
     </div>
 
-    <video id="video" class="video-playback" autoplay></video>
-
     <canvas id="canvas-image-topic-mirror" class="canvas-image-topic-mirror"></canvas>
     <div id="output-object-list-overlay" class="output-object-list-overlay"></div>
+
+    <button class="btn-toggle-camera-feed" @click="showCameraFeed = !showCameraFeed">
+      {{ showCameraFeed ? 'Hide' : 'Show' }} camera feed
+    </button>
+    <video v-if="showCameraFeed" id="video" class="video-playback" autoplay></video>
   </div>
 </template>
 
@@ -73,7 +76,8 @@ export default {
       imageProcessingModules: [],
       processingOption: null,
       textProcessingButton: 'Start',
-      processing: false
+      processing: false,
+      showCameraFeed: false
     };
   },
   watch: {
@@ -88,7 +92,7 @@ export default {
         if (this.selectedCameraTopic === 'none' || this.selectedCameraTopic === null) {
           let canvas = this.imageTopicDisplay;
           const context = canvas.getContext('2d');
-          context.clearRect(0, 0, canvas.width, canvas.height);
+          context.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
         }
       }
 
@@ -217,16 +221,26 @@ export default {
     },
     /* interface methods */
     drawImageTopicMirror: function(record) {
-      this.drawImage(record.image2D, this.imageTopicDisplay);
+      this.drawImage(record.image2D);
     },
-    drawImage: async function(image, canvas) {
-      if (!image || !canvas) {
+    drawImage: async function(image) {
+      if (!image) {
         return;
       }
 
+      let imageRatio = image.width / image.height;
+      let drawHeight = this.imageTopicDisplay.clientHeight;
+      let drawWidth = Math.ceil(imageRatio * drawHeight);
+      /*let drawWidth = this.imageTopicDisplay.clientWidth;
+      let drawHeight = Math.floor(drawWidth / imageRatio);*/
+      //console.info('source: ' + image.width + 'x' + image.height);
+      //console.info('dest: ' + drawWidth + 'x' + drawHeight);
+
       // adjust overlay element
-      this.imageTopicDisplayOverlay.style.width = this.imageTopicDisplay.clientWidth + 'px';
-      this.imageTopicDisplayOverlay.style.height = this.imageTopicDisplay.clientHeight + 'px';
+      //this.imageTopicDisplayOverlay.style.top = this.imageTopicDisplay.top;
+      //this.imageTopicDisplayOverlay.style.left = this.imageTopicDisplay.left;
+      this.imageTopicDisplayOverlay.style.width = drawWidth + 'px';
+      this.imageTopicDisplayOverlay.style.height = drawHeight + 'px';
 
       let imageDataRGBA = undefined;
       if (image.dataFormat === ImageDataFormats.GRAY8) {
@@ -251,14 +265,13 @@ export default {
 
       const imgData = new ImageData(new Uint8ClampedArray(imageDataRGBA), image.width, image.height);
 
-      const ctx = canvas.getContext('2d');
-      let imageRatio = image.width / image.height;
-      let drawWidth = imageRatio * canvas.height;
+      const ctx = this.imageTopicDisplay.getContext('2d');
       let imageBitmap = await createImageBitmap(imgData);
-      ctx.drawImage(imageBitmap, 0, 0, drawWidth, canvas.height);
+      //console.info(imageBitmap);
+      ctx.drawImage(imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height, 0, 0, drawWidth, drawHeight);
     },
-    handleObject2DList(object2DList) {
-      let outputObjects = object2DList.elements;
+    handleObject2DList(record) {
+      let outputObjects = record.object2DList.elements;
 
       while (this.object2DDivs.length < outputObjects.length) {
         let divElement = document.createElement('div');
@@ -299,11 +312,14 @@ export default {
   display: grid;
   grid-gap: 5px;
   padding: 5px;
-  grid-template-rows: auto 1fr;
-  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto 1fr;
+  grid-template-columns: 1fr;
   grid-template-areas:
-    'topic-list-select processing-modes-select'
-    'video-playback image-mirror';
+    'topic-list-select'
+    'processing-modes-select'
+    'image-mirror'
+    'video-playback';
+  overflow: scroll;
 }
 
 .multiselect-topic-list {
@@ -326,12 +342,11 @@ export default {
 
 .canvas-image-topic-mirror {
   grid-area: image-mirror;
-  width: 100%;
+  height: 400px;
 }
 
 .output-object-list-overlay {
   grid-area: image-mirror;
-  justify-self: center;
   overflow: hidden;
 }
 
@@ -339,5 +354,9 @@ export default {
   position: relative;
   background-color: yellow;
   color: black;
+}
+
+.btn-toggle-camera-feed {
+  width: 200px;
 }
 </style>
