@@ -2,7 +2,7 @@
   <div class="test-wrapper">
     <h3>NotifyCondition (topic dependency)</h3>
 
-    <app-button class="start-button" @click="startTest()" :disabled="!ubiiConnected">
+    <app-button class="start-button" @click="startTest" :disabled="!ubiiConnected">
       <font-awesome-icon icon="play" v-show="this.testData.status !== TEST_STATUS.RUNNING" />
       <font-awesome-icon icon="spinner" v-show="this.testData.status === TEST_STATUS.RUNNING" />
     </app-button>
@@ -97,16 +97,17 @@ export default {
   },
   methods: {
     prepareTest: async function() {
+      console.info('preparing test');
       this.testData = {
         status: CONSTANTS.TEST_STATUS.RUNNING,
         topicA: UbiiClientService.instance.getClientID() + '/test/notify-condition/topic-based/entity-a',
         topicB: UbiiClientService.instance.getClientID() + '/test/notify-condition/topic-based/entity-b',
         recvMsgs: {},
-        curValues: {},
-        subTokens: []
+        curValues: {}
       };
       this.testData.recvMsgs[this.testData.topicA] = 0;
       this.testData.recvMsgs[this.testData.topicB] = 0;
+      this.subTokens = [];
 
       // notify condition
       let replyNotifyConditionAdd = await UbiiClientService.instance.callService({
@@ -152,6 +153,7 @@ export default {
       );
     },
     startTest: async function() {
+      console.info('starting test');
       if (this.testData.status === CONSTANTS.TEST_STATUS.RUNNING) return;
 
       await this.prepareTest();
@@ -160,6 +162,11 @@ export default {
       this.testData.status = CONSTANTS.TEST_STATUS.RUNNING;
 
       console.info('running test ...'); // eslint-disable-line no-console
+      this.testData.entityB.publish(1);
+      this.intervalPublishA = setInterval(() => {
+        let randomInt = Math.floor(10 * Math.random());
+        this.testData.entityA.publish(randomInt);
+      }, 3000);
     },
     stopTest: async function() {
       this.testData.tTestStop = performance.now();
@@ -169,20 +176,37 @@ export default {
       this.testData.durationMs = this.testData.tTestStop - this.testData.tTestStart;
     },
     deinit: async function() {
-      for (let token of this.subTokens) {
-        await UbiiClientService.instance.unsubscribe(token);
+      if (this.subTokens && UbiiClientService.instance.isConnected()) {
+        for (let token of this.subTokens) {
+          await UbiiClientService.instance.unsubscribe(token);
+        }
       }
     },
     createNotifyCondition: function(topicA, topicB) {
       let condition = Object.assign({}, NOTIFY_CONDITION_TEMPLATE);
-      let evaluate = () => {
-        let intA = getTopicDataRecord({ topic: topicA }); // eslint-disable-line no-undef
-        let intB = getTopicDataRecord({ topic: topicB }); // eslint-disable-line no-undef
-        console.info('evaluating for A=' + intA + ', B=' + intB);
+      let evaluationCallback = (publisher, subscriber, getTopicDataRecord) => {
+        let recordA = getTopicDataRecord({ topic: topicA });
+        let recordB = getTopicDataRecord({ topic: topicB });
+        let intA = recordA && recordA.int32; // eslint-disable-line no-undef
+        let intB = recordB && recordB.int32; // eslint-disable-line no-undef
+        //console.info('evaluating for A=' + intA + ', B=' + intB);
 
-        return intA && intB && Math.abs(intA - intB) < 5;
+        if (typeof intA === 'undefined' || typeof intB === 'undefined') return false;
+        else return Math.abs(intA - intB) < 5;
       };
-      condition.evaluationFunctionStringified = evaluate.toString();
+      condition.evaluationFunctionStringified = evaluationCallback.toString();
+      //console.info(condition.evaluationFunctionStringified.indexOf('topicA'));
+      //console.info(condition.evaluationFunctionStringified.indexOf('topicB'));
+
+      condition.evaluationFunctionStringified = condition.evaluationFunctionStringified.replace(
+        'topicA',
+        `'${topicA}'`
+      );
+      condition.evaluationFunctionStringified = condition.evaluationFunctionStringified.replace(
+        'topicB',
+        `'${topicB}'`
+      );
+      //console.info(condition.evaluationFunctionStringified);
 
       return condition;
     },
@@ -192,36 +216,31 @@ export default {
       };
       entity.component.topic = topic;
       entity.component.notifyConditionIds.push(...notifyConditionIds);
+      entity.publish = integer => {
+        this.publish(integer, entity.component.topic);
+      };
 
       return entity;
     },
     testCondition: function() {
-      if (this.testData.curValTopicA && this.testData.curValTopicB) {
-        return Math.abs(this.testData.curValTopicA - this.testData.curValTopicB) < 5;
+      let curValueA = this.testData.curValues[this.testData.topicA];
+      let curValueB = this.testData.curValues[this.testData.topicB];
+      if (curValueA && curValueB) {
+        return Math.abs(curValueA - curValueB) < 5;
       }
     },
-    publish: function(integer, topicA, topicB) {
+    publish: function(integer, topic) {
+      console.info('publish() - ' + integer + ' on ' + topic);
+      this.testData.curValues[topic] = integer;
       let timestamp = UbiiClientService.instance.generateTimestamp();
-      if (topicA) {
-        UbiiClientService.instance.publishRecordImmediately({
-          topic: topicA,
-          timestamp: timestamp,
-          int32: integer
-        });
-        //this.testData.curValTopicA = integer;
-      }
-      if (topicB) {
-        UbiiClientService.instance.publishRecordImmediately({
-          topic: topicB,
-          timestamp: timestamp,
-          int32: integer
-        });
-        //this.testData.curValTopicA = integer;
-      }
+      UbiiClientService.instance.publishRecordImmediately({
+        topic: topic,
+        timestamp: timestamp,
+        int32: integer
+      });
     },
     onMessageReceived: function(record) {
       this.testData.recvMsgs[record.topic]++;
-      this.testData.curValues[record.topic] = record.int32;
       if (!this.testCondition()) {
         console.error(
           `received data on "${record.topic}" but the notify condition should not be fulfilled:` +
