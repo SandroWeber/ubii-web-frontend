@@ -13,7 +13,7 @@
 import PerformanceTestRTT from './performance/rtt/PerformanceTestRTT.vue';
 import PerformanceTestFibonacci from './PerformanceTestFibonacci.vue';
 import PerformanceTestMessageLoad from './PerformanceTestMessageLoad.vue';
-import TestNotifyCondition from './conditionalPubSub/TestNotifyCondition.vue';
+import TestNotifyCondition from './conditionalPubSub/TestNotifyConditionTopicBased.vue';
 
 export default {
   name: 'PerformanceTests',
