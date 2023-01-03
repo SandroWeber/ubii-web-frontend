@@ -28,6 +28,13 @@
           </app-tile>
         </router-link>
 
+        <router-link to="/applications/examples/random-walker" class="tile-menu-item" tag="div">
+          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
+            <font-awesome-icon icon="shoe-prints" class="tile-menu-icon" />
+            <p>Random Walker (conditional pub/sub)</p>
+          </app-tile>
+        </router-link>
+
         <!--<router-link to="/applications/examples/gatherer-web-interface-smart-devices" class="tile-menu-item" tag="div">
           <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
             <font-awesome-icon icon="tablet-alt" class="tile-menu-icon" />
@@ -123,7 +130,8 @@ import {
   faHandPointer,
   faHandScissors,
   faEye,
-  faCamera
+  faCamera,
+  faShoePrints
 } from '@fortawesome/free-solid-svg-icons';
 library.add(
   faMousePointer,
@@ -136,7 +144,8 @@ library.add(
   faHandPointer,
   faHandScissors,
   faEye,
-  faCamera
+  faCamera,
+  faShoePrints
 );
 
 export default {
