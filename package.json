@@ -23,7 +23,7 @@
     "jquery": "^3.5.1",
     "litegraph.js": "https://github.com/ate362/litegraph.js",
     "myo": "^3.0.0",
-    "npm": "^6.14.6",
+    "npm": "^9.4.1",
     "prettier": "^1.19.1",
     "qrcode": "^1.4.4",
     "three": "0.137.5",
