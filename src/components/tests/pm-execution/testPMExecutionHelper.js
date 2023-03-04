@@ -109,8 +109,8 @@ class TestPMExecutionHelper {
     }, TestPMExecutionHelper.CONSTANTS.TIMEOUT_MS);
 
     this.subTokens.push(
-      await UbiiClientService.instance.subscribeTopic(DEFAULT_TOPICS.INFO_TOPICS.RUNNING_SESSION, session => {
-        this.remainingSessionsIdsToStart = this.remainingSessionsIdsToStart.filter(id => id !== session.id);
+      await UbiiClientService.instance.subscribeTopic(DEFAULT_TOPICS.INFO_TOPICS.RUNNING_SESSION, record => {
+        this.remainingSessionsIdsToStart = this.remainingSessionsIdsToStart.filter(id => id !== record.session.id);
         if (this.remainingSessionsIdsToStart.length === 0) {
           this.runTest();
         }
@@ -179,39 +179,40 @@ class TestPMExecutionHelper {
     this.subTokens = [];
   }
 
-  onOutputDoubleFromPMTriggerOnInput(double, topic) {
-    if (double !== this.expectedDoubles.get(topic)) {
+  onOutputDoubleFromPMTriggerOnInput(record) {
+    if (record.double !== this.expectedDoubles.get(record.topic)) {
       console.error(
         'expected double for ' +
-          topic +
+          record.topic +
           ' does not match, received= ' +
-          double +
+          record.double +
           ' vs expected=' +
-          this.expectedDoubles.get(topic)
+          this.expectedDoubles.get(record.topic)
       );
       this.statistics.success = false;
     }
 
-    if (this.expectedTopics.indexOf(topic) !== -1) {
-      this.expectedTopics.splice(this.expectedTopics.indexOf(topic), 1);
+    if (this.expectedTopics.indexOf(record.topic) !== -1) {
+      this.expectedTopics.splice(this.expectedTopics.indexOf(record.topic), 1);
     }
   }
 
-  onOutputStringLengthsFromPMTriggerOnInput(length, topic) {
-    if (length !== this.expectedStringLengths.get(topic)) {
+  onOutputStringLengthsFromPMTriggerOnInput(record) {
+    let length = record.int32;
+    if (length !== this.expectedStringLengths.get(record.topic)) {
       console.error(
         'expected string length for ' +
-          topic +
+          record.topic +
           ' does not match, received=' +
           length +
           ' vs expected=' +
-          this.expectedStringLengths.get(topic)
+          this.expectedStringLengths.get(record.topic)
       );
       this.statistics.success = false;
     }
 
-    if (this.expectedTopics.indexOf(topic) !== -1) {
-      this.expectedTopics.splice(this.expectedTopics.indexOf(topic), 1);
+    if (this.expectedTopics.indexOf(record.topic) !== -1) {
+      this.expectedTopics.splice(this.expectedTopics.indexOf(record.topic), 1);
     }
   }
 }

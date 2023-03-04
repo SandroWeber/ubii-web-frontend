@@ -216,10 +216,10 @@ export default {
 
       this.testData.statistics.processingPerSecond = processingIterations / (passedTime / 1000);
     },
-    onProcessingFinishedCallback: function(result, topic) {
+    onProcessingFinishedCallback: function(record) {
       if (this.testData.status === 'running') {
-        let indexSuffix = topic.indexOf(PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX);
-        let id = topic.substring(0, indexSuffix);
+        let indexSuffix = record.topic.indexOf(PerformanceTestFibonacciHelper.PROCESSED_OUTPUT_SUFFIX);
+        let id = record.topic.substring(0, indexSuffix);
         this.testData.statistics.processingFinished.push(id);
       }
     }

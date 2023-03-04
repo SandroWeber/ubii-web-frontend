@@ -11,6 +11,9 @@
       <!-- status -->
       <span>Status:</span>
       <span class="test-status">{{ this.test.status }}</span>
+      <!-- result -->
+      <span>Result:</span>
+      <span class="test-status">{{ this.test.result }}</span>
     </div>
 
     <div class="separator"></div>
@@ -63,7 +66,7 @@ export default {
   },
   methods: {
     startTest: async function() {
-      this.test.start();
+      await this.test.start();
     },
     stopTest: async function() {
       this.test.stop();

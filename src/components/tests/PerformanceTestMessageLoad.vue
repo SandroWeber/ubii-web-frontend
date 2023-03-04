@@ -126,12 +126,12 @@ export default {
       };
     },
     ubiiSetup: async function() {
-      this.onMessageReceived = doubleTimeSent => {
+      this.onMessageReceived = record => {
         let tNow = performance.now();
         this.testData.tLastMessageReceived = tNow;
         this.testData.numMessagesReceived++;
 
-        const timing = tNow - doubleTimeSent;
+        const timing = tNow - record.double;
         this.testData.timings.push(timing);
         if (typeof this.testData.rttMin === 'undefined' || this.testData.rttMin > timing) {
           this.testData.rttMin = timing;

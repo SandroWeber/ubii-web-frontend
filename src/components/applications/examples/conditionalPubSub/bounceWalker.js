@@ -29,13 +29,17 @@ const NOTIFY_CONDITION_TEMPLATE = {
   }
 };
 
-export default class RandomWalker {
-  get componentPosition() { return this.compPos; }
-  get componentColor() { return this.compColor; }
+export default class BounceWalker {
+  get componentPosition() {
+    return this.compPos;
+  }
+  get componentColor() {
+    return this.compColor;
+  }
 
   constructor(moveDistance) {
     this.moveDistance = moveDistance;
-    this.CONSTANTS = RandomWalker.CONSTANTS;
+    this.CONSTANTS = BounceWalker.CONSTANTS;
 
     this.position = {
       x: Math.random(),
@@ -45,6 +49,11 @@ export default class RandomWalker {
 
   async init() {
     this.colorHex = this.getRandomColorHex();
+    this.direction = Math.random() * 2 * Math.PI; //Math.PI * 1.5;
+    this.position = {
+      x: Math.random(),
+      y: Math.random()
+    };
 
     await UbiiClientService.instance.waitForConnection();
 
@@ -87,7 +96,7 @@ export default class RandomWalker {
 
     this.intervalMove = setInterval(() => {
       this.moveStep();
-    }, RandomWalker.CONSTANTS.STEP_INTERVAL_MS);
+    }, BounceWalker.CONSTANTS.STEP_INTERVAL_MS);
 
     return true;
   }
@@ -100,12 +109,31 @@ export default class RandomWalker {
   }
 
   moveStep() {
-    const rdnAngle = Math.random() * 2 * Math.PI;
-    this.position.x += this.moveDistance * Math.cos(rdnAngle);
-    this.position.y += this.moveDistance * Math.sin(rdnAngle);
-    this.position.x = Math.min(Math.max(0.1, this.position.x), 0.9);
-    this.position.y = Math.min(Math.max(0.1, this.position.y), 0.9);
-    //console.info('random walker position: ' + this.position.x + ',' + this.position.y);
+    this.position.x += this.moveDistance * Math.cos(this.direction);
+    this.position.y += this.moveDistance * Math.sin(this.direction);
+    this.position.x = Math.min(Math.max(0, this.position.x), 1);
+    this.position.y = Math.min(Math.max(0, this.position.y), 1);
+
+    // reflect at boundaries
+    // this.direction: 0 = right, 0.5*Math.PI = down, Math.PI = left, 1.5*Math.PI = up
+    if (this.position.x <= 0) {
+      let entryAngle = Math.PI - this.direction;
+      this.direction += Math.PI + 2 * entryAngle;
+    }
+    if (this.position.x >= 1) {
+      let entryAngle = this.direction > Math.PI ? 2 * Math.PI - this.direction : 0 - this.direction;
+      this.direction += Math.PI + 2 * entryAngle;
+    }
+    if (this.position.y <= 0) {
+      let entryAngle = 1.5 * Math.PI - this.direction;
+      this.direction += Math.PI + 2 * entryAngle;
+    }
+    if (this.position.y >= 1) {
+      let entryAngle = 0.5 * Math.PI - this.direction;
+      this.direction += Math.PI + 2 * entryAngle;
+    }
+    this.direction = this.direction % (2 * Math.PI);
+    //console.info('pos: ' + this.position.x + ' ' + this.position.y + ', dir: ' + this.direction);
 
     this.publish();
   }
@@ -125,38 +153,27 @@ export default class RandomWalker {
 
     let condition = Object.assign({}, NOTIFY_CONDITION_TEMPLATE);
     let evaluationCallback = (publisher, subscriber, getTopicDataRecord) => {
-      let recordPublisherPosition = getTopicDataRecord(
-        {
-          component: UBII_COMPONENT_POSITION_TEMPLATE
-        },
-        publisher
-      );
-      let recordSubscriberPosition = getTopicDataRecord(
-        {
-          component: UBII_COMPONENT_POSITION_TEMPLATE
-        },
-        subscriber
-      );
+      let recordPublisherPosition = getTopicDataRecord({ component: UBII_COMPONENT_POSITION_TEMPLATE }, publisher);
+      let recordSubscriberPosition = getTopicDataRecord({ component: UBII_COMPONENT_POSITION_TEMPLATE }, subscriber);
       let posPublisher = recordPublisherPosition && recordPublisherPosition.vector2; // eslint-disable-line no-undef
       let posSubscriber = recordSubscriberPosition && recordSubscriberPosition.vector2; // eslint-disable-line no-undef
-      /*console.info(posPublisher);
-      console.info(posSubscriber);*/
 
       if (typeof posPublisher === 'undefined' || typeof posSubscriber === 'undefined') return false;
       else
         return (
           Math.sqrt(Math.pow(posPublisher.x - posSubscriber.x, 2) + Math.pow(posPublisher.y - posSubscriber.y, 2)) <
-          RandomWalker.CONSTANTS.MAX_SUB_DISTANCE
+          BounceWalker.CONSTANTS.MAX_SUB_DISTANCE
         );
     };
+    // stringify and replace constants (undefined on master node) for evaluationCallback
     condition.evaluationFunctionStringified = evaluationCallback.toString();
     condition.evaluationFunctionStringified = condition.evaluationFunctionStringified.replaceAll(
       'UBII_COMPONENT_POSITION_TEMPLATE',
-      `${JSON.stringify(UBII_COMPONENT_POSITION_TEMPLATE)}` // ${JSON.parse(JSON.stringify(UBII_COMPONENT_POSITION_TEMPLATE))}
+      `${JSON.stringify(UBII_COMPONENT_POSITION_TEMPLATE)}`
     );
     condition.evaluationFunctionStringified = condition.evaluationFunctionStringified.replaceAll(
-      'RandomWalker.CONSTANTS.MAX_SUB_DISTANCE',
-      `${JSON.stringify(RandomWalker.CONSTANTS.MAX_SUB_DISTANCE)}` // ${JSON.parse(JSON.stringify(UBII_COMPONENT_POSITION_TEMPLATE))}
+      'BounceWalker.CONSTANTS.MAX_SUB_DISTANCE',
+      `${JSON.stringify(BounceWalker.CONSTANTS.MAX_SUB_DISTANCE)}`
     );
     /*console.info('created notifycondition:');
     console.info(condition);*/
@@ -174,9 +191,9 @@ export default class RandomWalker {
   }
 }
 
-RandomWalker.CONSTANTS = Object.freeze({
+BounceWalker.CONSTANTS = Object.freeze({
   UBII_COMPONENT_POSITION_TEMPLATE,
   UBII_DEVICE_TEMPLATE,
-  MAX_SUB_DISTANCE: 0.5,
+  MAX_SUB_DISTANCE: 0.25,
   STEP_INTERVAL_MS: 500
 });

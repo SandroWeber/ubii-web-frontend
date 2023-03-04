@@ -31,7 +31,7 @@
         <router-link to="/applications/examples/random-walker" class="tile-menu-item" tag="div">
           <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
             <font-awesome-icon icon="shoe-prints" class="tile-menu-icon" />
-            <p>Random Walker (conditional pub/sub)</p>
+            <p>Walker (conditional pub/sub)</p>
           </app-tile>
         </router-link>
 

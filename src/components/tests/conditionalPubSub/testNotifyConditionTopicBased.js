@@ -22,6 +22,7 @@ const COMPONENT_TEMPLATE = {
 export default class TestNotifyConditionTopicBased {
   constructor() {
     this.status = CONSTANTS.TEST_STATUS.UMNEASURED;
+    this.result = 'undetermined';
     this.data = {
       recvMsgs: {},
       curValues: {}
@@ -34,8 +35,8 @@ export default class TestNotifyConditionTopicBased {
     this.status = CONSTANTS.TEST_STATUS.RUNNING;
     this.setup = {
       topicA: UbiiClientService.instance.getClientID() + '/test/notify-condition/topic-based/entity-a',
-      topicB: UbiiClientService.instance.getClientID() + '/test/notify-condition/topic-based/entity-b',
-    }
+      topicB: UbiiClientService.instance.getClientID() + '/test/notify-condition/topic-based/entity-b'
+    };
     this.data.recvMsgs[this.setup.topicA] = 0;
     this.data.recvMsgs[this.setup.topicB] = 0;
     this.subTokens = [];
@@ -51,7 +52,7 @@ export default class TestNotifyConditionTopicBased {
       console.info(this.notifyConditionSpecs);
     } else {
       console.warn(replyNotifyConditionAdd);
-      this.deinit();
+      this.stop();
       return;
     }
 
@@ -72,7 +73,7 @@ export default class TestNotifyConditionTopicBased {
       console.info(this.data.device);
     } else {
       console.error(replyDeviceRegistration);
-      this.deinit();
+      this.stop();
       return;
     }
 
@@ -95,14 +96,20 @@ export default class TestNotifyConditionTopicBased {
 
     console.info('running test ...');
     this.setup.entityB.publish(1);
+    this.nextIntForA = -10;
     this.intervalPublishA = setInterval(() => {
-      let randomInt = Math.floor(10 * Math.random());
-      this.setup.entityA.publish(randomInt);
-    }, 3000);
+      //let randomInt = Math.floor(10 * Math.random());
+      this.setup.entityA.publish(this.nextIntForA);
+      this.nextIntForA = this.nextIntForA + 1;
+      if (this.nextIntForA === 10) {
+        this.stop();
+      }
+    }, 100);
   }
 
   async stop() {
     this.data.tTestStop = performance.now();
+    this.intervalPublishA && clearInterval(this.intervalPublishA);
 
     if (this.subTokens && UbiiClientService.instance.isConnected()) {
       for (let token of this.subTokens) {
@@ -112,6 +119,11 @@ export default class TestNotifyConditionTopicBased {
 
     this.status = CONSTANTS.TEST_STATUS.STOPPED;
     this.data.durationMs = this.data.tTestStop - this.data.tTestStart;
+    if (this.failure) {
+      this.result = 'failed';
+    } else {
+      this.result = 'success';
+    }
   }
 
   createNotifyCondition(topicA, topicB) {
@@ -160,6 +172,7 @@ export default class TestNotifyConditionTopicBased {
   onMessageReceived(record) {
     this.data.recvMsgs[record.topic]++;
     if (!this.testCondition()) {
+      this.failure = true;
       console.error(
         `received data on "${record.topic}" but the notify condition should not be fulfilled:` +
           `A=${this.data.curValues[this.setup.topicA]}, B=${this.data.curValues[this.setup.topicB]}`
