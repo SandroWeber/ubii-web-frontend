@@ -28,7 +28,10 @@
       </app-button>
     </div>
 
-    <canvas id="canvas-image-topic-mirror" class="canvas-image-topic-mirror"></canvas>
+    <div id="wrapper-image-topic" class="wrapper-image-topic">
+      <canvas id="canvas-image-topic" class="canvas-image-topic"></canvas>
+    </div>
+
     <div id="output-object-list-overlay" class="output-object-list-overlay"></div>
 
     <button class="btn-toggle-camera-feed" @click="showCameraFeed = !showCameraFeed">
@@ -50,6 +53,8 @@ import { AppButton } from '../../../appComponents/appComponents.js';
 import UbiiComponentCamera from '../../../../ubii/components/ubii-component-camera';
 import ImageProcessingSession from './imageProcessingSession';
 
+const UPDATE_INTERVAL_PMS_MS = 5000;
+
 export default {
   name: 'ImageProcessing',
   components: {
@@ -57,8 +62,8 @@ export default {
     AppButton
   },
   mounted: function() {
-    this.imageTopicDisplay = document.getElementById('canvas-image-topic-mirror');
-    this.imageTopicDisplayOverlay = document.getElementById('output-object-list-overlay');
+    this.canvasImageTopic = document.getElementById('canvas-image-topic');
+    this.canvasImageTopicOverlay = document.getElementById('output-object-list-overlay');
 
     this.subTokens = [];
 
@@ -82,6 +87,10 @@ export default {
   },
   watch: {
     selectedCameraTopic: async function() {
+      let canvas = this.canvasImageTopic;
+      const context = canvas.getContext('2d');
+      console.info(context);
+
       // unsubscribe old topic first
       if (
         (this.topicCameraImage && this.selectedCameraTopic !== this.topicCameraImage) ||
@@ -90,8 +99,6 @@ export default {
         this.subTokenCamera && (await UbiiClientService.instance.unsubscribe(this.subTokenCamera));
 
         if (this.selectedCameraTopic === 'none' || this.selectedCameraTopic === null) {
-          let canvas = this.imageTopicDisplay;
-          const context = canvas.getContext('2d');
           context.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
         }
       }
@@ -116,6 +123,7 @@ export default {
       await UbiiClientService.instance.waitForConnection();
 
       await this.getImageProcessingModules();
+      this.intervalUpdatePMs = setInterval(this.getImageProcessingModules, UPDATE_INTERVAL_PMS_MS);
 
       // set up ubii camera interface
       this.topicPrefix = '/' + UbiiClientService.instance.getClientID() + '/image-processing';
@@ -147,6 +155,8 @@ export default {
     },
     stop: function() {
       this.running = false;
+
+      this.intervalUpdatePMs && clearInterval(this.intervalUpdatePMs);
 
       this.ubiiComponentCamera && this.ubiiComponentCamera.stop();
       this.runningSession && this.runningSession.stopSession();
@@ -214,8 +224,8 @@ export default {
         this.textProcessingButton = 'Start';
         this.runningSession && (await this.runningSession.stopSession());
 
-        while (this.imageTopicDisplayOverlay.hasChildNodes()) {
-          this.imageTopicDisplayOverlay.removeChild(this.imageTopicDisplayOverlay.childNodes[0]);
+        while (this.canvasImageTopicOverlay.hasChildNodes()) {
+          this.canvasImageTopicOverlay.removeChild(this.canvasImageTopicOverlay.childNodes[0]);
         }
       }
     },
@@ -228,19 +238,23 @@ export default {
         return;
       }
 
+      //console.info(`ImageProcessing example - received image ${image.width}x${image.height}`);
       let imageRatio = image.width / image.height;
-      let drawHeight = this.imageTopicDisplay.clientHeight;
+      let drawHeight = this.canvasImageTopic.clientHeight;
       let drawWidth = Math.ceil(imageRatio * drawHeight);
-      /*let drawWidth = this.imageTopicDisplay.clientWidth;
+
+      this.resizeCanvasImageTopic(imageRatio);
+
+      /*let drawWidth = this.canvasImageTopic.clientWidth;
       let drawHeight = Math.floor(drawWidth / imageRatio);*/
       //console.info('source: ' + image.width + 'x' + image.height);
       //console.info('dest: ' + drawWidth + 'x' + drawHeight);
 
       // adjust overlay element
-      //this.imageTopicDisplayOverlay.style.top = this.imageTopicDisplay.top;
-      //this.imageTopicDisplayOverlay.style.left = this.imageTopicDisplay.left;
-      this.imageTopicDisplayOverlay.style.width = drawWidth + 'px';
-      this.imageTopicDisplayOverlay.style.height = drawHeight + 'px';
+      //this.canvasImageTopicOverlay.style.top = this.canvasImageTopic.top;
+      //this.canvasImageTopicOverlay.style.left = this.canvasImageTopic.left;
+      this.canvasImageTopicOverlay.style.width = drawWidth + 'px';
+      this.canvasImageTopicOverlay.style.height = drawHeight + 'px';
 
       let imageDataRGBA = undefined;
       if (image.dataFormat === ImageDataFormats.GRAY8) {
@@ -265,10 +279,15 @@ export default {
 
       const imgData = new ImageData(new Uint8ClampedArray(imageDataRGBA), image.width, image.height);
 
-      const ctx = this.imageTopicDisplay.getContext('2d');
+      const ctx = this.canvasImageTopic.getContext('2d');
       let imageBitmap = await createImageBitmap(imgData);
       //console.info(imageBitmap);
       ctx.drawImage(imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height, 0, 0, drawWidth, drawHeight);
+    },
+    resizeCanvasImageTopic(imageRatio) {
+      let boundingRectImageTopicWrapper = document.getElementById('wrapper-image-topic').getBoundingClientRect();
+      this.canvasImageTopic.height = boundingRectImageTopicWrapper.height;
+      this.canvasImageTopic.width = imageRatio * boundingRectImageTopicWrapper.height;
     },
     handleObject2DList(record) {
       let outputObjects = record.object2DList.elements;
@@ -280,11 +299,11 @@ export default {
         divElement.style.position = 'relative';
         divElement.style.textAlign = 'left';
         divElement.style.fontWeight = 'bold';
-        this.imageTopicDisplayOverlay.appendChild(divElement);
+        this.canvasImageTopicOverlay.appendChild(divElement);
         this.object2DDivs.push(divElement);
       }
 
-      let overlayBoundings = this.imageTopicDisplayOverlay.getBoundingClientRect();
+      let overlayBoundings = this.canvasImageTopicOverlay.getBoundingClientRect();
       this.object2DDivs.forEach((div, index) => {
         if (index < outputObjects.length) {
           div.innerHTML = outputObjects[index].id;
@@ -312,7 +331,7 @@ export default {
   display: grid;
   grid-gap: 5px;
   padding: 5px;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto 400px 1fr;
   grid-template-columns: 1fr;
   grid-template-areas:
     'topic-list-select'
@@ -340,9 +359,11 @@ export default {
   grid-area: video-playback;
 }
 
-.canvas-image-topic-mirror {
+.wrapper-image-topic {
   grid-area: image-mirror;
-  height: 400px;
+}
+
+.canvas-image-topic {
 }
 
 .output-object-list-overlay {

@@ -57,11 +57,7 @@ export default class UbiiComponentCamera extends UbiiComponent {
 
   /* under firefox, ImageCapture API seems to be buggy */
   async grabFrame() {
-    console.info('grabFrame');
     let imageBitmap = await this.imageCapture.grabFrame().catch(error => console.error(error));
-    console.info(imageBitmap);
-    /*let blob = await this.imageCapture.takePhoto().catch(error => console.error(error));
-    console.info(blob);*/
     return imageBitmap;
   }
 
@@ -93,6 +89,7 @@ export default class UbiiComponentCamera extends UbiiComponent {
       });
     }
 
+    //console.info(`ubii component camera - publishing: ${imageBuffer.width}x${imageBuffer.height}`);
     UbiiClientService.instance.publishRecord({
       topic: this.ubiiSpecs.topic,
       timestamp: UbiiClientService.instance.generateTimestamp(),
