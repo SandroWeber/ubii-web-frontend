@@ -2,6 +2,10 @@
 
 ## Project setup
 
+- copy /src/config.json.template, rename to config.json, adjust according to master node communication endpoints configuration
+
+### Install dependencies
+
 ```
 npm install
 ```
