@@ -47,7 +47,7 @@ export default {
       if (this.expanded) {
         this.subToken = await UbiiClientService.instance.subscribeTopic(this.topic, this.onTopicDataRecord);
       } else {
-        await UbiiClientService.instance.unsubscribe(this.subToken);
+        this.subToken && (await UbiiClientService.instance.unsubscribe(this.subToken));
       }
     },
     onTopicDataRecord(record) {
