@@ -2,45 +2,48 @@
 
 ## Project setup
 
+- copy /src/config.json.template, rename to config.json, adjust according to master node communication endpoints configuration
+
+#### Install dependencies
+
 ```
 npm install
 ```
 
-### Compiles and hot-reloads for development
+#### Compiles and hot-reloads for development
 
 ```
 npm run serve (no HTTPS/SSL, make sure the master node is configured not to use HTTPS either)
 ```
 
-### Compiles and minifies for production
+#### Compiles and minifies for production
 
 ```
 npm run build
 ```
 
-### Run your tests
+#### Run your tests
 
 ```
 npm run test
 ```
 
-### Lints and fixes files
+#### Lints and fixes files
 
 ```
 npm run lint
 ```
 
-### Customize configuration
-
-See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ## HTTPS setup
 
-### Build the Frontend (don't forget to re-run after making changes while developing)
+IMPORTANT: this is only necessary if you need to use HTTPS and your master node is configured to use HTTPS respectively. If you don't need HTTPS, simply set the master node config to https.enabled = false and connect via HTTP.
+
+#### Build the Frontend (don't forget to re-run after making changes while developing)
 
 Run `npm run build`
 
-### How to create your own HTTPS certification
+#### How to create your own HTTPS certification
 
 - Install mkcert (https://github.com/FiloSottile/mkcert)
 - Run `mkcert -install`, this will create root certificate files and set everything up for you to sign your own certificates
@@ -53,7 +56,7 @@ Alternatives:
 - certbot (https://certbot.eff.org/)
 - greenlock (https://www.npmjs.com/package/greenlock)
 
-### NGINX
+#### NGINX
 
 - Install nginx (https://www.nginx.com/)
 - Copy the `ubii.nginx.<os>.conf` into a folder that is used by nginx. This depends on your distribution - /etc/nginx/nginx.conf, /usr/local/nginx/conf/nginx.conf or /usr/local/etc/nginx/nginx.conf are common defaults under UNIX.
