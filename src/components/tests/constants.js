@@ -3,6 +3,7 @@ export default Object.freeze({
     UMNEASURED: 'unmeasured',
     RUNNING: 'running',
     STOPPED: 'stopped',
-    FINISHED: 'finished'
+    FINISHED: 'finished',
+    FAILED: 'failed'
   }
 });

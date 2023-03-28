@@ -140,7 +140,8 @@ export default {
           this.testData.rttMax = timing;
         }
       };
-      this.subTokens.push(await UbiiClientService.instance.subscribeTopic(this.testData.topic, this.onMessageReceived));
+      let subToken = await UbiiClientService.instance.subscribeTopic(this.testData.topic, this.onMessageReceived);
+      this.subTokens.push(subToken);
     },
     startTest: async function() {
       if (this.testData.status === TEST_STATUS_RUNNING) return;
@@ -159,8 +160,6 @@ export default {
       this.intervalSendMessage = setInterval(() => this.sendMessage(), messageIntervalMs);
 
       this.testData.status = TEST_STATUS_RUNNING;
-
-      console.info('running test ...'); // eslint-disable-line no-console
     },
     stopTest: async function() {
       this.testData.tTestStop = performance.now();
@@ -181,12 +180,6 @@ export default {
           retriesAwaitingFinished++;
           setTimeout(waitForMessages, 500);
         } else {
-          /*console.info(
-            'test messages sent / received: ' +
-              this.testData.numMessagesSent +
-              ' / ' +
-              this.testData.numMessagesReceived
-          );*/
           this.finalizeTest();
         }
       };
@@ -196,8 +189,6 @@ export default {
       this.testData.status = TEST_STATUS_FINISHED;
       this.testData.actualMessagesPerSecond =
         (this.testData.numMessagesReceived / (this.testData.tTestStop - this.testData.tTestStart)) * 1000;
-      console.info('... test finished'); // eslint-disable-line no-console
-      console.info(this.testData); // eslint-disable-line no-console
       let rttSum = this.testData.timings.reduce((partial_sum, a) => partial_sum + a);
       this.testData.rttAvg = rttSum / this.testData.timings.length;
     },
