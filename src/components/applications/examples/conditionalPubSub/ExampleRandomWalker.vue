@@ -225,8 +225,8 @@ export default {
   grid-area: walker-area;
   margin: 0px;
   border: 1px solid white;
-  width: 500px;
-  height: 500px;
+  width: 300px;
+  height: 300px;
 }
 
 .hideCursor {

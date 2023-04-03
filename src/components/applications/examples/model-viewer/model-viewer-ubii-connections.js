@@ -49,23 +49,22 @@ export default class ModelViewerUbiiConnections {
 
   async subscribeTopics(ubiiDevice) {
     this.componentTouchEvents = ubiiDevice.components.find(component => component.tags && component.tags.includes(TAG_COMPONENT_TOUCH));
-    await UbiiClientService.instance.subscribeTopic(this.componentTouchEvents.topic, touchEventList => {
-      this.onTouchEvents(touchEventList);
+    await UbiiClientService.instance.subscribeTopic(this.componentTouchEvents.topic, record => {
+      record.touchEventList && record.touchEventList.elements && this.onTouchEvents(record.touchEventList.elements);
     });
 
     this.componentOrientation = ubiiDevice.components.find(component => component.tags.includes(TAG_COMPONENT_ORIENTATION));
     this.subscriptionTokenOrientation = await UbiiClientService.instance.subscribeTopic(
       this.componentOrientation.topic,
-      orientation => {
-        this.modelViewerRendering &&
-          this.modelViewerRendering.setSmartphoneRotation(orientation.y, orientation.x, -orientation.z);
+      record => {
+        if (record.vector3 && this.modelViewerRendering) {
+          this.modelViewerRendering.setSmartphoneRotation(record.vector3.y, record.vector3.x, -record.vector3.z);
+        }
       }
     );
   }
 
-  onTouchEvents(touchEventList) {
-    let touches = touchEventList.elements;
-
+  onTouchEvents(touches) {
     if (touches.length === 1 && touches[0].type === TouchEventType.TOUCH_START) {
       this.singleFingerDown = true;
     } else if (touches.length >= 2 && touches[0].type === TouchEventType.TOUCH_START) {
