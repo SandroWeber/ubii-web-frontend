@@ -1,29 +1,16 @@
 <template>
   <div class="img-processing-wrapper">
-    <multiselect
-      class="multiselect-topic-list"
-      v-model="selectedCameraTopic"
-      :options="cameraTopics"
-      placeholder="Pick an image topic"
-    ></multiselect>
+    <multiselect class="multiselect-topic-list" v-model="selectedCameraTopic" :options="cameraTopics"
+      placeholder="Pick an image topic"></multiselect>
 
     <div class="processing-options">
-      <multiselect
-        class="multiselect-pm-list"
-        v-model="selectedProcessingModule"
-        :options="imageProcessingModules"
-        label="name"
-        placeholder="Pick a processing module"
-        @select="onPmSelected"
-      ></multiselect>
+      <multiselect class="multiselect-pm-list" v-model="selectedProcessingModule" :options="imageProcessingModules"
+        label="name" placeholder="Pick a processing module" @select="onPmSelected"></multiselect>
 
       <div>{{ selectedProcessingModuleDescription }}</div>
 
-      <app-button
-        class="button round button-toggle-processing"
-        :class="processing ? 'red-accent' : 'green-accent'"
-        @click="toggleProcessing"
-      >
+      <app-button class="button round button-toggle-processing" :class="processing ? 'red-accent' : 'green-accent'"
+        @click="toggleProcessing">
         {{ textProcessingButton }}
       </app-button>
     </div>
@@ -37,7 +24,10 @@
     <button class="btn-toggle-camera-feed" @click="showCameraFeed = !showCameraFeed">
       {{ showCameraFeed ? 'Hide' : 'Show' }} camera feed
     </button>
-    <video v-if="showCameraFeed" id="video" class="video-playback" autoplay></video>
+    <div v-show="showCameraFeed">
+      <video id="video" class="video-playback" autoplay></video>
+    </div>
+
   </div>
 </template>
 
@@ -61,7 +51,7 @@ export default {
     Multiselect,
     AppButton
   },
-  mounted: function() {
+  mounted: function () {
     this.canvasImageTopic = document.getElementById('canvas-image-topic');
     this.canvasImageTopicOverlay = document.getElementById('output-object-list-overlay');
 
@@ -69,7 +59,7 @@ export default {
 
     this.start();
   },
-  beforeDestroy: function() {
+  beforeDestroy: function () {
     this.stop();
   },
   data: () => {
@@ -86,7 +76,7 @@ export default {
     };
   },
   watch: {
-    selectedCameraTopic: async function() {
+    selectedCameraTopic: async function () {
       let canvas = this.canvasImageTopic;
       const context = canvas.getContext('2d');
       console.info(context);
@@ -114,7 +104,7 @@ export default {
     }
   },
   methods: {
-    start: async function() {
+    start: async function () {
       if (this.running) {
         return;
       }
@@ -153,7 +143,7 @@ export default {
       };
       pollImageTopicList();
     },
-    stop: function() {
+    stop: function () {
       this.running = false;
 
       this.intervalUpdatePMs && clearInterval(this.intervalUpdatePMs);
@@ -162,7 +152,7 @@ export default {
       this.runningSession && this.runningSession.stopSession();
     },
     /* ubii methods */
-    getImageTopicList: async function() {
+    getImageTopicList: async function () {
       let replyComponents = await UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.COMPONENT_GET_LIST,
         component: {
@@ -181,7 +171,7 @@ export default {
         this.cameraTopics = list;
       }
     },
-    getImageProcessingModules: async function() {
+    getImageProcessingModules: async function () {
       let reply = await UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.PM_DATABASE_GET_LIST,
         processingModuleList: {
@@ -198,10 +188,10 @@ export default {
         this.imageProcessingModules.push(...reply.processingModuleList.elements);
       }
     },
-    onPmSelected: function(selectedOption) {
+    onPmSelected: function (selectedOption) {
       this.selectedProcessingModuleDescription = selectedOption.description;
     },
-    toggleProcessing: async function() {
+    toggleProcessing: async function () {
       this.processing = !this.processing;
 
       if (this.processing) {
@@ -221,19 +211,20 @@ export default {
         );
         await this.runningSession.startSession();
       } else {
-        this.textProcessingButton = 'Start';
         this.runningSession && (await this.runningSession.stopSession());
 
         while (this.canvasImageTopicOverlay.hasChildNodes()) {
           this.canvasImageTopicOverlay.removeChild(this.canvasImageTopicOverlay.childNodes[0]);
         }
+
+        this.textProcessingButton = 'Start';
       }
     },
     /* interface methods */
-    drawImageTopicMirror: function(record) {
+    drawImageTopicMirror: function (record) {
       this.drawImage(record.image2D);
     },
-    drawImage: async function(image) {
+    drawImage: async function (image) {
       if (!image) {
         return;
       }
@@ -331,12 +322,13 @@ export default {
   display: grid;
   grid-gap: 5px;
   padding: 5px;
-  grid-template-rows: auto auto 400px 1fr;
+  grid-template-rows: auto auto 400px 30px 1fr;
   grid-template-columns: 1fr;
   grid-template-areas:
     'topic-list-select'
     'processing-modes-select'
     'image-mirror'
+    'btn-toggle-camera-feed'
     'video-playback';
   overflow: scroll;
 }
@@ -363,8 +355,7 @@ export default {
   grid-area: image-mirror;
 }
 
-.canvas-image-topic {
-}
+.canvas-image-topic {}
 
 .output-object-list-overlay {
   grid-area: image-mirror;
@@ -378,6 +369,7 @@ export default {
 }
 
 .btn-toggle-camera-feed {
+  grid-area: btn-toggle-camera-feed;
   width: 200px;
 }
 </style>

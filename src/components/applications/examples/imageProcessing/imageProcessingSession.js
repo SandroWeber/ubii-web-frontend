@@ -54,8 +54,6 @@ export default class ImageProcessingSession {
 
     await UbiiClientService.instance.waitForConnection();
 
-    await UbiiClientService.instance.unsubscribe();
-
     let replyStopSession = await UbiiClientService.instance.callService({
       topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
       session: this
