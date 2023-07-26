@@ -4,7 +4,6 @@
       <performance-test-rtt class="performance-test"></performance-test-rtt>
       <performance-test-message-load class="performance-test" />
       <performance-test-fibonacci class="performance-test"></performance-test-fibonacci>
-      <test-notify-condition class="performance-test" />
     </div>
   </div>
 </template>
@@ -13,15 +12,13 @@
 import PerformanceTestRTT from './performance/rtt/PerformanceTestRTT.vue';
 import PerformanceTestFibonacci from './PerformanceTestFibonacci.vue';
 import PerformanceTestMessageLoad from './PerformanceTestMessageLoad.vue';
-import TestNotifyCondition from './conditionalPubSub/TestNotifyConditionTopicBased.vue';
 
 export default {
   name: 'PerformanceTests',
   components: {
     PerformanceTestRtt: PerformanceTestRTT,
     PerformanceTestFibonacci: PerformanceTestFibonacci,
-    PerformanceTestMessageLoad,
-    TestNotifyCondition
+    PerformanceTestMessageLoad
   }
 };
 </script>
@@ -34,7 +31,6 @@ export default {
 }
 
 .performance-tests-section {
-  overflow: scroll;
 }
 
 .performance-test {

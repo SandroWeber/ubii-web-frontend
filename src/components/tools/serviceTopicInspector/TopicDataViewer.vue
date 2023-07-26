@@ -14,10 +14,10 @@
     />
     <div class="topic-title">{{ topic }}</div>
     <div class="update-signal" v-show="expanded" v-bind:class="{ flash: flashing }"></div>
-    <div class="topic-data green-accent" v-show="expanded && topicData">
-      {{ topicData }}
+    <div class="topic-data green-accent" v-show="expanded && topicDataRecord">
+      {{ topicDataRecord }}
     </div>
-    <div class="topic-data red-accent" v-show="expanded && !topicData">
+    <div class="topic-data red-accent" v-show="expanded && !topicDataRecord">
       received empty data
     </div>
   </div>
@@ -39,30 +39,22 @@ export default {
     topic: { type: String, default: '' }
   },
   data: () => {
-    return { expanded: false, flashing: false, topicData: '... no data received yet ...' };
+    return { expanded: false, flashing: false, topicDataRecord: '... no data received yet ...' };
   },
   methods: {
     async toggleTopicDataDisplay() {
       this.expanded = !this.expanded;
       if (this.expanded) {
-        await UbiiClientService.instance.subscribeTopic(this.topic, this.onTopicDataRecord);
+        this.subToken = await UbiiClientService.instance.subscribeTopic(this.topic, this.onTopicDataRecord);
       } else {
-        await UbiiClientService.instance.unsubscribeTopic(this.topic, this.onTopicDataRecord);
+        this.subToken && (await UbiiClientService.instance.unsubscribe(this.subToken));
       }
     },
-    onTopicDataRecord(data) {
+    onTopicDataRecord(record) {
       this.flash();
-      this.topicData = util.inspect(data);
+      this.topicDataRecord = util.inspect(record);
     },
     flash() {
-      this.flashing = true;
-      setTimeout(() => {
-        this.flashing = false;
-      }, 100);
-    }
-  },
-  watch: {
-    topicData: function() {
       this.flashing = true;
       setTimeout(() => {
         this.flashing = false;

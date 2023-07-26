@@ -57,29 +57,26 @@ export default class UbiiComponentCamera extends UbiiComponent {
 
   /* under firefox, ImageCapture API seems to be buggy */
   async grabFrame() {
-    let imageBitmap = await this.imageCapture
-      .grabFrame()
-      .catch(error => console.error(error));
+    let imageBitmap = await this.imageCapture.grabFrame().catch(error => console.error(error));
     return imageBitmap;
   }
 
   /* unfortunately necessary to double memory, wait for bitmaprenderer API to finalize and be bug-free */
-  getFrameBuffer(image) {
+  getFrameBuffer(imageBitmap) {
     var canvas = document.createElement('canvas');
-    canvas.width = image.width;
-    canvas.height = image.height;
+    canvas.width = imageBitmap.width;
+    canvas.height = imageBitmap.height;
 
     let ctx = null; //canvas.getContext('bitmaprenderer');
     if (ctx) {
-      // transfer the ImageBitmap to it
-      ctx.transferFromImageBitmap(image);
+      ctx.transferFromImageBitmap(imageBitmap);
     } else {
       // in case someone supports createImageBitmap only
       // twice in memory...
       ctx = canvas.getContext('2d');
-      ctx.drawImage(image, 0, 0);
+      ctx.drawImage(imageBitmap, 0, 0);
+      return ctx.getImageData(0, 0, canvas.width, canvas.height);
     }
-    return canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
   }
 
   publishFrame(imageBitmap) {
@@ -92,6 +89,7 @@ export default class UbiiComponentCamera extends UbiiComponent {
       });
     }
 
+    //console.info(`ubii component camera - publishing: ${imageBuffer.width}x${imageBuffer.height}`);
     UbiiClientService.instance.publishRecord({
       topic: this.ubiiSpecs.topic,
       timestamp: UbiiClientService.instance.generateTimestamp(),

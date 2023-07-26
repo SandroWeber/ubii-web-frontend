@@ -17,8 +17,8 @@ class TestPMExecutionHelper {
       success: true
     };
 
-    this.subscriptionTokens = [];
     this.stringsForPMTriggerOnInputMux = new Map();
+    this.subTokens = [];
   }
 
   addSession() {
@@ -34,25 +34,19 @@ class TestPMExecutionHelper {
     let session = this.addSession();
     session.addPMTriggerOnInput(nodeId);
 
-    //TODO: after node-webbrowser includes new topicdata implementation, switch tokens
-    // subscribe to test output topics
     try {
-      let token = {
-        topic: session.topics.pmTriggerOnInput.topicOutDouble,
-        type: 'topic',
-        callback: (...params) => this.onOutputDoubleFromPMTriggerOnInput(...params)
-      };
-      await UbiiClientService.instance.subscribeTopic(token.topic, token.callback);
-      this.subscriptionTokens.push(token);
+      this.subTokens.push(
+        await UbiiClientService.instance.subscribeTopic(session.topics.pmTriggerOnInput.topicOutDouble, (...params) =>
+          this.onOutputDoubleFromPMTriggerOnInput(...params)
+        )
+      );
 
       for (let topic of session.topics.pmTriggerOnInput.demuxStringLengthTopics) {
-        let token = {
-          topic: topic,
-          type: 'topic',
-          callback: (...params) => this.onOutputStringLengthsFromPMTriggerOnInput(...params)
-        };
-        await UbiiClientService.instance.subscribeTopic(token.topic, token.callback);
-        this.subscriptionTokens.push(token);
+        this.subTokens.push(
+          await UbiiClientService.instance.subscribeTopic(topic, (...params) =>
+            this.onOutputStringLengthsFromPMTriggerOnInput(...params)
+          )
+        );
       }
     } catch (error) {
       console.error(error);
@@ -114,18 +108,14 @@ class TestPMExecutionHelper {
       this.statistics.status = TestPMExecutionHelper.CONSTANTS.STATUS.TIMEOUT;
     }, TestPMExecutionHelper.CONSTANTS.TIMEOUT_MS);
 
-    let token = {
-      topic: DEFAULT_TOPICS.INFO_TOPICS.RUNNING_SESSION,
-      type: 'topic',
-      callback: session => {
-        this.remainingSessionsIdsToStart = this.remainingSessionsIdsToStart.filter(id => id !== session.id);
+    this.subTokens.push(
+      await UbiiClientService.instance.subscribeTopic(DEFAULT_TOPICS.INFO_TOPICS.RUNNING_SESSION, record => {
+        this.remainingSessionsIdsToStart = this.remainingSessionsIdsToStart.filter(id => id !== record.session.id);
         if (this.remainingSessionsIdsToStart.length === 0) {
           this.runTest();
         }
-      }
-    };
-    await UbiiClientService.instance.subscribeTopic(token.topic, token.callback);
-    this.subscriptionTokens.push(token);
+      })
+    );
 
     for (let session of this.settings.sessions) {
       await UbiiClientService.instance.callService({
@@ -183,46 +173,46 @@ class TestPMExecutionHelper {
     }
 
     //TODO: after node-webbrowser includes new topicdata implementation, switch tokens
-    for (let token of this.subscriptionTokens) {
-      if (token.type === 'topic') {
-        await UbiiClientService.instance.unsubscribeTopic(token.topic, token.callback);
-      }
+    for (let token of this.subTokens) {
+      await UbiiClientService.instance.unsubscribe(token);
     }
+    this.subTokens = [];
   }
 
-  onOutputDoubleFromPMTriggerOnInput(double, topic) {
-    if (double !== this.expectedDoubles.get(topic)) {
+  onOutputDoubleFromPMTriggerOnInput(record) {
+    if (record.double !== this.expectedDoubles.get(record.topic)) {
       console.error(
         'expected double for ' +
-          topic +
+          record.topic +
           ' does not match, received= ' +
-          double +
+          record.double +
           ' vs expected=' +
-          this.expectedDoubles.get(topic)
+          this.expectedDoubles.get(record.topic)
       );
       this.statistics.success = false;
     }
 
-    if (this.expectedTopics.indexOf(topic) !== -1) {
-      this.expectedTopics.splice(this.expectedTopics.indexOf(topic), 1);
+    if (this.expectedTopics.indexOf(record.topic) !== -1) {
+      this.expectedTopics.splice(this.expectedTopics.indexOf(record.topic), 1);
     }
   }
 
-  onOutputStringLengthsFromPMTriggerOnInput(length, topic) {
-    if (length !== this.expectedStringLengths.get(topic)) {
+  onOutputStringLengthsFromPMTriggerOnInput(record) {
+    let length = record.int32;
+    if (length !== this.expectedStringLengths.get(record.topic)) {
       console.error(
         'expected string length for ' +
-          topic +
+          record.topic +
           ' does not match, received=' +
           length +
           ' vs expected=' +
-          this.expectedStringLengths.get(topic)
+          this.expectedStringLengths.get(record.topic)
       );
       this.statistics.success = false;
     }
-    
-    if (this.expectedTopics.indexOf(topic) !== -1) {
-      this.expectedTopics.splice(this.expectedTopics.indexOf(topic), 1);
+
+    if (this.expectedTopics.indexOf(record.topic) !== -1) {
+      this.expectedTopics.splice(this.expectedTopics.indexOf(record.topic), 1);
     }
   }
 }
