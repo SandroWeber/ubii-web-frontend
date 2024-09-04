@@ -38,7 +38,7 @@
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
 import UbiiClientContent from '../../sharedModules/UbiiClientContent';
-import RandomWalker from './randomWalker';
+//import RandomWalker from './randomWalker';
 import BounceWalker from './bounceWalker';
 
 export default {
@@ -124,8 +124,6 @@ export default {
       }
 
       let walkerAreaElement = document.getElementById('walker-area');
-      console.info(walkerAreaElement);
-
       let walkerDiv = document.createElement('div');
       walkerDiv.style.width = pixelSize + 'px';
       walkerDiv.style.height = pixelSize + 'px';
@@ -167,7 +165,6 @@ export default {
     updateWalkers: function() {
       let walkerAreaElement = document.getElementById('walker-area');
       let areaBoundClientRect = walkerAreaElement.getBoundingClientRect();
-      //console.info(areaBoundClientRect);
 
       for (let walker of this.walkers.values()) {
         let tNow = Date.now();
@@ -191,11 +188,6 @@ export default {
             'px';
         }
       }
-
-      /*if (this.tLastUpdateWalkers) {
-        console.info('delay between visual updates: ' + (Date.now() - this.tLastUpdateWalkers));
-      }
-      this.tLastUpdateWalkers = Date.now();*/
     }
   }
 };

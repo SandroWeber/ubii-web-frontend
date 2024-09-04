@@ -79,7 +79,6 @@ export default {
     selectedCameraTopic: async function () {
       let canvas = this.canvasImageTopic;
       const context = canvas.getContext('2d');
-      console.info(context);
 
       // unsubscribe old topic first
       if (
@@ -229,17 +228,11 @@ export default {
         return;
       }
 
-      //console.info(`ImageProcessing example - received image ${image.width}x${image.height}`);
       let imageRatio = image.width / image.height;
       let drawHeight = this.canvasImageTopic.clientHeight;
       let drawWidth = Math.ceil(imageRatio * drawHeight);
 
       this.resizeCanvasImageTopic(imageRatio);
-
-      /*let drawWidth = this.canvasImageTopic.clientWidth;
-      let drawHeight = Math.floor(drawWidth / imageRatio);*/
-      //console.info('source: ' + image.width + 'x' + image.height);
-      //console.info('dest: ' + drawWidth + 'x' + drawHeight);
 
       // adjust overlay element
       //this.canvasImageTopicOverlay.style.top = this.canvasImageTopic.top;
@@ -272,7 +265,6 @@ export default {
 
       const ctx = this.canvasImageTopic.getContext('2d');
       let imageBitmap = await createImageBitmap(imgData);
-      //console.info(imageBitmap);
       ctx.drawImage(imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height, 0, 0, drawWidth, drawHeight);
     },
     resizeCanvasImageTopic(imageRatio) {

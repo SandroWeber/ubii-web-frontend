@@ -1,5 +1,5 @@
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
-import { DEFAULT_TOPICS, MSG_TYPES, proto, ProtobufTranslator } from '@tum-far/ubii-msg-formats';
+import { DEFAULT_TOPICS, MSG_TYPES, proto } from '@tum-far/ubii-msg-formats';
 
 const UBII_COMPONENT_POSITION_TEMPLATE = {
   name: 'web-example_random-walker_pos',
@@ -63,8 +63,6 @@ export default class BounceWalker {
     });
     if (replyNotifyConditionAdd.notifyCondition) {
       this.notifyConditionSpecs = replyNotifyConditionAdd.notifyCondition;
-      /*console.info('NotifyCondition registered:');
-      console.info(this.notifyConditionSpecs);*/
     } else {
       console.error(replyNotifyConditionAdd);
       this.deinit();
@@ -82,8 +80,6 @@ export default class BounceWalker {
       this.device = replyDeviceRegistration.device;
       this.compPos = this.device.components.find(component => component.name === UBII_COMPONENT_POSITION_TEMPLATE.name);
       this.compColor = this.device.components.find(component => component.name === UBII_COMPONENT_COLOR_TEMPLATE.name);
-      /*console.info('registered device:');
-      console.info(this.device);*/
     } else {
       console.error(replyDeviceRegistration);
       return false;
@@ -133,7 +129,6 @@ export default class BounceWalker {
       this.direction += Math.PI + 2 * entryAngle;
     }
     this.direction = this.direction % (2 * Math.PI);
-    //console.info('pos: ' + this.position.x + ' ' + this.position.y + ', dir: ' + this.direction);
 
     this.publish();
   }
@@ -147,10 +142,6 @@ export default class BounceWalker {
   }
 
   createNotifyCondition() {
-    //let translatorCondition = new ProtobufTranslator(MSG_TYPES.NOTIFY_CONDITION);
-    //console.info(placeholderComponentProfile);
-    //console.info(JSON.stringify(UBII_COMPONENT_TEMPLATE));
-
     let condition = Object.assign({}, NOTIFY_CONDITION_TEMPLATE);
     let evaluationCallback = (publisher, subscriber, getTopicDataRecord) => {
       let recordPublisherPosition = getTopicDataRecord({ component: UBII_COMPONENT_POSITION_TEMPLATE }, publisher);
@@ -175,8 +166,6 @@ export default class BounceWalker {
       'BounceWalker.CONSTANTS.MAX_SUB_DISTANCE',
       `${JSON.stringify(BounceWalker.CONSTANTS.MAX_SUB_DISTANCE)}`
     );
-    /*console.info('created notifycondition:');
-    console.info(condition);*/
 
     return condition;
   }

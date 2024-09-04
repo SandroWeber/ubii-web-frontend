@@ -1,5 +1,5 @@
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
-import { DEFAULT_TOPICS, MSG_TYPES, proto, ProtobufTranslator } from '@tum-far/ubii-msg-formats';
+import { DEFAULT_TOPICS, MSG_TYPES, proto } from '@tum-far/ubii-msg-formats';
 
 const UBII_COMPONENT_POSITION_TEMPLATE = {
   name: 'web-example_random-walker_pos',
@@ -54,8 +54,6 @@ export default class RandomWalker {
     });
     if (replyNotifyConditionAdd.notifyCondition) {
       this.notifyConditionSpecs = replyNotifyConditionAdd.notifyCondition;
-      /*console.info('NotifyCondition registered:');
-      console.info(this.notifyConditionSpecs);*/
     } else {
       console.error(replyNotifyConditionAdd);
       this.deinit();
@@ -73,8 +71,6 @@ export default class RandomWalker {
       this.device = replyDeviceRegistration.device;
       this.compPos = this.device.components.find(component => component.name === UBII_COMPONENT_POSITION_TEMPLATE.name);
       this.compColor = this.device.components.find(component => component.name === UBII_COMPONENT_COLOR_TEMPLATE.name);
-      /*console.info('registered device:');
-      console.info(this.device);*/
     } else {
       console.error(replyDeviceRegistration);
       return false;
@@ -105,7 +101,6 @@ export default class RandomWalker {
     this.position.y += this.moveDistance * Math.sin(rdnAngle);
     this.position.x = Math.min(Math.max(0.1, this.position.x), 0.9);
     this.position.y = Math.min(Math.max(0.1, this.position.y), 0.9);
-    //console.info('random walker position: ' + this.position.x + ',' + this.position.y);
 
     this.publish();
   }
@@ -119,10 +114,6 @@ export default class RandomWalker {
   }
 
   createNotifyCondition() {
-    //let translatorCondition = new ProtobufTranslator(MSG_TYPES.NOTIFY_CONDITION);
-    //console.info(placeholderComponentProfile);
-    //console.info(JSON.stringify(UBII_COMPONENT_TEMPLATE));
-
     let condition = Object.assign({}, NOTIFY_CONDITION_TEMPLATE);
     let evaluationCallback = (publisher, subscriber, getTopicDataRecord) => {
       let recordPublisherPosition = getTopicDataRecord(
@@ -139,8 +130,6 @@ export default class RandomWalker {
       );
       let posPublisher = recordPublisherPosition && recordPublisherPosition.vector2; // eslint-disable-line no-undef
       let posSubscriber = recordSubscriberPosition && recordSubscriberPosition.vector2; // eslint-disable-line no-undef
-      /*console.info(posPublisher);
-      console.info(posSubscriber);*/
 
       if (typeof posPublisher === 'undefined' || typeof posSubscriber === 'undefined') return false;
       else
@@ -158,8 +147,6 @@ export default class RandomWalker {
       'RandomWalker.CONSTANTS.MAX_SUB_DISTANCE',
       `${JSON.stringify(RandomWalker.CONSTANTS.MAX_SUB_DISTANCE)}` // ${JSON.parse(JSON.stringify(UBII_COMPONENT_POSITION_TEMPLATE))}
     );
-    /*console.info('created notifycondition:');
-    console.info(condition);*/
 
     return condition;
   }

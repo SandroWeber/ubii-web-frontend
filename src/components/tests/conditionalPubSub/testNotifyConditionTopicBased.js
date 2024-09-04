@@ -30,8 +30,6 @@ export default class TestNotifyConditionTopicBased {
   }
 
   async prepare() {
-    console.info('preparing test');
-
     this.status = CONSTANTS.TEST_STATUS.RUNNING;
     this.setup = {
       topicA: UbiiClientService.instance.getClientID() + '/test/notify-condition/topic-based/entity-a',
@@ -48,8 +46,6 @@ export default class TestNotifyConditionTopicBased {
     });
     if (replyNotifyConditionAdd.notifyCondition) {
       this.notifyConditionSpecs = replyNotifyConditionAdd.notifyCondition;
-      console.info('NotifyCondition registered:');
-      console.info(this.notifyConditionSpecs);
     } else {
       console.warn(replyNotifyConditionAdd);
       this.stop();
@@ -69,8 +65,6 @@ export default class TestNotifyConditionTopicBased {
     });
     if (replyDeviceRegistration.device) {
       this.data.device = replyDeviceRegistration.device;
-      console.info('device registered:');
-      console.info(this.data.device);
     } else {
       console.error(replyDeviceRegistration);
       this.stop();
@@ -86,7 +80,6 @@ export default class TestNotifyConditionTopicBased {
   }
 
   async start() {
-    console.info('starting test');
     if (this.status === CONSTANTS.TEST_STATUS.RUNNING) return;
 
     await this.prepare();
@@ -94,7 +87,6 @@ export default class TestNotifyConditionTopicBased {
     this.data.tTestStart = performance.now();
     this.status = CONSTANTS.TEST_STATUS.RUNNING;
 
-    console.info('running test ...');
     this.setup.entityB.publish(1);
     this.nextIntForA = -10;
     this.intervalPublishA = setInterval(() => {
@@ -159,7 +151,6 @@ export default class TestNotifyConditionTopicBased {
   }
 
   publishInteger(integer, topic) {
-    console.info('publishInteger() - ' + integer + ' on ' + topic);
     this.data.curValues[topic] = integer;
     let timestamp = UbiiClientService.instance.generateTimestamp();
     UbiiClientService.instance.publishRecordImmediately({
@@ -185,7 +176,6 @@ export default class TestNotifyConditionTopicBased {
     let curValueB = this.data.curValues[this.setup.topicB];
     if (typeof curValueA !== 'undefined' && typeof curValueB !== 'undefined') {
       let boolean = Math.abs(curValueA - curValueB) < 5;
-      console.info('testCondition() - ' + boolean);
       return Math.abs(curValueA - curValueB) < 5;
     }
   }
