@@ -108,6 +108,11 @@ export default new Router({
       component: () => import('./components/applications/examples/ExampleMousePointer.vue')
     },
     {
+      path: '/applications/examples/random-walker',
+      name: 'Example - Random Walker',
+      component: () => import('./components/applications/examples/conditionalPubSub/ExampleRandomWalker.vue')
+    },
+    {
       path: '/applications/examples/gatherer-web-interface-smart-devices',
       name: 'Example - Gathering from Smart Devices connected via Web Interface',
       component: () => import('./components/applications/examples/ExampleWebInterfaceSmartDevices.vue')
