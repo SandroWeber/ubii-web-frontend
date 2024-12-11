@@ -65,10 +65,6 @@ export default {
   margin: 10px;
 }
 
-.component-tags {
-  margin-left: 30px;
-}
-
 .component-info {
   padding-left: 30px;
 }

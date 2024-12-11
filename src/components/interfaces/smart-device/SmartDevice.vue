@@ -137,8 +137,6 @@ export default {
   methods: {
     onClickEnable: function() {
       this.enabled = true;
-      console.info('onClickEnable');
-      console.info(this.additionalTags);
 
       UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, async () => {
         await this.startInterface();
@@ -156,9 +154,6 @@ export default {
         await UbiiClientService.instance.waitForConnection();
 
         this.elementTouch = document.getElementById('touch-area');
-
-        console.info('tags array: ');
-        console.info(this.additionalTags.split(','));
         
         this.ubiiDevice = new UbiiSmartDevice(this.elementTouch, {tags: this.additionalTags.split(',')});
         await this.ubiiDevice.init();

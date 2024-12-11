@@ -48,7 +48,6 @@ export default {
   },
   methods: {
     toggleDetails() {
-      console.info(this.device);
       this.expanded = !this.expanded;
     }
   }
@@ -65,10 +64,6 @@ export default {
   font-size: 1.2em;
   display: inline;
   margin: 10px;
-}
-
-.device-tags {
-  margin-left: 30px;
 }
 
 .device-info {
