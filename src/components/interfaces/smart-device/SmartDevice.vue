@@ -1,6 +1,8 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
     <div v-if="!enabled" class="wrapper-button-enable">
+      <span>additional tags (comma separated):</span>
+      <input id="add-tags" type="text" v-model="additionalTags" />
       <button @click="onClickEnable()">Enable</button>
     </div>
     <div ref="top-div" v-if="enabled">
@@ -105,7 +107,8 @@ export default {
       debugAcceleration: undefined,
       debugRotationRate: undefined,
       grantedImuPermission: false,
-      enabled: false
+      enabled: false,
+      additionalTags: ""
     };
   },
   mounted: function() {
@@ -134,6 +137,8 @@ export default {
   methods: {
     onClickEnable: function() {
       this.enabled = true;
+      console.info('onClickEnable');
+      console.info(this.additionalTags);
 
       UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, async () => {
         await this.startInterface();
@@ -151,7 +156,11 @@ export default {
         await UbiiClientService.instance.waitForConnection();
 
         this.elementTouch = document.getElementById('touch-area');
-        this.ubiiDevice = new UbiiSmartDevice(this.elementTouch);
+
+        console.info('tags array: ');
+        console.info(this.additionalTags.split(','));
+        
+        this.ubiiDevice = new UbiiSmartDevice(this.elementTouch, {tags: this.additionalTags.split(',')});
         await this.ubiiDevice.init();
       } catch (error) {
         console.error(error);
@@ -289,6 +298,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
 }
 
 .notification {

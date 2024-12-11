@@ -15,6 +15,7 @@
     <div class="component">{{ component.name + ' (' + component.id + ')' }}</div>
 
     <div v-if="expanded" class="component-info">
+      <div><b>Tags:</b>{{ component.tags }}</div>
       <div><b>Topic:</b> {{ component.topic }}</div>
       <div><b>Message Format:</b> {{ component.messageFormat }}</div>
       <div><b>I/O Type:</b> {{ getIOTypeString() }}</div>
@@ -64,7 +65,11 @@ export default {
   margin: 10px;
 }
 
+.component-tags {
+  margin-left: 30px;
+}
+
 .component-info {
-  padding-left: 20px;
+  padding-left: 30px;
 }
 </style>

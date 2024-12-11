@@ -21,8 +21,10 @@ const UBII_SPECS_TEMPLATE = {
 };
 
 export default class UbiiSmartDevice {
-  constructor(elementTouch) {
+  constructor(elementTouch, additionalDeviceProfile) {
     Object.assign(this, UBII_SPECS_TEMPLATE);
+    this.tags.push(additionalDeviceProfile.tags);
+
     this.deviceData = {};
     this.publishIntervalMilliseconds = 200;
     this.elementTouch = elementTouch;

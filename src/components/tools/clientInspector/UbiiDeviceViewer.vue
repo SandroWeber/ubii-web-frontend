@@ -14,7 +14,8 @@
     />
     <div class="device">{{ device.name + ' (' + device.id + ')' }}</div>
 
-    <div v-if="expanded" class="components">
+    <div v-if="expanded" class="device-info">
+      <div><b>Tags:</b>{{ device.tags }}</div>
       <div><b>Components:</b></div>
       <div v-for="component in device.components" :key="component.id">
         <ubii-component-viewer :component="component" />
@@ -47,6 +48,7 @@ export default {
   },
   methods: {
     toggleDetails() {
+      console.info(this.device);
       this.expanded = !this.expanded;
     }
   }
@@ -65,8 +67,12 @@ export default {
   margin: 10px;
 }
 
-.components {
+.device-tags {
+  margin-left: 30px;
+}
+
+.device-info {
   padding-top: 5px;
-  padding-left: 20px;
+  padding-left: 30px;
 }
 </style>
