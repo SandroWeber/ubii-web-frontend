@@ -29,14 +29,10 @@
         </app-tile>
       </router-link>-->
 
-      <router-link
-        to="/administration/sessionEditor"
-        class="grid-link"
-        tag="div"
-      >
+      <router-link to="/administration/graphEditor" class="grid-link" tag="div">
         <app-tile class="layer-three background round shadow green-accent">
           <font-awesome-icon icon="project-diagram" class="grid-icon" />
-          <p>Session Editor</p>
+          <p>Graph Editor</p>
           <font-awesome-icon
             icon="exclamation-triangle"
             class="under-construction-icon"
@@ -59,12 +55,7 @@ import '@riophae/vue-treeselect/dist/vue-treeselect.css';
 
 // Fontawesome.
 import { library } from '@fortawesome/fontawesome-svg-core';
-import {
-  faRandom,
-  faMicrochip,
-  faProjectDiagram,
-  faExclamationTriangle
-} from '@fortawesome/free-solid-svg-icons';
+import { faRandom, faMicrochip, faProjectDiagram, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 library.add(faRandom, faMicrochip, faProjectDiagram, faExclamationTriangle);
 
 /*let dummyTreeselectOptions = [

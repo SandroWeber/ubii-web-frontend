@@ -30,6 +30,8 @@ const ImageDataFormats = ProtobufLibrary.ubii.dataStructure.Image2D.DataFormat;
 export default {
   name: 'Example-OpenCV',
   mounted: function() {
+    this.subTokens = [];
+
     let video = document.getElementById('video');
     //this.videoOverlayElement = document.getElementById('video-overlay');
     this.canvasOpenCV = document.getElementById('canvas-opencv');
@@ -86,8 +88,7 @@ export default {
     /* ubii methods */
     createUbiiSpecs: function() {
       this.ubiiDeviceName = 'opencv_example';
-      let topicPrefix =
-        '/' + UbiiClientService.instance.getClientID() + '/' + this.ubiiDeviceName;
+      let topicPrefix = '/' + UbiiClientService.instance.getClientID() + '/' + this.ubiiDeviceName;
 
       this.ubiiDevice = {
         name: this.ubiiDeviceName,
@@ -108,10 +109,7 @@ export default {
       };
 
       let onCreatedInteractionOpenCVTest =
-        'state => {' +
-        'state.timestampLastImage = 0;' +
-        'state.tLastProcess = Date.now();' +
-        '};';
+        'state => {' + 'state.timestampLastImage = 0;' + 'state.tLastProcess = Date.now();' + '};';
 
       // we really need a functional interaction editor for this (async parts and class constructors aren't handled ver well by .toString())
       let processInteractionOpenCVTest =
@@ -164,15 +162,13 @@ export default {
             interactionId: this.ubiiInteractionOpenCVTest.id,
             inputMappings: [
               {
-                name: this.ubiiInteractionOpenCVTest.inputFormats[0]
-                  .internalName,
+                name: this.ubiiInteractionOpenCVTest.inputFormats[0].internalName,
                 topicSource: this.ubiiDevice.components[0].topic
               }
             ],
             outputMappings: [
               {
-                name: this.ubiiInteractionOpenCVTest.outputFormats[0]
-                  .internalName,
+                name: this.ubiiInteractionOpenCVTest.outputFormats[0].internalName,
                 topicDestination: this.ubiiDevice.components[1].topic
               }
             ]
@@ -190,22 +186,23 @@ export default {
         this.stopOpenCVTest();
       }
     },
-    startOpenCVTest: function() {
-      UbiiClientService.instance.subscribeTopic(
-        this.ubiiDevice.components[1].topic,
-        image => {
+    startOpenCVTest: async function() {
+      this.subTokens.push(
+        await UbiiClientService.instance.subscribeTopic(this.ubiiDevice.components[1].topic, image => {
           this.drawImageOpenCV(image);
-        }
+        })
       );
 
-      UbiiClientService.instance.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
-        session: this.ubiiSessionOpenCVTest
-      }).then(response => {
-        if (response.error) {
-          console.warn(response.error);
-        }
-      });
+      UbiiClientService.instance
+        .callService({
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
+          session: this.ubiiSessionOpenCVTest
+        })
+        .then(response => {
+          if (response.error) {
+            console.warn(response.error);
+          }
+        });
 
       let continuousPublish = () => {
         this.publishImage();
@@ -216,14 +213,17 @@ export default {
       };
       continuousPublish();
     },
-    stopOpenCVTest: function() {
-      UbiiClientService.instance.unsubscribeTopic(this.ubiiDevice.components[1].topic);
+    stopOpenCVTest: async function() {
+      for (let token of this.subTokens) {
+        await UbiiClientService.instance.unsubscribe(token);
+      }
+      this.subTokens = [];
 
       this.ubiiSessionOpenCVTest &&
-        UbiiClientService.instance.callService({
+        (await UbiiClientService.instance.callService({
           topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
           session: this.ubiiSessionOpenCVTest
-        });
+        }));
     },
     publishImage: function() {
       let img = this.captureImage();
@@ -302,11 +302,7 @@ export default {
         imageDataRGBA = image.data;
       }
 
-      const imgData = new ImageData(
-        new Uint8ClampedArray(imageDataRGBA),
-        image.width,
-        image.height
-      );
+      const imgData = new ImageData(new Uint8ClampedArray(imageDataRGBA), image.width, image.height);
       ctx.putImageData(imgData, 0, 0);
     }
   }

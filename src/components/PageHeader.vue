@@ -2,7 +2,6 @@
   <app-layer class="layer-two background low-contrast horizontal-shadow">
     <div class="header-wrapper">
       <h3>Ubi-Interact Web Frontend</h3>
-      <server-status />
     </div>
     
     <navigation />
@@ -11,7 +10,6 @@
 
 <script>
 import { AppLayer } from './appComponents/appComponents.js';
-import ServerStatus from './ServerStatus.vue';
 import Navigation from './Navigation.vue';
 
 /* fontawesome */
@@ -23,7 +21,6 @@ export default {
   name: 'PageHeader',
   components: {
     AppLayer,
-    ServerStatus,
     Navigation
   }
 };

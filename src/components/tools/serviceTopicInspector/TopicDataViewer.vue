@@ -1,6 +1,5 @@
 <template>
   <div>
-    <div class="update-signal" v-bind:class="{ flash: flashing }"></div>
     <font-awesome-icon
       class="expand-icon"
       v-show="!expanded"
@@ -14,10 +13,11 @@
       @click="toggleTopicDataDisplay(topic)"
     />
     <div class="topic-title">{{ topic }}</div>
-    <div class="topic-data green-accent" v-show="expanded && topicData">
-      {{ topicData }}
+    <div class="update-signal" v-show="expanded" v-bind:class="{ flash: flashing }"></div>
+    <div class="topic-data green-accent" v-show="expanded && topicDataRecord">
+      {{ topicDataRecord }}
     </div>
-    <div class="topic-data red-accent" v-show="expanded && !topicData">
+    <div class="topic-data red-accent" v-show="expanded && !topicDataRecord">
       received empty data
     </div>
   </div>
@@ -26,28 +26,35 @@
 <script>
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
-import {
-  faChevronRight,
-  faChevronDown
-} from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 library.add(faChevronRight, faChevronDown);
+
+import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
+
+import util from 'util';
 
 export default {
   name: 'TopicViewer',
   props: {
-    topic: { type: String, default: '' },
-    topicData: { type: String, default: '... no data received yet ...' }
+    topic: { type: String, default: '' }
   },
   data: () => {
-    return { expanded: false, flashing: false };
+    return { expanded: false, flashing: false, topicDataRecord: '... no data received yet ...' };
   },
   methods: {
-    toggleTopicDataDisplay() {
+    async toggleTopicDataDisplay() {
       this.expanded = !this.expanded;
-    }
-  },
-  watch: {
-    topicData: function() {
+      if (this.expanded) {
+        this.subToken = await UbiiClientService.instance.subscribeTopic(this.topic, this.onTopicDataRecord);
+      } else {
+        this.subToken && (await UbiiClientService.instance.unsubscribe(this.subToken));
+      }
+    },
+    onTopicDataRecord(record) {
+      this.flash();
+      this.topicDataRecord = util.inspect(record);
+    },
+    flash() {
       this.flashing = true;
       setTimeout(() => {
         this.flashing = false;

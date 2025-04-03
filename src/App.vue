@@ -1,26 +1,46 @@
 <template>
-  <app-layer id="app" class="layer-one background">
-    <div class="router-view-wrapper">
-      <router-view class="router-view" />
-    </div>
-  </app-layer>
+  <div class="app-wrapper">
+    <app-layer id="app" class="layer-one background">
+      <div class="router-view-wrapper">
+        <router-view class="router-view" />
+      </div>
+    </app-layer>
+    <connection-status />
+  </div>
 </template>
 
 <script>
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
 import { AppLayer } from './components/appComponents/appComponents.js';
+import ConnectionStatus from './components/ConnectionStatus.vue';
+
+import config from './config.json';
 
 export default {
   name: 'app',
   components: {
-    AppLayer
+    AppLayer,
+    ConnectionStatus
   },
   mounted: () => {
     let useHTTPS = window.location.protocol.includes('https');
     UbiiClientService.instance.setHTTPS(useHTTPS);
     UbiiClientService.instance.setName('Ubi-Interact Web Frontend');
-    UbiiClientService.instance.connect();
+
+    let urlServices = useHTTPS ? 'https://' : 'http://';
+    if (config && config.masterNode && config.masterNode.services && config.masterNode.services.url) {
+      urlServices += config.masterNode.services.url.replace(/.*:\/\//, '');
+    } else {
+      urlServices += window.location.hostname + ':8102/services';
+    }
+    let urlTopicData = useHTTPS ? 'wss://' : 'ws://';
+    if (config && config.masterNode && config.masterNode.topicdata && config.masterNode.topicdata.url) {
+      urlTopicData += config.masterNode.topicdata.url.replace(/.*:\/\//, '');
+    } else {
+      urlTopicData += window.location.hostname + ':8104';
+    }
+    UbiiClientService.instance.connect(urlServices, urlTopicData);
     window.addEventListener('beforeunload', () => {
       UbiiClientService.instance.disconnect();
     });
@@ -59,8 +79,8 @@ html, body {
   overflow: hidden;
 }
 
-#server-status {
-  position: relative;
+.app-wrapper {
+  height: 100%;
 }
 
 .router-view-wrapper {

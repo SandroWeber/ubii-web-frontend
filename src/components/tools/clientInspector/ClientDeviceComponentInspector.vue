@@ -60,8 +60,8 @@ export default {
       });
 
       if (reply.clientList) {
-        this.clientListActive = reply.clientList.elements.filter(client => client.state === CLIENT_STATE.ACTIVE);
-        this.clientListUnresponsive = reply.clientList.elements.filter(client => client.state !== CLIENT_STATE.ACTIVE);
+        this.clientListActive = reply.clientList.elements.filter(client => client.state === CLIENT_STATE[CLIENT_STATE.ACTIVE]);
+        this.clientListUnresponsive = reply.clientList.elements.filter(client => client.state !== CLIENT_STATE[CLIENT_STATE.ACTIVE]);
       }
     }
   }

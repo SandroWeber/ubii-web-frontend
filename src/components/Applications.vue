@@ -28,24 +28,10 @@
           </app-tile>
         </router-link>
 
-        <router-link to="/applications/examples/threejs" class="tile-menu-item" tag="div">
+        <router-link to="/applications/examples/random-walker" class="tile-menu-item" tag="div">
           <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
-            <font-awesome-icon icon="cube" class="tile-menu-icon" />
-            <p>Three.js Web Rendering</p>
-          </app-tile>
-        </router-link>
-
-        <router-link to="/applications/examples/threejs-webvr" class="tile-menu-item" tag="div">
-          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
-            <font-awesome-icon icon="vr-cardboard" class="tile-menu-icon" />
-            <p>Three.js WebVR</p>
-          </app-tile>
-        </router-link>
-
-        <router-link to="/applications/examples/aframe" class="tile-menu-item" tag="div">
-          <app-tile class="layer-three background round shadow purple-accent tile-menu-item-background">
-            <font-awesome-icon icon="vr-cardboard" class="tile-menu-icon" />
-            <p>A-Frame</p>
+            <font-awesome-icon icon="shoe-prints" class="tile-menu-icon" />
+            <p>Walker (conditional pub/sub)</p>
           </app-tile>
         </router-link>
 
@@ -144,7 +130,8 @@ import {
   faHandPointer,
   faHandScissors,
   faEye,
-  faCamera
+  faCamera,
+  faShoePrints
 } from '@fortawesome/free-solid-svg-icons';
 library.add(
   faMousePointer,
@@ -157,7 +144,8 @@ library.add(
   faHandPointer,
   faHandScissors,
   faEye,
-  faCamera
+  faCamera,
+  faShoePrints
 );
 
 export default {

@@ -13,6 +13,7 @@ const UBII_SPECS_TEMPLATE = {
     {
       name: 'web-component-linear-acceleration',
       topic: PLACEHOLDER_TOPIC_PREFIX + '/linear_acceleration',
+      tags: ['acceleration', 'linear'],
       messageFormat: 'ubii.dataStructure.Vector3',
       ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
     }
@@ -20,8 +21,10 @@ const UBII_SPECS_TEMPLATE = {
 };
 
 export default class UbiiSmartDevice {
-  constructor(elementTouch) {
+  constructor(elementTouch, additionalDeviceProfile) {
     Object.assign(this, UBII_SPECS_TEMPLATE);
+    this.tags.push(additionalDeviceProfile.tags);
+
     this.deviceData = {};
     this.publishIntervalMilliseconds = 200;
     this.elementTouch = elementTouch;

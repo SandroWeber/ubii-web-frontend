@@ -14,18 +14,15 @@
 
     <div class="category-header header-topicdata orange-accent">Topic Data</div>
 
-    <div class="category-content content-device-topicdata" v-show="topicData">
-      <div class="list-element" v-for="(data, topic) in topicData" :key="topic">
-        <topic-data-viewer :topic="topic" :topic-data="data" />
+    <div class="category-content content-device-topicdata">
+      <div class="list-element" v-for="topic in dataTopicList" :key="topic">
+        <topic-data-viewer :topic="topic" />
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import util from 'util';
-import Vue from 'vue';
-
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
 
@@ -36,17 +33,18 @@ export default {
   name: 'ServiceTopicInspector',
   components: {
     TopicDataViewer,
-    ServiceViewer,
+    ServiceViewer
   },
-  mounted: function () {
-    UbiiClientService.instance.waitForConnection().then(() => {
-      this.getTopicList();
-      this.getServiceList();
-    });
+  mounted: async function() {
+    await UbiiClientService.instance.waitForConnection();
+
+    this.intervalUpdateTopicList = setInterval(this.updateTopicList, 1000);
+    this.getServiceList();
+
     this.open = true;
   },
-  beforeDestroy: function () {
-    UbiiClientService.instance.unsubscribeRegex(this.regexAllTopics, this.handleTopicData);
+  beforeDestroy: function() {
+    this.intervalUpdateTopicList && clearInterval(this.intervalUpdateTopicList);
     this.open = false;
   },
   data: () => {
@@ -54,39 +52,31 @@ export default {
       ubiiClientService: UbiiClientService.instance,
       serviceList: [],
       serviceTopicList: [],
-      topicData: {},
-      regexAllTopics: '.*',
+      dataTopicList: []
     };
   },
   methods: {
-    getTopicList: function () {
+    updateTopicList: async function() {
+      let reply = await UbiiClientService.instance.callService({
+        topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST
+      });
+      let topics = reply.stringList.elements;
+      this.dataTopicList = topics.filter(topic => !topic.includes('/services/'));
+      this.serviceTopicList = topics.filter(topic => {
+        return topic.indexOf('/services/') === 0;
+      });
+    },
+    getServiceList: function() {
       UbiiClientService.instance
         .callService({
-          topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST,
+          topic: DEFAULT_TOPICS.SERVICES.SERVICE_LIST
         })
-        .then((reply) => {
-          let topics = reply.stringList.elements;
-          this.$data.serviceTopicList = topics.filter((topic) => {
-            return topic.indexOf('/services/') === 0;
-          });
-        });
-
-      UbiiClientService.instance.subscribeRegex(this.regexAllTopics, this.handleTopicData);
-    },
-    handleTopicData: function (data, topic) {
-      Vue.set(this.topicData, topic, util.inspect(data));
-    },
-    getServiceList: function () {
-      UbiiClientService.instance
-        .callService({
-          topic: DEFAULT_TOPICS.SERVICES.SERVICE_LIST,
-        })
-        .then((reply) => {
+        .then(reply => {
           let services = reply.serviceList.elements;
           this.$data.serviceList = services;
         });
-    },
-  },
+    }
+  }
 };
 </script>
 

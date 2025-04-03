@@ -1,20 +1,22 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
     <div v-if="!enabled" class="wrapper-button-enable">
+      <span>additional tags (comma separated):</span>
+      <input id="add-tags" type="text" v-model="additionalTags" />
       <button @click="onClickEnable()">Enable</button>
     </div>
     <div ref="top-div" v-if="enabled">
       <fullscreen ref="fullscreen" class="fullscreen" @change="onFullScreenChange" style="overflow: hidden">
         <div class="content">
           <button
-            class="button-safari-permissions"
+            class="button-permissions"
             v-show="needsImuPermissions && !grantedImuPermission"
             @click="requestImuPermissions()"
           >
             IMU Permissions
           </button>
 
-          <button class="button-debug" @click="showDebugView = !showDebugView">Debug View</button>
+          <button class="button-debug" @click="showDebugView = !showDebugView">Debug</button>
 
           <button class="button-calibrate" @click="calibrate()">Calibrate</button>
 
@@ -105,7 +107,8 @@ export default {
       debugAcceleration: undefined,
       debugRotationRate: undefined,
       grantedImuPermission: false,
-      enabled: false
+      enabled: false,
+      additionalTags: ""
     };
   },
   mounted: async function() {
@@ -164,7 +167,7 @@ export default {
       }
       try {
         this.elementTouch = document.getElementById('touch-area');
-        this.ubiiDevice = new UbiiSmartDevice(this.elementTouch);
+        this.ubiiDevice = new UbiiSmartDevice(this.elementTouch, {tags: this.additionalTags.split(',')});
       } catch (error) {
         console.error('ubii device creation error');
         console.error(error);
@@ -296,10 +299,10 @@ export default {
   height: 100%;
   display: grid;
   grid-gap: 5px;
-  grid-template-columns: auto 100px 75px 25px;
+  grid-template-columns: 25px 75px 75px auto;
   grid-template-rows: 25px auto 1fr;
   grid-template-areas:
-    'btn-safari-permissions btn-debug btn-calibrate btn-fullscreen'
+    ' btn-fullscreen btn-debug btn-calibrate btn-permissions'
     'debug-view debug-view debug-view debug-view'
     'touch touch touch touch';
 }
@@ -308,14 +311,15 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
 }
 
 .notification {
   color: red;
 }
 
-.button-safari-permissions {
-  grid-area: btn-safari-permissions;
+.button-permissions {
+  grid-area: btn-permissions;
 }
 
 .button-debug {

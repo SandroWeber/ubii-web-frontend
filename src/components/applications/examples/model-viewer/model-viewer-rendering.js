@@ -6,7 +6,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
-import { MathUtils } from 'three/src/math/MathUtils';
+import { MathUtils } from 'three';
 
 export default class ModelViewerRendering {
   constructor(containerElement) {

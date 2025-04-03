@@ -51,9 +51,11 @@ export default class PMTestExecutionTriggerOnInput {
     let outputs = {};
 
     // check if changed, otherwise no output
-    if (inputs.inDouble && inputs.inDouble !== state.lastInDouble) {
-      state.lastInDouble = inputs.inDouble;
-      outputs.outDouble = inputs.inDouble;
+    if (inputs.inDouble.double && inputs.inDouble.double !== state.lastInDouble) {
+      state.lastInDouble = inputs.inDouble.double;
+      outputs.outDouble = {
+        double: inputs.inDouble.double
+      }
     }
 
     if (inputs.inMuxStrings && inputs.inMuxStrings.elements && inputs.inMuxStrings.elements.length > 0) {
