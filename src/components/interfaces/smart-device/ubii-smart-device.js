@@ -121,6 +121,9 @@ export default class UbiiSmartDevice {
       return;
     }
 
+    console.info('onDeviceMotion');
+    console.info(event);
+
     /*this.processAccelerationData(event.acceleration);
     if (this.componentTouch && this.componentTouch.touches && this.componentTouch.touches.length > 0) {
       let vel = this.velocityEstimate();
@@ -135,7 +138,7 @@ export default class UbiiSmartDevice {
       acceleration: event.acceleration,
       timestamp: timestamp
     };
-    this.deviceData.rotationRateData = {
+    this.deviceData.rotationRate = {
       rotationRate: event.rotationRate,
       timestamp: timestamp
     };
@@ -222,6 +225,8 @@ export default class UbiiSmartDevice {
       return;
     }
 
+    console.info('publishDeviceMotion');
+    console.info(this.deviceData.accelerationData);
     UbiiClientService.instance.publishRecord({
       topic: this.componentLinearAcceleration.topic,
       timestamp: this.deviceData.accelerationData.timestamp,
