@@ -1,23 +1,20 @@
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
-import { MSG_TYPES } from '@tum-far/ubii-msg-formats';
-const UbiiImage2D = ProtobufLibrary.ubii.dataStructure.Image2D;
+import { MSG_TYPES, proto } from '@tum-far/ubii-msg-formats';
+const UbiiImage2D = proto.ubii.dataStructure.Image2D;
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
 import UbiiComponent from './ubii-component-base';
 
-const TOPIC_SUFFIX = 'camera_image';
-
 const UBII_SPECS = {
   name: 'web-component-camera',
   messageFormat: MSG_TYPES.DATASTRUCTURE_IMAGE,
-  ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
+  ioType: proto.ubii.devices.Component.IOType.PUBLISHER,
   tags: ['camera', 'image', '2D'],
   description: 'web interface - camera componenent'
 };
 
 export default class UbiiComponentCamera extends UbiiComponent {
   constructor(publishFrequencyMS, ubiiImageFormat, videoPlaybackElement) {
-    super(TOPIC_SUFFIX, UBII_SPECS);
+    super(UBII_SPECS);
 
     this.publishFrequencyMS = publishFrequencyMS;
     this.ubiiImageFormat = ubiiImageFormat;

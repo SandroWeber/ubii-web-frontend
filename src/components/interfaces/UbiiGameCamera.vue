@@ -2,10 +2,9 @@
   <div class="interface-wrapper">
     <div class="debug-log">{{ textOutput }}</div>
     <video id="video" class="camera-image" autoplay></video>
-    <button
-      @click="onButtonCoCoSSD"
-      :class="{'toggle-active': cocoSsdActive, 'toggle-inactive': !cocoSsdActive}"
-    >toggle coco-ssd object detection</button>
+    <button @click="onButtonCoCoSSD" :class="{ 'toggle-active': cocoSsdActive, 'toggle-inactive': !cocoSsdActive }">
+      toggle coco-ssd object detection
+    </button>
   </div>
 </template>
 
@@ -15,14 +14,13 @@
 import uuidv4 from 'uuid/v4';
 
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
-import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
+import { DEFAULT_TOPICS, proto } from '@tum-far/ubii-msg-formats';
 import { setTimeout } from 'timers';
 
 export default {
   name: 'Interface-UbiiController-GameCamera',
   mounted: function() {
-     // For CAMERA
+    // For CAMERA
     let video = document.getElementById('video');
     this.videoOverlayElement = document.getElementById('video-overlay');
     this.publishFrequency = 500; // ms
@@ -49,7 +47,7 @@ export default {
   beforeDestroy: function() {
     this.stop();
   },
-  data: () => {    
+  data: () => {
     return {
       cocoSsdActive: false,
       textOutput: 'have fun :)'
@@ -67,13 +65,10 @@ export default {
             this.ubiiDevice = device;
           }
         });
-        UbiiClientService.instance.subscribeTopic(
-            this.componentTextOutput.topic,
-            text => {
-                this.textOutput = text;
-              }
-            );
+        UbiiClientService.instance.subscribeTopic(this.componentTextOutput.topic, text => {
+          this.textOutput = text;
         });
+      });
     },
     stop: function() {
       this.cocoSsdActive = false;
@@ -82,7 +77,7 @@ export default {
     },
     /* ubii methods */
     createUbiiSpecs: async function() {
-       if (this.clientId) {
+      if (this.clientId) {
         console.warn('tried to create ubii specs, but are already present');
         return;
       }
@@ -94,27 +89,27 @@ export default {
 
       this.ubiiDevice = {
         name: this.ubiiDeviceName,
-        deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
+        deviceType: proto.ubii.devices.Device.DeviceType.PARTICIPANT,
         clientId: UbiiClientService.instance.getClientID(),
         components: [
           {
             topic: topicPrefix + '/camera_image',
             messageFormat: 'ubii.dataStructure.Image',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
+            ioType: proto.ubii.devices.Component.IOType.SUBSCRIBER
           },
           {
             topic: topicPrefix + '/objects',
             messageFormat: 'ubii.dataStructure.Object2DList',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
+            ioType: proto.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/set_text',
             messageFormat: 'string',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
+            ioType: proto.ubii.devices.Component.IOType.PUBLISHER
           }
         ]
-      };    
-      
+      };
+
       this.componentCameraImage = this.ubiiDevice.components[0];
       this.componentCameraObjects = this.ubiiDevice.components[1];
       this.componentTextOutput = this.ubiiDevice.components[2];
@@ -135,9 +130,7 @@ export default {
       this.ubiiSessionCoCoSSD = {
         id: uuidv4(),
         name: 'UbiiControllerCamera - Session CoCoSSD',
-        processMode:
-          ProtobufLibrary.ubii.sessions.ProcessMode
-            .INDIVIDUAL_PROCESS_FREQUENCIES,
+        processMode: proto.ubii.sessions.ProcessMode.INDIVIDUAL_PROCESS_FREQUENCIES,
         interactions: [this.interactionCocoSsdSpecs],
         ioMappings: [
           {
@@ -150,8 +143,7 @@ export default {
             ],
             outputMappings: [
               {
-                name: this.interactionCocoSsdSpecs.outputFormats[0]
-                  .internalName,
+                name: this.interactionCocoSsdSpecs.outputFormats[0].internalName,
                 topicDestination: this.ubiiDevice.components[1].topic
               }
             ]
@@ -159,11 +151,9 @@ export default {
         ]
       };
     },
-     registerUbiiSpecs: function() {
+    registerUbiiSpecs: function() {
       if (this.initializing || this.hasRegisteredUbiiDevice) {
-        console.warn(
-          'Tried to register ubii device, but is already registered'
-        );
+        console.warn('Tried to register ubii device, but is already registered');
         return;
       }
       this.initializing = true;
@@ -171,7 +161,8 @@ export default {
 
       // register the mouse pointer device
       UbiiClientService.instance.waitForConnection().then(() => {
-        UbiiClientService.instance.registerDevice(this.ubiiDevice)
+        UbiiClientService.instance
+          .registerDevice(this.ubiiDevice)
           .then(device => {
             if (device.id) {
               this.ubiiDevice = device;
@@ -182,25 +173,17 @@ export default {
             return device;
           })
           .then(() => {
-            UbiiClientService.instance.subscribeTopic(
-              this.componentTextOutput.topic,
-              this.setTextOutput
-            );
+            UbiiClientService.instance.subscribeTopic(this.componentTextOutput.topic, this.setTextOutput);
 
             if (this.componentVibration) {
-              UbiiClientService.instance.subscribeTopic(
-                this.componentVibration.topic,
-                this.vibrate
-              );
+              UbiiClientService.instance.subscribeTopic(this.componentVibration.topic, this.vibrate);
             }
           });
       });
     },
     unregisterUbiiSpecs: async function() {
       if (!this.hasRegisteredUbiiDevice) {
-        console.warn(
-          'Tried to unregister ubii specs, but they are not registered.'
-        );
+        console.warn('Tried to unregister ubii specs, but they are not registered.');
         return;
       }
 
@@ -219,8 +202,7 @@ export default {
       });
 
       // TODO: unregister device
-      this.ubiiDevice &&
-        (await UbiiClientService.instance.deregisterDevice(this.ubiiDevice));
+      this.ubiiDevice && (await UbiiClientService.instance.deregisterDevice(this.ubiiDevice));
     },
     /* interface methods */
     onButtonCoCoSSD: function() {
@@ -233,21 +215,20 @@ export default {
       }
     },
     startCoCoSSDObjectDetection: function() {
-      UbiiClientService.instance.subscribe(
-        this.ubiiDevice.components[1].topic,
-        predictedObjectsList => {
-          this.drawCoCoSSDLabels(predictedObjectsList.elements);
-        }
-      );
-
-      UbiiClientService.instance.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
-        session: this.ubiiSessionCoCoSSD
-      }).then(response => {
-        if (response.error) {
-          console.warn(response.error);
-        }
+      UbiiClientService.instance.subscribe(this.ubiiDevice.components[1].topic, predictedObjectsList => {
+        this.drawCoCoSSDLabels(predictedObjectsList.elements);
       });
+
+      UbiiClientService.instance
+        .callService({
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+          session: this.ubiiSessionCoCoSSD
+        })
+        .then(response => {
+          if (response.error) {
+            console.warn(response.error);
+          }
+        });
 
       let continuousPublish = () => {
         this.publishImage();
@@ -291,8 +272,7 @@ export default {
           width: img.width,
           height: img.height,
           data: data,
-          dataFormat:
-            ProtobufLibrary.ubii.dataStructure.Image2D.DataFormat.RGBA8
+          dataFormat: proto.ubii.dataStructure.Image2D.DataFormat.RGBA8
         }
       });
     },
@@ -302,15 +282,12 @@ export default {
       canvas.width = this.videoElement.videoWidth;
 
       let videoRatio = canvas.width / canvas.height;
-      let displayRatio =
-        this.videoElement.clientWidth / this.videoElement.clientHeight;
+      let displayRatio = this.videoElement.clientWidth / this.videoElement.clientHeight;
 
       if (displayRatio > videoRatio) {
-        this.videoOverlayElement.style.width =
-          videoRatio * this.videoOverlayElement.clientHeight + 'px';
+        this.videoOverlayElement.style.width = videoRatio * this.videoOverlayElement.clientHeight + 'px';
       } else if (displayRatio < videoRatio) {
-        this.videoOverlayElement.style.height =
-          videoRatio * this.videoOverlayElement.clientWidth + 'px';
+        this.videoOverlayElement.style.height = videoRatio * this.videoOverlayElement.clientWidth + 'px';
       }
 
       var ctx = canvas.getContext('2d');
@@ -339,22 +316,11 @@ export default {
         if (index < predictionsList.length) {
           div.innerHTML = predictionsList[index].id;
           // set position
-          div.style.left =
-            Math.floor(
-              predictionsList[index].pose.position.x * overlayBoundings.width
-            ) + 'px';
-          div.style.top =
-            Math.floor(
-              predictionsList[index].pose.position.y * overlayBoundings.height
-            ) + 'px';
+          div.style.left = Math.floor(predictionsList[index].pose.position.x * overlayBoundings.width) + 'px';
+          div.style.top = Math.floor(predictionsList[index].pose.position.y * overlayBoundings.height) + 'px';
           // set size
-          div.style.width =
-            Math.floor(predictionsList[index].size.x * overlayBoundings.width) +
-            'px';
-          div.style.height =
-            Math.floor(
-              predictionsList[index].size.y * overlayBoundings.height
-            ) + 'px';
+          div.style.width = Math.floor(predictionsList[index].size.x * overlayBoundings.width) + 'px';
+          div.style.height = Math.floor(predictionsList[index].size.y * overlayBoundings.height) + 'px';
           div.style.textShadow = '0px 0px 10px yellow';
 
           div.style.visibility = 'visible';

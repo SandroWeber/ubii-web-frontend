@@ -1,10 +1,6 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
-    <div
-      ref="savr-render-container"
-      id="savr-render-container"
-      class="render-container"
-    ></div>
+    <div ref="savr-render-container" id="savr-render-container" class="render-container"></div>
   </UbiiClientContent>
 </template>
 
@@ -19,14 +15,8 @@ import { loadObj } from './modules/threeHelper';
 // Networking
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import UbiiClientContent from '../sharedModules/UbiiClientContent';
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
-import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
-import {
-  createUbiiSpecs,
-  subscribeSpecs,
-  subscribe,
-  unsubscribe
-} from './modules/ubiiHelper';
+import { DEFAULT_TOPICS, proto } from '@tum-far/ubii-msg-formats';
+import { createUbiiSpecs, subscribeSpecs, subscribe, unsubscribe } from './modules/ubiiHelper';
 
 export default {
   name: 'SAVRLaserPointer',
@@ -64,10 +54,7 @@ export default {
 
       let geometry = new THREE.BoxBufferGeometry(1, 1, 1);
       for (var i = 0; i < 3; i++) {
-        let object = new THREE.Mesh(
-          geometry,
-          new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff })
-        );
+        let object = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff }));
         object.position.set(i * 3 - 2.5, 2, -10);
         this.scene.add(object);
         this.targets.push(object);
@@ -89,9 +76,7 @@ export default {
         //viewDir.divideScalar(viewDir.lengthSq()); // fast normalize
         viewDir.multiplyScalar(distance);
 
-        this.model.position = new THREE.Vector3(camPos.x, height, camPos.z).add(
-          viewDir
-        );
+        this.model.position = new THREE.Vector3(camPos.x, height, camPos.z).add(viewDir);
       }
 
       // calculate model rotation
@@ -102,28 +87,26 @@ export default {
       }
     },
     updateSmartDevices: function() {
-      UbiiClientService.instance
-        .callService({ topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST })
-        .then(reply => {
-          this.$data.topicList = reply.stringList.elements;
+      UbiiClientService.instance.callService({ topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST }).then(reply => {
+        this.$data.topicList = reply.stringList.elements;
 
-          this.$data.topicList.forEach(topic => {
-            const topicIndex = topic.indexOf('/web-interface-smart-device/');
+        this.$data.topicList.forEach(topic => {
+          const topicIndex = topic.indexOf('/web-interface-smart-device/');
 
-            if (topicIndex !== -1) {
-              const clientID = topic.substring(0, topicIndex);
+          if (topicIndex !== -1) {
+            const clientID = topic.substring(0, topicIndex);
 
-              // create new client if we dont have one yet or a new client just connected
-              if (!this.$data.client) {
+            // create new client if we dont have one yet or a new client just connected
+            if (!this.$data.client) {
+              this.createClient(clientID);
+            } else {
+              if (!this.$data.oldClients.includes(clientID)) {
                 this.createClient(clientID);
-              } else {
-                if (!this.$data.oldClients.includes(clientID)) {
-                  this.createClient(clientID);
-                }
               }
             }
-          });
+          }
         });
+      });
     },
     createClient: function(id) {
       if (this.client) {
@@ -150,24 +133,12 @@ export default {
       const ctx = this;
       const debugRays = false;
       subscribe(touchEventTopic, event => {
-        if (
-          event.type == ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN
-        ) {
-          ctx.raycaster.set(
-            ctx.model.position,
-            new THREE.Vector3(0, 0, -1).applyQuaternion(ctx.model.quaternion)
-          );
+        if (event.type == proto.ubii.dataStructure.ButtonEventType.DOWN) {
+          ctx.raycaster.set(ctx.model.position, new THREE.Vector3(0, 0, -1).applyQuaternion(ctx.model.quaternion));
           let intersects = ctx.raycaster.intersectObjects(ctx.targets);
 
           if (debugRays) {
-            ctx.scene.add(
-              new THREE.ArrowHelper(
-                ctx.raycaster.ray.direction,
-                ctx.raycaster.ray.origin,
-                300,
-                0xff0000
-              )
-            );
+            ctx.scene.add(new THREE.ArrowHelper(ctx.raycaster.ray.direction, ctx.raycaster.ray.origin, 300, 0xff0000));
           }
 
           for (var i = 0; i < intersects.length; i++) {
@@ -212,12 +183,7 @@ export default {
         };
       };
 
-      const specs = createUbiiSpecs(
-        deviceName,
-        [orientationInput],
-        [orientationOutput],
-        processingCallback
-      );
+      const specs = createUbiiSpecs(deviceName, [orientationInput], [orientationOutput], processingCallback);
 
       return {
         session: specs.session,

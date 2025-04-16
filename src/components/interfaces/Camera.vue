@@ -17,11 +17,8 @@
 <script>
 /* eslint-disable no-unused-vars */
 
-import uuidv4 from 'uuid/v4';
-
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
-import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
+import { DEFAULT_TOPICS, proto } from '@tum-far/ubii-msg-formats';
 import { setTimeout } from 'timers';
 
 export default {
@@ -82,23 +79,22 @@ export default {
     /* ubii methods */
     createUbiiSpecs: async function() {
       this.ubiiDeviceName = 'CameraWebInterface';
-      let topicPrefix =
-        '/' + UbiiClientService.instance.getClientID() + '/' + this.ubiiDeviceName;
+      let topicPrefix = '/' + UbiiClientService.instance.getClientID() + '/' + this.ubiiDeviceName;
 
       this.ubiiDevice = {
         name: this.ubiiDeviceName,
-        deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
+        deviceType: proto.ubii.devices.Device.DeviceType.PARTICIPANT,
         clientId: UbiiClientService.instance.getClientID(),
         components: [
           {
             topic: topicPrefix + '/camera_image',
             messageFormat: 'ubii.dataStructure.Image',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
+            ioType: proto.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/objects',
             messageFormat: 'ubii.dataStructure.Object2DList',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
+            ioType: proto.ubii.devices.Component.IOType.SUBSCRIBER
           }
         ]
       };
@@ -136,21 +132,20 @@ export default {
       }
     },
     startCoCoSSDObjectDetection: function() {
-      UbiiClientService.instance.subscribeTopic(
-        this.ubiiDevice.components[1].topic,
-        this.handleObjectPredictions
-      );
+      UbiiClientService.instance.subscribeTopic(this.ubiiDevice.components[1].topic, this.handleObjectPredictions);
 
-      UbiiClientService.instance.callService({
-        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
-        session: this.ubiiSessionCoCoSSD
-      }).then(response => {
-        if (response.error) {
-          console.warn(response.error);
-        } else if (response.session) {
-          this.ubiiSessionCoCoSSD = response.session;
-        }
-      });
+      UbiiClientService.instance
+        .callService({
+          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
+          session: this.ubiiSessionCoCoSSD
+        })
+        .then(response => {
+          if (response.error) {
+            console.warn(response.error);
+          } else if (response.session) {
+            this.ubiiSessionCoCoSSD = response.session;
+          }
+        });
 
       let continuousPublish = () => {
         this.publishImage();
@@ -162,10 +157,7 @@ export default {
       continuousPublish();
     },
     stopCoCoSSDObjectDetection: function() {
-      UbiiClientService.instance.unsubscribeTopic(
-        this.ubiiDevice.components[1].topic,
-        this.handleObjectPredictions
-      );
+      UbiiClientService.instance.unsubscribeTopic(this.ubiiDevice.components[1].topic, this.handleObjectPredictions);
 
       this.cocoSSDLabels.forEach(div => {
         div.style.visibility = 'hidden';
@@ -191,8 +183,7 @@ export default {
           width: img.width,
           height: img.height,
           data: data,
-          dataFormat:
-            ProtobufLibrary.ubii.dataStructure.Image2D.DataFormat.RGBA8
+          dataFormat: proto.ubii.dataStructure.Image2D.DataFormat.RGBA8
         }
       });
     },
@@ -205,15 +196,12 @@ export default {
       canvas.width = this.videoElement.videoWidth;
 
       let videoRatio = canvas.width / canvas.height;
-      let displayRatio =
-        this.videoElement.clientWidth / this.videoElement.clientHeight;
+      let displayRatio = this.videoElement.clientWidth / this.videoElement.clientHeight;
 
       if (displayRatio > videoRatio) {
-        this.videoOverlayElement.style.width =
-          videoRatio * this.videoOverlayElement.clientHeight + 'px';
+        this.videoOverlayElement.style.width = videoRatio * this.videoOverlayElement.clientHeight + 'px';
       } else if (displayRatio < videoRatio) {
-        this.videoOverlayElement.style.height =
-          videoRatio * this.videoOverlayElement.clientWidth + 'px';
+        this.videoOverlayElement.style.height = videoRatio * this.videoOverlayElement.clientWidth + 'px';
       }
 
       var ctx = canvas.getContext('2d');
@@ -242,22 +230,11 @@ export default {
         if (index < predictionsList.length) {
           div.innerHTML = predictionsList[index].id;
           // set position
-          div.style.left =
-            Math.floor(
-              predictionsList[index].pose.position.x * overlayBoundings.width
-            ) + 'px';
-          div.style.top =
-            Math.floor(
-              predictionsList[index].pose.position.y * overlayBoundings.height
-            ) + 'px';
+          div.style.left = Math.floor(predictionsList[index].pose.position.x * overlayBoundings.width) + 'px';
+          div.style.top = Math.floor(predictionsList[index].pose.position.y * overlayBoundings.height) + 'px';
           // set size
-          div.style.width =
-            Math.floor(predictionsList[index].size.x * overlayBoundings.width) +
-            'px';
-          div.style.height =
-            Math.floor(
-              predictionsList[index].size.y * overlayBoundings.height
-            ) + 'px';
+          div.style.width = Math.floor(predictionsList[index].size.x * overlayBoundings.width) + 'px';
+          div.style.height = Math.floor(predictionsList[index].size.y * overlayBoundings.height) + 'px';
           div.style.textShadow = '0px 0px 10px yellow';
 
           div.style.visibility = 'visible';

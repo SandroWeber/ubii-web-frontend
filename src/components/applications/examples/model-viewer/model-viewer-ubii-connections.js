@@ -1,12 +1,10 @@
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
-import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
+import { DEFAULT_TOPICS, proto } from '@tum-far/ubii-msg-formats';
 
-const TouchEventType = ProtobufLibrary.ubii.dataStructure.TouchEvent.TouchEventType;
+const TouchEventType = proto.ubii.dataStructure.TouchEvent.TouchEventType;
 
 const TAG_COMPONENT_TOUCH = 'touch';
 const TAG_COMPONENT_ORIENTATION = 'orientation';
-
 
 export default class ModelViewerUbiiConnections {
   constructor(modelViewerRendering) {
@@ -35,6 +33,7 @@ export default class ModelViewerUbiiConnections {
           ]
         }
       });
+      console.info(response);
       if (response && response.deviceList && response.deviceList.elements) {
         for (const device of response.deviceList.elements) {
           if (device.tags.includes('smart device')) {
@@ -48,12 +47,16 @@ export default class ModelViewerUbiiConnections {
   }
 
   async subscribeTopics(ubiiDevice) {
-    this.componentTouchEvents = ubiiDevice.components.find(component => component.tags && component.tags.includes(TAG_COMPONENT_TOUCH));
+    this.componentTouchEvents = ubiiDevice.components.find(
+      component => component.tags && component.tags.includes(TAG_COMPONENT_TOUCH)
+    );
     await UbiiClientService.instance.subscribeTopic(this.componentTouchEvents.topic, record => {
       record.touchEventList && record.touchEventList.elements && this.onTouchEvents(record.touchEventList.elements);
     });
 
-    this.componentOrientation = ubiiDevice.components.find(component => component.tags.includes(TAG_COMPONENT_ORIENTATION));
+    this.componentOrientation = ubiiDevice.components.find(component =>
+      component.tags.includes(TAG_COMPONENT_ORIENTATION)
+    );
     this.subscriptionTokenOrientation = await UbiiClientService.instance.subscribeTopic(
       this.componentOrientation.topic,
       record => {

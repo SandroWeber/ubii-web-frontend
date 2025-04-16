@@ -1,80 +1,59 @@
 <template>
   <UbiiClientContent :ubiiClientService="ubiiClientService">
     <div ref="top-div">
-      <fullscreen
-        ref="fullscreen"
-        class="controller"
-        @change="onFullScreenChange"
-        style="overflow: hidden;"
-      >
-      <template>
-        <div class="debug-log">{{ textOutput }}</div>
-        <button class="button-fullscreen" @click="toggleFullScreen()">
-          <font-awesome-icon
-            icon="compress"
-            class="interface-icon"
-            v-show="fullscreen"
-          />
-          <font-awesome-icon
-            icon="expand"
-            class="interface-icon"
-            v-show="!fullscreen"
-          />
-        </button>
-        <div id="analog-left" class="analog-left">
-          <div class="analog-ring">
-            <div
-              id="analog-stick-left"
-              class="analog-stick"
-              v-on:touchstart="onTouchStart($event)"
-              v-on:touchmove="onTouchMove($event)"
-              v-on:touchend="onTouchEnd($event)"
-              :style="{
-                top: stickPosition['analog-stick-left'].y + '%',
-                left: stickPosition['analog-stick-left'].x + '%'
-              }"
-            ></div>
+      <fullscreen ref="fullscreen" class="controller" @change="onFullScreenChange" style="overflow: hidden;">
+        <template>
+          <div class="debug-log">{{ textOutput }}</div>
+          <button class="button-fullscreen" @click="toggleFullScreen()">
+            <font-awesome-icon icon="compress" class="interface-icon" v-show="fullscreen" />
+            <font-awesome-icon icon="expand" class="interface-icon" v-show="!fullscreen" />
+          </button>
+          <div id="analog-left" class="analog-left">
+            <div class="analog-ring">
+              <div
+                id="analog-stick-left"
+                class="analog-stick"
+                v-on:touchstart="onTouchStart($event)"
+                v-on:touchmove="onTouchMove($event)"
+                v-on:touchend="onTouchEnd($event)"
+                :style="{
+                  top: stickPosition['analog-stick-left'].y + '%',
+                  left: stickPosition['analog-stick-left'].x + '%'
+                }"
+              ></div>
+            </div>
           </div>
-        </div>
-        <div id="a-button" class="a-button">
-          <button
-            @touchstart="publishPressedActionButton(1)"
-            @touchend="publishReleasedActionButton(1)"
-            class="action-button"
-          >
-            A
-          </button>
-        </div>
-        <div id="b-button" class="b-button">
-          <button
-            @touchstart="publishPressedActionButton(2)"
-            @touchend="publishReleasedActionButton(2)"
-            class="action-button"
-          >
-            B
-          </button>
-        </div>
-        <div id="start-select-area" class="start-select-area">
-          <button
-            @touchstart="
-              publishButtonStart(
-                ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN
-              )
-            "
-            @touchend="
-              publishButtonStart(
-                ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP
-              )
-            "
-            class="start-button"
-          >
-            Start
-          </button>
-        </div>
-        <div id="ubii-controller-touch-display-area" class="touch-area">
-          <canvas id="canvas-display-area" class="canvas-display-area"></canvas>
-        </div>
-        </template> 
+          <div id="a-button" class="a-button">
+            <button
+              @touchstart="publishPressedActionButton(1)"
+              @touchend="publishReleasedActionButton(1)"
+              class="action-button"
+            >
+              A
+            </button>
+          </div>
+          <div id="b-button" class="b-button">
+            <button
+              @touchstart="publishPressedActionButton(2)"
+              @touchend="publishReleasedActionButton(2)"
+              class="action-button"
+            >
+              B
+            </button>
+          </div>
+          <div id="start-select-area" class="start-select-area">
+            <button
+              @touchstart="publishButtonStart(ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN)"
+              @touchend="publishButtonStart(ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP)"
+              class="start-button"
+            >
+              Start
+            </button>
+          </div>
+          <div id="ubii-controller-touch-display-area" class="touch-area">
+            <canvas id="canvas-display-area" class="canvas-display-area"></canvas>
+          </div>
+        </template>
       </fullscreen>
     </div>
   </UbiiClientContent>
@@ -86,14 +65,14 @@ import Fullscreen from 'vue-fullscreen';
 
 import UbiiClientContent from '../applications/sharedModules/UbiiClientContent';
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
+import { proto } from '@tum-far/ubii-msg-formats';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faExpand, faCompress } from '@fortawesome/free-solid-svg-icons';
 import { setTimeout } from 'timers';
 
-const ImageDataFormats = ProtobufLibrary.ubii.dataStructure.Image2D.DataFormat;
+const ImageDataFormats = proto.ubii.dataStructure.Image2D.DataFormat;
 
 library.add([faExpand, faCompress]);
 
@@ -110,14 +89,8 @@ export default {
       this.stopInterface();
     });
 
-    UbiiClientService.instance.on(
-      UbiiClientService.EVENTS.CONNECT,
-      this.registerUbiiSpecs
-    );
-    UbiiClientService.instance.on(
-      UbiiClientService.EVENTS.DISCONNECT,
-      this.unregisterUbiiSpecs
-    );
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, this.registerUbiiSpecs);
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, this.unregisterUbiiSpecs);
 
     this.deviceData = {};
     this.canvasDisplayArea = document.getElementById('canvas-display-area');
@@ -137,14 +110,14 @@ export default {
     stickPos['analog-stick-right'] = { x: 25, y: 25 };
     return {
       ubiiClientService: UbiiClientService.instance,
-      ProtobufLibrary: ProtobufLibrary,
+      ProtobufLibrary: proto,
       initializing: false,
       hasRegisteredUbiiDevice: false,
       clientId: undefined,
       publishFrequency: 0.01,
       fullscreen: false,
       stickPosition: stickPos,
-      textOutput: 'have fun :)',
+      textOutput: 'have fun :)'
     };
   },
   methods: {
@@ -166,66 +139,62 @@ export default {
 
       this.ubiiDevice = {
         name: this.deviceName,
-        deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
+        deviceType: proto.ubii.devices.Device.DeviceType.PARTICIPANT,
         components: [
           {
             topic: topicPrefix + '/orientation',
             messageFormat: 'ubii.dataStructure.Vector3',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
+            ioType: proto.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/linear_acceleration',
             messageFormat: 'ubii.dataStructure.Vector3',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
+            ioType: proto.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/analog_stick_left',
             messageFormat: 'ubii.dataStructure.Vector2',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
+            ioType: proto.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/button_a',
             messageFormat: 'ubii.dataStructure.KeyEvent',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
+            ioType: proto.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/button_b',
             messageFormat: 'ubii.dataStructure.KeyEvent',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
+            ioType: proto.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/button_start',
             messageFormat: 'ubii.dataStructure.KeyEvent',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
+            ioType: proto.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/set_color',
             messageFormat: 'ubii.dataStructure.Color',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
+            ioType: proto.ubii.devices.Component.IOType.SUBSCRIBER
           },
           {
             topic: topicPrefix + '/set_image',
             messageFormat: 'ubii.dataStructure.Image2D',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
+            ioType: proto.ubii.devices.Component.IOType.SUBSCRIBER
           },
           {
             topic: topicPrefix + '/clear_image',
             messageFormat: 'boolean',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
-          },
+            ioType: proto.ubii.devices.Component.IOType.SUBSCRIBER
+          }
         ]
       };
       // add vibration component if available
-      navigator.vibrate =
-        navigator.vibrate ||
-        navigator.webkitVibrate ||
-        navigator.mozVibrate ||
-        navigator.msVibrate;
+      navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
       if (navigator.vibrate) {
         this.componentVibration = {
           topic: topicPrefix + '/vibration_pattern',
           messageFormat: 'double',
-          ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
+          ioType: proto.ubii.devices.Component.IOType.SUBSCRIBER
         };
         this.ubiiDevice.components.push(this.componentVibration);
         this.tNextVibrate = Date.now();
@@ -244,9 +213,7 @@ export default {
     },
     registerUbiiSpecs: function() {
       if (this.initializing || this.hasRegisteredUbiiDevice) {
-        console.warn(
-          'Tried to register ubii device, but is already registered'
-        );
+        console.warn('Tried to register ubii device, but is already registered');
         return;
       }
       this.initializing = true;
@@ -254,7 +221,8 @@ export default {
 
       // register the mouse pointer device
       UbiiClientService.instance.waitForConnection().then(() => {
-        UbiiClientService.instance.registerDevice(this.ubiiDevice)
+        UbiiClientService.instance
+          .registerDevice(this.ubiiDevice)
           .then(device => {
             if (device.id) {
               this.ubiiDevice = device;
@@ -265,34 +233,20 @@ export default {
             return device;
           })
           .then(() => {
-            UbiiClientService.instance.subscribeTopic(
-              this.componentSetColor.topic,
-              this.setColor
-            );
+            UbiiClientService.instance.subscribeTopic(this.componentSetColor.topic, this.setColor);
 
-            UbiiClientService.instance.subscribeTopic(
-              this.componentSetImage.topic,
-              this.drawImage
-            );
-            UbiiClientService.instance.subscribeTopic(
-              this.componentClearImage.topic,
-              this.clearImage
-            );          
+            UbiiClientService.instance.subscribeTopic(this.componentSetImage.topic, this.drawImage);
+            UbiiClientService.instance.subscribeTopic(this.componentClearImage.topic, this.clearImage);
 
             if (this.componentVibration) {
-              UbiiClientService.instance.subscribeTopic(
-                this.componentVibration.topic,
-                this.vibrate
-              );
+              UbiiClientService.instance.subscribeTopic(this.componentVibration.topic, this.vibrate);
             }
           });
       });
     },
     unregisterUbiiSpecs: async function() {
       if (!this.hasRegisteredUbiiDevice) {
-        console.warn(
-          'Tried to unregister ubii specs, but they are not registered.'
-        );
+        console.warn('Tried to unregister ubii specs, but they are not registered.');
         return;
       }
 
@@ -311,28 +265,19 @@ export default {
       });
 
       // TODO: unregister device
-      this.ubiiDevice &&
-        (await UbiiClientService.instance.deregisterDevice(this.ubiiDevice));
+      this.ubiiDevice && (await UbiiClientService.instance.deregisterDevice(this.ubiiDevice));
     },
     setTextOutput: function(text) {
       this.textOutput = text;
     },
     setColor: function(color) {
-      let colorString =
-        'rgba(' +
-        [color.r * 255, color.g * 255, color.b * 255, color.a].join(',') +
-        ')';
-      document.getElementById(
-        'start-select-area'
-      ).style.backgroundColor = colorString;
+      let colorString = 'rgba(' + [color.r * 255, color.g * 255, color.b * 255, color.a].join(',') + ')';
+      document.getElementById('start-select-area').style.backgroundColor = colorString;
     },
     drawImage: function(image) {
       const ctx = this.canvasDisplayArea.getContext('2d');
 
-      let displayDimensions = [
-        this.canvasDisplayArea.width,
-        this.canvasDisplayArea.height
-      ];
+      let displayDimensions = [this.canvasDisplayArea.width, this.canvasDisplayArea.height];
 
       let imageDataRGBA = undefined;
       if (image.dataFormat === ImageDataFormats.GRAY8) {
@@ -359,53 +304,28 @@ export default {
       ctx.clearRect(0, 0, displayDimensions[0], displayDimensions[1]);
 
       // draw image data
-      const imgData = new ImageData(
-        new Uint8ClampedArray(imageDataRGBA),
-        image.width,
-        image.height
-      );
+      const imgData = new ImageData(new Uint8ClampedArray(imageDataRGBA), image.width, image.height);
 
       // calculate proper rescale width/height
       let resizeDimensions = [imgData.width, imgData.height];
       if (imgData.width > imgData.height) {
         resizeDimensions[0] = displayDimensions[0];
-        resizeDimensions[1] =
-          imgData.height * (displayDimensions[0] / imgData.width);
+        resizeDimensions[1] = imgData.height * (displayDimensions[0] / imgData.width);
       } else {
-        resizeDimensions[0] =
-          imgData.width * (displayDimensions[1] / imgData.height);
+        resizeDimensions[0] = imgData.width * (displayDimensions[1] / imgData.height);
         resizeDimensions[1] = displayDimensions[1];
       }
 
-      createImageBitmap(imgData, 0, 0, imgData.width, imgData.height).then(
-        imgBitmap => {
-          let startX =
-            displayDimensions[0] > resizeDimensions[0]
-              ? (displayDimensions[0] - resizeDimensions[0]) / 2
-              : 0;
-          let startY =
-            displayDimensions[1] > resizeDimensions[1]
-              ? (displayDimensions[1] - resizeDimensions[1]) / 2
-              : 0;
-          ctx.drawImage(
-            imgBitmap,
-            startX,
-            startY,
-            resizeDimensions[0],
-            resizeDimensions[1]
-          );
-        }
-      );
+      createImageBitmap(imgData, 0, 0, imgData.width, imgData.height).then(imgBitmap => {
+        let startX = displayDimensions[0] > resizeDimensions[0] ? (displayDimensions[0] - resizeDimensions[0]) / 2 : 0;
+        let startY = displayDimensions[1] > resizeDimensions[1] ? (displayDimensions[1] - resizeDimensions[1]) / 2 : 0;
+        ctx.drawImage(imgBitmap, startX, startY, resizeDimensions[0], resizeDimensions[1]);
+      });
     },
     clearImage: function() {
       const ctx = this.canvasDisplayArea.getContext('2d');
 
-      ctx.clearRect(
-        0,
-        0,
-        this.canvasDisplayArea.width,
-        this.canvasDisplayArea.height
-      );
+      ctx.clearRect(0, 0, this.canvasDisplayArea.width, this.canvasDisplayArea.height);
     },
     vibrate: function(vibrationPattern) {
       if (Date.now() >= this.tNextVibrate) {
@@ -414,21 +334,15 @@ export default {
       }
     },
     publishContinuousDeviceData: function() {
-      this.deviceData['analog-stick-left'] &&
-        this.publishAnalogStickPosition(this.deviceData['analog-stick-left']);
+      this.deviceData['analog-stick-left'] && this.publishAnalogStickPosition(this.deviceData['analog-stick-left']);
 
-      this.deviceData.currentOrientation &&
-        this.publishDeviceOrientation(this.deviceData.currentOrientation);
+      this.deviceData.currentOrientation && this.publishDeviceOrientation(this.deviceData.currentOrientation);
 
-      this.deviceData.acceleration &&
-        this.publishDeviceMotion(this.deviceData.acceleration);
+      this.deviceData.acceleration && this.publishDeviceMotion(this.deviceData.acceleration);
 
       // call loop
       if (this.hasRegisteredUbiiDevice) {
-        setTimeout(
-          this.publishContinuousDeviceData,
-          this.publishFrequency * 1000
-        );
+        setTimeout(this.publishContinuousDeviceData, this.publishFrequency * 1000);
       }
     },
     publishDeviceOrientation: function(orientation) {
@@ -485,7 +399,7 @@ export default {
       UbiiClientService.instance.publishRecord({
         topic: topic,
         keyEvent: {
-          type: ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN,
+          type: proto.ubii.dataStructure.ButtonEventType.DOWN,
           key: buttonID.toString()
         }
       });
@@ -500,7 +414,7 @@ export default {
       UbiiClientService.instance.publishRecord({
         topic: topic,
         keyEvent: {
-          type: ProtobufLibrary.ubii.dataStructure.ButtonEventType.UP,
+          type: proto.ubii.dataStructure.ButtonEventType.UP,
           key: buttonID.toString()
         }
       });
@@ -513,11 +427,7 @@ export default {
     },
     /* event methods */
     registerEventListeners: function() {
-      window.addEventListener(
-        'deviceorientation',
-        this.onDeviceOrientation,
-        true
-      );
+      window.addEventListener('deviceorientation', this.onDeviceOrientation, true);
       window.addEventListener('devicemotion', this.onDeviceMotion, true);
     },
     unregisterEventListeners: function() {
@@ -527,26 +437,16 @@ export default {
     onTouchStart: function(event) {
       this.deviceData.touches = event.touches;
 
-      this.deviceData[event.target.id] = this.normalizeAnalogStickCoordinates(
-        event,
-        0
-      );
-      this.$data.stickPosition[event.target.id].x =
-        (this.deviceData[event.target.id].x + 1) * 25;
-      this.$data.stickPosition[event.target.id].y =
-        (-this.deviceData[event.target.id].y + 1) * 25;
+      this.deviceData[event.target.id] = this.normalizeAnalogStickCoordinates(event, 0);
+      this.$data.stickPosition[event.target.id].x = (this.deviceData[event.target.id].x + 1) * 25;
+      this.$data.stickPosition[event.target.id].y = (-this.deviceData[event.target.id].y + 1) * 25;
     },
     onTouchMove: function(event) {
       this.deviceData.touches = event.touches;
 
-      this.deviceData[event.target.id] = this.normalizeAnalogStickCoordinates(
-        event,
-        0
-      );
-      this.$data.stickPosition[event.target.id].x =
-        (this.deviceData[event.target.id].x + 1) * 25;
-      this.$data.stickPosition[event.target.id].y =
-        (-this.deviceData[event.target.id].y + 1) * 25;
+      this.deviceData[event.target.id] = this.normalizeAnalogStickCoordinates(event, 0);
+      this.$data.stickPosition[event.target.id].x = (this.deviceData[event.target.id].x + 1) * 25;
+      this.$data.stickPosition[event.target.id].y = (-this.deviceData[event.target.id].y + 1) * 25;
     },
     onTouchEnd: function(event) {
       this.deviceData.touches = event.touches;
@@ -580,15 +480,11 @@ export default {
       };
 
       // normalize to X=[-1;1] (left-right) Y=[-1;1] (top-bottom)
-      let normalizedX =
-        2 * ((touchPosition.x - ringBounds.left) / ringBounds.width - 0.5);
-      let normalizedY =
-        2 * ((touchPosition.y - ringBounds.top) / ringBounds.height - 0.5);
+      let normalizedX = 2 * ((touchPosition.x - ringBounds.left) / ringBounds.width - 0.5);
+      let normalizedY = 2 * ((touchPosition.y - ringBounds.top) / ringBounds.height - 0.5);
 
       // normalize if longer than 1
-      let vec2Length = Math.sqrt(
-        Math.pow(normalizedX, 2) + Math.pow(normalizedY, 2)
-      );
+      let vec2Length = Math.sqrt(Math.pow(normalizedX, 2) + Math.pow(normalizedY, 2));
       if (vec2Length > 1) {
         normalizedX = normalizedX / vec2Length;
         normalizedY = normalizedY / vec2Length;

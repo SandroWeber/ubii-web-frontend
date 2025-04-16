@@ -108,27 +108,13 @@ export default {
       debugRotationRate: undefined,
       grantedImuPermission: false,
       enabled: false,
-      additionalTags: ""
+      additionalTags: ''
     };
   },
   mounted: async function() {
     this.initializing = false;
     this.hasRegisteredUbiiDevice = false;
     this.enabled = false;
-
-    // unsubscribe before page is unloaded
-    window.addEventListener('beforeunload', async () => {
-      await this.stopInterface();
-    });
-
-    UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, async () => {
-      await this.startInterface();
-    });
-    UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, async () => {
-      await this.stopInterface();
-    });
-
-    await this.startInterface();
   },
   beforeDestroy: function() {
     this.stopInterface();
@@ -153,6 +139,12 @@ export default {
       UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, async () => {
         await this.stopInterface();
       });
+
+      // unsubscribe before page is unloaded
+      window.addEventListener('beforeunload', async () => {
+        await this.stopInterface();
+      });
+
       this.startInterface();
     },
     startInterface: async function() {
@@ -167,7 +159,9 @@ export default {
       }
       try {
         this.elementTouch = document.getElementById('touch-area');
-        this.ubiiDevice = new UbiiSmartDevice(this.elementTouch, {tags: this.additionalTags.split(',')});
+        this.ubiiDevice = new UbiiSmartDevice(this.elementTouch, {
+          tags: this.additionalTags.split(',').filter(value => value.length > 0)
+        });
       } catch (error) {
         console.error('ubii device creation error');
         console.error(error);

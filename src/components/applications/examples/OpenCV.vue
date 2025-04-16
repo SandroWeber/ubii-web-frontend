@@ -21,11 +21,10 @@
 import uuidv4 from 'uuid/v4';
 
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
-import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
+import { DEFAULT_TOPICS, proto } from '@tum-far/ubii-msg-formats';
 import { setTimeout } from 'timers';
 
-const ImageDataFormats = ProtobufLibrary.ubii.dataStructure.Image2D.DataFormat;
+const ImageDataFormats = proto.ubii.dataStructure.Image2D.DataFormat;
 
 export default {
   name: 'Example-OpenCV',
@@ -92,18 +91,18 @@ export default {
 
       this.ubiiDevice = {
         name: this.ubiiDeviceName,
-        deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
+        deviceType: proto.ubii.devices.Device.DeviceType.PARTICIPANT,
         clientId: UbiiClientService.instance.getClientID(),
         components: [
           {
             topic: topicPrefix + '/camera_image',
             messageFormat: 'ubii.dataStructure.Image2D',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
+            ioType: proto.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: topicPrefix + '/opencv_image',
             messageFormat: 'ubii.dataStructure.Image2D',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
+            ioType: proto.ubii.devices.Component.IOType.SUBSCRIBER
           }
         ]
       };

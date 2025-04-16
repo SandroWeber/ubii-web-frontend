@@ -1,21 +1,19 @@
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
+import { proto } from '@tum-far/ubii-msg-formats';
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
 import UbiiComponent from './ubii-component-base';
 
-const TOPIC_SUFFIX = 'orientation';
-
 const UBII_SPECS = {
   name: 'web-component-orientation',
   messageFormat: 'ubii.dataStructure.Vector3',
-  ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
+  ioType: proto.ubii.devices.Component.IOType.PUBLISHER,
   tags: ['imu', 'orientation'],
   description: 'web interface component - orientation'
 };
 
 export default class UbiiComponentOrientation extends UbiiComponent {
   constructor(publishFrequencyMS) {
-    super(TOPIC_SUFFIX, UBII_SPECS);
+    super(UBII_SPECS);
 
     this.publishFrequencyMS = publishFrequencyMS;
   }
