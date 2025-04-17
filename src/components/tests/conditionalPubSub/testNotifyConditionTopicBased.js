@@ -10,16 +10,20 @@ const NOTIFY_CONDITION_TEMPLATE = {
   evaluationFunctionStringified: undefined
 };
 
-const COMPONENT_TEMPLATE = {
-  name: 'frontend.test-notify-condition.pub-component',
-  topic: undefined,
-  messageFormat: 'int32',
-  ioType: proto.ubii.devices.Component.IOType.PUBLISHER,
-  tags: ['test', 'NotifyCondition'],
-  notifyConditionIds: []
-};
+const TOPIC_A_RANGE_MIN = -10;
+const TOPIC_A_RANGE_MAX = 10;
+const DIFF_THRESHOLD = 5;
 
 export default class TestNotifyConditionTopicBased {
+  static COMPONENT_TEMPLATE = {
+    name: 'frontend.test-notify-condition.pub-component',
+    topic: undefined,
+    messageFormat: 'int32',
+    ioType: proto.ubii.devices.Component.IOType.PUBLISHER,
+    tags: ['test', 'NotifyCondition'],
+    notifyConditionIds: []
+  };
+
   constructor() {
     this.status = CONSTANTS.TEST_STATUS.UMNEASURED;
     this.result = 'undetermined';
@@ -30,6 +34,8 @@ export default class TestNotifyConditionTopicBased {
   }
 
   async prepare() {
+    this.result = 'undetermined';
+    this.failure = true;
     this.status = CONSTANTS.TEST_STATUS.RUNNING;
     this.setup = {
       topicA: UbiiClientService.instance.getClientID() + '/test/notify-condition/topic-based/entity-a',
@@ -87,13 +93,13 @@ export default class TestNotifyConditionTopicBased {
     this.data.tTestStart = performance.now();
     this.status = CONSTANTS.TEST_STATUS.RUNNING;
 
-    this.setup.entityB.publish(1);
-    this.nextIntForA = -10;
+    this.setup.entityB.publish(0);
+    this.nextIntForA = TOPIC_A_RANGE_MIN;
     this.intervalPublishA = setInterval(() => {
       //let randomInt = Math.floor(10 * Math.random());
       this.setup.entityA.publish(this.nextIntForA);
       this.nextIntForA = this.nextIntForA + 1;
-      if (this.nextIntForA === 10) {
+      if (this.nextIntForA === TOPIC_A_RANGE_MAX) {
         this.stop();
       }
     }, 100);
@@ -127,19 +133,20 @@ export default class TestNotifyConditionTopicBased {
       let intB = recordB && recordB.int32; // eslint-disable-line no-undef
 
       if (typeof intA === 'undefined' || typeof intB === 'undefined') return false;
-      else return Math.abs(intA - intB) < 5;
+      else return Math.abs(intA - intB) < DIFF_THRESHOLD;
     };
     condition.evaluationFunctionStringified = evaluationCallback.toString();
 
     condition.evaluationFunctionStringified = condition.evaluationFunctionStringified.replace('topicA', `'${topicA}'`);
     condition.evaluationFunctionStringified = condition.evaluationFunctionStringified.replace('topicB', `'${topicB}'`);
+    condition.evaluationFunctionStringified = condition.evaluationFunctionStringified.replace('DIFF_THRESHOLD', `'${DIFF_THRESHOLD}'`);
 
     return condition;
   }
 
   createTestEntity(topic, notifyConditionIds) {
     let entity = {
-      component: Object.assign({}, COMPONENT_TEMPLATE)
+      component: JSON.parse(JSON.stringify(TestNotifyConditionTopicBased.COMPONENT_TEMPLATE))
     };
     entity.component.topic = topic;
     entity.component.notifyConditionIds.push(...notifyConditionIds);
@@ -174,9 +181,10 @@ export default class TestNotifyConditionTopicBased {
   testCondition() {
     let curValueA = this.data.curValues[this.setup.topicA];
     let curValueB = this.data.curValues[this.setup.topicB];
+    console.info(`testCondition() - curValueA=${curValueA}, curValueB=${curValueB}`);
     if (typeof curValueA !== 'undefined' && typeof curValueB !== 'undefined') {
-      let boolean = Math.abs(curValueA - curValueB) < 5;
-      return Math.abs(curValueA - curValueB) < 5;
+      let valid = Math.abs(curValueA - curValueB) < DIFF_THRESHOLD;
+      return valid;
     }
   }
 }
