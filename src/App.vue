@@ -24,22 +24,9 @@ export default {
     ConnectionStatus
   },
   mounted: () => {
-    let useHTTPS = window.location.protocol.includes('https');
-    UbiiClientService.instance.setHTTPS(useHTTPS);
     UbiiClientService.instance.setName('Ubi-Interact Web Frontend');
-
-    let urlServices = useHTTPS ? 'https://' : 'http://';
-    if (config && config.masterNode && config.masterNode.services && config.masterNode.services.url) {
-      urlServices += config.masterNode.services.url.replace(/.*:\/\//, '');
-    } else {
-      urlServices += window.location.hostname + ':8102/services';
-    }
-    let urlTopicData = useHTTPS ? 'wss://' : 'ws://';
-    if (config && config.masterNode && config.masterNode.topicdata && config.masterNode.topicdata.url) {
-      urlTopicData += config.masterNode.topicdata.url.replace(/.*:\/\//, '');
-    } else {
-      urlTopicData += window.location.hostname + ':8104';
-    }
+    const urlServices = config.masterNode.services.url ? config.masterNode.services.url : 'http://localhost:8102/services/json';
+    const urlTopicData = config.masterNode.topicdata.url ? config.masterNode.topicdata.url : 'ws://localhost:8104';
     UbiiClientService.instance.connect(urlServices, urlTopicData);
     window.addEventListener('beforeunload', () => {
       UbiiClientService.instance.disconnect();
