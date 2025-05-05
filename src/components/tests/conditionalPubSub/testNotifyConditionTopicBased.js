@@ -1,28 +1,27 @@
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
-import { DEFAULT_TOPICS, proto } from '@tum-far/ubii-msg-formats';
 
 import CONSTANTS from '../constants';
+import ComponentInteger from './componentInteger';
+import NotifyConditionIntegerDiff from './notifyConditionIntegerDiff';
+import ComponentString from './componentString';
 
 /* eslint-disable no-console */
 
-const NOTIFY_CONDITION_TEMPLATE = {
-  name: 'frontend.test-notify-condition',
-  evaluationFunctionStringified: undefined
-};
-
 const TOPIC_A_RANGE_MIN = -10;
 const TOPIC_A_RANGE_MAX = 10;
-const DIFF_THRESHOLD = 5;
 
 export default class TestNotifyConditionTopicBased {
-  static COMPONENT_TEMPLATE = {
-    name: 'frontend.test-notify-condition.pub-component',
-    topic: undefined,
-    messageFormat: 'int32',
-    ioType: proto.ubii.devices.Component.IOType.PUBLISHER,
-    tags: ['test', 'NotifyCondition'],
-    notifyConditionIds: []
-  };
+  get currentIntA() {
+    return this.data.latestRecordReceived[this.setup.componentIntegerA.topic].int32;
+  }
+
+  get currentIntB() {
+    return this.data.latestRecordReceived[this.setup.componentIntegerB.topic].int32;
+  }
+
+  get currentString() {
+    return this.data.latestRecordReceived[this.setup.componentString.topic].string;
+  }
 
   constructor() {
     this.status = CONSTANTS.TEST_STATUS.UMNEASURED;
@@ -37,52 +36,48 @@ export default class TestNotifyConditionTopicBased {
     this.result = 'undetermined';
     this.failure = true;
     this.status = CONSTANTS.TEST_STATUS.RUNNING;
-    this.setup = {
-      topicA: UbiiClientService.instance.getClientID() + '/test/notify-condition/topic-based/entity-a',
-      topicB: UbiiClientService.instance.getClientID() + '/test/notify-condition/topic-based/entity-b'
-    };
-    this.data.recvMsgs[this.setup.topicA] = 0;
-    this.data.recvMsgs[this.setup.topicB] = 0;
+
+    this.setup = {};
+    this.setup.componentIntegerA = new ComponentInteger();
+    if (!(await this.setup.componentIntegerA.register())) return;
+    console.info(this.setup.componentIntegerA.ubiiSpecs);
+    this.setup.componentIntegerB = new ComponentInteger();
+    if (!(await this.setup.componentIntegerB.register())) return;
+    console.info(this.setup.componentIntegerB.ubiiSpecs);
+    this.setup.notifyCondition = new NotifyConditionIntegerDiff(
+      this.setup.componentIntegerA.topic,
+      this.setup.componentIntegerB.topic
+    );
+    if (!(await this.setup.notifyCondition.register())) return;
+    this.setup.componentString = new ComponentString();
+    this.setup.componentString.updateUbiiSpecs({ notifyConditionIds: [this.setup.notifyCondition.id] });
+    if (!(await this.setup.componentString.register())) return;
+
     this.subTokens = [];
-
-    // notify condition
-    let replyNotifyConditionAdd = await UbiiClientService.instance.callService({
-      topic: DEFAULT_TOPICS.SERVICES.NOTIFY_CONDITION_ADD,
-      notifyCondition: this.createNotifyCondition(this.setup.topicA, this.setup.topicB)
-    });
-    if (replyNotifyConditionAdd.notifyCondition) {
-      this.notifyConditionSpecs = replyNotifyConditionAdd.notifyCondition;
-    } else {
-      console.warn(replyNotifyConditionAdd);
-      this.stop();
-      return;
-    }
-
-    this.setup.entityA = this.createTestEntity(this.setup.topicA, [this.notifyConditionSpecs.id]);
-    this.setup.entityB = this.createTestEntity(this.setup.topicB, [this.notifyConditionSpecs.id]);
-
-    let replyDeviceRegistration = await UbiiClientService.instance.callService({
-      topic: DEFAULT_TOPICS.SERVICES.DEVICE_REGISTRATION,
-      device: {
-        name: 'test-notify-condition-topic-based',
-        clientId: UbiiClientService.instance.getClientID(),
-        components: [this.setup.entityA.component, this.setup.entityB.component]
-      }
-    });
-    if (replyDeviceRegistration.device) {
-      this.data.device = replyDeviceRegistration.device;
-    } else {
-      console.error(replyDeviceRegistration);
-      this.stop();
-      return;
-    }
-
     this.subTokens.push(
-      await UbiiClientService.instance.subscribeTopic(this.setup.topicA, record => this.onMessageReceived(record))
+      await UbiiClientService.instance.subscribeTopic(this.setup.componentIntegerA.topic, record =>
+        this.onMessageInteger(record)
+      )
     );
     this.subTokens.push(
-      await UbiiClientService.instance.subscribeTopic(this.setup.topicB, record => this.onMessageReceived(record))
+      await UbiiClientService.instance.subscribeTopic(this.setup.componentIntegerB.topic, record =>
+        this.onMessageInteger(record)
+      )
     );
+    this.subTokens.push(
+      await UbiiClientService.instance.subscribeTopic(this.setup.componentString.topic, record =>
+        this.onMessageString(record)
+      )
+    );
+
+    this.mapTimestamp2RecordExpected = new Map();
+    this.data = {
+      latestRecordReceived: {},
+      numMsgsReceived: {}
+    };
+    this.data.numMsgsReceived[this.setup.componentIntegerA.topic] = 0;
+    this.data.numMsgsReceived[this.setup.componentIntegerB.topic] = 0;
+    this.data.numMsgsReceived[this.setup.componentString.topic] = 0;
   }
 
   async start() {
@@ -93,16 +88,9 @@ export default class TestNotifyConditionTopicBased {
     this.data.tTestStart = performance.now();
     this.status = CONSTANTS.TEST_STATUS.RUNNING;
 
-    this.setup.entityB.publish(0);
+    this.setup.componentIntegerB.publish(0);
     this.nextIntForA = TOPIC_A_RANGE_MIN;
-    this.intervalPublishA = setInterval(() => {
-      //let randomInt = Math.floor(10 * Math.random());
-      this.setup.entityA.publish(this.nextIntForA);
-      this.nextIntForA = this.nextIntForA + 1;
-      if (this.nextIntForA === TOPIC_A_RANGE_MAX) {
-        this.stop();
-      }
-    }, 100);
+    this.setup.componentIntegerA.publish(this.nextIntForA);
   }
 
   async stop() {
@@ -124,67 +112,63 @@ export default class TestNotifyConditionTopicBased {
     }
   }
 
-  createNotifyCondition(topicA, topicB) {
-    let condition = Object.assign({}, NOTIFY_CONDITION_TEMPLATE);
-    let evaluationCallback = (publisher, subscriber, getTopicDataRecord) => {
-      let recordA = getTopicDataRecord({ topic: topicA });
-      let recordB = getTopicDataRecord({ topic: topicB });
-      let intA = recordA && recordA.int32; // eslint-disable-line no-undef
-      let intB = recordB && recordB.int32; // eslint-disable-line no-undef
+  async createComponentIntegerCondition(notifyConditionIds) {
+    let protoSpecs = JSON.parse(JSON.stringify(TestNotifyConditionTopicBased.COMPONENT_TEMPLATE));
+    protoSpecs.notifyConditionIds.push(...notifyConditionIds);
+    let component = new UbiiComponent(protoSpecs);
 
-      if (typeof intA === 'undefined' || typeof intB === 'undefined') return false;
-      else return Math.abs(intA - intB) < DIFF_THRESHOLD;
-    };
-    condition.evaluationFunctionStringified = evaluationCallback.toString();
+    const success = await component.register();
+    if (!success) return undefined;
 
-    condition.evaluationFunctionStringified = condition.evaluationFunctionStringified.replace('topicA', `'${topicA}'`);
-    condition.evaluationFunctionStringified = condition.evaluationFunctionStringified.replace('topicB', `'${topicB}'`);
-    condition.evaluationFunctionStringified = condition.evaluationFunctionStringified.replace('DIFF_THRESHOLD', `'${DIFF_THRESHOLD}'`);
-
-    return condition;
-  }
-
-  createTestEntity(topic, notifyConditionIds) {
-    let entity = {
-      component: JSON.parse(JSON.stringify(TestNotifyConditionTopicBased.COMPONENT_TEMPLATE))
-    };
-    entity.component.topic = topic;
-    entity.component.notifyConditionIds.push(...notifyConditionIds);
-    entity.publish = integer => {
-      this.publishInteger(integer, entity.component.topic);
-    };
-
-    return entity;
-  }
-
-  publishInteger(integer, topic) {
-    this.data.curValues[topic] = integer;
-    let timestamp = UbiiClientService.instance.generateTimestamp();
-    UbiiClientService.instance.publishRecordImmediately({
-      topic: topic,
-      timestamp: timestamp,
-      int32: integer
+    let reply = (component.publish = integer => {
+      this.publishInteger(integer, component.protoSpecs.topic);
     });
+
+    return component;
   }
 
-  onMessageReceived(record) {
-    this.data.recvMsgs[record.topic]++;
-    if (!this.testCondition()) {
+  onMessageInteger(record) {
+    console.info('onMessageInteger()');
+    console.info('record:');
+    console.info(record);
+    this.data.numMsgsReceived[record.topic]++;
+    this.data.latestRecordReceived[record.topic] = record;
+
+    const lastRecordA = this.data.latestRecordReceived[this.setup.componentIntegerA.topic];
+    console.info('lastRecordA:');
+    console.info(lastRecordA);
+    const lastRecordB = this.data.latestRecordReceived[this.setup.componentIntegerB.topic];
+    console.info('lastRecordB:');
+    console.info(lastRecordB);
+    if (lastRecordA && lastRecordB) {
+      let isExpectedToReceive = Math.abs(lastRecordA.int32 - lastRecordB.int32) < NotifyConditionIntegerDiff.DIFF_THRESHOLD;
+      const stringRecord = this.setup.componentString.publish();
+      this.mapTimestamp2RecordExpected.set(stringRecord.timestamp, isExpectedToReceive);
+      console.info(this.mapTimestamp2RecordExpected.get(stringRecord.timestamp));
+      if (!isExpectedToReceive) {
+        setTimeout(this.testCondition(stringRecord), 500);
+      }
+    }
+  }
+
+  onMessageString(record) {
+    this.data.numMsgsReceived[record.topic]++;
+    this.data.latestRecordReceived[record.topic] = record;
+    if (!this.testCondition(record)) {
       this.failure = true;
       console.error(
         `received data on "${record.topic}" but the notify condition should not be fulfilled:` +
-          `A=${this.data.curValues[this.setup.topicA]}, B=${this.data.curValues[this.setup.topicB]}`
+          `A=${this.data.latestRecordReceived[this.setup.componentIntegerA.topic]}, B=${this.data.latestRecordReceived[this.setup.componentIntegerB.topic]}`
       );
     }
   }
 
-  testCondition() {
-    let curValueA = this.data.curValues[this.setup.topicA];
-    let curValueB = this.data.curValues[this.setup.topicB];
+  testCondition(record) {
+    const curValueA = this.data.latestRecordReceived[this.setup.componentIntegerA.topic].int32;
+    const curValueB = this.data.latestRecordReceived[this.setup.componentIntegerB.topic].int32;
     console.info(`testCondition() - curValueA=${curValueA}, curValueB=${curValueB}`);
     if (typeof curValueA !== 'undefined' && typeof curValueB !== 'undefined') {
-      let valid = Math.abs(curValueA - curValueB) < DIFF_THRESHOLD;
-      return valid;
+      return this.mapTimestamp2RecordExpected.get(record.timestamp);
     }
   }
 }

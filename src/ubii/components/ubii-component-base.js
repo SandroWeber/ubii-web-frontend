@@ -12,11 +12,7 @@ export default class UbiiComponent {
   }
 
   constructor(ubiiSpecs) {
-    if (new.target === UbiiComponent) {
-      throw new TypeError('Cannot construct UbiiComponent instances directly');
-    }
-
-    this.ubiiSpecs = ubiiSpecs;
+    this.ubiiSpecs = JSON.parse(JSON.stringify(ubiiSpecs));
   }
 
   async start() {
@@ -38,24 +34,18 @@ export default class UbiiComponent {
     await this.onStop();
   }
 
-  async onStart() {
-    throw new Error(
-      'base UbiiComponent class should not be created directly, extend instead and overwrite onStart for initialization'
-    );
-  }
+  async onStart() {}
 
-  async onStop() {
-    throw new Error(
-      'base UbiiComponent class should not be created directly, extend instead and overwrite onStop for de-initialization'
-    );
-  }
+  async onStop() {}
 
   getUbiiSpecs() {
     return this.ubiiSpecs;
   }
 
   updateUbiiSpecs(specs) {
-    this.ubiiSpecs = specs;
+    for (const prop in specs) {
+      this.ubiiSpecs[prop] = JSON.parse(JSON.stringify(specs[prop]));
+    }
   }
 
   toString() {
