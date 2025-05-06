@@ -135,7 +135,7 @@ export default {
   },
   data: () => {
     return {
-      showClientPointer: false,
+      showClientPointer: true,
       showServerPointer: true,
       mirrorPointer: false,
       publishImmediately: false,
