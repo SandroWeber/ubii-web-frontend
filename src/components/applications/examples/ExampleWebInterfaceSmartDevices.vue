@@ -5,8 +5,7 @@
 </template>
 
 <script>
-import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
+import { DEFAULT_TOPICS, proto } from '@tum-far/ubii-msg-formats';
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
 import UbiiClientContent from '../sharedModules/UbiiClientContent';
@@ -108,17 +107,17 @@ export default {
 
       this.device = {
         name: 'SmartDeviceGathererExample - Device',
-        deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
+        deviceType: proto.ubii.devices.Device.DeviceType.PARTICIPANT,
         components: [
           {
             topic: this.topicVibrationDistanceThreshold,
             messageFormat: 'double',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
+            ioType: proto.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: this.topicTouchObjects,
             messageFormat: 'ubii.dataStructure.Object2DList',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
+            ioType: proto.ubii.devices.Component.IOType.SUBSCRIBER
           }
         ]
       };

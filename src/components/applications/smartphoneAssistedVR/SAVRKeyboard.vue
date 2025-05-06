@@ -17,8 +17,7 @@ import TextDisplay from './modules/TextDisplay';
 // Networking
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 import UbiiClientContent from '../sharedModules/UbiiClientContent';
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
-import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
+import { DEFAULT_TOPICS, proto } from '@tum-far/ubii-msg-formats';
 import { unsubscribe, subscribe } from './modules/ubiiHelper';
 
 export default {
@@ -130,7 +129,7 @@ export default {
 
       subscribe(touchEventTopic, event => {
         this.cursor.touched =
-          event.type == ProtobufLibrary.ubii.dataStructure.ButtonEventType.DOWN;
+          event.type == proto.ubii.dataStructure.ButtonEventType.DOWN;
 
         if (event.position) {
           this.cursor.cursorPosition = new THREE.Vector2(

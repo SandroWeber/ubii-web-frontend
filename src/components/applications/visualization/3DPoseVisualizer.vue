@@ -14,8 +14,7 @@
 
 import * as Three from 'three';
 import uuidv4 from 'uuid/v4';
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
-import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
+import { DEFAULT_TOPICS, proto } from '@tum-far/ubii-msg-formats';
 
 import WebVR from '../sharedModules/WebVR';
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
@@ -60,22 +59,22 @@ export default {
 
       this.ubiiDevice = {
         name: '3DPoseVisualizer - Device',
-        deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
+        deviceType: proto.ubii.devices.Device.DeviceType.PARTICIPANT,
         components: [
           {
             topic: this.topicBoundingBox,
             messageFormat: 'vector3',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
+            ioType: proto.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: this.topicGenerateNumberOfObjects,
             messageFormat: 'double',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
+            ioType: proto.ubii.devices.Component.IOType.PUBLISHER
           },
           {
             topic: this.topicObjects,
             messageFormat: 'ubii.dataStructure.Object3D',
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
+            ioType: proto.ubii.devices.Component.IOType.SUBSCRIBER
           }
         ]
       };

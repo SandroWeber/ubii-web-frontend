@@ -1,21 +1,19 @@
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
+import { proto } from '@tum-far/ubii-msg-formats';
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
 import UbiiComponent from './ubii-component-base';
 
-const TOPIC_SUFFIX = 'vibration_pattern';
-
 const UBII_SPECS = {
   name: 'web-component-vibration',
   messageFormat: 'double',
-  ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER,
+  ioType: proto.ubii.devices.Component.IOType.SUBSCRIBER,
   tags: ['vibration'],
   description: 'web interface component - vibration'
 };
 
 export default class UbiiComponentVibration extends UbiiComponent {
   constructor() {
-    super(TOPIC_SUFFIX, UBII_SPECS);
+    super(UBII_SPECS);
   }
 
   async onStart() {

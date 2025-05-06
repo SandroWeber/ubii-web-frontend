@@ -18,21 +18,9 @@
               <tr>
                 <td>
                   <div class="bigger-icon">
-                    <font-awesome-icon
-                      id="opponent-scissors-icon"
-                      icon="hand-scissors"
-                      class="interface-icon"
-                    />
-                    <font-awesome-icon
-                      id="opponent-rock-icon"
-                      icon="hand-rock"
-                      class="interface-icon"
-                    />
-                    <font-awesome-icon
-                      id="opponent-paper-icon"
-                      icon="hand-paper"
-                      class="interface-icon"
-                    />
+                    <font-awesome-icon id="opponent-scissors-icon" icon="hand-scissors" class="interface-icon" />
+                    <font-awesome-icon id="opponent-rock-icon" icon="hand-rock" class="interface-icon" />
+                    <font-awesome-icon id="opponent-paper-icon" icon="hand-paper" class="interface-icon" />
                   </div>
                 </td>
               </tr>
@@ -46,21 +34,9 @@
               <tr>
                 <td>
                   <div class="bigger-icon">
-                    <font-awesome-icon
-                      id="player-scissors-icon"
-                      icon="hand-scissors"
-                      class="interface-icon"
-                    />
-                    <font-awesome-icon
-                      id="player-rock-icon"
-                      icon="hand-rock"
-                      class="interface-icon"
-                    />
-                    <font-awesome-icon
-                      id="player-paper-icon"
-                      icon="hand-paper"
-                      class="interface-icon"
-                    />
+                    <font-awesome-icon id="player-scissors-icon" icon="hand-scissors" class="interface-icon" />
+                    <font-awesome-icon id="player-rock-icon" icon="hand-rock" class="interface-icon" />
+                    <font-awesome-icon id="player-paper-icon" icon="hand-paper" class="interface-icon" />
                   </div>
                 </td>
               </tr>
@@ -78,11 +54,7 @@
           <div class="in-the-middle" id="text-area">
             <div id="message-text">{{ msgText }}</div>
             <br />
-            <button
-              class="pure-button"
-              id="optional-retry-btn"
-              @click="startGame()"
-            >
+            <button class="pure-button" id="optional-retry-btn" @click="startGame()">
               Retry
             </button>
           </div>
@@ -131,16 +103,11 @@ import UbiiClientContent from '../sharedModules/UbiiClientContent';
 
 import uuidv4 from 'uuid/v4';
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
-import { DEFAULT_TOPICS } from '@tum-far/ubii-msg-formats';
+import { DEFAULT_TOPICS, proto } from '@tum-far/ubii-msg-formats';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
-import {
-  faHandRock,
-  faHandPaper,
-  faHandScissors
-} from '@fortawesome/free-solid-svg-icons';
+import { faHandRock, faHandPaper, faHandScissors } from '@fortawesome/free-solid-svg-icons';
 import { setTimeout } from 'timers';
 
 library.add(faHandRock);
@@ -221,12 +188,12 @@ export default {
       //https://gitlab.lrz.de/IN-FAR/Ubi-Interact/ubii-msg-formats/blob/develop/src/proto/devices/device.proto
       let ubiiDevice = {
         name: deviceName,
-        deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
+        deviceType: proto.ubii.devices.Device.DeviceType.PARTICIPANT,
         components: [
           {
             topic: outputGestureData.topic,
             messageFormat: outputGestureData.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.SUBSCRIBER
+            ioType: proto.ubii.devices.Component.IOType.SUBSCRIBER
           }
         ]
       };
@@ -358,7 +325,8 @@ export default {
           this.createUbiiSpecs();
 
           // register device
-          UbiiClientService.instance.registerDevice(this.$data.ubiiDevice)
+          UbiiClientService.instance
+            .registerDevice(this.$data.ubiiDevice)
             .then(device => {
               this.$data.ubiiDevice = device;
               return device;
@@ -374,10 +342,7 @@ export default {
                   console.info(response);
                 });
               //subscribe to our classied output gesture topic
-              UbiiClientService.instance.subscribeTopic(
-                this.$data.outputGestureData.topic,
-                this.handleGestureData
-              );
+              UbiiClientService.instance.subscribeTopic(this.$data.outputGestureData.topic, this.handleGestureData);
             });
         });
       });
@@ -385,10 +350,7 @@ export default {
 
     //unsubscribe and stop session
     stopSession: function() {
-      UbiiClientService.instance.unsubscribeTopic(
-        this.$data.outputGestureData.topic,
-        this.handleGestureData
-      );
+      UbiiClientService.instance.unsubscribeTopic(this.$data.outputGestureData.topic, this.handleGestureData);
       UbiiClientService.instance.callService({
         topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_STOP,
         session: this.$data.ubiiSession
@@ -410,20 +372,18 @@ export default {
     //look for myo interfaces
     findMyoTopic: async function() {
       return new Promise(resolve => {
-        UbiiClientService.instance
-          .callService({ topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST })
-          .then(reply => {
-            this.$data.topicList = reply.stringList.list;
+        UbiiClientService.instance.callService({ topic: DEFAULT_TOPICS.SERVICES.TOPIC_LIST }).then(reply => {
+          this.$data.topicList = reply.stringList.list;
 
-            this.$data.topicList.forEach(topic => {
-              const topicIndex = topic.indexOf('/web-interface-myo/');
+          this.$data.topicList.forEach(topic => {
+            const topicIndex = topic.indexOf('/web-interface-myo/');
 
-              if (topicIndex !== -1) {
-                this.myoDataTopicSource = topic;
-                resolve();
-              }
-            });
+            if (topicIndex !== -1) {
+              this.myoDataTopicSource = topic;
+              resolve();
+            }
           });
+        });
       });
     },
 
@@ -537,16 +497,14 @@ export default {
             setTimeout(() => {
               //no input detected
               if (
-                (this.currentButtonInput == undefined ||
-                  this.currentButtonInput == 0) &&
+                (this.currentButtonInput == undefined || this.currentButtonInput == 0) &&
                 this.gestureInputCollection.length == 0
               ) {
                 this.noInputMessage(btn);
               }
               //evaluate game
               else {
-                if (this.gestureInputCollection.length == 0)
-                  this.playerGesture = this.currentButtonInput;
+                if (this.gestureInputCollection.length == 0) this.playerGesture = this.currentButtonInput;
                 else this.getBestGesture();
 
                 this.chooseGestureForOpponent();
@@ -590,12 +548,7 @@ export default {
       ) {
         this.winLoseMsg = 'You lose!';
       } else {
-        console.error(
-          'Invalid gesture id. player: ' +
-            this.gesture +
-            ' opponent: ' +
-            this.opponentGesture
-        );
+        console.error('Invalid gesture id. player: ' + this.gesture + ' opponent: ' + this.opponentGesture);
       }
     },
 
@@ -708,9 +661,7 @@ export default {
         this.percentScissors = 0;
         s.style.height = '0';
       } else {
-        this.percentScissors = Math.round(
-          (cnt_1 / (cnt_1 + cnt_2 + cnt_3)) * 100
-        );
+        this.percentScissors = Math.round((cnt_1 / (cnt_1 + cnt_2 + cnt_3)) * 100);
         s.style.height = this.percentScissors.toString() + '%';
       }
       if (cnt_2 == 0) {

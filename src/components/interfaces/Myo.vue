@@ -4,11 +4,7 @@
       <br />
       <div class="c">
         Myo connected:
-        <font-awesome-icon
-          id="connect-icon"
-          :icon="connectedIcon"
-          class="interface-icon"
-        />
+        <font-awesome-icon id="connect-icon" :icon="connectedIcon" class="interface-icon" />
         <p v-if="!myoConnected">
           Do you have the Myo SDK installed? (only available for Windows/Mac)
         </p>
@@ -63,14 +59,11 @@ import Myo from 'myo';
 import UbiiClientContent from '../applications/sharedModules/UbiiClientContent';
 
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
+import { proto } from '@tum-far/ubii-msg-formats';
 
 /* fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
-import {
-  faCheckCircle,
-  faTimesCircle
-} from '@fortawesome/free-solid-svg-icons';
+import { faCheckCircle, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 
 library.add(faCheckCircle);
 library.add(faTimesCircle);
@@ -89,10 +82,7 @@ export default {
       this.stopInterface();
       this.startInterface();
     });
-    UbiiClientService.instance.on(
-      UbiiClientService.EVENTS.DISCONNECT,
-      this.stopInterface
-    );
+    UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, this.stopInterface);
 
     if (UbiiClientService.instance.isConnected()) this.startInterface();
   },
@@ -150,12 +140,12 @@ export default {
       //specification of a ubii.devices.Device
       let ubiiDevice = {
         name: deviceName,
-        deviceType: ProtobufLibrary.ubii.devices.Device.DeviceType.PARTICIPANT,
+        deviceType: proto.ubii.devices.Device.DeviceType.PARTICIPANT,
         components: [
           {
             topic: inputClientMyoData.topic,
             messageFormat: inputClientMyoData.messageFormat,
-            ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER
+            ioType: proto.ubii.devices.Component.IOType.PUBLISHER
           }
         ]
       };
@@ -166,26 +156,20 @@ export default {
       this.$data.inputClientMyoData = inputClientMyoData;
     },
 
-    startInterface: function() {
-      UbiiClientService.instance.waitForConnection().then(() => {
-        // create all the specifications
-        this.createUbiiSpecs();
+    startInterface: async function() {
+      await UbiiClientService.instance.waitForConnection();
+      // create all the specifications
+      this.createUbiiSpecs();
 
-        //Myo setup
-        this.connectMyo();
-        this.getMyoData();
-        this.setPublishInterval();
+      //Myo setup
+      this.connectMyo();
+      this.getMyoData();
+      this.setPublishInterval();
 
-        // register device
-        UbiiClientService.instance.registerDevice(this.$data.ubiiDevice)
-          .then(device => {
-            this.$data.ubiiDevice = device;
-            return device;
-          })
-          .then(() => {
-            this.$data.interfaceStarted = true;
-          });
-      });
+      // register device
+      let device = await UbiiClientService.instance.registerDevice(this.$data.ubiiDevice);
+      this.$data.ubiiDevice = device;
+      this.$data.interfaceStarted = true;
     },
 
     stopInterface: function() {

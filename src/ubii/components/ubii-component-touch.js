@@ -1,21 +1,19 @@
-import ProtobufLibrary from '@tum-far/ubii-msg-formats/dist/js/protobuf';
+import { proto } from '@tum-far/ubii-msg-formats';
 import { UbiiClientService } from '@tum-far/ubii-node-webbrowser';
 
 import UbiiComponent from './ubii-component-base';
 
-const TOPIC_SUFFIX = 'touch_events';
-
 const UBII_SPECS = {
   name: 'web-component-touch',
   messageFormat: 'ubii.dataStructure.TouchEventList',
-  ioType: ProtobufLibrary.ubii.devices.Component.IOType.PUBLISHER,
+  ioType: proto.ubii.devices.Component.IOType.PUBLISHER,
   tags: ['touch'],
   description: 'web interface - touch screen'
 };
 
 export default class UbiiComponentTouchscreen extends UbiiComponent {
   constructor(publishFrequencyMS, touchElement) {
-    super(TOPIC_SUFFIX, UBII_SPECS);
+    super(UBII_SPECS);
 
     this.publishFrequencyMS = publishFrequencyMS;
     this.touchElement = touchElement;
@@ -36,7 +34,7 @@ export default class UbiiComponentTouchscreen extends UbiiComponent {
     for (let i = 0; i < event.touches.length; i++) {
       touchList.push({
         id: event.touches[i].identifier.toString(),
-        type: ProtobufLibrary.ubii.dataStructure.TouchEvent.TouchEventType.TOUCH_START,
+        type: proto.ubii.dataStructure.TouchEvent.TouchEventType.TOUCH_START,
         position: this.normalizeCoordinates(event.touches[i])
       });
     }
@@ -55,7 +53,7 @@ export default class UbiiComponentTouchscreen extends UbiiComponent {
     for (let i = 0; i < event.touches.length; i++) {
       touchList.push({
         id: event.touches[i].identifier.toString(),
-        type: ProtobufLibrary.ubii.dataStructure.TouchEvent.TouchEventType.TOUCH_END,
+        type: proto.ubii.dataStructure.TouchEvent.TouchEventType.TOUCH_END,
         position: this.normalizeCoordinates(event.touches[i])
       });
     }
@@ -70,7 +68,7 @@ export default class UbiiComponentTouchscreen extends UbiiComponent {
       for (let i = 0; i < this.touches.length; i++) {
         touchList.push({
           id: this.touches[i].identifier.toString(),
-          type: ProtobufLibrary.ubii.dataStructure.TouchEvent.TouchEventType.TOUCH_MOVE,
+          type: proto.ubii.dataStructure.TouchEvent.TouchEventType.TOUCH_MOVE,
           position: this.normalizeCoordinates(this.touches[i])
         });
       }

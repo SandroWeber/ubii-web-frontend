@@ -108,18 +108,13 @@ export default {
       debugRotationRate: undefined,
       grantedImuPermission: false,
       enabled: false,
-      additionalTags: ""
+      additionalTags: ''
     };
   },
-  mounted: function() {
+  mounted: async function() {
     this.initializing = false;
     this.hasRegisteredUbiiDevice = false;
     this.enabled = false;
-
-    // unsubscribe before page is unloaded
-    window.addEventListener('beforeunload', async () => {
-      await this.stopInterface();
-    });
   },
   beforeDestroy: function() {
     this.stopInterface();
@@ -144,6 +139,12 @@ export default {
       UbiiClientService.instance.on(UbiiClientService.EVENTS.DISCONNECT, async () => {
         await this.stopInterface();
       });
+
+      // unsubscribe before page is unloaded
+      window.addEventListener('beforeunload', async () => {
+        await this.stopInterface();
+      });
+
       this.startInterface();
     },
     startInterface: async function() {
@@ -152,12 +153,23 @@ export default {
 
       try {
         await UbiiClientService.instance.waitForConnection();
-
+      } catch (error) {
+        console.error('waitForConnection error');
+        console.error(error);
+      }
+      try {
         this.elementTouch = document.getElementById('touch-area');
-        
-        this.ubiiDevice = new UbiiSmartDevice(this.elementTouch, {tags: this.additionalTags.split(',')});
+        this.ubiiDevice = new UbiiSmartDevice(this.elementTouch, {
+          tags: this.additionalTags.split(',').filter(value => value.length > 0)
+        });
+      } catch (error) {
+        console.error('ubii device creation error');
+        console.error(error);
+      }
+      try {
         await this.ubiiDevice.init();
       } catch (error) {
+        console.error('ubii device init error');
         console.error(error);
       }
 
@@ -253,11 +265,11 @@ export default {
           };
         }
 
-        if (ubiiDeviceData && ubiiDeviceData.rotationRateData) {
+        if (ubiiDeviceData && ubiiDeviceData.rotationRate) {
           this.debugRotationRate = {
-            alpha: this.round(ubiiDeviceData.rotationRateData.rotationRate.alpha, 2),
-            beta: this.round(ubiiDeviceData.rotationRateData.rotationRate.beta, 2),
-            gamma: this.round(ubiiDeviceData.rotationRateData.rotationRate.gamma, 2)
+            alpha: this.round(ubiiDeviceData.rotationRate.rotationRate.alpha, 2),
+            beta: this.round(ubiiDeviceData.rotationRate.rotationRate.beta, 2),
+            gamma: this.round(ubiiDeviceData.rotationRate.rotationRate.gamma, 2)
           };
         }
       }
