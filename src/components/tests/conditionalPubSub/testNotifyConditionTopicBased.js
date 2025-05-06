@@ -34,16 +34,14 @@ export default class TestNotifyConditionTopicBased {
 
   async prepare() {
     this.result = 'undetermined';
-    this.failure = true;
+    this.failure = false;
     this.status = CONSTANTS.TEST_STATUS.RUNNING;
 
     this.setup = {};
     this.setup.componentIntegerA = new ComponentInteger();
     if (!(await this.setup.componentIntegerA.register())) return;
-    console.info(this.setup.componentIntegerA.ubiiSpecs);
     this.setup.componentIntegerB = new ComponentInteger();
     if (!(await this.setup.componentIntegerB.register())) return;
-    console.info(this.setup.componentIntegerB.ubiiSpecs);
     this.setup.notifyCondition = new NotifyConditionIntegerDiff(
       this.setup.componentIntegerA.topic,
       this.setup.componentIntegerB.topic
@@ -70,7 +68,7 @@ export default class TestNotifyConditionTopicBased {
       )
     );
 
-    this.mapTimestamp2RecordExpected = new Map();
+    this.mapTimestamp2StringExpected = new Map();
     this.data = {
       latestRecordReceived: {},
       numMsgsReceived: {}
@@ -90,7 +88,7 @@ export default class TestNotifyConditionTopicBased {
 
     this.setup.componentIntegerB.publish(0);
     this.nextIntForA = TOPIC_A_RANGE_MIN;
-    this.setup.componentIntegerA.publish(this.nextIntForA);
+    this.publishNextIntA();
   }
 
   async stop() {
@@ -127,48 +125,51 @@ export default class TestNotifyConditionTopicBased {
     return component;
   }
 
+  publishNextIntA() {
+    this.setup.componentIntegerA.publish(this.nextIntForA);
+    this.nextIntForA++;
+  }
+
   onMessageInteger(record) {
-    console.info('onMessageInteger()');
-    console.info('record:');
-    console.info(record);
     this.data.numMsgsReceived[record.topic]++;
     this.data.latestRecordReceived[record.topic] = record;
 
     const lastRecordA = this.data.latestRecordReceived[this.setup.componentIntegerA.topic];
-    console.info('lastRecordA:');
-    console.info(lastRecordA);
     const lastRecordB = this.data.latestRecordReceived[this.setup.componentIntegerB.topic];
-    console.info('lastRecordB:');
-    console.info(lastRecordB);
     if (lastRecordA && lastRecordB) {
-      let isExpectedToReceive = Math.abs(lastRecordA.int32 - lastRecordB.int32) < NotifyConditionIntegerDiff.DIFF_THRESHOLD;
+      let isExpectedToReceive =
+        Math.abs(lastRecordA.int32 - lastRecordB.int32) < NotifyConditionIntegerDiff.DIFF_THRESHOLD;
       const stringRecord = this.setup.componentString.publish();
-      this.mapTimestamp2RecordExpected.set(stringRecord.timestamp, isExpectedToReceive);
-      console.info(this.mapTimestamp2RecordExpected.get(stringRecord.timestamp));
+      this.mapTimestamp2StringExpected.set(stringRecord.timestamp.millis, isExpectedToReceive);
       if (!isExpectedToReceive) {
-        setTimeout(this.testCondition(stringRecord), 500);
+        this.timeoutWaitForStringMsg = setTimeout(this.testCallback(stringRecord, false), 300);
       }
     }
   }
 
   onMessageString(record) {
+    clearTimeout(this.timeoutWaitForStringMsg);
     this.data.numMsgsReceived[record.topic]++;
     this.data.latestRecordReceived[record.topic] = record;
-    if (!this.testCondition(record)) {
-      this.failure = true;
-      console.error(
-        `received data on "${record.topic}" but the notify condition should not be fulfilled:` +
-          `A=${this.data.latestRecordReceived[this.setup.componentIntegerA.topic]}, B=${this.data.latestRecordReceived[this.setup.componentIntegerB.topic]}`
-      );
-    }
+    this.testCallback(record, true);
   }
 
-  testCondition(record) {
-    const curValueA = this.data.latestRecordReceived[this.setup.componentIntegerA.topic].int32;
-    const curValueB = this.data.latestRecordReceived[this.setup.componentIntegerB.topic].int32;
-    console.info(`testCondition() - curValueA=${curValueA}, curValueB=${curValueB}`);
-    if (typeof curValueA !== 'undefined' && typeof curValueB !== 'undefined') {
-      return this.mapTimestamp2RecordExpected.get(record.timestamp);
+  testCallback(record, shouldReceive) {
+    if (shouldReceive !== this.mapTimestamp2StringExpected.get(record.timestamp.millis)) {
+      this.failure = true;
+      console.error(
+        `did not receive data on "${record.topic}" when notify condition should be fulfilled, ran into timeout:` +
+          `A=${this.data.latestRecordReceived[this.setup.componentIntegerA.topic]}, B=${
+            this.data.latestRecordReceived[this.setup.componentIntegerB.topic]
+          }`
+      );
+    } else {
+      if (this.nextIntForA === TOPIC_A_RANGE_MAX) {
+        clearTimeout(this.timeoutWaitForStringMsg);
+        this.stop();
+      } else {
+        this.publishNextIntA();
+      }
     }
   }
 }
