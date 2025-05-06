@@ -54,20 +54,18 @@ export default {
     };
   },
   methods: {
-    start: function() {
+    start: async function() {
       this.cocoSSDLabels = [];
 
-      UbiiClientService.instance.waitForConnection().then(() => {
-        this.createUbiiSpecs();
+      await UbiiClientService.instance.waitForConnection();
+      this.createUbiiSpecs();
 
-        UbiiClientService.instance.registerDevice(this.ubiiDevice).then(device => {
-          if (device) {
-            this.ubiiDevice = device;
-          }
-        });
-        UbiiClientService.instance.subscribeTopic(this.componentTextOutput.topic, text => {
-          this.textOutput = text;
-        });
+      const device = await UbiiClientService.instance.registerDevice(this.ubiiDevice);
+      if (device) {
+        this.ubiiDevice = device;
+      }
+      UbiiClientService.instance.subscribeTopic(this.componentTextOutput.topic, text => {
+        this.textOutput = text;
       });
     },
     stop: function() {
@@ -151,7 +149,7 @@ export default {
         ]
       };
     },
-    registerUbiiSpecs: function() {
+    registerUbiiSpecs: async function() {
       if (this.initializing || this.hasRegisteredUbiiDevice) {
         console.warn('Tried to register ubii device, but is already registered');
         return;
@@ -160,26 +158,19 @@ export default {
       this.cocoSSDLabels = [];
 
       // register the mouse pointer device
-      UbiiClientService.instance.waitForConnection().then(() => {
-        UbiiClientService.instance
-          .registerDevice(this.ubiiDevice)
-          .then(device => {
-            if (device.id) {
-              this.ubiiDevice = device;
-              this.hasRegisteredUbiiDevice = true;
-              this.initializing = false;
-              this.publishContinuousDeviceData();
-            }
-            return device;
-          })
-          .then(() => {
-            UbiiClientService.instance.subscribeTopic(this.componentTextOutput.topic, this.setTextOutput);
+      await UbiiClientService.instance.waitForConnection();
+      const device = await UbiiClientService.instance.registerDevice(this.ubiiDevice);
+      if (device.id) {
+        this.ubiiDevice = device;
+        this.hasRegisteredUbiiDevice = true;
+        this.initializing = false;
+        this.publishContinuousDeviceData();
+      }
+      await UbiiClientService.instance.subscribeTopic(this.componentTextOutput.topic, this.setTextOutput);
 
-            if (this.componentVibration) {
-              UbiiClientService.instance.subscribeTopic(this.componentVibration.topic, this.vibrate);
-            }
-          });
-      });
+      if (this.componentVibration) {
+        await UbiiClientService.instance.subscribeTopic(this.componentVibration.topic, this.vibrate);
+      }
     },
     unregisterUbiiSpecs: async function() {
       if (!this.hasRegisteredUbiiDevice) {
@@ -214,21 +205,18 @@ export default {
         this.stopCoCoSSDObjectDetection();
       }
     },
-    startCoCoSSDObjectDetection: function() {
+    startCoCoSSDObjectDetection: async function() {
       UbiiClientService.instance.subscribe(this.ubiiDevice.components[1].topic, predictedObjectsList => {
         this.drawCoCoSSDLabels(predictedObjectsList.elements);
       });
 
-      UbiiClientService.instance
-        .callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
-          session: this.ubiiSessionCoCoSSD
-        })
-        .then(response => {
-          if (response.error) {
-            console.warn(response.error);
-          }
-        });
+      const response = await UbiiClientService.instance.callService({
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_START,
+        session: this.ubiiSessionCoCoSSD
+      });
+      if (response.error) {
+        console.warn(response.error);
+      }
 
       let continuousPublish = () => {
         this.publishImage();

@@ -33,7 +33,6 @@ export default class ModelViewerUbiiConnections {
           ]
         }
       });
-      console.info(response);
       if (response && response.deviceList && response.deviceList.elements) {
         for (const device of response.deviceList.elements) {
           if (device.tags.includes('smart device')) {

@@ -156,27 +156,20 @@ export default {
       this.$data.inputClientMyoData = inputClientMyoData;
     },
 
-    startInterface: function() {
-      UbiiClientService.instance.waitForConnection().then(() => {
-        // create all the specifications
-        this.createUbiiSpecs();
+    startInterface: async function() {
+      await UbiiClientService.instance.waitForConnection();
+      // create all the specifications
+      this.createUbiiSpecs();
 
-        //Myo setup
-        this.connectMyo();
-        this.getMyoData();
-        this.setPublishInterval();
+      //Myo setup
+      this.connectMyo();
+      this.getMyoData();
+      this.setPublishInterval();
 
-        // register device
-        UbiiClientService.instance
-          .registerDevice(this.$data.ubiiDevice)
-          .then(device => {
-            this.$data.ubiiDevice = device;
-            return device;
-          })
-          .then(() => {
-            this.$data.interfaceStarted = true;
-          });
-      });
+      // register device
+      let device = await UbiiClientService.instance.registerDevice(this.$data.ubiiDevice);
+      this.$data.ubiiDevice = device;
+      this.$data.interfaceStarted = true;
     },
 
     stopInterface: function() {

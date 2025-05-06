@@ -23,7 +23,7 @@ import { setTimeout } from 'timers';
 
 export default {
   name: 'Interface-Camera',
-  mounted: function() {
+  mounted: async function() {
     let video = document.getElementById('video');
     this.videoOverlayElement = document.getElementById('video-overlay');
 
@@ -32,21 +32,17 @@ export default {
     // Get access to the camera!
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       // Not adding `{ audio: true }` since we only want video now
-      navigator.mediaDevices.getUserMedia({ video: true }).then(
-        //resolved
-        stream => {
-          //video.src = window.URL.createObjectURL(stream);
-          video.srcObject = stream;
-          video.play();
+      try {
+        let stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        //video.src = window.URL.createObjectURL(stream);
+        video.srcObject = stream;
+        video.play();
 
-          this.videoElement = video;
-          this.start();
-        },
-        //rejected
-        error => {
-          console.warn(error);
-        }
-      );
+        this.videoElement = video;
+        this.start();
+      } catch (error) {
+        console.warn(error);
+      }
     }
   },
   beforeDestroy: function() {
@@ -58,18 +54,16 @@ export default {
     };
   },
   methods: {
-    start: function() {
+    start: async function() {
       this.cocoSSDLabels = [];
 
-      UbiiClientService.instance.waitForConnection().then(() => {
-        this.createUbiiSpecs();
+      await UbiiClientService.instance.waitForConnection();
+      this.createUbiiSpecs();
 
-        UbiiClientService.instance.registerDevice(this.ubiiDevice).then(device => {
-          if (device) {
-            this.ubiiDevice = device;
-          }
-        });
-      });
+      const device = await UbiiClientService.instance.registerDevice(this.ubiiDevice);
+      if (device) {
+        this.ubiiDevice = device;
+      }
     },
     stop: function() {
       this.cocoSsdActive = false;
@@ -131,21 +125,18 @@ export default {
         this.stopCoCoSSDObjectDetection();
       }
     },
-    startCoCoSSDObjectDetection: function() {
+    startCoCoSSDObjectDetection: async function() {
       UbiiClientService.instance.subscribeTopic(this.ubiiDevice.components[1].topic, this.handleObjectPredictions);
 
-      UbiiClientService.instance
-        .callService({
-          topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
-          session: this.ubiiSessionCoCoSSD
-        })
-        .then(response => {
-          if (response.error) {
-            console.warn(response.error);
-          } else if (response.session) {
-            this.ubiiSessionCoCoSSD = response.session;
-          }
-        });
+      const response = await UbiiClientService.instance.callService({
+        topic: DEFAULT_TOPICS.SERVICES.SESSION_RUNTIME_START,
+        session: this.ubiiSessionCoCoSSD
+      });
+      if (response.error) {
+        console.error(response.error);
+      } else if (response.session) {
+        this.ubiiSessionCoCoSSD = response.session;
+      }
 
       let continuousPublish = () => {
         this.publishImage();
