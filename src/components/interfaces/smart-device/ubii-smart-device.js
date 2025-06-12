@@ -4,6 +4,7 @@ import UbiiComponentTouchscreen from '../../../ubii/components/ubii-component-to
 import UbiiComponentOrientation from '../../../ubii/components/ubii-component-orientation';
 import UbiiComponentVibration from '../../../ubii/components/ubii-component-vibration';
 import UbiiComponentAccelerometer from '../../../ubii/components/ubii-component-accelerometer';
+import UbiiComponentGPS from '../../../ubii/components/ubii-component-gps';
 
 const UBII_SPECS_TEMPLATE = {
   name: 'web-interface-smart-device',
@@ -19,74 +20,96 @@ export default class UbiiSmartDevice {
 
     this.publishIntervalMilliseconds = 200;
     this.elementTouch = elementTouch;
+    this.clientId = null;
+    this.deviceId = null;
   }
 
-  /* setup */
-
   async init() {
-    await UbiiClientService.instance.waitForConnection();
+    try {
+      await UbiiClientService.instance.waitForConnection();
+      this.clientId = UbiiClientService.instance.getClientID();
+      
+      if (!this.clientId) {
+        console.error('Client not registered. Cannot initialize device.');
+        return false;
+      }
 
-    this.clientId = UbiiClientService.instance.getClientID();
+      this._componentObjects = [];
+      this.componentAccelerometer = new UbiiComponentAccelerometer();
+      this.componentVibrate = new UbiiComponentVibration();
+      this.componentOrientation = new UbiiComponentOrientation(33);
+      this.componentTouch = new UbiiComponentTouchscreen(33, this.elementTouch);
+      this.componentGPS = new UbiiComponentGPS(UBII_SPECS_TEMPLATE.name);
+      
+      this._componentObjects.push(
+        this.componentAccelerometer,
+        this.componentVibrate,
+        this.componentOrientation,
+        this.componentTouch,
+        this.componentGPS
+      );
 
-    this._componentObjects = [];
-    this.componentAccelerometer = new UbiiComponentAccelerometer();
-    this.componentVibrate = new UbiiComponentVibration();
-    this.componentOrientation = new UbiiComponentOrientation(33);
-    this.componentTouch = new UbiiComponentTouchscreen(33, this.elementTouch);
-    this._componentObjects.push(
-      this.componentAccelerometer,
-      this.componentVibrate,
-      this.componentOrientation,
-      this.componentTouch
-    );
+      // Register components first
+      for (const component of this._componentObjects) {
+        const success = await component.register();
+        if (!success) {
+          console.error('Component registration failed:', component);
+          return false;
+        }
+      }
 
-    let successRegister = await this.register();
+      // Get component specs
+      this.components = this._componentObjects.map(componentObject => componentObject.getUbiiSpecs());
 
-    if (successRegister) {
+      // Register device
+      const registrationSpecs = await UbiiClientService.instance.registerDevice({
+        ...this,
+        clientId: this.clientId
+      });
+
+      if (!registrationSpecs || !registrationSpecs.id) {
+        console.error('Device registration failed:', registrationSpecs);
+        return false;
+      }
+
+      this.deviceId = registrationSpecs.id;
+      Object.assign(this, registrationSpecs);
+      console.log('Device registered successfully with ID:', this.deviceId);
+
+      // Start components
       await this.componentAccelerometer.start();
       await this.componentVibrate.start();
       await this.componentOrientation.start();
       await this.componentTouch.start();
+      await this.componentGPS.start();
+
+      return true;
+    } catch (error) {
+      console.error('Error during device initialization:', error);
+      return false;
     }
   }
 
   async deinit() {
-    this.running = false;
-    for (let component of this.components) {
-      component.stop && (await component.stop());
-    }
-    await this.deregister();
-  }
+    try {
+      // Stop components
+      if (this.componentGPS) await this.componentGPS.stop();
+      if (this.componentTouch) await this.componentTouch.stop();
+      if (this.componentOrientation) await this.componentOrientation.stop();
+      if (this.componentVibrate) await this.componentVibrate.stop();
+      if (this.componentAccelerometer) await this.componentAccelerometer.stop();
 
-  async register() {
-    await UbiiClientService.instance.waitForConnection();
-    for (const component of this._componentObjects) {
-      let success = await component.register();
-      if (!success) {
-        console.error('failed to register component:');
-        console.error(component);
-        return false;
+      // Deregister device
+      if (this.deviceId) {
+        await UbiiClientService.instance.deregisterDevice(this);
+        console.log('Device deregistered successfully');
       }
+
+      return true;
+    } catch (error) {
+      console.error('Error during device deinitialization:', error);
+      return false;
     }
-
-    this.components = this._componentObjects.map(componentObject => componentObject.getUbiiSpecs());
-    let registrationSpecs = await UbiiClientService.instance.registerDevice(this);
-    if (!registrationSpecs || !registrationSpecs.id) return false;
-
-    Object.assign(this, registrationSpecs);
-    console.info('registered device:');
-    console.info(this);
-    this.hasRegisteredUbiiDevice = true;
-    this.running = true;
-
-    return true;
-  }
-
-  async deregister() {
-    this.intervalPublishContinuousData && clearInterval(this.intervalPublishContinuousData);
-
-    await UbiiClientService.instance.deregisterDevice(this);
-    this.hasRegisteredUbiiDevice = false;
   }
 
   toProtobuf() {}

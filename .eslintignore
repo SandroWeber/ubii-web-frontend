@@ -1,0 +1,7 @@
+node_modules/**
+dist/**
+build/**
+**/vendor/**
+**/*.min.js
+**/coverage/**
+**/ubii-msg-formats/** 
