@@ -5,92 +5,114 @@
       <input id="add-tags" type="text" v-model="additionalTags" />
       <button @click="onClickEnable()">Enable</button>
     </div>
-    <div v-else>
-      <div class="debug-info">
-        <div>Device ID: {{ clientId || 'Not registered' }}</div>
-        <div>
-          <div>GPS Location:</div>
-          <div>Latitude: {{ deviceLocation.latitude ? deviceLocation.latitude.toFixed(6) : 'Waiting...' }}</div>
-          <div>Longitude: {{ deviceLocation.longitude ? deviceLocation.longitude.toFixed(6) : 'Waiting...' }}</div>
-          <div>Accuracy: {{ deviceLocation.accuracy ? deviceLocation.accuracy.toFixed(2) + 'm' : 'Waiting...' }}</div>
-        </div>
-        <div v-if="!isSecure && isIOS" class="protocol-warning">
-          <p>⚠️ Running on HTTP - Geolocation may not work on iOS. Please use HTTPS.</p>
-        </div>
-        <div v-if="locationPermissionDenied" class="permission-warning">
-          <p>Location permission is required for this device to work properly.</p>
-          <button @click="requestLocationPermission" class="permission-button">
-            Grant Location Permission
+    <div ref="top-div" v-if="enabled">
+      <fullscreen ref="fullscreen" class="fullscreen" @change="onFullScreenChange" style="overflow: hidden">
+        <div class="content">
+          <button
+            class="button-permissions"
+            v-show="needsImuPermissions && !grantedImuPermission"
+            @click="requestImuPermissions()"
+          >
+            IMU Permissions
           </button>
-        </div>
-      </div>
-      <div ref="top-div">
-        <fullscreen ref="fullscreen" class="fullscreen" @change="onFullScreenChange" style="overflow: hidden">
-          <div class="content">
-            <button
-              class="button-permissions"
-              v-show="needsImuPermissions && !grantedImuPermission"
-              @click="requestImuPermissions()"
-            >
-              IMU Permissions
-            </button>
 
-            <button class="button-debug" @click="showDebugView = !showDebugView">Debug</button>
+          <button class="button-debug" @click="showDebugView = !showDebugView">Debug</button>
 
-            <button class="button-calibrate" @click="calibrate()">Calibrate</button>
+          <button class="button-calibrate" @click="calibrate()">Calibrate</button>
 
-            <button class="button-fullscreen" @click="toggleFullScreen()">
-              <font-awesome-icon icon="compress" class="interface-icon" v-show="fullscreen" />
-              <font-awesome-icon icon="expand" class="interface-icon" v-show="!fullscreen" />
-            </button>
+          <button 
+            class="button-location" 
+            v-show="needsLocationPermission && !locationPermissionGranted"
+            @click="requestLocationPermission()"
+          >
+            Location Permission
+          </button>
 
-            <div id="debug-view" class="debug-view" v-show="showDebugView">
-              <div id="debug-out">{{ debugOutput }}</div>
-              <br />
-              <span v-show="clientId">Client ID: {{ clientId }}</span>
-              <br />
-              <span>Touch0: {{ getTouch0X() }} {{ getTouch0Y() }}</span>
-              <br />
-              <span v-if="!debugDeviceOrientation"> IMU data only available via HTTPS </span>
-              <br />
-              <span>Orientation:</span>
-              <span v-if="debugDeviceOrientation">
-                {{ debugDeviceOrientation.alpha }}
-                {{ debugDeviceOrientation.beta }}
-                {{ debugDeviceOrientation.gamma }}
-              </span>
-              <br />
-              <span>Calibrated Orientation:</span>
-              <span v-if="debugFixedCalibratedOrientation">
-                {{ debugFixedCalibratedOrientation.alpha }}
-                {{ debugFixedCalibratedOrientation.beta }}
-                {{ debugFixedCalibratedOrientation.gamma }}
-              </span>
-              <br />
-              <span>Acceleration:</span>
-              <span v-if="debugAcceleration">
-                {{ round(debugAcceleration.x, 1) }}
-                {{ round(debugAcceleration.y, 1) }}
-                {{ round(debugAcceleration.z, 1) }}
-              </span>
-              <br />
-              <span>Rotation:</span>
-              <span v-if="debugRotationRate">
-                {{ round(debugRotationRate.alpha, 1) }}
-                {{ round(debugRotationRate.beta, 1) }}
-                {{ round(debugRotationRate.gamma, 1) }}
-              </span>
+          <button class="button-fullscreen" @click="toggleFullScreen()">
+            <font-awesome-icon icon="compress" class="interface-icon" v-show="fullscreen" />
+            <font-awesome-icon icon="expand" class="interface-icon" v-show="!fullscreen" />
+          </button>
+
+          <div id="debug-view" class="debug-view" v-show="showDebugView">
+            <div id="debug-out">{{ debugOutput }}</div>
+            <br />
+            <span v-show="clientId">Client ID: {{ clientId }}</span>
+            <br />
+            <span>Touch0: {{ getTouch0X() }} {{ getTouch0Y() }}</span>
+            <br />
+            <span v-if="!debugDeviceOrientation"> IMU data only available via HTTPS </span>
+            <br />
+            <span>Orientation:</span>
+            <span v-if="debugDeviceOrientation">
+              {{ debugDeviceOrientation.alpha }}
+              {{ debugDeviceOrientation.beta }}
+              {{ debugDeviceOrientation.gamma }}
+            </span>
+            <br />
+            <span>Calibrated Orientation:</span>
+            <span v-if="debugFixedCalibratedOrientation">
+              {{ debugFixedCalibratedOrientation.alpha }}
+              {{ debugFixedCalibratedOrientation.beta }}
+              {{ debugFixedCalibratedOrientation.gamma }}
+            </span>
+            <br />
+            <span>Acceleration:</span>
+            <span v-if="debugAcceleration">
+              {{ this.round(debugAcceleration.x, 1) }}
+              {{ this.round(debugAcceleration.y, 1) }}
+              {{ this.round(debugAcceleration.z, 1) }}
+            </span>
+            <br />
+            <span>Rotation:</span>
+            <span v-if="debugRotationRate">
+              {{ this.round(debugRotationRate.alpha, 1) }}
+              {{ this.round(debugRotationRate.beta, 1) }}
+              {{ this.round(debugRotationRate.gamma, 1) }}
+            </span>
+            <br />
+            <span>GPS Location:</span>
+            <span v-if="gpsStatus">
+              {{ gpsStatus.latitude ? gpsStatus.latitude.toFixed(6) : 'Waiting...' }}
+              {{ gpsStatus.longitude ? gpsStatus.longitude.toFixed(6) : 'Waiting...' }}
+              ({{ gpsStatus.accuracy ? gpsStatus.accuracy.toFixed(2) + 'm' : 'N/A' }})
+            </span>
+            <br />
+            <span v-if="!isSecure && isIOS" class="protocol-warning">
+              ⚠️ Running on HTTP - Geolocation may not work on iOS. Please use HTTPS.
+            </span>
+            <br />
+            <hr />
+            <h4>🔒 Proximity Security Test</h4>
+            <div class="proximity-test">
+              <input 
+                v-model="targetDeviceId" 
+                placeholder="Target Device ID" 
+                class="proximity-input"
+              />
+              <input 
+                v-model.number="maxDistance" 
+                type="number" 
+                placeholder="Max Distance (m)" 
+                class="proximity-input"
+              />
+              <button @click="testProximity()" class="proximity-button">Test Proximity</button>
+              <div v-if="proximityResult" class="proximity-result">
+                <span v-if="proximityResult.isWithinProximity" class="proximity-allowed">✅ Access ALLOWED</span>
+                <span v-else class="proximity-denied">❌ Access DENIED</span>
+                <br />
+                <span>Distance: {{ proximityResult.distance.toFixed(2) }}m / {{ proximityResult.maxDistance }}m</span>
+              </div>
             </div>
-
-            <div
-              id="touch-area"
-              v-on:touchstart="onTouchStart($event)"
-              v-on:touchmove="onTouchMove($event)"
-              v-on:touchend="onTouchEnd($event)"
-            ></div>
           </div>
-        </fullscreen>
-      </div>
+
+          <div
+            id="touch-area"
+            v-on:touchstart="onTouchStart($event)"
+            v-on:touchmove="onTouchMove($event)"
+            v-on:touchend="onTouchEnd($event)"
+          ></div>
+        </div>
+      </fullscreen>
     </div>
   </UbiiClientContent>
 </template>
@@ -127,19 +149,19 @@ export default {
       debugAcceleration: undefined,
       debugRotationRate: undefined,
       grantedImuPermission: false,
-      enabled: false,
-      additionalTags: '',
-      ubiiDevice: null,
-      initializing: false,
-      hasRegisteredUbiiDevice: false,
-      locationPermissionDenied: false,
-      deviceLocation: {
+      locationPermissionGranted: false,
+      gpsStatus: {
         latitude: null,
         longitude: null,
         accuracy: null
       },
+      enabled: false,
+      additionalTags: '',
       isSecure: window.location.protocol === 'https:',
-      isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
+      isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
+      targetDeviceId: '',
+      maxDistance: 100,
+      proximityResult: null
     };
   },
   mounted: async function() {
@@ -158,10 +180,13 @@ export default {
         typeof DeviceOrientationEvent !== 'undefined' &&
         DeviceOrientationEvent.requestPermission !== undefined
       );
+    },
+    needsLocationPermission: function() {
+      return 'geolocation' in navigator;
     }
   },
   methods: {
-    onClickEnable: async function() {
+    onClickEnable: function() {
       this.enabled = true;
 
       UbiiClientService.instance.on(UbiiClientService.EVENTS.CONNECT, async () => {
@@ -176,7 +201,7 @@ export default {
         await this.stopInterface();
       });
 
-      await this.startInterface();
+      this.startInterface();
     },
     startInterface: async function() {
       if (this.initializing) return;
@@ -184,55 +209,43 @@ export default {
 
       try {
         await UbiiClientService.instance.waitForConnection();
-        this.clientId = UbiiClientService.instance.getClientID();
-        console.log('Connected with client ID:', this.clientId);
       } catch (error) {
-        console.error('waitForConnection error:', error);
-        this.initializing = false;
-        return;
+        console.error('waitForConnection error');
+        console.error(error);
       }
-
       try {
         this.elementTouch = document.getElementById('touch-area');
         this.ubiiDevice = new UbiiSmartDevice(this.elementTouch, {
           tags: this.additionalTags.split(',').filter(value => value.length > 0)
         });
       } catch (error) {
-        console.error('ubii device creation error:', error);
-        this.initializing = false;
-        return;
+        console.error('ubii device creation error');
+        console.error(error);
       }
-
       try {
-        const success = await this.ubiiDevice.init();
-        if (!success) {
-          console.error('Failed to initialize device');
-          this.initializing = false;
-          return;
-        }
-
-        // Subscribe to device location updates
-        UbiiClientService.instance.subscribeTopic(
-          `/${this.clientId}/web-interface-smart-device/gps_coordinates`,
-          (data) => {
-            if (data && data.vector2) {
-              this.deviceLocation = {
-                latitude: data.vector2.x,
-                longitude: data.vector2.y,
-                accuracy: data.vector2.accuracy || null
-              };
+        await this.ubiiDevice.init();
+        
+        // Subscribe to GPS updates
+        if (this.ubiiDevice.componentGPS) {
+          UbiiClientService.instance.subscribeTopic(
+            this.ubiiDevice.componentGPS.topic,
+            (data) => {
+              if (data && data.vector2) {
+                this.gpsStatus = {
+                  latitude: data.vector2.x,
+                  longitude: data.vector2.y,
+                  accuracy: data.vector2.accuracy || null
+                };
+              }
             }
-          }
-        );
-
-        this.intervalUpdateDebugView = setInterval(this.updateDebugView, 100);
+          );
+        }
       } catch (error) {
-        console.error('ubii device init error:', error);
-        this.initializing = false;
-        return;
+        console.error('ubii device init error');
+        console.error(error);
       }
 
-      this.initializing = false;
+      this.intervalUpdateDebugView = setInterval(this.updateDebugView, 100);
     },
     stopInterface: async function() {
       this.ubiiDevice && (await this.ubiiDevice.deinit());
@@ -248,6 +261,71 @@ export default {
       if (permissionDeviceMotion === 'granted' && permissionDeviceOrientation === 'granted') {
         this.grantedImuPermission = true;
         this.ubiiDevice.registerEventListeners();
+      }
+    },
+    requestLocationPermission: async function() {
+      try {
+        if (this.isIOS) {
+          console.log('iOS detected - please enable location services in Settings');
+          // For iOS, we need to try to get a position to trigger the system prompt
+          await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                console.log('iOS location permission granted');
+                this.locationPermissionGranted = true;
+                resolve(position);
+              },
+              (error) => {
+                console.error('iOS location permission error:', error);
+                this.locationPermissionGranted = false;
+                reject(error);
+              },
+              {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+              }
+            );
+          });
+        } else {
+          // For non-iOS devices, we can use the permissions API
+          const permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
+          console.log('Current permission status:', permissionStatus.state);
+          
+          if (permissionStatus.state === 'prompt') {
+            await new Promise((resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(
+                (position) => {
+                  console.log('Location permission granted');
+                  this.locationPermissionGranted = true;
+                  resolve(position);
+                },
+                (error) => {
+                  console.error('Location permission error:', error);
+                  this.locationPermissionGranted = false;
+                  reject(error);
+                },
+                {
+                  enableHighAccuracy: true,
+                  timeout: 10000,
+                  maximumAge: 0
+                }
+              );
+            });
+          } else if (permissionStatus.state === 'denied') {
+            console.log('Location permission denied - please enable in browser settings');
+            this.locationPermissionGranted = false;
+          }
+        }
+        
+        // If we got here with permission, try to reinitialize the device
+        if (this.locationPermissionGranted) {
+          await this.stopInterface();
+          await this.startInterface();
+        }
+      } catch (error) {
+        console.error('Error requesting location permission:', error);
+        this.locationPermissionGranted = false;
       }
     },
     onTouchStart: function(event) {
@@ -331,74 +409,46 @@ export default {
             gamma: this.round(ubiiDeviceData.rotationRate.rotationRate.gamma, 2)
           };
         }
-      }
-    },
-    async requestLocationPermission() {
-      try {
-        // First check if we're on iOS
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        
-        if (isIOS) {
-          console.log('iOS detected - please enable location services in Settings');
-          // For iOS, we need to try to get a position to trigger the system prompt
-          await new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(
-              (position) => {
-                console.log('iOS location permission granted');
-                this.locationPermissionDenied = false;
-                resolve(position);
-              },
-              (error) => {
-                console.error('iOS location permission error:', error);
-                this.locationPermissionDenied = true;
-                reject(error);
-              },
-              {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
-              }
-            );
-          });
-        } else {
-          // For non-iOS devices, we can use the permissions API
-          const permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
-          console.log('Current permission status:', permissionStatus.state);
-          
-          if (permissionStatus.state === 'prompt') {
-            await new Promise((resolve, reject) => {
-              navigator.geolocation.getCurrentPosition(
-                (position) => {
-                  console.log('Location permission granted');
-                  this.locationPermissionDenied = false;
-                  resolve(position);
-                },
-                (error) => {
-                  console.error('Location permission error:', error);
-                  this.locationPermissionDenied = true;
-                  reject(error);
-                },
-                {
-                  enableHighAccuracy: true,
-                  timeout: 10000,
-                  maximumAge: 0
-                }
-              );
-            });
-          } else if (permissionStatus.state === 'denied') {
-            console.log('Location permission denied - please enable in browser settings');
-            this.locationPermissionDenied = true;
+
+        // Update GPS status from component
+        if (this.ubiiDevice && this.ubiiDevice.componentGPS) {
+          const gpsStatus = this.ubiiDevice.componentGPS.getStatus();
+          if (gpsStatus.isActive && this.gpsStatus.latitude === null) {
+            // GPS is active but we don't have coordinates yet
+            this.gpsStatus = {
+              latitude: null,
+              longitude: null,
+              accuracy: null
+            };
           }
         }
+      }
+    },
+    testProximity: async function() {
+      if (!this.ubiiDevice || !this.ubiiDevice.componentProximity) {
+        console.error('Proximity component not available');
+        return;
+      }
+
+      if (!this.targetDeviceId) {
+        console.error('Please enter a target device ID');
+        return;
+      }
+
+      try {
+        const result = await this.ubiiDevice.componentProximity.checkProximity(
+          this.targetDeviceId, 
+          this.maxDistance
+        );
         
-        // If we got here with permission, try to reinitialize the device
-        if (!this.locationPermissionDenied) {
-          await this.stopInterface();
-          await this.startInterface();
+        if (result) {
+          this.proximityResult = result;
+          console.log('Proximity test completed:', result);
+        } else {
+          console.error('Proximity test failed');
         }
       } catch (error) {
-        console.error('Error requesting location permission:', error);
-        this.locationPermissionDenied = true;
+        console.error('Error testing proximity:', error);
       }
     }
   }
@@ -406,12 +456,26 @@ export default {
 </script>
 
 <style scoped>
-.debug-info {
-  background-color: #f5f5f5;
-  padding: 10px;
-  margin: 10px;
-  border-radius: 4px;
-  font-family: monospace;
+.fullscreen {
+  height: 100%;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.content {
+  height: 100%;
+  display: grid;
+  grid-gap: 5px;
+  grid-template-columns: 25px 75px 75px auto;
+  grid-template-rows: 25px auto 1fr;
+  grid-template-areas:
+    ' btn-fullscreen btn-debug btn-calibrate btn-permissions btn-location'
+    'debug-view debug-view debug-view debug-view debug-view'
+    'touch touch touch touch touch';
 }
 
 .wrapper-button-enable {
@@ -421,93 +485,94 @@ export default {
   flex-direction: column;
 }
 
-.fullscreen {
-  width: 100%;
-  height: 100%;
-}
-
-.content {
-  width: 100%;
-  height: 100%;
-  position: relative;
+.notification {
+  color: red;
 }
 
 .button-permissions {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
+  grid-area: btn-permissions;
 }
 
 .button-debug {
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 1;
-}
-
-.button-calibrate {
-  position: absolute;
-  top: 0;
-  right: 60px;
-  z-index: 1;
+  grid-area: btn-debug;
 }
 
 .button-fullscreen {
-  position: absolute;
-  top: 0;
-  right: 120px;
-  z-index: 1;
+  grid-area: btn-fullscreen;
+  width: 25px;
+  height: 25px;
+}
+
+.button-calibrate {
+  grid-area: btn-calibrate;
+}
+
+.button-location {
+  grid-area: btn-location;
 }
 
 .debug-view {
-  position: absolute;
-  top: 30px;
-  right: 0;
-  z-index: 1;
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: 5px;
-}
-
-#touch-area {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  touch-action: none;
-  user-select: none;
-}
-
-.permission-warning {
-  background-color: #fff3cd;
-  border: 1px solid #ffeeba;
-  color: #856404;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 4px;
-}
-
-.permission-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-.permission-button:hover {
-  background-color: #0056b3;
+  grid-area: debug-view;
 }
 
 .protocol-warning {
-  background-color: #fff3cd;
-  border: 1px solid #ffeeba;
-  color: #856404;
-  padding: 10px;
+  color: #ff6b35;
+  font-weight: bold;
+}
+
+#touch-area {
+  grid-area: touch;
+  height: 100%;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.proximity-test {
   margin: 10px 0;
-  border-radius: 4px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.proximity-input {
+  margin: 5px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  width: 150px;
+}
+
+.proximity-button {
+  margin: 5px;
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.proximity-button:hover {
+  background-color: #0056b3;
+}
+
+.proximity-result {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 3px;
+  font-weight: bold;
+}
+
+.proximity-allowed {
+  color: #28a745;
+}
+
+.proximity-denied {
+  color: #dc3545;
 }
 </style>

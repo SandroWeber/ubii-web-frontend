@@ -12,6 +12,7 @@ export default class UbiiComponentGPS {
     this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     this.deviceId = null;
     this.isSecure = window.location.protocol === 'https:';
+    this.isActive = false;
   }
 
   getUbiiSpecs() {
@@ -20,7 +21,8 @@ export default class UbiiComponentGPS {
       topic: this.topic,
       tags: this.tags,
       messageFormat: 'ubii.dataStructure.Vector2',
-      ioType: proto.ubii.devices.Component.IOType.PUBLISHER
+      ioType: proto.ubii.devices.Component.IOType.PUBLISHER,
+      description: 'GPS location component with real-time tracking'
     };
   }
 
@@ -103,6 +105,7 @@ export default class UbiiComponentGPS {
       (position) => {
         this.updateCount++;
         this.lastUpdate = new Date();
+        this.isActive = true;
         
         // Log detailed position information
         console.log(`GPS Update #${this.updateCount}:`, {
@@ -132,7 +135,7 @@ export default class UbiiComponentGPS {
         if (clientId) {
           // Call the location update service
           UbiiClientService.instance.callService({
-            topic: '/ubii/services/location/update',
+            topic: '/services/location/update',
             device: {
               id: clientId,
               latitude: position.coords.latitude,
@@ -215,6 +218,18 @@ export default class UbiiComponentGPS {
         protocol: window.location.protocol
       });
       this.watchId = null;
+      this.isActive = false;
     }
+  }
+
+  getStatus() {
+    return {
+      isActive: this.isActive,
+      updateCount: this.updateCount,
+      lastUpdate: this.lastUpdate,
+      isIOS: this.isIOS,
+      isSecure: this.isSecure,
+      watchId: this.watchId
+    };
   }
 } 
