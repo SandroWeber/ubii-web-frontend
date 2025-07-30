@@ -4,6 +4,14 @@ module.exports = {
   chainWebpack: config => {
     const types = ['vue-modules', 'vue', 'normal-modules', 'normal'];
     types.forEach(type => addStyleResource(config.module.rule('stylus').oneOf(type)));
+  },
+  devServer: {
+    https: {
+      key: './certificates/ubii.private-key.pem',
+      cert: './certificates/ubii.cert.pem'
+    },
+    host: '192.168.0.29',
+    port: 8080
   }
 };
 

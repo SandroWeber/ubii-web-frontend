@@ -24,6 +24,7 @@
     "myo": "^3.0.0",
     "npm": "^6.14.6",
     "qrcode": "^1.4.4",
+    "regenerator-runtime": "^0.14.1",
     "three": "0.137.5",
     "three-dragcontrols": "0.88.2",
     "three-orbit-controls": "82.1.0",
