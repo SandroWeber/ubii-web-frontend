@@ -4,6 +4,8 @@ import UbiiComponentTouchscreen from '../../../ubii/components/ubii-component-to
 import UbiiComponentOrientation from '../../../ubii/components/ubii-component-orientation';
 import UbiiComponentVibration from '../../../ubii/components/ubii-component-vibration';
 import UbiiComponentAccelerometer from '../../../ubii/components/ubii-component-accelerometer';
+import UbiiComponentGPS from '../../../ubii/components/ubii-component-gps';
+import UbiiComponentProximity from '../../../ubii/components/ubii-component-proximity';
 
 const UBII_SPECS_TEMPLATE = {
   name: 'web-interface-smart-device',
@@ -33,11 +35,15 @@ export default class UbiiSmartDevice {
     this.componentVibrate = new UbiiComponentVibration();
     this.componentOrientation = new UbiiComponentOrientation(33);
     this.componentTouch = new UbiiComponentTouchscreen(33, this.elementTouch);
+    this.componentGPS = new UbiiComponentGPS(UBII_SPECS_TEMPLATE.name);
+    this.componentProximity = new UbiiComponentProximity(UBII_SPECS_TEMPLATE.name);
     this._componentObjects.push(
       this.componentAccelerometer,
       this.componentVibrate,
       this.componentOrientation,
-      this.componentTouch
+      this.componentTouch,
+      this.componentGPS,
+      this.componentProximity
     );
 
     let successRegister = await this.register();
@@ -47,11 +53,16 @@ export default class UbiiSmartDevice {
       await this.componentVibrate.start();
       await this.componentOrientation.start();
       await this.componentTouch.start();
+      await this.componentGPS.start();
     }
   }
 
   async deinit() {
     this.running = false;
+    // Stop GPS component specifically
+    if (this.componentGPS) {
+      await this.componentGPS.stop();
+    }
     for (let component of this.components) {
       component.stop && (await component.stop());
     }
